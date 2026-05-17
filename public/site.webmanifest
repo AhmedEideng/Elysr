@@ -1,0 +1,12 @@
+{
+  "name": "اليسر ميديكال — Elysr Medical",
+  "short_name": "Elysr",
+  "description": "منتجات طبية وصحية بأسعار الاستيراد المباشر",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5a4",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }],
+  "lang": "ar",
+  "dir": "rtl"
+}
