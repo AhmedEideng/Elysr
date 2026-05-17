@@ -1,9 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import {
   MessageCircle,
-  ShieldCheck,
-  Truck,
-  CreditCard,
   Instagram,
   Facebook,
   Twitter,
@@ -48,34 +45,6 @@ const supportLinks = [
 export function Footer() {
   return (
     <footer className="mt-20 bg-foreground text-background">
-      {/* القسم العلوي: الضمانات */}
-      <div className="border-b border-background/10 py-10 bg-background/5">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <TrustBadge
-              icon={<ShieldCheck className="h-6 w-6" />}
-              title="منتجات أصلية"
-              desc="بضمان الجودة 100%"
-            />
-            <TrustBadge
-              icon={<Truck className="h-6 w-6" />}
-              title="توصيل سريع"
-              desc="لكافة محافظات مصر"
-            />
-            <TrustBadge
-              icon={<CreditCard className="h-6 w-6" />}
-              title="دفع عند الاستلام"
-              desc="عاين قبل الدفع"
-            />
-            <TrustBadge
-              icon={<MessageCircle className="h-6 w-6" />}
-              title="سرية تامة"
-              desc="تغليف سادة غير شفاف"
-            />
-          </div>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 py-16">
         <div className="grid gap-12 lg:grid-cols-4 md:grid-cols-2">
           {/* العمود الأول: البراند */}
@@ -204,18 +173,6 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  );
-}
-
-function TrustBadge({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
-  return (
-    <div className="flex flex-col items-center text-center space-y-2 group">
-      <div className="h-12 w-12 rounded-2xl bg-primary-glow/10 flex items-center justify-center text-primary-glow group-hover:scale-110 transition-smooth">
-        {icon}
-      </div>
-      <div className="font-bold text-sm">{title}</div>
-      <div className="text-[10px] text-background/40">{desc}</div>
-    </div>
   );
 }
 
