@@ -21,8 +21,7 @@ export function Hero() {
             </span>
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            اضمن الفاعلية والأمان مع مكملاتنا الطبية المستوردة. جودة تفوق التوقعات، أسعار المصنع
-            المباشرة، شحن سريع وخاص جداً. ثقتك هي غايتنا.
+              لا شئ يفوق الخبرة
           </p>
           <div className="flex flex-col gap-3 max-w-md mx-auto pt-2">
             <Link
