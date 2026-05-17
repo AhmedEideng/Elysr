@@ -40,62 +40,53 @@
 :root {
   --radius: 1rem;
 
-  /* Palette: The Royal Medical (Deep Royal Blue & Champagne Gold) */
-  --background: oklch(0.99 0.005 255);
-  --foreground: oklch(0.18 0.06 260); /* Deep Navy Grey */
+  /* New Palette: Modern Cyan-Blue (Logo Inspired) */
+  --background: oklch(0.99 0.005 230);
+  --foreground: oklch(0.15 0.05 240);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.06 260);
+  --card-foreground: oklch(0.15 0.05 240);
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.06 260);
+  --primary: oklch(0.58 0.16 235); /* Solid Medical Blue */
+  --primary-foreground: oklch(1 0 0);
+  --primary-glow: oklch(0.75 0.14 215); /* Bright Cyan from Logo */
 
-  --primary: oklch(0.42 0.14 260); /* Deep Royal Blue */
-  --primary-foreground: oklch(0.99 0 0);
-  --primary-glow: oklch(0.88 0.07 95); /* Champagne Gold Accent */
+  --secondary: oklch(0.96 0.02 230);
+  --secondary-foreground: oklch(0.25 0.06 240);
 
-  --secondary: oklch(0.96 0.01 260);
-  --secondary-foreground: oklch(0.25 0.05 260);
+  --muted: oklch(0.94 0.01 230);
+  --muted-foreground: oklch(0.45 0.04 240);
 
-  --muted: oklch(0.95 0.01 260);
-  --muted-foreground: oklch(0.5 0.03 260);
+  --accent: oklch(0.92 0.06 215); /* Soft Cyan Tint */
+  --accent-foreground: oklch(0.25 0.08 240);
 
-  --accent: oklch(0.92 0.04 260); /* Light Royal Tint */
-  --accent-foreground: oklch(0.3 0.06 260);
+  --destructive: oklch(0.6 0.18 28);
+  --success: oklch(0.65 0.15 160);
 
-  --destructive: oklch(0.55 0.18 25);
-  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.91 0.015 230);
+  --input: oklch(0.93 0.015 230);
+  --ring: oklch(0.58 0.16 235 / 0.4);
 
-  --success: oklch(0.6 0.14 160);
-  --success-foreground: oklch(0.99 0 0);
+  /* Gradients inspired by Logo Flow */
+  --gradient-hero: linear-gradient(135deg, oklch(0.55 0.18 240) 0%, oklch(0.75 0.14 215) 100%);
+  --gradient-soft: linear-gradient(180deg, oklch(0.98 0.01 230) 0%, oklch(1 0 0) 100%);
+  --gradient-brand: linear-gradient(135deg, oklch(0.58 0.16 235), oklch(0.75 0.14 215));
 
-  --border: oklch(0.9 0.02 260);
-  --input: oklch(0.92 0.02 260);
-  --ring: oklch(0.42 0.14 260 / 0.5);
+  --shadow-sm: 0 2px 4px oklch(0.2 0.1 235 / 0.04);
+  --shadow-md: 0 12px 24px -8px oklch(0.2 0.15 235 / 0.12);
+  --shadow-lg: 0 25px 50px -12px oklch(0.2 0.2 235 / 0.2);
+  --shadow-glow: 0 0 40px oklch(0.75 0.14 215 / 0.35);
 
-  /* Premium Royal Gradients */
-  --gradient-hero: linear-gradient(135deg, oklch(0.35 0.12 260) 0%, oklch(0.5 0.15 255) 100%);
-  --gradient-soft: linear-gradient(180deg, oklch(0.98 0.01 260) 0%, oklch(1 0 0) 100%);
-  --gradient-brand: linear-gradient(135deg, oklch(0.35 0.12 260), oklch(0.45 0.15 250));
-  --gradient-glass: linear-gradient(135deg, oklch(1 0 0 / 0.95), oklch(1 0 0 / 0.6));
-
-  --shadow-sm: 0 2px 8px oklch(0.2 0.1 260 / 0.05);
-  --shadow-md: 0 15px 35px -10px oklch(0.2 0.15 260 / 0.12);
-  --shadow-lg: 0 35px 70px -15px oklch(0.2 0.2 260 / 0.25);
-  --shadow-glow: 0 0 50px oklch(0.88 0.07 95 / 0.4);
-
-  --transition-smooth: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark {
-  --background: oklch(0.12 0.03 260);
-  --foreground: oklch(0.98 0.005 260);
-  --card: oklch(0.16 0.04 260);
-  --card-foreground: oklch(0.98 0.005 260);
-  --primary: oklch(0.88 0.07 95); /* Gold primary in dark mode */
-  --primary-foreground: oklch(0.15 0.05 260);
+  --background: oklch(0.12 0.03 240);
+  --foreground: oklch(0.98 0.005 230);
+  --card: oklch(0.16 0.04 240);
+  --primary: oklch(0.75 0.14 215);
+  --primary-foreground: oklch(0.12 0.03 240);
   --border: oklch(1 0 0 / 0.08);
-  --muted: oklch(0.22 0.04 260);
 }
 
 @layer base {
@@ -111,33 +102,19 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
   }
   h1,
   h2,
   h3,
   h4 {
-    font-family: var(--font-display);
     font-weight: 800;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.02em;
   }
 }
 
 @layer utilities {
-  .bg-gradient-hero {
-    background-image: var(--gradient-hero);
-  }
-  .bg-gradient-soft {
-    background-image: var(--gradient-soft);
-  }
   .bg-gradient-brand {
     background-image: var(--gradient-brand);
-  }
-  .bg-gradient-glass {
-    background-image: var(--gradient-glass);
-  }
-  .shadow-glow {
-    box-shadow: var(--shadow-glow);
   }
   .shadow-elegant {
     box-shadow: var(--shadow-lg);
@@ -145,14 +122,12 @@
   .shadow-card {
     box-shadow: var(--shadow-md);
   }
-
   .text-gradient {
     background: var(--gradient-brand);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
-
   .transition-smooth {
     transition: var(--transition-smooth);
   }
@@ -160,14 +135,14 @@
   .skeleton {
     position: relative;
     overflow: hidden;
-    background-color: oklch(0.94 0.01 260);
+    background-color: oklch(0.94 0.01 230);
   }
   .skeleton::after {
     content: "";
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
     animation: shimmer 2s infinite linear;
   }
 }
@@ -184,9 +159,9 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-12px);
+    transform: translateY(-10px);
   }
 }
 .animate-float {
-  animation: float 6s ease-in-out infinite;
+  animation: float 5s ease-in-out infinite;
 }
