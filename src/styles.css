@@ -40,62 +40,62 @@
 :root {
   --radius: 1rem;
 
-  /* Brand: Elysr Medical — Premium cyan→blue */
-  --background: oklch(0.99 0.005 220);
-  --foreground: oklch(0.15 0.04 240);
+  /* Palette: The Royal Medical (Deep Royal Blue & Champagne Gold) */
+  --background: oklch(0.99 0.005 255);
+  --foreground: oklch(0.18 0.06 260); /* Deep Navy Grey */
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.04 240);
+  --card-foreground: oklch(0.18 0.06 260);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.04 240);
+  --popover-foreground: oklch(0.18 0.06 260);
 
-  --primary: oklch(0.55 0.18 245); /* Richer premium blue */
-  --primary-foreground: oklch(0.99 0.005 220);
-  --primary-glow: oklch(0.75 0.15 210); /* Vibrant cyan */
+  --primary: oklch(0.42 0.14 260); /* Deep Royal Blue */
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-glow: oklch(0.88 0.07 95); /* Champagne Gold Accent */
 
-  --secondary: oklch(0.96 0.02 220);
-  --secondary-foreground: oklch(0.25 0.05 240);
+  --secondary: oklch(0.96 0.01 260);
+  --secondary-foreground: oklch(0.25 0.05 260);
 
-  --muted: oklch(0.96 0.015 220);
-  --muted-foreground: oklch(0.45 0.03 240);
+  --muted: oklch(0.95 0.01 260);
+  --muted-foreground: oklch(0.5 0.03 260);
 
-  --accent: oklch(0.92 0.06 215);
-  --accent-foreground: oklch(0.25 0.07 240);
+  --accent: oklch(0.92 0.04 260); /* Light Royal Tint */
+  --accent-foreground: oklch(0.3 0.06 260);
 
-  --destructive: oklch(0.55 0.22 25);
+  --destructive: oklch(0.55 0.18 25);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --success: oklch(0.65 0.18 150);
+  --success: oklch(0.6 0.14 160);
   --success-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.9 0.015 220);
-  --input: oklch(0.92 0.015 220);
-  --ring: oklch(0.55 0.18 245 / 0.5);
+  --border: oklch(0.9 0.02 260);
+  --input: oklch(0.92 0.02 260);
+  --ring: oklch(0.42 0.14 260 / 0.5);
 
-  /* Premium Gradients */
-  --gradient-hero: linear-gradient(135deg, oklch(0.55 0.18 245) 0%, oklch(0.75 0.15 210) 100%);
-  --gradient-soft: linear-gradient(180deg, oklch(0.98 0.01 220) 0%, oklch(1 0 0) 100%);
-  --gradient-brand: linear-gradient(135deg, oklch(0.5 0.2 250), oklch(0.7 0.15 210));
-  --gradient-glass: linear-gradient(135deg, oklch(1 0 0 / 0.9), oklch(1 0 0 / 0.5));
+  /* Premium Royal Gradients */
+  --gradient-hero: linear-gradient(135deg, oklch(0.35 0.12 260) 0%, oklch(0.5 0.15 255) 100%);
+  --gradient-soft: linear-gradient(180deg, oklch(0.98 0.01 260) 0%, oklch(1 0 0) 100%);
+  --gradient-brand: linear-gradient(135deg, oklch(0.35 0.12 260), oklch(0.45 0.15 250));
+  --gradient-glass: linear-gradient(135deg, oklch(1 0 0 / 0.95), oklch(1 0 0 / 0.6));
 
-  --shadow-sm: 0 2px 4px oklch(0.2 0.1 240 / 0.04);
-  --shadow-md: 0 12px 30px -10px oklch(0.2 0.1 240 / 0.12);
-  --shadow-lg: 0 30px 60px -15px oklch(0.2 0.15 240 / 0.25);
-  --shadow-glow: 0 0 40px oklch(0.7 0.15 210 / 0.3);
+  --shadow-sm: 0 2px 8px oklch(0.2 0.1 260 / 0.05);
+  --shadow-md: 0 15px 35px -10px oklch(0.2 0.15 260 / 0.12);
+  --shadow-lg: 0 35px 70px -15px oklch(0.2 0.2 260 / 0.25);
+  --shadow-glow: 0 0 50px oklch(0.88 0.07 95 / 0.4);
 
-  --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark {
-  --background: oklch(0.12 0.02 240);
-  --foreground: oklch(0.98 0.005 220);
-  --card: oklch(0.16 0.03 240);
-  --card-foreground: oklch(0.98 0.005 220);
-  --primary: oklch(0.75 0.15 210);
-  --primary-foreground: oklch(0.15 0.04 240);
+  --background: oklch(0.12 0.03 260);
+  --foreground: oklch(0.98 0.005 260);
+  --card: oklch(0.16 0.04 260);
+  --card-foreground: oklch(0.98 0.005 260);
+  --primary: oklch(0.88 0.07 95); /* Gold primary in dark mode */
+  --primary-foreground: oklch(0.15 0.05 260);
   --border: oklch(1 0 0 / 0.08);
-  --muted: oklch(0.2 0.03 240);
+  --muted: oklch(0.22 0.04 260);
 }
 
 @layer base {
@@ -119,7 +119,7 @@
   h4 {
     font-family: var(--font-display);
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
   }
 }
 
@@ -160,14 +160,14 @@
   .skeleton {
     position: relative;
     overflow: hidden;
-    background-color: oklch(0.94 0.01 220);
+    background-color: oklch(0.94 0.01 260);
   }
   .skeleton::after {
     content: "";
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
     animation: shimmer 2s infinite linear;
   }
 }
@@ -184,9 +184,9 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-12px);
   }
 }
 .animate-float {
-  animation: float 5s ease-in-out infinite;
+  animation: float 6s ease-in-out infinite;
 }
