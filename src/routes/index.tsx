@@ -5,6 +5,8 @@ import { FeaturedProducts } from "@/components/sections/FeaturedProducts";
 import { WhyUs } from "@/components/sections/WhyUs";
 import { Partners } from "@/components/sections/Partners";
 import { WholesaleBanner } from "@/components/sections/WholesaleBanner";
+import { ShopByConcern } from "@/components/sections/ShopByConcern";
+import { DailyAdvice } from "@/components/sections/DailyAdvice";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,6 +27,11 @@ function Index() {
     <>
       <Hero />
       <FeaturedProducts />
+
+      {/* التعديلات الجديدة: التسوق حسب الاحتياج والنصيحة الطبية */}
+      <ShopByConcern />
+      <DailyAdvice />
+
       <WhyUs />
       <Partners />
       <WholesaleBanner />
