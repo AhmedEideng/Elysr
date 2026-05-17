@@ -229,7 +229,7 @@ function CartPage() {
           <div className="space-y-4">
             <Inp
               label="الاسم *"
-              placeholder="أحمد محمد"
+              placeholder="اكتب اسمك هنا"
               value={customer.name}
               onChange={(v) => setCustomer({ ...customer, name: v })}
             />
