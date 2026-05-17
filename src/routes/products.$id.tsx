@@ -1,11 +1,21 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Star, ShoppingCart, ShieldCheck, Truck, Lock, Plus, Minus } from "lucide-react";
+import {
+  Star,
+  ShoppingCart,
+  ShieldCheck,
+  Truck,
+  Lock,
+  Plus,
+  Minus,
+  AlertCircle,
+} from "lucide-react";
 import { formatPrice } from "@/data/product-types";
 import { useCart } from "@/hooks/use-cart";
 import { toast } from "sonner";
-import { waLink, buildOrderMessage } from "@/lib/whatsapp";
 import { injectJsonLd, clearJsonLd, productSchema, breadcrumbSchema } from "@/lib/seo";
+import { ProductCard } from "@/components/ProductCard";
+import { FAQ } from "@/components/FAQ";
 
 export const Route = createFileRoute("/products/$id")({
   component: ProductPage,
@@ -18,10 +28,16 @@ export const Route = createFileRoute("/products/$id")({
     </div>
   ),
   loader: async ({ params }) => {
-    const { getProductById } = await import("@/data/products");
+    const { getProductById, getProductsByCategory } = await import("@/data/products");
     const product = getProductById(params.id);
     if (!product) throw notFound();
-    return { product };
+
+    const related = getProductsByCategory(product.category)
+      .filter((p) => p.id !== product.id)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 4);
+
+    return { product, related };
   },
   head: ({ loaderData }) => ({
     meta: [
@@ -32,12 +48,20 @@ export const Route = createFileRoute("/products/$id")({
 });
 
 function ProductPage() {
-  const { product } = Route.useLoaderData();
+  const { product, related } = Route.useLoaderData();
   const { add } = useCart();
   const navigate = useNavigate();
   const [qty, setQty] = useState(1);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
-  // حقن Schema.org Product + BreadcrumbList
+  useEffect(() => {
+    setQty(1);
+    setImageLoaded(false);
+    setImageFailed(false);
+    window.scrollTo(0, 0);
+  }, [product.id]);
+
   useEffect(() => {
     injectJsonLd("product", productSchema(product));
     injectJsonLd(
@@ -75,15 +99,17 @@ function ProductPage() {
   return (
     <div className="container mx-auto px-4 py-10">
       <div className="grid gap-10 md:grid-cols-2">
-        {/* ✅ نفس منطق ProductCard: صورة إن وُجدت، وإلا إيموجي */}
-        {product.image ? (
-          <div className="rounded-3xl bg-gradient-soft border overflow-hidden aspect-square">
+        {product.image && !imageFailed ? (
+          <div className="rounded-3xl bg-gradient-soft border overflow-hidden aspect-square relative shadow-sm">
+            {!imageLoaded && <div className="absolute inset-0 skeleton" />}
             <img
               src={product.image}
               alt={product.name}
               loading="eager"
               decoding="async"
-              className="h-full w-full object-cover"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageFailed(true)}
+              className={`h-full w-full object-cover transition-smooth duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
             />
           </div>
         ) : (
@@ -99,12 +125,8 @@ function ProductPage() {
           )}
           <h1 className="text-3xl md:text-4xl font-bold">{product.name}</h1>
           <div className="text-sm text-muted-foreground">{product.nameEn}</div>
-          <div className="flex items-center gap-2">
-            <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-            <span className="font-bold">{product.rating}</span>
-            <span className="text-muted-foreground">({product.reviews} تقييم)</span>
-          </div>
-          <div className="flex items-end gap-3">
+
+          <div className="flex items-end gap-3 pt-2">
             <span className="text-4xl font-bold text-primary">{formatPrice(product.price)}</span>
             {product.oldPrice && (
               <span className="text-xl text-muted-foreground line-through">
@@ -112,89 +134,91 @@ function ProductPage() {
               </span>
             )}
           </div>
-          <p className="text-muted-foreground leading-relaxed">{product.description}</p>
 
-          {product.benefits.length > 0 && (
-            <div>
-              <h3 className="font-bold mb-2">المميزات:</h3>
-              <ul className="space-y-1.5">
-                {product.benefits.map((b: string) => (
-                  <li key={b} className="flex items-center gap-2 text-sm">
-                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {product.usage && (
-            <p className="text-sm">
-              <strong>طريقة الاستخدام: </strong>
-              {product.usage}
+          <div className="bg-accent/30 p-4 rounded-2xl border border-primary/10">
+            <h3 className="font-bold mb-2 flex items-center gap-2 text-sm">
+              <AlertCircle className="h-4 w-4 text-primary" />
+              إخلاء مسؤولية طبي
+            </h3>
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              هذا المنتج هو مكمل غذائي/صحي وليس دواءً لعلاج الأمراض. النتائج قد تختلف من شخص لآخر
+              بناءً على الحالة الصحية والعمر. يرجى استشارة الطبيب قبل الاستخدام إذا كنت تعاني من
+              أمراض مزمنة أو تتناول أدوية أخرى.
             </p>
-          )}
-          {product.ingredients && (
-            <p className="text-sm">
-              <strong>المكونات: </strong>
-              {product.ingredients}
-            </p>
-          )}
+          </div>
 
-          <div className="flex items-center gap-3 pt-2">
-            <div className="flex items-center rounded-full border">
+          <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
+            {product.description}
+          </p>
+
+          <div className="flex items-center gap-3 pt-4 border-t">
+            <div className="flex items-center rounded-full border bg-muted/50 p-1">
               <button
                 onClick={() => setQty(Math.max(1, qty - 1))}
-                className="h-10 w-10 inline-flex items-center justify-center hover:bg-accent rounded-r-full"
-                aria-label="تقليل"
+                className="h-9 w-9 inline-flex items-center justify-center hover:bg-accent rounded-full transition-smooth"
               >
                 <Minus className="h-4 w-4" />
               </button>
-              <span className="w-10 text-center font-bold" aria-live="polite">
-                {qty}
-              </span>
+              <span className="w-10 text-center font-bold">{qty}</span>
               <button
                 onClick={() => setQty(qty + 1)}
-                className="h-10 w-10 inline-flex items-center justify-center hover:bg-accent rounded-l-full"
-                aria-label="زيادة"
+                className="h-9 w-9 inline-flex items-center justify-center hover:bg-accent rounded-full transition-smooth"
               >
                 <Plus className="h-4 w-4" />
               </button>
             </div>
             <button
-              onClick={() => {
-                add(product, qty);
-                toast.success("تمت الإضافة للسلة");
-              }}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border-2 border-primary bg-background px-6 py-3 font-bold text-primary transition-smooth hover:bg-accent"
+              onClick={handleAddToCart}
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-brand px-6 py-4 font-bold text-primary-foreground shadow-elegant transition-smooth hover:scale-[1.02]"
             >
-              <ShoppingCart className="h-4 w-4" /> أضف للسلة
+              <ShoppingCart className="h-5 w-5" /> إضافة للسلة
             </button>
           </div>
-          <button
-            onClick={handleAddToCart}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-brand px-6 py-4 font-bold text-primary-foreground shadow-elegant transition-smooth hover:scale-[1.02]"
-          >
-            إضافة إلى السلة
-          </button>
 
-          <div className="grid grid-cols-3 gap-3 pt-4 border-t">
-            <Trust icon={<ShieldCheck className="h-5 w-5" />} label="منتج أصلي" />
-            <Trust icon={<Truck className="h-5 w-5" />} label="شحن سريع" />
-            <Trust icon={<Lock className="h-5 w-5" />} label="تغليف سري" />
+          <div className="grid grid-cols-3 gap-3 pt-6">
+            <Trust icon={<ShieldCheck className="h-5 w-5" />} label="أصلي 100%" />
+            <Trust icon={<Truck className="h-5 w-5" />} label="توصيل سريع" />
+            <Trust icon={<Lock className="h-5 w-5" />} label="سرية تامة" />
           </div>
         </div>
       </div>
+
+      <FAQ />
+
+      {related.length > 0 && (
+        <section className="mt-20">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold">منتجات قد تعجبك أيضاً</h2>
+            <Link
+              to={
+                product.category === "men"
+                  ? "/products/men"
+                  : product.category === "women"
+                    ? "/products/women"
+                    : "/products/devices"
+              }
+              className="text-primary font-bold hover:underline"
+            >
+              عرض الكل
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {related.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
 function Trust({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="flex flex-col items-center gap-1 text-center">
+    <div className="flex flex-col items-center gap-1.5 text-center p-3 rounded-2xl border bg-card">
       <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-accent text-primary">
         {icon}
       </span>
-      <span className="text-xs font-semibold">{label}</span>
+      <span className="text-[10px] md:text-xs font-bold">{label}</span>
     </div>
   );
 }

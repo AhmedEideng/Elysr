@@ -21,7 +21,7 @@ export function Hero() {
             </span>
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              لا شئ يفوق الخبرة
+            لا شئ يفوق الخبرة
           </p>
           <div className="flex flex-col gap-3 max-w-md mx-auto pt-2">
             <Link

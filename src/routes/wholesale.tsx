@@ -171,6 +171,7 @@ function Input({
   value,
   onChange,
   type = "text",
+  maxLength,
 }: {
   label: string;
   value: string;

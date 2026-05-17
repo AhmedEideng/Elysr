@@ -48,7 +48,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, hydrated]);
 
-  const add = useCallback((p, qty = 1) => {
+  const add = useCallback((p: Product, qty = 1) => {
     setItems((prev) => {
       const ex = prev.find((i) => i.id === p.id);
       const maxStock = p.stock ?? 10;

@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Clock, ArrowRight } from "lucide-react";
 import { articleSchema, clearJsonLd, injectJsonLd } from "@/lib/seo";
+import type { Article } from "@/data/articles";
 
 export const Route = createFileRoute("/education_/$slug")({
   loader: async ({ params }) => {
@@ -28,8 +29,38 @@ export const Route = createFileRoute("/education_/$slug")({
   ),
 });
 
+function RelatedCard({ a }: { a: Article }) {
+  const [isError, setIsError] = useState(false);
+  return (
+    <Link
+      key={a.slug}
+      to="/education/$slug"
+      params={{ slug: a.slug }}
+      className="group rounded-2xl border bg-card p-5 hover:shadow-card transition-smooth overflow-hidden flex flex-col"
+    >
+      {a.image && !isError ? (
+        <div className="h-32 -mx-5 -mt-5 mb-4 overflow-hidden border-b">
+          <img
+            src={a.image}
+            alt={a.title}
+            loading="lazy"
+            onError={() => setIsError(true)}
+            className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
+          />
+        </div>
+      ) : (
+        <div className="text-4xl mb-3">{a.emoji}</div>
+      )}
+      <h3 className="font-bold leading-snug group-hover:text-primary transition-smooth">
+        {a.title}
+      </h3>
+    </Link>
+  );
+}
+
 function ArticlePage() {
   const { article, related } = Route.useLoaderData();
+  const [isMainImageError, setIsMainImageError] = useState(false);
 
   useEffect(() => {
     injectJsonLd("article", articleSchema(article));
@@ -51,12 +82,13 @@ function ArticlePage() {
         </span>
       </div>
 
-      {article.image ? (
+      {article.image && !isMainImageError ? (
         <div className="aspect-video bg-gradient-soft rounded-3xl overflow-hidden mb-8">
           <img
             src={article.image}
             alt={article.title}
             loading="eager"
+            onError={() => setIsMainImageError(true)}
             className="h-full w-full object-cover"
           />
         </div>
@@ -82,28 +114,7 @@ function ArticlePage() {
         <h2 className="text-2xl font-bold mb-6">مقالات ذات صلة</h2>
         <div className="grid gap-5 md:grid-cols-3">
           {related.map((a) => (
-            <Link
-              key={a.slug}
-              to="/education/$slug"
-              params={{ slug: a.slug }}
-              className="group rounded-2xl border bg-card p-5 hover:shadow-card transition-smooth overflow-hidden flex flex-col"
-            >
-              {a.image ? (
-                <div className="h-32 -mx-5 -mt-5 mb-4 overflow-hidden border-b">
-                  <img
-                    src={a.image}
-                    alt={a.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
-                  />
-                </div>
-              ) : (
-                <div className="text-4xl mb-3">{a.emoji}</div>
-              )}
-              <h3 className="font-bold leading-snug group-hover:text-primary transition-smooth">
-                {a.title}
-              </h3>
-            </Link>
+            <RelatedCard key={a.slug} a={a} />
           ))}
         </div>
       </section>

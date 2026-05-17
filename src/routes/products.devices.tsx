@@ -8,11 +8,11 @@ export const Route = createFileRoute("/products/devices")({
   },
   head: () => ({
     meta: [
-      { title: "أجهزة وأدوات طبية — اليسر ميديكال" },
+      { title: "الأجهزة والأدوات الطبية — التكنولوجيا الصحية | اليسر ميديكال" },
       {
         name: "description",
         content:
-          "أجهزة وأدوات طبية احترافية: قياس الضغط والسكر، أجهزة استنشاق، موازين، إسعافات أولية وأكثر بأسعار الاستيراد.",
+          "أحدث الأجهزة الطبية المساعدة، مضخات التفريغ الرقمية، وأدوات العناية الصحية المنزلية.",
       },
     ],
   }),
@@ -24,12 +24,13 @@ function DevicesPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <header className="mb-10 text-center">
-        <span className="inline-block rounded-full bg-accent px-4 py-1 text-xs font-bold text-primary mb-3">
-          أجهزة طبية معتمدة
+        <span className="inline-block rounded-full bg-blue-100 px-4 py-1 text-xs font-bold text-blue-600 mb-3">
+          تكنولوجيا صحية
         </span>
         <h1 className="text-4xl font-bold md:text-5xl">أجهزة وأدوات طبية</h1>
         <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-          أجهزة قياس، أدوات علاج، وحقائب إسعاف منزلية مختارة بعناية بأعلى معايير الجودة العالمية.
+          حلول تقنية متطورة وأجهزة طبية معتمدة لدعم الصحة العامة وتحسين جودة الحياة اليومية بأحدث
+          المعايير العالمية.
         </p>
       </header>
       <div className="grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
