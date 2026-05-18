@@ -17,6 +17,7 @@ export async function submitToGoogleSheets(data: Record<string, unknown>) {
   try {
     await fetch(SHEET_URL, {
       method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ data: JSON.stringify(data) }),
     });
     return { success: true };
