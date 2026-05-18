@@ -1,23 +1,33 @@
 /**
- * Elysr Medical - Google Sheets Webhook
+ * Elysr Medical — Google Sheets Webhook
+ * يستقبل طلبات السلة فقط ويكتبها في الشيت
+ *
+ * للنشر: Extensions > Apps Script > Deploy > Web App
+ *   Execute as: Me  |  Who has access: Anyone
  */
 
 function doPost(e) {
   try {
     var data = JSON.parse(e.parameter.data);
-    var sheetName = data.orderType === "wholesale" ? "الوكلاء والتجار" : "الطلبات";
-    var sheet = getOrCreateSheet(sheetName);
+    var sheet = getOrCreateSheet("الطلبات");
 
-    if (data.orderType === "wholesale") {
-      var notes = data.notes || "";
-      var m = notes.match(/النشاط:\s*(.+)/);
-      var business = m ? m[1].trim() : "";
-      var rest = notes.replace(/النشاط:\s*.+/, "").trim();
-      sheet.appendRow([now(), data.orderId, data.customerName, business, data.customerPhone, data.governorate, data.address, rest, data.paymentMethod, "جديد"]);
-    } else {
-      var items = (data.items || []).map(function(it) { return it.name + " × " + it.qty + " = " + (it.price * it.qty) + " ج.م"; }).join(" | ");
-      sheet.appendRow([now(), data.orderId, data.customerName, data.customerPhone, data.governorate, data.address, items, data.total, data.notes, data.paymentMethod]);
-    }
+    var items = (data.items || []).map(function(it) {
+      return it.name + " × " + it.qty + " = " + (it.price * it.qty) + " ج.م";
+    }).join(" | ");
+
+    sheet.appendRow([
+      now(),
+      data.orderId || "",
+      data.customerName || "",
+      data.customerPhone || "",
+      data.governorate || "",
+      data.address || "",
+      items,
+      data.total || 0,
+      data.notes || "",
+      data.paymentMethod || "واتساب"
+    ]);
+
     return json({ success: true });
   } catch (err) {
     return json({ success: false, error: err.toString() });
@@ -25,7 +35,7 @@ function doPost(e) {
 }
 
 function doGet() {
-  return json({ status: "Elysr Webhook Active", version: "4.0" });
+  return json({ status: "✅ Elysr Webhook Active", version: "5.0" });
 }
 
 function getOrCreateSheet(name) {
@@ -33,13 +43,13 @@ function getOrCreateSheet(name) {
   var s = ss.getSheetByName(name);
   if (!s) {
     s = ss.insertSheet(name);
-    if (name === "الطلبات") {
-      s.appendRow(["التاريخ","رقم الطلب","اسم العميل","الهاتف","المحافظة","العنوان","المنتجات","الإجمالي","ملاحظات","طريقة الدفع"]);
-    } else {
-      s.appendRow(["التاريخ","رقم الطلب","اسم العميل","النشاط","الهاتف","المحافظة","المدينة","ملاحظات","طريقة الدفع","الحالة"]);
-    }
+    s.appendRow([
+      "التاريخ", "رقم الطلب", "اسم العميل", "الهاتف",
+      "المحافظة", "العنوان", "المنتجات", "الإجمالي (ج.م)",
+      "ملاحظات", "طريقة الدفع"
+    ]);
     s.setFrozenRows(1);
-    s.getRange(1,1,1,10).setFontWeight("bold").setBackground("#1a73e8").setFontColor("#ffffff");
+    s.getRange(1, 1, 1, 10).setFontWeight("bold").setBackground("#1a73e8").setFontColor("#ffffff");
     s.autoResizeColumns(1, 10);
   }
   return s;
@@ -48,9 +58,13 @@ function getOrCreateSheet(name) {
 function now() {
   var d = new Date();
   var h = d.getHours();
-  return d.getDate() + "/" + (d.getMonth()+1) + "/" + d.getFullYear() + " " + (h%12||12) + ":" + ("0"+d.getMinutes()).slice(-2) + " " + (h>=12?"م":"ص");
+  var period = h >= 12 ? "م" : "ص";
+  h = h % 12 || 12;
+  return d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear()
+    + " " + h + ":" + ("0" + d.getMinutes()).slice(-2) + " " + period;
 }
 
 function json(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
 }
