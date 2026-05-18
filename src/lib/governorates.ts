@@ -36,15 +36,15 @@ export type Governorate = (typeof EGYPT_GOVERNORATES)[number];
 
 /**
  * 🔗 دوال التكامل مع Google Sheets عبر Google Apps Script Web App
+ *
+ * ⚠️ بعد نشر الـ Web App، استبدل YOUR_DEPLOYMENT_ID بالمعرف الحقيقي:
+ *    https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec
  */
 
 const GOOGLE_SHEETS_WEBHOOK_URL =
   "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
 
-/**
- * إرسال الطلب إلى Google Sheets
- */
-export async function submitToGoogleSheets(orderData: {
+export interface OrderSheetData {
   orderId: string;
   customerName: string;
   customerPhone: string;
@@ -54,35 +54,50 @@ export async function submitToGoogleSheets(orderData: {
   items: { name: string; qty: number; price: number }[];
   total: number;
   orderType: "cart" | "wholesale" | "contact";
-}): Promise<{ success: boolean; error?: string }> {
+  paymentMethod?: "واتساب" | "طلب مباشر";
+}
+
+/**
+ * إرسال الطلب إلى Google Sheets مع معالجة حقيقية للاستجابة.
+ */
+export async function submitToGoogleSheets(
+  orderData: OrderSheetData,
+): Promise<{ success: boolean; error?: string; orderId?: string }> {
   try {
     const res = await fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
       method: "POST",
-      mode: "no-cors", // Google Apps Script يتطلب no-cors للعمل من المتصفح
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ data: JSON.stringify(orderData) }),
     });
 
-    // في وضع no-cors، لا يمكن قراءة الـ response body
-    // نعتبر أن الطلب نجح إذا لم يرمِ خطأ
-    return { success: true };
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const json = await res.json();
+    if (json.success) return { success: true, orderId: json.orderId };
+    return { success: false, error: json.error || "خطأ غير معروف من السيرفر" };
   } catch (err) {
     console.error("Google Sheets submission failed:", err);
-    return { success: false, error: "فشل الاتصال بقاعدة البيانات" };
+    logOrderLocally(orderData);
+    return {
+      success: false,
+      error:
+        err instanceof TypeError
+          ? "تعذر الاتصال بقاعدة البيانات. الطلب محفوظ محلياً."
+          : "فشل الاتصال بقاعدة البيانات",
+    };
   }
 }
 
 /**
- * تسجيل محاولة طلب (حتى لو فشل Google Sheets) — fallback
+ * ✅ تسجيل الطلب محلياً كـ fallback عند فشل Google Sheets
  */
 export function logOrderLocally(orderData: Record<string, unknown>) {
   try {
-    const key = "elysr_order_fallback_v1";
+    const key = "elysr_order_fallback_v2";
     const raw = localStorage.getItem(key);
-    const orders = raw ? JSON.parse(raw) : [];
+    const orders: Array<Record<string, unknown>> = raw ? JSON.parse(raw) : [];
     orders.push({ ...orderData, loggedAt: new Date().toISOString() });
-    // الاحتفاظ بآخر 50 طلب فقط
-    if (orders.length > 50) orders.splice(0, orders.length - 50);
+    while (orders.length > 50) orders.shift();
     localStorage.setItem(key, JSON.stringify(orders));
   } catch {
     // تجاهل بهدوء
