@@ -79,7 +79,7 @@ function CartPage() {
       toast.success("✅ تم استلام طلبك بنجاح! سنتواصل معك قريباً.", { duration: 4000 });
       setSubmitting(false);
       clear();
-      navigate({ to: "/thank-you" });
+      navigate({ to: "/order-confirmed" });
     }
   };
 
