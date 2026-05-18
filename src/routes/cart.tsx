@@ -37,7 +37,7 @@ function CartPage() {
     return () => { cancelled = true; };
   }, [items]);
 
-  const checkout = async () => {
+  const checkout = () => {
     if (items.length === 0) { toast.error("السلة فارغة"); return; }
     if (!customer.name || !customer.phone || !customer.governorate || !customer.address) {
       toast.error("يرجى ملء جميع الحقول المطلوبة (*)"); return;

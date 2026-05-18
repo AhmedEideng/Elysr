@@ -7,7 +7,6 @@ import {
   BookOpen,
   Mail,
   MapPin,
-  
 } from "lucide-react";
 import logo from "@/assets/logo.webp";
 import { COMPANY, waLink } from "@/lib/whatsapp";

@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { CheckCircle2, Phone, Home, ShoppingBag } from "lucide-react";
-import { useCart } from "@/hooks/use-cart";
 
 export const Route = createFileRoute("/order-confirmed")({
   head: () => ({
@@ -15,8 +14,6 @@ export const Route = createFileRoute("/order-confirmed")({
 });
 
 function OrderConfirmedPage() {
-  const { items } = useCart();
-
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
