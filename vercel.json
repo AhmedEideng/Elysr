@@ -3,19 +3,9 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "outputDirectory": "dist",
-  "framework": "vite",
-  "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/products/:id",
-      "destination": "/products/:id.html"
-    },
-    {
-      "source": "/education/:slug",
-      "destination": "/education/:slug.html"
-    },
-    {
-      "source": "/((?!.*\\.).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
@@ -74,5 +64,6 @@
         }
       ]
     }
-  ]
+  ],
+  "trailingSlash": false
 }
