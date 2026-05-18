@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /cart
+Disallow: /thank-you
 
-Sitemap: /sitemap.xml
+Sitemap: https://elysrmedical.com/sitemap.xml

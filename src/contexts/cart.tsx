@@ -19,11 +19,13 @@ export interface CartCtx {
   remove: (id: string) => void;
   setQty: (id: string, qty: number) => void;
   clear: () => void;
+  isStockLimitReached: (id: string) => boolean;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const CartContext = createContext<CartCtx | null>(null);
 const STORAGE_KEY = "elysr_cart_v1";
+const MAX_CART_ITEMS = 50; // 🔧 حد أقصى لعدد الأصناف في السلة
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -32,7 +34,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw));
+      if (raw) {
+        const parsed = JSON.parse(raw) as CartItem[];
+        // 🔧 تحقق من صحة البيانات المحفوظة
+        const valid = parsed.filter(
+          (i) => i.id && i.name && typeof i.price === "number" && typeof i.qty === "number",
+        );
+        setItems(valid);
+      }
     } catch (err) {
       console.warn("Failed to read cart from localStorage:", err);
     }
@@ -50,11 +59,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const add = useCallback((p: Product, qty = 1) => {
     setItems((prev) => {
-      const ex = prev.find((i) => i.id === p.id);
+      // 🔧 حد أقصى لعدد الأصناف
+      if (prev.length >= MAX_CART_ITEMS && !prev.find((i) => i.id === p.id)) {
+        return prev;
+      }
       const maxStock = p.stock ?? 10;
+      const safeQty = Math.max(1, Math.min(qty, maxStock));
+      const ex = prev.find((i) => i.id === p.id);
       if (ex) {
         return prev.map((i) =>
-          i.id === p.id ? { ...i, qty: Math.min(i.qty + qty, maxStock) } : i,
+          i.id === p.id
+            ? {
+                ...i,
+                // 🔧 استخدام السعر الحالي من المنتج وليس القديم
+                price: p.price,
+                qty: Math.min(i.qty + safeQty, maxStock),
+              }
+            : i,
         );
       }
       return [
@@ -65,7 +86,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           price: p.price,
           emoji: p.emoji,
           image: p.image,
-          qty: Math.min(qty, maxStock),
+          qty: safeQty,
           stock: maxStock,
         },
       ];
@@ -82,13 +103,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  // 🔧 دالة لمعرفة هل وصل المستخدم لحد المخزون
+  const isStockLimitReached = useCallback(
+    (id: string) => {
+      const item = items.find((i) => i.id === id);
+      if (!item) return false;
+      return item.qty >= (item.stock ?? 10);
+    },
+    [items],
+  );
+
   const clear = useCallback(() => setItems([]), []);
 
   const value = useMemo(() => {
     const count = items.reduce((s, i) => s + i.qty, 0);
     const total = items.reduce((s, i) => s + i.qty * i.price, 0);
-    return { items, count, total, add, remove, setQty, clear };
-  }, [items, add, remove, setQty, clear]);
+    return { items, count, total, add, remove, setQty, clear, isStockLimitReached };
+  }, [items, add, remove, setQty, clear, isStockLimitReached]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

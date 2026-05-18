@@ -24,6 +24,19 @@ export function ProductCard({ product }: { product: Product }) {
           -{Math.round((1 - product.price / product.oldPrice) * 100)}%
         </span>
       )}
+      {/* 🔧 عرض حالة المخزون */}
+      {product.stock <= 5 && product.stock > 0 && (
+        <span className="absolute bottom-4 left-4 z-10 rounded-full bg-amber-100 px-2.5 py-1 text-[9px] font-bold text-amber-700">
+          باقي {product.stock}
+        </span>
+      )}
+      {product.stock <= 0 && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/70 backdrop-blur-[2px] rounded-[2rem]">
+          <span className="rounded-full bg-destructive px-4 py-1.5 text-xs font-bold text-destructive-foreground">
+            نفد المخزون
+          </span>
+        </div>
+      )}
       <Link to="/products/$id" params={{ id: product.id }} className="block">
         {showImage ? (
           <div className="aspect-square w-full overflow-hidden bg-gradient-soft relative">
@@ -33,6 +46,8 @@ export function ProductCard({ product }: { product: Product }) {
               alt={product.name}
               loading="lazy"
               decoding="async"
+              width={400}
+              height={400}
               className={`h-full w-full object-cover transition-all duration-700 group-hover:scale-110 ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"}`}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageFailed(true)}
@@ -73,16 +88,23 @@ export function ProductCard({ product }: { product: Product }) {
               {formatPrice(product.price)}
             </span>
           </div>
+          {/* 🔧 تعطيل زر الإضافة إذا نفد المخزون */}
           <button
             onClick={() => {
+              if (product.stock <= 0) return;
               add(product);
               toast.success("تمت الإضافة للسلة", {
                 icon: <ShoppingCart className="h-4 w-4 text-primary" />,
                 className: "rounded-2xl font-bold",
               });
             }}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-brand text-primary-foreground transition-all duration-300 hover:scale-110 hover:rotate-3 shadow-lg active:scale-95"
-            aria-label="أضف للسلة"
+            disabled={product.stock <= 0}
+            className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl text-primary-foreground transition-all duration-300 shadow-lg active:scale-95 ${
+              product.stock <= 0
+                ? "bg-muted text-muted-foreground cursor-not-allowed shadow-none"
+                : "bg-gradient-brand hover:scale-110 hover:rotate-3"
+            }`}
+            aria-label={product.stock <= 0 ? "نفد المخزون" : "أضف للسلة"}
           >
             <ShoppingCart className="h-5 w-5" />
           </button>

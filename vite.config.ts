@@ -36,8 +36,39 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
+        // 🔧 تقسيم vendor — بدون circular dependency
         manualChunks(id) {
-          if (id.includes("node_modules")) return "vendor";
+          if (!id.includes("node_modules")) return;
+
+          // React Core + scheduler + use-sync-external-store (كلها مترابطة)
+          if (
+            id.includes("/react-dom/") ||
+            id.includes("/react/") ||
+            id.includes("scheduler") ||
+            id.includes("use-sync-external-store")
+          ) {
+            return "vendor-react";
+          }
+
+          // مكتبة التوجيه
+          if (id.includes("@tanstack")) {
+            return "vendor-router";
+          }
+
+          // أيقونات (تحميل كسول)
+          if (id.includes("lucide-react")) {
+            return "vendor-icons";
+          }
+
+          // بحث fuzzy
+          if (id.includes("fuse.js")) {
+            return "vendor-search";
+          }
+
+          // إشعارات
+          if (id.includes("sonner")) {
+            return "vendor-toast";
+          }
         },
       },
     },

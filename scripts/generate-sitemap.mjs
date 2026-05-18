@@ -21,6 +21,7 @@ try {
   /* لا يوجد articles.ts */
 }
 
+// 🔧 إزالة /cart من sitemap — لا فائدة من أرشفته
 const staticRoutes = [
   { path: "/", priority: "1.0", changefreq: "daily" },
   { path: "/products/men", priority: "0.9", changefreq: "weekly" },
@@ -30,7 +31,6 @@ const staticRoutes = [
   { path: "/wholesale", priority: "0.8", changefreq: "monthly" },
   { path: "/about", priority: "0.5", changefreq: "monthly" },
   { path: "/contact", priority: "0.6", changefreq: "monthly" },
-  { path: "/cart", priority: "0.3", changefreq: "yearly" },
   { path: "/shipping", priority: "0.4", changefreq: "yearly" },
   { path: "/returns", priority: "0.4", changefreq: "yearly" },
   { path: "/terms", priority: "0.3", changefreq: "yearly" },

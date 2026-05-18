@@ -1,19 +1,26 @@
-import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/ProductCard";
+import { getFeaturedProducts } from "@/data/products";
+import { useLayoutEffect, useState } from "react";
 import type { Product } from "@/data/product-types";
 
 export function FeaturedProducts() {
-  const [featured, setFeatured] = useState<Product[]>([]);
+  // 🔧 استخدام useLayoutEffect + import مباشر بدلاً من lazy loading غير ضروري
+  // المنتجات بيانات محلية ثابتة، لا حاجة لـ dynamic import
+  const [featured, setFeatured] = useState<Product[]>(() => {
+    // محاولة الحصول على البيانات مباشرة (synchronous)
+    try {
+      return getFeaturedProducts();
+    } catch {
+      return [];
+    }
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    import("@/data/products").then(({ getFeaturedProducts }) => {
-      if (!cancelled) setFeatured(getFeaturedProducts());
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // في حال لم تعمل التهيئة المتزامنة (SSR etc.)
+  useLayoutEffect(() => {
+    if (featured.length === 0) {
+      setFeatured(getFeaturedProducts());
+    }
+  }, [featured.length]);
 
   return (
     <section className="bg-gradient-soft py-8 md:py-10">

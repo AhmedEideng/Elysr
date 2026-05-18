@@ -9,15 +9,13 @@ import {
   Package,
   CheckCircle,
   Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/data/product-types";
 import { waLink, buildOrderMessage } from "@/lib/whatsapp";
-import { isValidEgyptianPhone, generateOrderId } from "@/lib/utils";
+import { isValidEgyptianPhone, generateOrderId, sanitizeInput } from "@/lib/utils";
 import { toast } from "sonner";
-
-// ملاحظة: ضع رابط Google Apps Script الخاص بك هنا لاحقاً
-const GOOGLE_SHEET_WEBHOOK = "YOUR_GOOGLE_SCRIPT_URL_HERE";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({ meta: [{ title: "السلة — اليسر ميديكال" }] }),
@@ -27,7 +25,7 @@ export const Route = createFileRoute("/cart")({
 type OrderMethod = "whatsapp" | "direct";
 
 function CartPage() {
-  const { items, total, setQty, remove, clear } = useCart();
+  const { items, total, setQty, remove, clear, isStockLimitReached } = useCart();
   const navigate = useNavigate();
   const [customer, setCustomer] = useState({ name: "", phone: "", address: "", notes: "" });
   const [method, setMethod] = useState<OrderMethod>("whatsapp");
@@ -67,45 +65,40 @@ function CartPage() {
       return;
     }
 
+    // 🔧 التحقق من أن الكميات ضمن المخزون
+    const overStock = items.find((i) => i.qty > (i.stock ?? 10));
+    if (overStock) {
+      toast.error(`الكمية المطلوبة لـ "${overStock.name}" تتجاوز المخزون المتاح`);
+      return;
+    }
+
     setSubmitting(true);
     const orderId = generateOrderId();
+
+    // 🔧 تنظيف المدخلات قبل الإرسال
+    const sanitizedCustomer = {
+      name: sanitizeInput(customer.name, 100),
+      phone: sanitizeInput(customer.phone, 15),
+      address: sanitizeInput(customer.address, 200),
+      notes: customer.notes ? sanitizeInput(customer.notes, 300) : undefined,
+    };
 
     if (method === "whatsapp") {
       const msg = buildOrderMessage(
         items.map((i) => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
-        customer,
+        sanitizedCustomer,
         orderId,
       );
       window.open(waLink(msg), "_blank", "noopener,noreferrer");
       setSubmitting(false);
       setShowPrompt(true);
     } else {
-      try {
-        const orderData = {
-          orderId,
-          date: new Date().toLocaleString("ar-EG"),
-          ...customer,
-          items: items.map((i) => `${i.name} (${i.qty})`).join(" - "),
-          total: `${total} ج.م`,
-          method: "طلب مباشر من الموقع",
-        };
-
-        await fetch(GOOGLE_SHEET_WEBHOOK, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(orderData),
-        });
-
-        toast.success(`تم استلام طلبك بنجاح! رقم الطلب: ${orderId}`);
-        clear();
-        navigate({ to: "/thank-you" });
-      } catch (err) {
-        console.error(err);
-        toast.error("حدثت مشكلة، يرجى المحاولة عبر واتساب");
-      } finally {
-        setSubmitting(false);
-      }
+      // 🔧 تنبيه واضح إذا لم يُضبط Webhook
+      toast.error("الطلب المباشر غير متاح حالياً. يرجى استخدام واتساب.", {
+        duration: 5000,
+        icon: <AlertTriangle className="h-4 w-4 text-destructive" />,
+      });
+      setSubmitting(false);
     }
   };
 
@@ -159,47 +152,57 @@ function CartPage() {
       <h1 className="text-3xl font-bold mb-8">سلة التسوق</h1>
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-3">
-          {items.map((it) => (
-            <div
-              key={it.id}
-              className="flex items-center gap-4 rounded-2xl border bg-card p-4 transition-smooth hover:shadow-md"
-            >
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border bg-muted">
-                {it.image ? (
-                  <img src={it.image} alt={it.name} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center text-2xl">
-                    {it.emoji}
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm truncate">{it.name}</div>
-                <div className="text-primary font-bold">{formatPrice(it.price)}</div>
-              </div>
-              <div className="flex items-center rounded-full border bg-background">
-                <button
-                  onClick={() => setQty(it.id, it.qty - 1)}
-                  className="p-1.5 hover:bg-accent rounded-r-full"
-                >
-                  <Minus className="h-3 w-3" />
-                </button>
-                <span className="w-6 text-center text-xs font-bold">{it.qty}</span>
-                <button
-                  onClick={() => setQty(it.id, it.qty + 1)}
-                  className="p-1.5 hover:bg-accent rounded-l-full"
-                >
-                  <Plus className="h-3 w-3" />
-                </button>
-              </div>
-              <button
-                onClick={() => remove(it.id)}
-                className="text-destructive p-2 hover:bg-destructive/10 rounded-full transition-smooth"
+          {items.map((it) => {
+            const atLimit = isStockLimitReached(it.id);
+            return (
+              <div
+                key={it.id}
+                className="flex items-center gap-4 rounded-2xl border bg-card p-4 transition-smooth hover:shadow-md"
               >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
+                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border bg-muted">
+                  {it.image ? (
+                    <img src={it.image} alt={it.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-2xl">
+                      {it.emoji}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-sm truncate">{it.name}</div>
+                  <div className="text-primary font-bold">{formatPrice(it.price)}</div>
+                  {/* 🔧 عرض حالة المخزون */}
+                  {atLimit && (
+                    <span className="text-[10px] text-amber-600 font-bold">الحد الأقصى المتاح</span>
+                  )}
+                </div>
+                <div className="flex items-center rounded-full border bg-background">
+                  <button
+                    onClick={() => setQty(it.id, it.qty - 1)}
+                    className="p-1.5 hover:bg-accent rounded-r-full"
+                  >
+                    <Minus className="h-3 w-3" />
+                  </button>
+                  <span className="w-6 text-center text-xs font-bold">{it.qty}</span>
+                  <button
+                    onClick={() => setQty(it.id, it.qty + 1)}
+                    disabled={atLimit}
+                    className={`p-1.5 rounded-l-full transition-smooth ${
+                      atLimit ? "opacity-30 cursor-not-allowed" : "hover:bg-accent"
+                    }`}
+                  >
+                    <Plus className="h-3 w-3" />
+                  </button>
+                </div>
+                <button
+                  onClick={() => remove(it.id)}
+                  className="text-destructive p-2 hover:bg-destructive/10 rounded-full transition-smooth"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            );
+          })}
           <button
             onClick={clear}
             className="text-xs text-muted-foreground hover:text-destructive px-2 transition-smooth"
@@ -226,12 +229,21 @@ function CartPage() {
             </button>
           </div>
 
+          {/* 🔧 تنبيه عند اختيار طلب مباشر غير مفعّل */}
+          {method === "direct" && (
+            <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-700 flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>الطلب المباشر غير متاح حالياً. يرجى استخدام واتساب لإتمام طلبك.</span>
+            </div>
+          )}
+
           <div className="space-y-4">
             <Inp
               label="الاسم *"
               placeholder="اكتب اسمك هنا"
               value={customer.name}
               onChange={(v) => setCustomer({ ...customer, name: v })}
+              maxLength={100}
             />
             <Inp
               label="رقم الهاتف *"
@@ -239,12 +251,14 @@ function CartPage() {
               value={customer.phone}
               onChange={(v) => setCustomer({ ...customer, phone: v })}
               type="tel"
+              maxLength={11}
             />
             <Inp
               label="العنوان *"
               placeholder="المحافظة، المدينة، الشارع"
               value={customer.address}
               onChange={(v) => setCustomer({ ...customer, address: v })}
+              maxLength={200}
             />
             <label className="block">
               <span className="text-sm font-semibold mb-1.5 block">ملاحظات</span>
@@ -252,6 +266,7 @@ function CartPage() {
                 value={customer.notes}
                 placeholder="أي تفاصيل أخرى..."
                 onChange={(e) => setCustomer({ ...customer, notes: e.target.value })}
+                maxLength={300}
                 rows={2}
                 className="w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all"
               />
@@ -265,7 +280,7 @@ function CartPage() {
 
           <button
             onClick={checkout}
-            disabled={submitting}
+            disabled={submitting || method === "direct"}
             className={`w-full rounded-full px-6 py-4 font-bold text-white shadow-elegant transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-2 ${method === "whatsapp" ? "bg-[#25D366] hover:bg-[#1ebd57] shadow-[#25d366]/20" : "bg-primary hover:bg-primary/90 shadow-primary/20"}`}
           >
             {submitting ? (
@@ -293,12 +308,14 @@ function Inp({
   onChange,
   placeholder,
   type = "text",
+  maxLength = 200,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   type?: string;
+  maxLength?: number;
 }) {
   return (
     <label className="block">
@@ -307,6 +324,7 @@ function Inp({
         type={type}
         value={value}
         placeholder={placeholder}
+        maxLength={maxLength}
         onChange={(e) => onChange(e.target.value)}
         className="w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all"
       />

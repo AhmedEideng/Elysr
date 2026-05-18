@@ -12,9 +12,18 @@ export function isValidEgyptianPhone(phone: string): boolean {
   return phoneRegex.test(cleanPhone);
 }
 
-// توليد رقم طلب عشوائي
+// 🔧 توليد رقم طلب آمن بدون تكرار باستخدام UUID + timestamp
 export function generateOrderId(): string {
-  const prefix = "EL";
-  const randomNum = Math.floor(1000 + Math.random() * 9000); // 4 أرقام عشوائية
-  return `#${prefix}-${randomNum}`;
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const randomPart = crypto.randomUUID().slice(0, 4).toUpperCase();
+  return `#EL-${timestamp}-${randomPart}`;
+}
+
+// 🔧 تنظيف النصوص من الرموز الخطرة لمنع XSS
+export function sanitizeInput(input: string, maxLength = 200): string {
+  return input
+    .slice(0, maxLength)
+    .replace(/[<>"'&\\]/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
