@@ -1,21 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  Building2,
-  Package,
-  TrendingUp,
-  Truck,
-  Phone,
-  CheckCircle2,
-  ChevronDown,
-  MapPin,
-  MessageCircle,
-  Loader2,
+  Building2, Package, TrendingUp, Truck, Phone, CheckCircle2,
+  ChevronDown, MapPin, MessageCircle, Loader2,
 } from "lucide-react";
 import { waLink } from "@/lib/whatsapp";
 import { isValidEgyptianPhone, sanitizeInput } from "@/lib/utils";
-import { EGYPT_GOVERNORATES } from "@/lib/governorates";
-import { submitToGoogleSheets, logOrderLocally } from "@/lib/governorates";
+import { EGYPT_GOVERNORATES, submitToGoogleSheets } from "@/lib/governorates";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/wholesale")({
@@ -28,23 +19,20 @@ export const Route = createFileRoute("/wholesale")({
   component: WholesalePage,
 });
 
-type WholesaleMethod = "whatsapp" | "direct";
-
 function WholesalePage() {
   const [form, setForm] = useState({ name: "", business: "", phone: "", governorate: "", city: "", message: "" });
-  const [method, setMethod] = useState<WholesaleMethod>("whatsapp");
+  const [method, setMethod] = useState<"whatsapp" | "direct">("whatsapp");
   const [submitting, setSubmitting] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.phone || !form.governorate) {
-      toast.error("الاسم ورقم الهاتف والمحافظة مطلوبون");
-      return;
+      toast.error("الاسم ورقم الهاتف والمحافظة مطلوبون"); return;
     }
     if (!isValidEgyptianPhone(form.phone)) {
-      toast.error("برجاء إدخال رقم هاتف مصري صحيح (11 رقم يبدأ بـ 01)");
-      return;
+      toast.error("برجاء إدخال رقم هاتف مصري صحيح"); return;
     }
+
     setSubmitting(true);
     const sn = sanitizeInput(form.name, 100);
     const sb = sanitizeInput(form.business, 100);
@@ -54,15 +42,15 @@ function WholesalePage() {
     const sm = sanitizeInput(form.message, 500);
     const orderId = `#EL-WS-${Date.now().toString(36).toUpperCase()}`;
 
-    const sheetResult = await submitToGoogleSheets({
-      orderId, customerName: sn, customerPhone: sp, governorate: sg, address: sc,
-      notes: `النشاط: ${sb}\n${sm}`,
-      items: [], total: 0, orderType: "wholesale",
+    submitToGoogleSheets({
+      orderId, orderType: "wholesale",
       paymentMethod: method === "whatsapp" ? "واتساب" : "طلب مباشر",
+      customerName: sn, customerPhone: sp,
+      governorate: sg, address: sc,
+      notes: `النشاط: ${sb}\n${sm}`,
+      items: [], total: 0,
     });
-    if (!sheetResult.success) {
-      logOrderLocally({ orderId, type: "wholesale", name: sn, business: sb, phone: sp, governorate: sg, city: sc, message: sm });
-    }
+
     if (method === "whatsapp") {
       const msg = `🏢 *طلب جملة جديد*\n
 👤 الاسم: ${sn}
@@ -72,12 +60,11 @@ function WholesalePage() {
 📍 المدينة: ${sc}
 📝 ${sm}`;
       window.open(waLink(msg), "_blank", "noopener,noreferrer");
-      toast.success("تم فتح واتساب ✅ — أرسل الرسالة لإتمام الطلب");
+      toast.success("تم فتح واتساب ✅");
     } else {
-      toast.success("✅ تم استلام طلبك بنجاح! سنتواصل معك خلال 24 ساعة.", {
-        duration: 5000, icon: <CheckCircle2 className="h-5 w-5 text-success" />,
-      });
+      toast.success("✅ تم استلام طلبك بنجاح! سنتواصل معك خلال 24 ساعة.", { duration: 5000 });
     }
+
     setSubmitting(false);
     if (method === "direct") setForm({ name: "", business: "", phone: "", governorate: "", city: "", message: "" });
   };
