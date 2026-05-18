@@ -37,7 +37,7 @@ function CartPage() {
     return () => { cancelled = true; };
   }, [items]);
 
-  const checkout = () => {
+  const checkout = async () => {
     if (items.length === 0) { toast.error("السلة فارغة"); return; }
     if (!customer.name || !customer.phone || !customer.governorate || !customer.address) {
       toast.error("يرجى ملء جميع الحقول المطلوبة (*)"); return;
@@ -61,7 +61,7 @@ function CartPage() {
     };
 
     // إرسال إلى Google Sheets مع ذكر الطريقة
-    submitToGoogleSheets({
+    await submitToGoogleSheets({
       orderId, orderType: "cart",
       paymentMethod: method === "whatsapp" ? "واتساب" : "طلب مباشر",
       customerName: sc.name, customerPhone: sc.phone,

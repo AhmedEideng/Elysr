@@ -41,12 +41,12 @@ function doPost(e) {
 }
 
 function doGet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const ordersSheet = ss.getSheetByName("الطلبات");
+  // إنشاء الشيت فوراً عند أول زيارة لتظهر الأعمدة
+  const sheet = getOrCreateSheet("الطلبات");
   return json({
     status: "✅ Elysr Webhook Active",
-    version: "5.1",
-    orders: ordersSheet ? ordersSheet.getLastRow() - 1 + " طلب" : "لم ينشأ بعد"
+    version: "5.2",
+    orders: sheet.getLastRow() - 1 + " طلب"
   });
 }
 
@@ -71,7 +71,7 @@ function getOrCreateSheet(name) {
 }
 
 function now() {
-  // UTC+3 (توقيت القاهرة) — مع معالجة تغيير التاريخ عند منتصف الليل
+  // UTC+3 (توقيت القاهرة)
   const d = new Date();
   const cairo = new Date(d.getTime() + 3 * 60 * 60 * 1000);
   const h = cairo.getUTCHours();
