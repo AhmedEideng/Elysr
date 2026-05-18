@@ -42,7 +42,7 @@ export type Governorate = (typeof EGYPT_GOVERNORATES)[number];
  */
 
 const GOOGLE_SHEETS_WEBHOOK_URL =
-  "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+  "https://script.google.com/macros/s/AKfycbzxLHv_tE86DfwnlQ7NUjfq-I83KC1UTFSZAZmM4lwgo411L_PDHfpdIAdexR640GwMcg/exec";
 
 export interface OrderSheetData {
   orderId: string;
