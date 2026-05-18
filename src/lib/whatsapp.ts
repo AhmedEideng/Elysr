@@ -14,7 +14,13 @@ export const waLink = (message: string) =>
 // 🔧 بناء رسالة الطلب مع تنظيف المدخلات لمنع الحقن
 export const buildOrderMessage = (
   items: { id?: string; name: string; qty: number; price: number }[],
-  customer?: { name?: string; phone?: string; address?: string; notes?: string },
+  customer?: {
+    name?: string;
+    phone?: string;
+    governorate?: string;
+    address?: string;
+    notes?: string;
+  },
   orderId?: string,
 ) => {
   const lines: string[] = [];
@@ -23,6 +29,7 @@ export const buildOrderMessage = (
   lines.push("");
   if (customer?.name) lines.push(`👤 الاسم: ${sanitize(customer.name, 100)}`);
   if (customer?.phone) lines.push(`📞 الهاتف: ${sanitize(customer.phone, 15)}`);
+  if (customer?.governorate) lines.push(`🗺️ المحافظة: ${sanitize(customer.governorate, 50)}`);
   if (customer?.address) lines.push(`📍 العنوان: ${sanitize(customer.address, 200)}`);
   if (customer?.notes) lines.push(`📝 ملاحظات: ${sanitize(customer.notes, 300)}`);
   lines.push("");
