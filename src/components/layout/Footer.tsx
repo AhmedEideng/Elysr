@@ -7,7 +7,7 @@ import {
   BookOpen,
   Mail,
   MapPin,
-  Clock,
+  
 } from "lucide-react";
 import logo from "@/assets/logo.webp";
 import { COMPANY, waLink } from "@/lib/whatsapp";
@@ -124,7 +124,7 @@ export function Footer() {
             <ul className="space-y-4">
               <ContactItem icon={<Mail className="h-4 w-4" />} text={COMPANY.email} />
               <ContactItem icon={<MapPin className="h-4 w-4" />} text={COMPANY.address} />
-              <ContactItem icon={<Clock className="h-4 w-4" />} text="يومياً من 9 ص حتى 11 م" />
+
               <li className="pt-2">
                 <a
                   href={waLink("مرحباً، أرغب في الاستفسار")}

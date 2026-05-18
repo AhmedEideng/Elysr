@@ -59,9 +59,7 @@ function OrderConfirmedPage() {
             <Phone className="h-5 w-5 text-primary" />
             <span className="text-sm">لديك استفسار؟ تواصل معنا مباشرة</span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            ساعات العمل: من السبت إلى الخميس، 10 ص – 10 م
-          </p>
+
         </div>
 
         <div className="grid grid-cols-2 gap-3 pt-2">

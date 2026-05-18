@@ -92,9 +92,7 @@ function ThankYouPage() {
           </Link>
         </div>
 
-        <p className="text-xs text-muted-foreground pt-4">
-          ساعات العمل: من السبت إلى الخميس، 10 ص – 10 م
-        </p>
+
       </div>
     </div>
   );
