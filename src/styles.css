@@ -1,0 +1,167 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-glow: var(--primary-glow);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: "Cairo", "Tajawal", system-ui, sans-serif;
+  --font-display: "Tajawal", "Cairo", system-ui, sans-serif;
+}
+
+:root {
+  --radius: 1rem;
+
+  /* New Palette: Modern Cyan-Blue (Logo Inspired) */
+  --background: oklch(0.99 0.005 230);
+  --foreground: oklch(0.15 0.05 240);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.05 240);
+
+  --primary: oklch(0.58 0.16 235); /* Solid Medical Blue */
+  --primary-foreground: oklch(1 0 0);
+  --primary-glow: oklch(0.75 0.14 215); /* Bright Cyan from Logo */
+
+  --secondary: oklch(0.96 0.02 230);
+  --secondary-foreground: oklch(0.25 0.06 240);
+
+  --muted: oklch(0.94 0.01 230);
+  --muted-foreground: oklch(0.45 0.04 240);
+
+  --accent: oklch(0.92 0.06 215); /* Soft Cyan Tint */
+  --accent-foreground: oklch(0.25 0.08 240);
+
+  --destructive: oklch(0.55 0.20 300); /* Royal Purple */
+  --success: oklch(0.65 0.15 160);
+
+  --border: oklch(0.91 0.015 230);
+  --input: oklch(0.93 0.015 230);
+  --ring: oklch(0.58 0.16 235 / 0.4);
+
+  /* Gradients inspired by Logo Flow */
+  --gradient-hero: linear-gradient(135deg, oklch(0.55 0.18 240) 0%, oklch(0.75 0.14 215) 100%);
+  --gradient-soft: linear-gradient(180deg, oklch(0.98 0.01 230) 0%, oklch(1 0 0) 100%);
+  --gradient-brand: linear-gradient(135deg, oklch(0.58 0.16 235), oklch(0.75 0.14 215));
+
+  --shadow-sm: 0 2px 4px oklch(0.2 0.1 235 / 0.04);
+  --shadow-md: 0 12px 24px -8px oklch(0.2 0.15 235 / 0.12);
+  --shadow-lg: 0 25px 50px -12px oklch(0.2 0.2 235 / 0.2);
+  --shadow-glow: 0 0 40px oklch(0.75 0.14 215 / 0.35);
+
+  --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark {
+  --background: oklch(0.12 0.03 240);
+  --foreground: oklch(0.98 0.005 230);
+  --card: oklch(0.16 0.04 240);
+  --primary: oklch(0.75 0.14 215);
+  --primary-foreground: oklch(0.12 0.03 240);
+  --border: oklch(1 0 0 / 0.08);
+}
+
+@layer base {
+  html {
+    direction: rtl;
+    scroll-behavior: smooth;
+  }
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-brand {
+    background-image: var(--gradient-brand);
+  }
+  .shadow-elegant {
+    box-shadow: var(--shadow-lg);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-md);
+  }
+  .text-gradient {
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: oklch(0.94 0.01 230);
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shimmer 2s infinite linear;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
