@@ -60,12 +60,15 @@
   --accent: oklch(0.92 0.06 215); /* Soft Cyan Tint */
   --accent-foreground: oklch(0.25 0.08 240);
 
-  --destructive: oklch(0.6 0.18 28);
+  /* 🔴 أحمر قوي وحيوي — من oklch(0.6 0.18 28) الباهت */
+  --destructive: oklch(0.55 0.28 27); /* أحمر صارخ #E03E3E */
+  --destructive-foreground: oklch(1 0 0);
+
   --success: oklch(0.65 0.15 160);
 
   --border: oklch(0.91 0.015 230);
   --input: oklch(0.93 0.015 230);
-  --ring: oklch(0.58 0.16 235 / 0.4);
+  --ring: oklch(0.55 0.28 27 / 0.4);
 
   /* Gradients inspired by Logo Flow */
   --gradient-hero: linear-gradient(135deg, oklch(0.55 0.18 240) 0%, oklch(0.75 0.14 215) 100%);
@@ -87,6 +90,7 @@
   --primary: oklch(0.75 0.14 215);
   --primary-foreground: oklch(0.12 0.03 240);
   --border: oklch(1 0 0 / 0.08);
+  --destructive: oklch(0.65 0.3 27);
 }
 
 @layer base {
