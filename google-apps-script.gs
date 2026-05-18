@@ -71,12 +71,14 @@ function getOrCreateSheet(name) {
 }
 
 function now() {
+  // UTC+3 (توقيت القاهرة) — مع معالجة تغيير التاريخ عند منتصف الليل
   const d = new Date();
-  const h = d.getHours();
+  const cairo = new Date(d.getTime() + 3 * 60 * 60 * 1000);
+  const h = cairo.getUTCHours();
   const period = h >= 12 ? "م" : "ص";
   const hour12 = h % 12 || 12;
-  const min = ("0" + d.getMinutes()).slice(-2);
-  return d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear()
+  const min = ("0" + cairo.getUTCMinutes()).slice(-2);
+  return cairo.getUTCDate() + "/" + (cairo.getUTCMonth() + 1) + "/" + cairo.getUTCFullYear()
     + " " + hour12 + ":" + min + " " + period;
 }
 
