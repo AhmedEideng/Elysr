@@ -130,7 +130,7 @@ export function Footer() {
                   href={waLink("مرحباً، أرغب في الاستفسار")}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary-glow px-4 py-3 font-bold text-foreground transition-smooth hover:scale-[1.02] hover:shadow-glow"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary-glow px-4 py-3 font-bold text-foreground transition-smooth hover:shadow-glow"
                 >
                   <MessageCircle className="h-5 w-5" /> واتساب المبيعات
                 </a>
@@ -141,7 +141,7 @@ export function Footer() {
       </div>
 
       {/* الشريط السفلي: الحقوق وطرق الدفع */}
-      <div className="border-t border-background/10 py-8 bg-black/20">
+      <div className="border-t border-primary-glow/20 py-8 bg-foreground">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-right">
             <p className="text-xs text-background/40">
@@ -150,13 +150,13 @@ export function Footer() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-3 opacity-30 grayscale hover:opacity-100 hover:grayscale-0 transition-smooth">
-            <div className="bg-background/10 px-2 py-1 rounded-md text-[10px] font-bold">VISA</div>
-            <div className="bg-background/10 px-2 py-1 rounded-md text-[10px] font-bold">
+            <div className="bg-primary-glow/15 px-2 py-1 rounded-md text-[10px] font-bold">VISA</div>
+            <div className="bg-primary-glow/15 px-2 py-1 rounded-md text-[10px] font-bold">
               MASTERCARD
             </div>
-            <div className="bg-background/10 px-2 py-1 rounded-md text-[10px] font-bold">MEEZA</div>
-            <div className="bg-background/10 px-2 py-1 rounded-md text-[10px] font-bold">VALU</div>
-            <div className="bg-background/10 px-2 py-1 rounded-md text-[10px] font-bold">COD</div>
+            <div className="bg-primary-glow/15 px-2 py-1 rounded-md text-[10px] font-bold">MEEZA</div>
+            <div className="bg-primary-glow/15 px-2 py-1 rounded-md text-[10px] font-bold">VALU</div>
+            <div className="bg-primary-glow/15 px-2 py-1 rounded-md text-[10px] font-bold">COD</div>
           </div>
 
           <div className="flex gap-6">
@@ -180,7 +180,7 @@ function SocialLink({ icon, href }: { icon: ReactNode; href: string }) {
   return (
     <a
       href={href}
-      className="h-10 w-10 rounded-full border border-background/10 flex items-center justify-center hover:bg-primary-glow hover:text-foreground transition-smooth"
+      className="h-10 w-10 rounded-full border border-primary-glow/20 flex items-center justify-center hover:bg-primary-glow hover:text-foreground transition-smooth"
     >
       {icon}
     </a>
