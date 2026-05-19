@@ -112,6 +112,8 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
                         <img
                           src={p.image}
                           alt={p.name}
+                          width={40}
+                          height={40}
                           loading="lazy"
                           className="h-full w-full object-cover"
                         />

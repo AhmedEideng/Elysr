@@ -34,6 +34,8 @@ function ArticleCard({ a }: { a: Article }) {
           <img
             src={a.image}
             alt={a.title}
+            width={640}
+            height={360}
             loading="lazy"
             onError={() => setIsError(true)}
             className="h-full w-full object-cover group-hover:scale-105 transition-smooth duration-500"

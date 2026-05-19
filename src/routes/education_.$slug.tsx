@@ -43,6 +43,8 @@ function RelatedCard({ a }: { a: Article }) {
           <img
             src={a.image}
             alt={a.title}
+            width={800}
+            height={450}
             loading="lazy"
             onError={() => setIsError(true)}
             className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
@@ -87,6 +89,8 @@ function ArticlePage() {
           <img
             src={article.image}
             alt={article.title}
+            width={800}
+            height={450}
             loading="eager"
             onError={() => setIsMainImageError(true)}
             className="h-full w-full object-cover"

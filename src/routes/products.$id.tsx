@@ -147,6 +147,8 @@ function ProductPage() {
             <img
               src={product.image}
               alt={product.name}
+              width={600}
+              height={600}
               loading="eager"
               decoding="async"
               onLoad={() => setImageLoaded(true)}
