@@ -42,7 +42,7 @@ export function getShippingLabel(governorate: string): string {
   return "وجه قبلي";
 }
 
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbx8WcLzjb8kaEe7-cjanJ4xI1fOuPc97V7UxKhqVNF8dWBx4CfEhvqqvoSqR5VhVTVG/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzs2SUXCszQSSn--echoV52G-VPzgdzD9RtPsgnXJC8xksE-9vnc3Zz-HM-otQWeD5Z/exec";
 
 /** إرسال للشيت في الخلفية - لا ننتظر الرد */
 export function submitToGoogleSheets(data: Record<string, unknown>) {
