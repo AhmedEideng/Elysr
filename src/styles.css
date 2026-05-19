@@ -94,12 +94,24 @@
 }
 
 @layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
   html {
-    overflow-y: scroll;
-    overflow-x: hidden;
     direction: rtl;
     scroll-behavior: smooth;
+    overflow-x: hidden;
+    max-width: 100%;
   }
+
+  body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
   * {
     border-color: var(--color-border);
   }
