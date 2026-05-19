@@ -19,7 +19,7 @@ function OrderConfirmedPage() {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-12 md:py-16 max-w-2xl">
+    <div className="container mx-auto px-4 overflow-x-hidden py-12 md:py-16 max-w-2xl">
       <div className="text-center space-y-6">
         <div className="inline-flex h-24 w-24 items-center justify-center rounded-full bg-gradient-brand text-primary-foreground mx-auto animate-in zoom-in-50 duration-500">
           <CheckCircle2 className="h-14 w-14" strokeWidth={2.5} />

@@ -125,7 +125,7 @@ function WholesalePage() {
             <textarea value={form.message} maxLength={500} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={3} className="w-full rounded-xl border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary resize-none" />
           </label>
 
-          <button type="submit" disabled={submitting} className="w-full rounded-full bg-[#25D366] hover:bg-[#1ebd57] px-6 py-3.5 font-bold text-white shadow-elegant transition-smooth hover:scale-[1.02] disabled:opacity-60 flex items-center justify-center gap-2">
+          <button type="submit" disabled={submitting} className="w-full rounded-full bg-[#25D366] hover:bg-[#1ebd57] px-6 py-3.5 font-bold text-white shadow-elegant transition-smooth  disabled:opacity-60 flex items-center justify-center gap-2">
             <MessageCircle className="h-5 w-5" />إرسال عبر واتساب
           </button>
         </form>

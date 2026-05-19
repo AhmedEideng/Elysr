@@ -104,7 +104,7 @@ function CartPage() {
   );
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-6 md:py-10">
+    <div className="container mx-auto px-3 sm:px-4 py-6 md:py-10 lg:overflow-x-visible overflow-x-hidden">
       {showPrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
           <div className="w-full max-w-md rounded-3xl bg-card p-6 shadow-2xl animate-in zoom-in-95">
@@ -125,7 +125,7 @@ function CartPage() {
           {items.map((it) => {
             const atLimit = isStockLimitReached(it.id);
             return (
-              <div key={it.id} className="rounded-2xl border bg-card p-3 sm:p-4 transition-smooth hover:shadow-md">
+              <div key={it.id} className="rounded-2xl border bg-card p-3 sm:p-4 transition-smooth">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-xl border bg-muted">
@@ -200,7 +200,7 @@ function CartPage() {
             </div>
           </div>
           <button onClick={checkout} disabled={submitting}
-            className={`w-full rounded-full px-5 sm:px-6 py-3.5 sm:py-4 font-bold text-white shadow-elegant transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-2 text-sm sm:text-base ${method === "whatsapp" ? "bg-[#25D366] hover:bg-[#1ebd57] shadow-[#25d366]/20" : "bg-gradient-brand shadow-primary/20"}`}>
+            className={`w-full rounded-full px-5 sm:px-6 py-3.5 sm:py-4 font-bold text-white shadow-elegant transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-2 text-sm sm:text-base ${method === "whatsapp" ? "bg-[#25D366] hover:bg-[#1ebd57] shadow-[#25d366]/20" : "bg-gradient-brand shadow-primary/20"}`}>
             {submitting ? (<><Loader2 className="h-5 w-5 animate-spin" />جاري الإرسال...</>)
             : method === "whatsapp" ? (<><MessageCircle className="h-5 w-5" />تأكيد عبر واتساب</>)
             : (<><CheckCircle className="h-5 w-5" />تأكيد الطلب المباشر</>)}
