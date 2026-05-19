@@ -48,14 +48,14 @@ export function ProductCard({ product }: { product: Product }) {
               decoding="async"
               width={400}
               height={400}
-              className={`h-full w-full object-cover transition-all duration-700 group-hover:scale-110 ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"}`}
+              className={`h-full w-full object-cover transition-all duration-700  ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"}`}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageFailed(true)}
             />
           </div>
         ) : (
           <div
-            className="aspect-square w-full bg-gradient-soft flex items-center justify-center text-7xl transition-all duration-700 group-hover:scale-110"
+            className="aspect-square w-full bg-gradient-soft flex items-center justify-center text-7xl transition-all duration-700 "
             aria-label={product.name}
           >
             {product.emoji}
@@ -102,7 +102,7 @@ export function ProductCard({ product }: { product: Product }) {
             className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl text-primary-foreground transition-all duration-300 shadow-lg active:scale-95 ${
               product.stock <= 0
                 ? "bg-muted text-muted-foreground cursor-not-allowed shadow-none"
-                : "bg-gradient-brand hover:scale-110 hover:rotate-3"
+                : "bg-gradient-brand hover:brightness-110"
             }`}
             aria-label={product.stock <= 0 ? "نفد المخزون" : "أضف للسلة"}
           >

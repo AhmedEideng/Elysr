@@ -47,7 +47,7 @@ function RelatedCard({ a }: { a: Article }) {
             height={450}
             loading="lazy"
             onError={() => setIsError(true)}
-            className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
+            className="w-full h-full object-cover group transition-smooth"
           />
         </div>
       ) : (

@@ -95,7 +95,8 @@
 
 @layer base {
   html {
-    overflow-x: clip;
+    overflow-y: scroll;
+    overflow-x: hidden;
     direction: rtl;
     scroll-behavior: smooth;
   }
@@ -138,7 +139,6 @@
   }
 
   .skeleton {
-    position: relative;
     overflow: hidden;
     background-color: oklch(0.94 0.01 230);
   }

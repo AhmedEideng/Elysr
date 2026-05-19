@@ -38,7 +38,7 @@ function ArticleCard({ a }: { a: Article }) {
             height={360}
             loading="lazy"
             onError={() => setIsError(true)}
-            className="h-full w-full object-cover group-hover:scale-105 transition-smooth duration-500"
+            className="h-full w-full object-cover transition-smooth duration-500"
           />
         </div>
       ) : (
