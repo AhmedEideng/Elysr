@@ -76,7 +76,7 @@ function CartPage() {
         setSubmitting(false);
         setShowPrompt(true);
       } else {
-        toast.success(, { duration: 4000 });
+        toast.success("✅ تم استلام طلبك بنجاح!", { duration: 4000 });
         setSubmitting(false);
         clear();
         navigate({ to: "/order-confirmed" });
