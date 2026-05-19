@@ -7,7 +7,7 @@ import {
 import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/data/product-types";
 import { waLink, buildOrderMessage } from "@/lib/whatsapp";
-import { isValidEgyptianPhone, generateOrderId, sanitizeInput } from "@/lib/utils";
+import { isValidEgyptianPhone, sanitizeInput } from "@/lib/utils";
 import { EGYPT_GOVERNORATES, submitToGoogleSheets } from "@/lib/governorates";
 import { toast } from "sonner";
 
@@ -37,7 +37,7 @@ function CartPage() {
     return () => { cancelled = true; };
   }, [items]);
 
-  const checkout = async () => {
+  const checkout = () => {
     if (items.length === 0) { toast.error("السلة فارغة"); return; }
     if (!customer.name || !customer.phone || !customer.governorate || !customer.address) {
       toast.error("يرجى ملء جميع الحقول المطلوبة (*)"); return;
@@ -51,7 +51,6 @@ function CartPage() {
     }
 
     setSubmitting(true);
-    const orderId = generateOrderId();
     const sc = {
       name: sanitizeInput(customer.name, 100),
       phone: sanitizeInput(customer.phone, 15),
@@ -60,27 +59,32 @@ function CartPage() {
       notes: customer.notes ? sanitizeInput(customer.notes, 300) : "",
     };
 
-    // إرسال إلى Google Sheets مع ذكر الطريقة
-    await submitToGoogleSheets({
-      orderId, orderType: "cart",
+    // إرسال إلى Google Sheets والحصول على رقم الطلب التسلسلي
+    submitToGoogleSheets({
+      orderType: "cart",
       paymentMethod: method === "whatsapp" ? "واتساب" : "طلب مباشر",
       customerName: sc.name, customerPhone: sc.phone,
       governorate: sc.governorate, address: sc.address, notes: sc.notes,
       items: items.map((i) => ({ name: i.name, qty: i.qty, price: i.price })), total,
-    });
+    }).then((result) => {
+      const orderId = result.orderId || "#EL-0000";
 
-    if (method === "whatsapp") {
-      const msg = buildOrderMessage(
-        items.map((i) => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })), sc, orderId);
-      window.open(waLink(msg), "_blank", "noopener,noreferrer");
+      if (method === "whatsapp") {
+        const msg = buildOrderMessage(
+          items.map((i) => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })), sc, orderId);
+        window.open(waLink(msg), "_blank", "noopener,noreferrer");
+        setSubmitting(false);
+        setShowPrompt(true);
+      } else {
+        toast.success(, { duration: 4000 });
+        setSubmitting(false);
+        clear();
+        navigate({ to: "/order-confirmed" });
+      }
+    }).catch(() => {
+      toast.error("فشل الاتصال. حاول مجدداً.");
       setSubmitting(false);
-      setShowPrompt(true);
-    } else {
-      toast.success("✅ تم استلام طلبك بنجاح! سنتواصل معك قريباً.", { duration: 4000 });
-      setSubmitting(false);
-      clear();
-      navigate({ to: "/order-confirmed" });
-    }
+    });
   };
 
   if (items.length === 0) return (

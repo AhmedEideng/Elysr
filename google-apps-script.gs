@@ -1,21 +1,14 @@
 /**
  * Elysr Medical — Google Sheets Webhook
- * يستقبل طلبات السلة ويكتبها في الشيت
- *
- * للنشر:
- * 1. افتح Google Sheet
- * 2. Extensions > Apps Script
- * 3. الصق الكود كاملاً
- * 4. Deploy > New Deployment > Web App
- *    • Execute as: Me
- *    • Who has access: Anyone
- * 5. انسخ الرابط وضعه في governorates.ts
+ * يستقبل طلبات السلة ويكتبها في الشيت برقم تسلسلي
  */
 
 function doPost(e) {
   try {
     const data = JSON.parse(e.parameter.data);
     const sheet = getOrCreateSheet("الطلبات");
+    const nextNum = sheet.getLastRow();
+    const orderId = "#EL-" + ("000" + nextNum).slice(-4);
 
     const itemsText = (data.items || []).map(function (it) {
       return it.name + " × " + it.qty + " = " + (it.price * it.qty) + " ج.م";
@@ -23,7 +16,7 @@ function doPost(e) {
 
     sheet.appendRow([
       now(),
-      data.orderId || "",
+      orderId,
       data.customerName || "",
       data.customerPhone || "",
       data.governorate || "",
@@ -34,19 +27,19 @@ function doPost(e) {
       data.paymentMethod || "واتساب"
     ]);
 
-    return json({ success: true });
+    return json({ success: true, orderId: orderId });
   } catch (err) {
     return json({ success: false, error: err.toString() });
   }
 }
 
 function doGet() {
-  // إنشاء الشيت فوراً عند أول زيارة لتظهر الأعمدة
-  const sheet = getOrCreateSheet("الطلبات");
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ordersSheet = ss.getSheetByName("الطلبات");
   return json({
     status: "✅ Elysr Webhook Active",
-    version: "5.2",
-    orders: sheet.getLastRow() - 1 + " طلب"
+    version: "6.0",
+    orders: ordersSheet ? ordersSheet.getLastRow() - 1 + " طلب" : "لم ينشأ بعد"
   });
 }
 
@@ -71,7 +64,6 @@ function getOrCreateSheet(name) {
 }
 
 function now() {
-  // UTC+3 (توقيت القاهرة)
   const d = new Date();
   const cairo = new Date(d.getTime() + 3 * 60 * 60 * 1000);
   const h = cairo.getUTCHours();

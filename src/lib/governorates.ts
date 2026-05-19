@@ -15,11 +15,13 @@ const SHEET_URL = "https://script.google.com/macros/s/AKfycbwtH56JwMJXXG1EjCD5nH
 
 export async function submitToGoogleSheets(data: Record<string, unknown>) {
   try {
-    await fetch(SHEET_URL, {
+    const res = await fetch(SHEET_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ data: JSON.stringify(data) }),
     });
+    const json = await res.json();
+    return { success: json.success, orderId: json.orderId as string };
     return { success: true };
   } catch (err) {
     console.error("Google Sheets:", err);
