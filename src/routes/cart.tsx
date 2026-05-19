@@ -104,7 +104,7 @@ function CartPage() {
   );
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-6 md:py-10 ">
+    <div className="w-full max-w-full mx-auto px-3 sm:px-4 py-6 md:py-10 overflow-hidden">
       {showPrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
           <div className="w-full max-w-md rounded-3xl bg-card p-6 shadow-2xl animate-in zoom-in-95">
