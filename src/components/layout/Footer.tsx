@@ -140,23 +140,13 @@ export function Footer() {
         </div>
       </div>
 
-      {/* الشريط السفلي: الحقوق وطرق الدفع */}
+      {/* الشريط السفلي: الحقوق */}
       <div className="border-t border-primary-glow/20 py-8 bg-foreground">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-right">
             <p className="text-xs text-background/40">
               © {new Date().getFullYear()} {COMPANY.name}. جميع الحقوق محفوظة لـ {COMPANY.nameEn}
             </p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-3 opacity-30 grayscale hover:opacity-100 hover:grayscale-0 transition-smooth">
-            <div className="bg-primary-glow/15 px-2 py-1 rounded-md text-[10px] font-bold">VISA</div>
-            <div className="bg-primary-glow/15 px-2 py-1 rounded-md text-[10px] font-bold">
-              MASTERCARD
-            </div>
-            <div className="bg-primary-glow/15 px-2 py-1 rounded-md text-[10px] font-bold">MEEZA</div>
-            <div className="bg-primary-glow/15 px-2 py-1 rounded-md text-[10px] font-bold">VALU</div>
-            <div className="bg-primary-glow/15 px-2 py-1 rounded-md text-[10px] font-bold">COD</div>
           </div>
 
           <div className="flex gap-6">
