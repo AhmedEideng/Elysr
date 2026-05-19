@@ -11,7 +11,7 @@ export const EGYPT_GOVERNORATES = [
 
 export type Governorate = (typeof EGYPT_GOVERNORATES)[number];
 
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbwtH56JwMJXXG1EjCD5nHGW8tY0kkJOFibQolQleFUlyVRL_N-mTta9dDNgHusl_Zc/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbx8WcLzjb8kaEe7-cjanJ4xI1fOuPc97V7UxKhqVNF8dWBx4CfEhvqqvoSqR5VhVTVG/exec";
 
 export async function submitToGoogleSheets(data: Record<string, unknown>) {
   try {
