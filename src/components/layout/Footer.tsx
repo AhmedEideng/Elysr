@@ -44,11 +44,11 @@ const supportLinks = [
 
 export function Footer() {
   return (
-    <footer className="mt-20 bg-foreground text-background">
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid gap-12 lg:grid-cols-4 md:grid-cols-2">
+    <footer className="mt-12 bg-foreground text-background">
+      <div className="container mx-auto px-4 py-10">
+        <div className="grid gap-8 lg:grid-cols-4 md:grid-cols-2">
           {/* العمود الأول: البراند */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             <Link to="/" className="inline-flex items-center gap-3">
               <img
                 src={logo}
@@ -75,11 +75,11 @@ export function Footer() {
 
           {/* العمود الثاني: الأقسام */}
           <div>
-            <h3 className="mb-6 flex items-center gap-2 text-lg font-bold">
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
               <span className="h-6 w-1 rounded-full bg-primary-glow" />
               أقسام المتجر
             </h3>
-            <ul className="space-y-4">
+            <ul className="space-y-3">
               {shopLinks.map((link) => (
                 <li key={link.to}>
                   <Link
@@ -95,11 +95,11 @@ export function Footer() {
 
           {/* العمود الثالث: المكتبة العلمية */}
           <div>
-            <h3 className="mb-6 flex items-center gap-2 text-lg font-bold">
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
               <span className="h-6 w-1 rounded-full bg-primary-glow" />
               المكتبة العلمية
             </h3>
-            <ul className="space-y-4">
+            <ul className="space-y-3">
               {libraryLinks.map((link) => (
                 <li key={link.label}>
                   <Link
@@ -117,15 +117,15 @@ export function Footer() {
 
           {/* العمود الرابع: معلومات التواصل */}
           <div>
-            <h3 className="mb-6 flex items-center gap-2 text-lg font-bold">
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
               <span className="h-6 w-1 rounded-full bg-primary-glow" />
               تواصل معنا
             </h3>
-            <ul className="space-y-4">
+            <ul className="space-y-3">
               <ContactItem icon={<Mail className="h-4 w-4" />} text={COMPANY.email} />
               <ContactItem icon={<MapPin className="h-4 w-4" />} text={COMPANY.address} />
 
-              <li className="pt-2">
+              <li className="pt-1">
                 <a
                   href={waLink("مرحباً، أرغب في الاستفسار")}
                   target="_blank"
@@ -141,7 +141,7 @@ export function Footer() {
       </div>
 
       {/* الشريط السفلي: الحقوق */}
-      <div className="border-t border-primary-glow/20 py-8 bg-foreground">
+      <div className="border-t border-primary-glow/20 py-5 bg-foreground">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-right">
             <p className="text-xs text-background/40">
