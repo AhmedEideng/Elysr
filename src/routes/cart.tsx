@@ -59,32 +59,31 @@ function CartPage() {
       notes: customer.notes ? sanitizeInput(customer.notes, 300) : "",
     };
 
-    // إرسال إلى Google Sheets والحصول على رقم الطلب التسلسلي
+    // رقم طلب محلي سريع
+    const orderId = "#EL-" + Date.now().toString(36).toUpperCase().slice(-6);
+
+    // إرسال للشيت في الخلفية (لا ننتظر الرد)
     submitToGoogleSheets({
+      orderId,
       orderType: "cart",
       paymentMethod: method === "whatsapp" ? "واتساب" : "طلب مباشر",
       customerName: sc.name, customerPhone: sc.phone,
       governorate: sc.governorate, address: sc.address, notes: sc.notes,
       items: items.map((i) => ({ name: i.name, qty: i.qty, price: i.price })), total,
-    }).then((result) => {
-      const orderId = result.orderId || "#EL-0000";
-
-      if (method === "whatsapp") {
-        const msg = buildOrderMessage(
-          items.map((i) => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })), sc, orderId);
-        window.open(waLink(msg), "_blank", "noopener,noreferrer");
-        setSubmitting(false);
-        setShowPrompt(true);
-      } else {
-        toast.success("✅ تم استلام طلبك بنجاح!", { duration: 4000 });
-        setSubmitting(false);
-        clear();
-        navigate({ to: "/order-confirmed" });
-      }
-    }).catch(() => {
-      toast.error("فشل الاتصال. حاول مجدداً.");
-      setSubmitting(false);
     });
+
+    if (method === "whatsapp") {
+      const msg = buildOrderMessage(
+        items.map((i) => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })), sc, orderId);
+      window.open(waLink(msg), "_blank", "noopener,noreferrer");
+      setSubmitting(false);
+      setShowPrompt(true);
+    } else {
+      toast.success("✅ تم استلام طلبك بنجاح!", { duration: 4000 });
+      setSubmitting(false);
+      clear();
+      navigate({ to: "/order-confirmed" });
+    }
   };
 
   if (items.length === 0) return (
