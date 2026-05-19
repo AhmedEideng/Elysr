@@ -13,21 +13,16 @@ export type Governorate = (typeof EGYPT_GOVERNORATES)[number];
 
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbx8WcLzjb8kaEe7-cjanJ4xI1fOuPc97V7UxKhqVNF8dWBx4CfEhvqqvoSqR5VhVTVG/exec";
 
-export async function submitToGoogleSheets(data: Record<string, unknown>) {
-  try {
-    const res = await fetch(SHEET_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ data: JSON.stringify(data) }),
-    });
-    const json = await res.json();
-    return { success: json.success, orderId: json.orderId as string };
-    return { success: true };
-  } catch (err) {
+/** إرسال للشيت في الخلفية - لا ننتظر الرد */
+export function submitToGoogleSheets(data: Record<string, unknown>) {
+  fetch(SHEET_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ data: JSON.stringify(data) }),
+  }).catch((err) => {
     console.error("Google Sheets:", err);
     logOrderLocally(data);
-    return { success: false };
-  }
+  });
 }
 
 function logOrderLocally(data: Record<string, unknown>) {

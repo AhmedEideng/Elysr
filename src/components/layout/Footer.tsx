@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   MessageCircle,
@@ -175,7 +176,7 @@ export function Footer() {
   );
 }
 
-function SocialLink({ icon, href }: { icon: React.ReactNode; href: string }) {
+function SocialLink({ icon, href }: { icon: ReactNode; href: string }) {
   return (
     <a
       href={href}
@@ -186,7 +187,7 @@ function SocialLink({ icon, href }: { icon: React.ReactNode; href: string }) {
   );
 }
 
-function ContactItem({ icon, text }: { icon: React.ReactNode; text: string }) {
+function ContactItem({ icon, text }: { icon: ReactNode; text: string }) {
   return (
     <li className="flex items-center gap-3 text-sm text-background/60">
       <span className="text-primary-glow">{icon}</span>
