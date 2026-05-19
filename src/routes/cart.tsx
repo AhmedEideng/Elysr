@@ -125,11 +125,11 @@ function CartPage() {
           {items.map((it) => {
             const atLimit = isStockLimitReached(it.id);
             return (
-              <div key={it.id} className="w-full rounded-2xl border bg-card p-3 sm:p-4 transition-smooth">
+              <div key={it.id} className="w-full rounded-2xl border bg-card p-2.5 sm:p-4 transition-smooth">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-xl border bg-muted">
-                      {it.image ? (<img src={it.image} alt={it.name} className="h-full w-full object-cover" width={64} height={64} loading="lazy" />)
+                  <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                    <div className="h-12 w-12 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-xl border bg-muted">
+                      {it.image ? (<img src={it.image} alt={it.name} className="h-full w-full object-cover" width={48} height={48} loading="lazy" />)
                       : (<div className="h-full w-full flex items-center justify-center text-2xl">{it.emoji}</div>)}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -138,7 +138,7 @@ function CartPage() {
                       {atLimit && <span className="text-[10px] text-amber-600 font-bold">الحد الأقصى المتاح</span>}
                     </div>
                   </div>
-                  <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-3 shrink-0">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-2.5 shrink-0">
                     <div className="flex items-center rounded-full border bg-background">
                       <button onClick={() => setQty(it.id, it.qty - 1)} className="p-1.5 hover:bg-accent rounded-r-full"><Minus className="h-3.5 w-3.5 sm:h-3 sm:w-3" /></button>
                       <span className="w-7 sm:w-6 text-center text-xs font-bold tabular-nums">{it.qty}</span>
@@ -153,16 +153,16 @@ function CartPage() {
           <button onClick={clear} className="text-xs text-muted-foreground hover:text-destructive px-2">تفريغ السلة</button>
         </div>
 
-        <aside className="w-full rounded-3xl border bg-card p-5 sm:p-6 h-fit shadow-card space-y-5 lg:sticky lg:top-24 border-primary/10">
+        <aside className="w-full rounded-3xl border bg-card p-4 sm:p-6 h-fit shadow-card space-y-5 lg:sticky lg:top-24 border-primary/10">
           <h2 className="text-lg sm:text-xl font-bold">طريقة إتمام الطلب</h2>
-          <div className="grid grid-cols-2 gap-2 p-1.5 bg-muted rounded-2xl">
+          <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-muted rounded-2xl">
             <button onClick={() => setMethod("whatsapp")} className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all duration-300 ${method === "whatsapp" ? "bg-background shadow-md text-[#25D366] scale-105" : "text-muted-foreground hover:bg-background/50"}`}><MessageCircle className="h-4 w-4" /> واتساب</button>
             <button onClick={() => setMethod("direct")} className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all duration-300 ${method === "direct" ? "bg-background shadow-md text-primary scale-105" : "text-muted-foreground hover:bg-background/50"}`}><Package className="h-4 w-4" /> طلب مباشر</button>
           </div>
           <div className="rounded-xl bg-muted/50 p-3 text-[11px] text-muted-foreground">
             {method === "whatsapp" ? "سيُفتح واتساب برسالة جاهزة. أرسلها ثم عد هنا لتأكيد الطلب." : "سيُرسل طلبك مباشرة. سنتواصل معك لتأكيد التفاصيل."}
           </div>
-          <div className="space-y-3.5">
+          <div className="space-y-3">
             <Inp label="الاسم *" placeholder="اكتب اسمك هنا" value={customer.name} onChange={(v) => setCustomer({ ...customer, name: v })} maxLength={100} />
             <Inp label="رقم الهاتف *" placeholder="01xxxxxxxxx" value={customer.phone} onChange={(v) => setCustomer({ ...customer, phone: v })} type="tel" maxLength={11} />
             <label className="block">
@@ -200,7 +200,7 @@ function CartPage() {
             </div>
           </div>
           <button onClick={checkout} disabled={submitting}
-            className={`w-full rounded-full px-5 sm:px-6 py-3.5 sm:py-4 font-bold text-white shadow-elegant transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-2 text-sm sm:text-base ${method === "whatsapp" ? "bg-[#25D366] hover:bg-[#1ebd57] shadow-[#25d366]/20" : "bg-gradient-brand shadow-primary/20"}`}>
+            className={`w-full rounded-full px-4 sm:px-6 py-3 sm:py-4 font-bold text-white shadow-elegant transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-2 text-sm sm:text-base ${method === "whatsapp" ? "bg-[#25D366] hover:bg-[#1ebd57] shadow-[#25d366]/20" : "bg-gradient-brand shadow-primary/20"}`}>
             {submitting ? (<><Loader2 className="h-5 w-5 animate-spin" />جاري الإرسال...</>)
             : method === "whatsapp" ? (<><MessageCircle className="h-5 w-5" />تأكيد عبر واتساب</>)
             : (<><CheckCircle className="h-5 w-5" />تأكيد الطلب المباشر</>)}
