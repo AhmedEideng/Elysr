@@ -8,7 +8,7 @@ import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/data/product-types";
 import { waLink, buildOrderMessage } from "@/lib/whatsapp";
 import { isValidEgyptianPhone, sanitizeInput } from "@/lib/utils";
-import { EGYPT_GOVERNORATES, submitToGoogleSheets } from "@/lib/governorates";
+import { EGYPT_GOVERNORATES, submitToGoogleSheets, getShippingCost, getShippingLabel } from "@/lib/governorates";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/cart")({
@@ -24,6 +24,10 @@ function CartPage() {
   const [customer, setCustomer] = useState({ name: "", phone: "", governorate: "", address: "", notes: "" });
   const [method, setMethod] = useState<OrderMethod>("whatsapp");
   const [submitting, setSubmitting] = useState(false);
+
+  // 🚚 حساب مصاريف الشحن حسب المحافظة المختارة
+  const shipping = customer.governorate ? getShippingCost(customer.governorate) : 0;
+  const grandTotal = total + shipping;
   const [showPrompt, setShowPrompt] = useState(false);
   const [imageById, setImageById] = useState<Record<string, string | undefined>>({});
 
@@ -69,12 +73,15 @@ function CartPage() {
       paymentMethod: method === "whatsapp" ? "واتساب" : "طلب مباشر",
       customerName: sc.name, customerPhone: sc.phone,
       governorate: sc.governorate, address: sc.address, notes: sc.notes,
-      items: items.map((i) => ({ name: i.name, qty: i.qty, price: i.price })), total,
+      items: items.map((i) => ({ name: i.name, qty: i.qty, price: i.price })),
+      subtotal: total,
+      shipping,
+      total: grandTotal,
     });
 
     if (method === "whatsapp") {
       const msg = buildOrderMessage(
-        items.map((i) => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })), sc, orderId);
+        items.map((i) => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })), sc, orderId, shipping);
       window.open(waLink(msg), "_blank", "noopener,noreferrer");
       setSubmitting(false);
       setShowPrompt(true);
@@ -174,9 +181,23 @@ function CartPage() {
               <textarea value={customer.notes} placeholder="أي تفاصيل أخرى..." onChange={(e) => setCustomer({ ...customer, notes: e.target.value })} maxLength={300} rows={2} className="w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all resize-none" />
             </label>
           </div>
-          <div className="border-t pt-4 text-base sm:text-lg font-bold flex justify-between">
-            <span>الإجمالي</span>
-            <span className="text-primary">{formatPrice(total)}</span>
+          <div className="border-t pt-4 space-y-2">
+            <div className="text-sm flex justify-between">
+              <span className="text-muted-foreground">المجموع الفرعي</span>
+              <span>{formatPrice(total)}</span>
+            </div>
+            {shipping > 0 && (
+              <div className="text-sm flex justify-between">
+                <span className="text-muted-foreground">
+                  🚚 شحن — {getShippingLabel(customer.governorate)}
+                </span>
+                <span>{formatPrice(shipping)}</span>
+              </div>
+            )}
+            <div className="text-base sm:text-lg font-bold flex justify-between pt-2 border-t">
+              <span>الإجمالي</span>
+              <span className="text-primary">{formatPrice(grandTotal)}</span>
+            </div>
           </div>
           <button onClick={checkout} disabled={submitting}
             className={`w-full rounded-full px-5 sm:px-6 py-3.5 sm:py-4 font-bold text-white shadow-elegant transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-2 text-sm sm:text-base ${method === "whatsapp" ? "bg-[#25D366] hover:bg-[#1ebd57] shadow-[#25d366]/20" : "bg-gradient-brand shadow-primary/20"}`}>

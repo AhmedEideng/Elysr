@@ -11,7 +11,6 @@ export const COMPANY = {
 export const waLink = (message: string) =>
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
-// 🔧 بناء رسالة الطلب مع تنظيف المدخلات لمنع الحقن
 export const buildOrderMessage = (
   items: { id?: string; name: string; qty: number; price: number }[],
   customer?: {
@@ -22,6 +21,7 @@ export const buildOrderMessage = (
     notes?: string;
   },
   orderId?: string,
+  shipping?: number,
 ) => {
   const lines: string[] = [];
   lines.push("🛒 *طلب جديد من موقع اليسر ميديكال*");
@@ -38,7 +38,6 @@ export const buildOrderMessage = (
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
   items.forEach((it, i) => {
-    // 🔧 تنظيف اسم المنتج
     const safeName = sanitize(it.name, 150);
     lines.push(`${i + 1}. ${safeName} × ${it.qty} = ${it.price * it.qty} ج.م`);
     if (it.id && origin) {
@@ -47,13 +46,15 @@ export const buildOrderMessage = (
     lines.push("");
   });
 
-  const total = items.reduce((s, it) => s + it.price * it.qty, 0);
-  lines.push(`💰 *الإجمالي النهائي: ${total} ج.م*`);
+  const subtotal = items.reduce((s, it) => s + it.price * it.qty, 0);
+  if (shipping && shipping > 0) {
+    lines.push(`🚚 مصاريف الشحن: ${shipping} ج.م`);
+  }
+  lines.push(`💰 *الإجمالي النهائي: ${subtotal + (shipping || 0)} ج.م*`);
 
   return lines.join("\n");
 };
 
-// 🔧 دالة تنظيف النصوص — إزالة الرموز الخطرة
 function sanitize(text: string, maxLen: number): string {
   return text
     .replace(/[<>"'&\\*~`|#[\]{}]/g, "")

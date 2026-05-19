@@ -11,6 +11,37 @@ export const EGYPT_GOVERNORATES = [
 
 export type Governorate = (typeof EGYPT_GOVERNORATES)[number];
 
+/**
+ * 🚚 مصاريف الشحن حسب المحافظة
+ */
+const SHIPPING_RATES: Record<string, number> = {
+  القاهرة: 40,
+  الجيزة: 40,
+  // وجه بحري
+  القليوبية: 60, البحيرة: 60, مطروح: 60, دمياط: 60, الدقهلية: 60,
+  الشرقية: 60, الغربية: 60, المنوفية: 60, كفر_الشيخ: 60,
+  الإسماعيلية: 60, السويس: 60, بورسعيد: 60, شمال_سيناء: 60,
+  جنوب_سيناء: 60, البحر_الأحمر: 60, الإسكندرية: 60,
+  // وجه قبلي
+  الفيوم: 75, بني_سويف: 75, المنيا: 75, أسيوط: 75, سوهاج: 75,
+  قنا: 75, الأقصر: 75, أسوان: 75, الوادي_الجديد: 75,
+};
+
+/** 🚚 حساب مصاريف الشحن حسب المحافظة */
+export function getShippingCost(governorate: string): number {
+  // نحول المسافات لشرطات سفلية عشان المفاتيح
+  const key = governorate.replace(/ /g, "_");
+  return SHIPPING_RATES[key] ?? 60; // الافتراضي 60 لو المحافظة مش موجودة
+}
+
+/** 🏷️ وصف منطقة الشحن */
+export function getShippingLabel(governorate: string): string {
+  const cost = getShippingCost(governorate);
+  if (cost === 40) return "القاهرة والجيزة";
+  if (cost === 60) return "وجه بحري";
+  return "وجه قبلي";
+}
+
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbx8WcLzjb8kaEe7-cjanJ4xI1fOuPc97V7UxKhqVNF8dWBx4CfEhvqqvoSqR5VhVTVG/exec";
 
 /** إرسال للشيت في الخلفية - لا ننتظر الرد */
