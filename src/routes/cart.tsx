@@ -104,7 +104,7 @@ function CartPage() {
   );
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-6 md:py-10 max-w-full">
+    <div className="container mx-auto px-3 sm:px-4 py-6 md:py-10 ">
       {showPrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
           <div className="w-full max-w-md rounded-3xl bg-card p-6 shadow-2xl animate-in zoom-in-95">
@@ -133,7 +133,7 @@ function CartPage() {
                       : (<div className="h-full w-full flex items-center justify-center text-2xl">{it.emoji}</div>)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-sm truncate">{it.name}</div>
+                      <div className="font-semibold text-sm truncate max-w-full">{it.name}</div>
                       <div className="text-primary font-bold text-sm">{formatPrice(it.price)}</div>
                       {atLimit && <span className="text-[10px] text-amber-600 font-bold">الحد الأقصى المتاح</span>}
                     </div>
