@@ -104,7 +104,7 @@ function CartPage() {
   );
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-6 md:py-10 lg:overflow-x-visible overflow-x-hidden">
+    <div className="container mx-auto px-3 sm:px-4 py-6 md:py-10 max-w-full">
       {showPrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
           <div className="w-full max-w-md rounded-3xl bg-card p-6 shadow-2xl animate-in zoom-in-95">
@@ -125,7 +125,7 @@ function CartPage() {
           {items.map((it) => {
             const atLimit = isStockLimitReached(it.id);
             return (
-              <div key={it.id} className="rounded-2xl border bg-card p-3 sm:p-4 transition-smooth">
+              <div key={it.id} className="w-full rounded-2xl border bg-card p-3 sm:p-4 transition-smooth">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-xl border bg-muted">
@@ -153,7 +153,7 @@ function CartPage() {
           <button onClick={clear} className="text-xs text-muted-foreground hover:text-destructive px-2">تفريغ السلة</button>
         </div>
 
-        <aside className="rounded-3xl border bg-card p-5 sm:p-6 h-fit shadow-card space-y-5 lg:sticky lg:top-24 border-primary/10">
+        <aside className="w-full rounded-3xl border bg-card p-5 sm:p-6 h-fit shadow-card space-y-5 lg:sticky lg:top-24 border-primary/10">
           <h2 className="text-lg sm:text-xl font-bold">طريقة إتمام الطلب</h2>
           <div className="grid grid-cols-2 gap-2 p-1.5 bg-muted rounded-2xl">
             <button onClick={() => setMethod("whatsapp")} className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all duration-300 ${method === "whatsapp" ? "bg-background shadow-md text-[#25D366] scale-105" : "text-muted-foreground hover:bg-background/50"}`}><MessageCircle className="h-4 w-4" /> واتساب</button>

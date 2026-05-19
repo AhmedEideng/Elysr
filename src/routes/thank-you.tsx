@@ -29,7 +29,7 @@ function ThankYouPage() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="container mx-auto px-4 overflow-x-hidden py-12 md:py-16 max-w-2xl">
+    <div className="container mx-auto px-4 py-12 md:py-16 max-w-2xl">
       <div className="text-center space-y-6">
         {/* أيقونة النجاح */}
         <div className="inline-flex h-24 w-24 items-center justify-center rounded-full bg-green-100 text-green-600 mx-auto animate-in zoom-in-50 duration-500">
