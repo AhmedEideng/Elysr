@@ -7,7 +7,7 @@ const pageview = (url: string) => {
     typeof window !== "undefined" &&
     (window as unknown as { gtag: (...args: unknown[]) => void }).gtag
   ) {
-    (window as unknown as { gtag: (...args: unknown[]) => void }).gtag("config", "G-XXXXXXXXXX", {
+    (window as unknown as { gtag: (...args: unknown[]) => void }).gtag("config", "G-V3X7Q3D0RR", {
       page_path: url,
     });
   }
