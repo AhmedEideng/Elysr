@@ -22,6 +22,8 @@ function doPost(e) {
       data.governorate || "",
       data.address || "",
       itemsText,
+      data.subtotal || 0,
+      data.shipping || 0,
       data.total || 0,
       data.notes || "",
       data.paymentMethod || "واتساب"
@@ -38,7 +40,7 @@ function doGet() {
   const ordersSheet = ss.getSheetByName("الطلبات");
   return json({
     status: "✅ Elysr Webhook Active",
-    version: "6.0",
+    version: "6.1",
     orders: ordersSheet ? ordersSheet.getLastRow() - 1 + " طلب" : "لم ينشأ بعد"
   });
 }
@@ -50,15 +52,15 @@ function getOrCreateSheet(name) {
     sheet = ss.insertSheet(name);
     sheet.appendRow([
       "التاريخ", "رقم الطلب", "اسم العميل", "الهاتف",
-      "المحافظة", "العنوان", "المنتجات", "الإجمالي (ج.م)",
-      "ملاحظات", "طريقة الدفع"
+      "المحافظة", "العنوان", "المنتجات", "المجموع الفرعي",
+      "الشحن", "الإجمالي", "ملاحظات", "طريقة الدفع"
     ]);
     sheet.setFrozenRows(1);
-    sheet.getRange(1, 1, 1, 10)
+    sheet.getRange(1, 1, 1, 12)
       .setFontWeight("bold")
       .setBackground("#1a73e8")
       .setFontColor("#ffffff");
-    sheet.autoResizeColumns(1, 10);
+    sheet.autoResizeColumns(1, 12);
   }
   return sheet;
 }
