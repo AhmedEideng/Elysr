@@ -95,7 +95,7 @@
 
 @layer base {
   html {
-    overflow-x: hidden;
+    overflow-x: clip;
     direction: rtl;
     scroll-behavior: smooth;
   }
@@ -103,7 +103,6 @@
     border-color: var(--color-border);
   }
   body {
-    overflow-x: hidden;
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
