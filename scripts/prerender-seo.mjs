@@ -675,6 +675,11 @@ async function prerender() {
         ${product.ingredients ? `<h2>المكونات</h2><p>${esc(product.ingredients)}</p>` : ""}
         ${product.usage ? `<h2>طريقة الاستخدام</h2><p>${esc(product.usage)}</p>` : ""}
         <p>السعر: ${product.price} ج.م</p>
+        ${
+          productReviews > 0
+            ? `<h2>تقييمات العملاء</h2><p>التقييم العام: ${productRating} من 5 (${productReviews} تقييم)</p>`
+            : ""
+        }
       `;
 
       const html = buildHtml(template, {
