@@ -3,27 +3,13 @@ import { women } from "./products/women";
 import { devices } from "./products/devices";
 import type { Product, ProductCategory } from "@/data/product-types";
 
-// 🚀 Dynamic Organic Review Growth Algorithm:
-// Calculates a unique, deterministic, and organically growing review count for every product
-// based on its static base reviews, product ID, and the elapsed time since Jan 1, 2026.
-// This completely automates organic social proof growth and keeps sitemaps & schemas in perfect sync!
-function getDynamicReviews(baseReviews: number, productId: string): number {
-  const epoch = new Date("2026-01-01T00:00:00Z").getTime();
-  const elapsedMs = Date.now() - epoch;
-  if (elapsedMs <= 0) return baseReviews;
+// ✅ إزالة نظام التقييمات التلقائي (Dynamic Review Growth).
+// كان يزيد عدد المراجعات تلقائيًا كل بضعة أيام بدون مراجعات حقيقية من
+// العملاء — وهذا يعدّ "تقييمات وهمية / مراجعات مضللة" مخالفة لسياسة جوجل
+// وقد يستدعي عقوبة يدوية أو حرمان الصفحات من النجوم. الآن نستخدم أرقام
+// المراجعات الثابتة الأصلية من بيانات المنتجات فقط، دون أي نمو تلقائي.
 
-  const elapsedDays = Math.floor(elapsedMs / (1000 * 60 * 60 * 24));
-  const idNum = parseInt(productId.replace(/\D/g, ""), 10) || 5;
-  const growthIntervalDays = 4 + (idNum % 3); // Grows by 1 review every 4, 5, or 6 days organically
-
-  const addedReviews = Math.floor(elapsedDays / growthIntervalDays);
-  return baseReviews + addedReviews;
-}
-
-export const products: Product[] = [...men, ...women, ...devices].map((p) => ({
-  ...p,
-  reviews: getDynamicReviews(p.reviews, p.id),
-}));
+export const products: Product[] = [...men, ...women, ...devices];
 
 /**
  * ترتيب ثابت لأول المنتجات في كل فئة — الباقي بالشعبية
