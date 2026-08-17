@@ -612,7 +612,7 @@
     },
     {
       "source": "/products/hammer-of-thor-herbal-supplement",
-      "destination": "/products/hammer-of-thor-capsules",
+      "destination": "/products/men",
       "permanent": true
     },
     {
@@ -627,7 +627,7 @@
     },
     {
       "source": "/products/3d-super-green-coffee-30-sachets",
-      "destination": "/products/coffemix-caviar-original-for-women",
+      "destination": "/products/women",
       "permanent": true
     },
     {
@@ -647,17 +647,17 @@
     },
     {
       "source": "/products/overtime-erection-delay",
-      "destination": "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
+      "destination": "/products/men",
       "permanent": true
     },
     {
       "source": "/products/original-black-horse-royal-honey",
-      "destination": "/products/original-black-horse-caviar-code",
+      "destination": "/products/men",
       "permanent": true
     },
     {
       "source": "/products/merson-gel-50-gm",
-      "destination": "/products/sotara-gel-50gm",
+      "destination": "/products/men",
       "permanent": true
     },
     {
@@ -747,12 +747,12 @@
     },
     {
       "source": "/products/sex-women-hot-life-wipes",
-      "destination": "/products/connubial-drops",
+      "destination": "/products/women",
       "permanent": true
     },
     {
       "source": "/products/tiger-power-tablets",
-      "destination": "/products/hammer-of-thor-capsules",
+      "destination": "/products/men",
       "permanent": true
     }
   ]
