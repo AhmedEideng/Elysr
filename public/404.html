@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 — الصفحة غير موجودة | اليسر ميديكال</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="description" content="عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها. تصفح الأقسام الرئيسية في اليسر ميديكال أو تواصل معنا للمساعدة." />
+    <meta name="theme-color" content="#0085ca" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: linear-gradient(180deg, #f5f9fb 0%, #ffffff 100%);
+        color: #0f2740;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+      }
+      .card {
+        max-width: 460px;
+        width: 100%;
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 48px 32px;
+        box-shadow: 0 25px 50px -12px rgba(0, 3, 97, 0.18);
+        border: 1px solid rgba(0, 119, 182, 0.08);
+      }
+      .code {
+        font-size: 88px;
+        font-weight: 900;
+        line-height: 1;
+        background: linear-gradient(135deg, #005f8e, #0077b6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 8px;
+      }
+      h1 {
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 12px;
+        color: #0f2740;
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.8;
+        color: #5b6b7c;
+        margin-bottom: 28px;
+      }
+      .links {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+      }
+      a.btn {
+        display: block;
+        text-decoration: none;
+        padding: 14px 24px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 15px;
+        transition: opacity 0.2s ease;
+      }
+      a.btn-primary {
+        background: linear-gradient(135deg, #005f8e, #0077b6);
+        color: #ffffff;
+      }
+      a.btn-primary:hover { opacity: 0.9; }
+      a.btn-ghost {
+        color: #0077b6;
+        border: 1px solid rgba(0, 119, 182, 0.3);
+      }
+      a.btn-ghost:hover { background: rgba(0, 119, 182, 0.05); }
+      .row { display: flex; gap: 10px; }
+      .row a { flex: 1; }
+      @media (max-width: 420px) {
+        .code { font-size: 72px; }
+        .row { flex-direction: column; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="code">404</div>
+      <h1>عذراً، الصفحة غير موجودة</h1>
+      <p>الصفحة التي تبحث عنها غير متاحة أو تم نقلها أو حذفها. يمكنك العودة إلى الرئيسية أو تصفح الأقسام الرئيسية للموقع.</p>
+      <div class="links">
+        <a class="btn btn-primary" href="/">العودة للرئيسية</a>
+        <div class="row">
+          <a class="btn btn-ghost" href="/products/men">منتجات الرجال</a>
+          <a class="btn btn-ghost" href="/products/women">منتجات النساء</a>
+        </div>
+        <div class="row">
+          <a class="btn btn-ghost" href="/education">مقالات التوعية</a>
+          <a class="btn btn-ghost" href="/contact">تواصل معنا</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
