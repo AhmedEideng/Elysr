@@ -13,7 +13,7 @@ import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "اليسر — منتجات الصحة الزوجية الأصلية في مصر | شحن سري ودفع عند الاستلام" },
+      { title: "اليسر — منتجات الصحة الزوجية الأصلية في مصر" },
       {
         name: "description",
         content:
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
       // Open Graph
       {
         property: "og:title",
-        content: "اليسر — منتجات الصحة الزوجية الأصلية في مصر | شحن سري ودفع عند الاستلام",
+        content: "اليسر — منتجات الصحة الزوجية الأصلية في مصر",
       },
       {
         property: "og:description",

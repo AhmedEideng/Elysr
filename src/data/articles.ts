@@ -354,7 +354,7 @@ export const articles: Article[] = [
     image: "/images/article-ginseng-guide-hero.webp?v=27",
     slug: "red-korean-ginseng-energy-endurance-benefits",
     title:
-      "سر الطاقة الخلوية: كيف يعيد الجينسنج الكوري الأحمر المركز بناء التحمل البدني من الجذور؟",
+      "الجينسنج الكوري الأحمر: الطاقة والتحمل البدني",
     excerpt:
       "دليل صيدلاني شامل يكشف الآلية الفسيولوجية للجينسنج الكوري الأحمر المركز في زيادة إنتاج مركب ATP وركائز الطاقة، وتحسين التحمل البدني دون إجهاد الجهاز العصبي.",
     category: "men",
@@ -393,7 +393,7 @@ export const articles: Article[] = [
   {
     image: "/images/article-nutrition-libido.webp?v=27",
     slug: "peruvian-maca-root-benefits-for-vitality-and-energy",
-    title: "سر الطاقة الأنديزية: كيف تعيد جذور الماكا توازن الحيوية والنشاط الخلوي للرجال والنساء",
+    title: "جذور الماكا البيروفية: الطاقة والحيوية",
     excerpt:
       "اكتشف كيف تعمل جذور الماكا البيروفية كأقوى التكيفات النباتية لدعم إنتاج الطاقة الخلوية وتخفيف الإجهاد اليومي لدى الرجال والنساء بطريقة فسيولوجية آمنة.",
     category: "men",
@@ -432,7 +432,7 @@ export const articles: Article[] = [
   {
     image: "/images/article-nutrition-libido.webp?v=27",
     slug: "peruvian-maca-root-energy-vitality-men-women",
-    title: "جذور الماكا البيروفية للتوازن الفسيولوجي ودعم مستويات الطاقة لدى الرجال والنساء",
+    title: "الماكا البيروفية للطاقة والحيوية",
     excerpt:
       "دراسة صيدلانية شاملة حول دور جذور الماكا التكيفية في تحفيز الطاقة الخلوية وتحسين الأداء البدني والأنوثة والذكورة دون الإخلال بالتوازن الهرموني.",
     category: "men",
@@ -472,7 +472,7 @@ export const articles: Article[] = [
     image: "/images/article-omega3-hero.webp?v=27",
     slug: "omega-3-omega-6-benefits-skin-cell-elasticity",
     title:
-      "مرونة الجلد وتجدد الخلايا: كيف تعيد الأحماض الدهنية الأساسية صياغة حماية البشرة من الداخل",
+      "الأحماض الدهنية أوميغا 3 وأوميغا 6 للبشرة",
     excerpt:
       "اكتشف كيف تعمل أحماض الأوميغا 3 والأوميغا 6 على تدعيم الغشاء الخلوي للجلد، وتجديد حاجز البشرة الطبيعي للحفاظ على النضارة والمرونة الحيوية.",
     category: "women",
@@ -512,7 +512,7 @@ export const articles: Article[] = [
     image: "/images/article-physiological-methods-for-stamina-and-timing-without-numbing.webp?v=27",
     slug: "physiological-methods-for-stamina-and-timing-without-numbing",
     title:
-      "إعادة ضبط الاستجابة العصبية: كيف تسيطر على التوقيت بحلول فسيولوجية تغنيك عن مواد التخدير الموضعي",
+      "التحكم في التوقيت بطرق فسيولوجية آمنة",
     excerpt:
       "تعرف على الآليات الفسيولوجية العميقة التي تمنحك التحكم الكامل في التوقيت دون إفقاد الشعور بالمتعة عبر كريمات التخدير، مع رؤية صيدلانية متخصصة من اليسر ميديكال.",
     category: "men",
