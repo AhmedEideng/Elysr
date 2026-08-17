@@ -570,6 +570,7 @@ function ProductPage() {
         rating={product.rating}
         reviewsCount={product.reviews}
         category={product.category}
+        slug={product.slug}
       />
 
       {/* ── FAQ Section ── */}

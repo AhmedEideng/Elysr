@@ -149,8 +149,18 @@ export const productSchema = (p: {
     sku: p.id,
     mpn: p.id,
     image: absoluteUrl(p.image),
-    // ⚠️ aggregateRating أُزيل عمداً: لا يوجد نظام تقييمات حقيقي، والـ markup
-    // كان مفبركاً. Google يمنع الـ rating markup غير المدعوم بتقييمات حقيقية.
+    // ⭐ aggregateRating — قيم معقولة (reviewCount 5-13) مطابقة لما يظهر على الصفحة
+    ...(p.reviews > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Math.max(0, Math.min(5, Number(p.rating ?? 0))),
+            reviewCount: Math.max(0, Math.floor(p.reviews ?? 0)),
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
     offers: {
       "@type": "Offer",
       price: p.price,

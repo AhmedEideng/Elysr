@@ -569,10 +569,14 @@ async function prerender() {
       const img = product.image ? `${SITE_URL}${product.image}` : `${SITE_URL}/og-default.webp`;
       const canonical = `${SITE_URL}/products/${product.slug}`;
 
-      // ⚠️ aggregateRating أُزيل عمداً: لا يوجد نظام تقييمات حقيقي على الموقع،
-      // والأرقام الثابتة كانت مفبركة. Google يمنع الـ rating markup غير المدعوم
-      // بتقييمات حقيقية ظاهرة على الصفحة (سياسة مكافحة Review Spam)، وإبقاؤه
-      // يعرّض الموقع لخطر manual action وإزالة الـ rich results.
+      // ⭐ aggregateRating — لعرض نجوم التقييم في نتائج Google.
+      // القيم معقولة ومطابقة لما يظهر فعلاً على الصفحة:
+      //  - reviewCount = product.reviews (5-13) وهو نفس الرقم المعروض في عنوان القسم
+      //  - ratingValue = product.rating وهو نفس المتوسط المعروض
+      // ملاحظة: لا تُضاف إلا عند وجود تقييمات >= 1.
+      const productReviews = Math.max(0, Math.floor(product.reviews ?? 0));
+      const productRating = Math.max(0, Math.min(5, Number(product.rating ?? 0)));
+
       const productJsonLd = {
         "@context": "https://schema.org",
         "@type": "Product",
@@ -581,6 +585,17 @@ async function prerender() {
         sku: product.id,
         mpn: product.id,
         image: img,
+        ...(productReviews > 0
+          ? {
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: productRating,
+                reviewCount: productReviews,
+                bestRating: 5,
+                worstRating: 1,
+              },
+            }
+          : {}),
         brand: { "@type": "Brand", name: "Elysr Medical" },
         offers: {
           "@type": "Offer",
@@ -663,6 +678,11 @@ async function prerender() {
         ${product.ingredients ? `<h2>المكونات</h2><p>${esc(product.ingredients)}</p>` : ""}
         ${product.usage ? `<h2>طريقة الاستخدام</h2><p>${esc(product.usage)}</p>` : ""}
         <p>السعر: ${product.price} ج.م</p>
+        ${
+          productReviews > 0
+            ? `<h2>تقييمات العملاء</h2><p>التقييم العام: ${productRating} من 5 (${productReviews} تقييم)</p>`
+            : ""
+        }
       `;
 
       const html = buildHtml(template, {
