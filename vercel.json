@@ -749,6 +749,11 @@
       "source": "/products/sex-women-hot-life-wipes",
       "destination": "/products/connubial-drops",
       "permanent": true
+    },
+    {
+      "source": "/products/tiger-power-tablets",
+      "destination": "/products/hammer-of-thor-capsules",
+      "permanent": true
     }
   ]
 }
