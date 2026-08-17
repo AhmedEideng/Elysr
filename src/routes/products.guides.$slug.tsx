@@ -143,7 +143,7 @@ function SeoLandingPageComponent() {
         <section className="mt-10 rounded-[2rem] border border-primary/10 bg-gradient-soft p-5 md:p-7">
           <h2 className="text-2xl font-black">ابدأ من الأقسام الحالية</h2>
           <p className="mt-2 text-sm leading-7 text-muted-foreground">
-            هذه الصفحة لا تضيف قسماً جديداً في المتجر؛ هي دليل يساعدك على الوصول للقسم المناسب حسب
+            هذه الصفحة لا تضيف قسماً جديداً في الشركة؛ هي دليل يساعدك على الوصول للقسم المناسب حسب
             كلمة البحث والاحتياج.
           </p>
           <div className="mt-5 grid gap-3 md:grid-cols-3">

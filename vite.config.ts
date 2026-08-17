@@ -42,7 +42,18 @@ export default defineConfig({
         // 🔧 تقسيم الملفات الكبيرة والـ vendor
         manualChunks(id) {
           // 🚀 تقسيم ملفات البيانات الضخمة لمنع بلوت index.js
-          // منتجات الكتالوج (يحتاجها الهوم فعلاً → تُحمّل مباشرة)
+          // تقسيم الكتالوج لكل فئة على حدة بحيث يُحمّل فقط ملف القسم
+          // الذي يحتاجه المستخدم (men/women/devices) بدلاً من كل المنتجات
+          // معاً في chunk واحد ضخم — يحسّن زمن التحميل (LCP) للأقسام والهوم.
+          if (id.includes("src/data/products/men")) {
+            return "data-catalog-men";
+          }
+          if (id.includes("src/data/products/women")) {
+            return "data-catalog-women";
+          }
+          if (id.includes("src/data/products/devices")) {
+            return "data-catalog-devices";
+          }
           if (id.includes("src/data/products")) {
             return "data-catalog";
           }

@@ -4,7 +4,7 @@ import { MessageCircle, Mail, MapPin, Sparkles } from "lucide-react";
 import logo from "@/assets/logo-mono.webp";
 import { COMPANY, waLink } from "@/lib/whatsapp";
 
-// ── أقسام المتجر الأساسية ──
+// ── أقسام الشركة الأساسية ──
 const shopLinks = [
   { to: "/products/men", label: "منتجات الرجال", emoji: "💪" },
   { to: "/products/women", label: "منتجات النساء", emoji: "🌸" },
