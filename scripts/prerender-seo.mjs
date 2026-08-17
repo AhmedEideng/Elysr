@@ -594,6 +594,11 @@ async function prerender() {
             }
           : {}),
         brand: { "@type": "Brand", name: "Elysr Medical" },
+        // ⚠️ تحديث جوجل مايو 2026: المنتجات ذات المحتوى الحساس/البالغين يجب
+        // أن تُعلَّم بـ hasAdultConsideration حتى لا تُصنَّف بشكل خاطئ أو
+        // تُستبعد من نتائج معينة. هذه الصفحة تبيع منتجات صحة زوجية/حساسة،
+        // لذا نضع هذا العلم صراحةً للتوافق مع سياسات جوجل الجديدة.
+        hasAdultConsideration: "https://schema.org/SexualContentConsideration",
         offers: {
           "@type": "Offer",
           price: product.price,
