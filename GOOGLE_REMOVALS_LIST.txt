@@ -1,0 +1,49 @@
+قائمة روابط المنتجات المحذوفة لإزالتها من Google Search Console
+=================================================================
+
+الموقع: https://elysrmedical.store
+
+────────────────────────────────────────────
+المجموعة 1 — منتجات محذوفة نهائيًا (أزلها من فهرسة جوجل)
+────────────────────────────────────────────
+ضع هذه الروابط في أداة "إزالة العناوين" (URL Removals) في Search Console:
+
+https://elysrmedical.store/products/hammer-of-thor-herbal-supplement
+https://elysrmedical.store/products/overtime-erection-delay
+https://elysrmedical.store/products/original-black-horse-royal-honey
+https://elysrmedical.store/products/merson-gel-50-gm
+https://elysrmedical.store/products/tiger-power-tablets
+https://elysrmedical.store/products/3d-super-green-coffee-30-sachets
+https://elysrmedical.store/products/sex-women-hot-life-wipes
+
+────────────────────────────────────────────
+المجموعة 2 — أسماء قديمة لنفس المنتجات الحالية (لا تحتاج إزالة)
+────────────────────────────────────────────
+هذه روابط لنفس المنتجات الموجودة حاليًا (تمت إعادة تسميتها).
+لا تزلها من جوجل — فقط اطلب فهرسة النسخة الجديدة، وسيتعلم جوجل تلقائيًا:
+
+https://elysrmedical.store/products/kreva            -> المنتج: kreva-gel-for-men
+https://elysrmedical.store/products/kreva-gel        -> المنتج: kreva-gel-for-men
+https://elysrmedical.store/products/sotara           -> المنتج: sotara-gel-50gm
+https://elysrmedical.store/products/sotara-gel       -> المنتج: sotara-gel-50gm
+https://elysrmedical.store/products/titan-gel-gold   -> المنتج: titan-gel-gold-special-gel-for-men
+https://elysrmedical.store/products/dooz-gel         -> المنتج: dooz-14000-delay-cream
+
+────────────────────────────────────────────
+الصفحات الحالية المهمة — اطلب فهرستها
+────────────────────────────────────────────
+استخدم "فحص عنوان URL" (URL Inspection) ثم "طلب الفهرسة" لهذه:
+
+https://elysrmedical.store/
+https://elysrmedical.store/products/men
+https://elysrmedical.store/products/women
+https://elysrmedical.store/products/hammer-of-thor-capsules
+https://elysrmedical.store/products/kreva-gel-for-men
+https://elysrmedical.store/products/sotara-gel-50gm
+
+────────────────────────────────────────────
+ملاحظة هامة
+────────────────────────────────────────────
+- لا تمسح الـ redirects من الموقع (سيتحول للـ 404 ويضيع قيمة الرابط).
+- أزل فقط فهرسة الصفحات المحذوفة من Search Console (إزالة العناوين).
+- قدم sitemap.xml من جديد بعدها (يحتوي فقط الصفحات الحالية).
