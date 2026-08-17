@@ -141,8 +141,6 @@ export const productSchema = (p: {
   stock: number;
   image?: string;
 }) => {
-  const safeReviews = Math.max(0, Math.floor(p.reviews ?? 0));
-  const safeRating = Math.max(0, Math.min(5, Number(p.rating ?? 0)));
   return {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -151,19 +149,8 @@ export const productSchema = (p: {
     sku: p.id,
     mpn: p.id,
     image: absoluteUrl(p.image),
-    // ⭐ aggregateRating — مطلوب من Google لعرض نجوم التقييم في نتائج البحث
-    // ملاحظة: reviewCount لازم يكون >= 1 وإلا Google يتجاهل الـ aggregateRating
-    ...(safeReviews > 0
-      ? {
-          aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: safeRating,
-            reviewCount: safeReviews,
-            bestRating: 5,
-            worstRating: 1,
-          },
-        }
-      : {}),
+    // ⚠️ aggregateRating أُزيل عمداً: لا يوجد نظام تقييمات حقيقي، والـ markup
+    // كان مفبركاً. Google يمنع الـ rating markup غير المدعوم بتقييمات حقيقية.
     offers: {
       "@type": "Offer",
       price: p.price,
