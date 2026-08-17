@@ -1,0 +1,39 @@
+# robots.txt — Elysr Medical Group
+# https://elysrmedical.store
+
+User-agent: *
+Allow: /
+Disallow: /cart
+Disallow: /thank-you
+Disallow: /order-confirmed
+Disallow: /wishlist
+
+# Allow AI bots for AI Overviews, ChatGPT discovery, Perplexity, etc.
+User-agent: GPTBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+User-agent: Claude-Web
+Allow: /
+
+# Block aggressive scrapers (not AI assistants)
+User-agent: CCBot
+Disallow: /
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Googlebot-Image
+Allow: /images/
+Allow: /logo.png
+Allow: /og-default.webp
+Allow: /apple-touch-icon.png
+
+Sitemap: https://elysrmedical.store/sitemap-index.xml
+Sitemap: https://elysrmedical.store/sitemap.xml
+Sitemap: https://elysrmedical.store/sitemap-images.xml

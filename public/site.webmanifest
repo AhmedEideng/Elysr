@@ -1,0 +1,63 @@
+{
+  "name": "اليسر ميديكال — Elysr Medical",
+  "short_name": "اليسر",
+  "description": "منتجات الصحة الزوجية الأصلية في مصر — شحن سري ودفع عند الاستلام",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0085ca",
+  "categories": ["health", "medical", "shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "منتجات الرجال",
+      "short_name": "رجال",
+      "description": "تصفح منتجات الصحة الزوجية للرجال",
+      "url": "/products/men",
+      "icons": [{ "src": "/favicon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "منتجات النساء",
+      "short_name": "نساء",
+      "description": "تصفح منتجات الصحة الزوجية للنساء",
+      "url": "/products/women",
+      "icons": [{ "src": "/favicon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "السلة",
+      "short_name": "السلة",
+      "description": "عرض السلة وإتمام الطلب",
+      "url": "/cart",
+      "icons": [{ "src": "/favicon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

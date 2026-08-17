@@ -1,0 +1,413 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-glow: var(--primary-glow);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: "Cairo", system-ui, sans-serif;
+  --font-display: "Cairo", system-ui, sans-serif;
+}
+
+/* ============================================================
+ * Color tokens with sRGB fallbacks for old browsers (Chrome <111,
+ * Safari <15.4, Windows 7). Each token has hex/rgba first, then
+ * the modern oklch(). Old browsers ignore the second declaration.
+ * ============================================================ */
+:root {
+  --radius: 1rem;
+
+  --background: #f9fcfe;
+  --background: oklch(0.99 0.005 230);
+  --foreground: #000d1e;
+  --foreground: oklch(0.15 0.05 240);
+
+  --card: #ffffff;
+  --card: oklch(1 0 0);
+  --card-foreground: #000d1e;
+  --card-foreground: oklch(0.15 0.05 240);
+
+  --popover: #ffffff;
+  --popover: oklch(1 0 0);
+  --popover-foreground: #000d1e;
+  --popover-foreground: oklch(0.15 0.05 240);
+
+  --primary: #006da6;
+  --primary: oklch(0.51 0.13 240);
+  --primary-foreground: #ffffff;
+  --primary-foreground: oklch(1 0 0);
+  --primary-glow: #00c3e5;
+  --primary-glow: oklch(0.75 0.14 215);
+
+  --secondary: #e5f5fd;
+  --secondary: oklch(0.96 0.02 230);
+  --secondary-foreground: #00243b;
+  --secondary-foreground: oklch(0.25 0.06 240);
+
+  --muted: #e5edf1;
+  --muted: oklch(0.94 0.01 230);
+  --muted-foreground: #41596a;
+  --muted-foreground: oklch(0.45 0.04 240);
+
+  --accent: #b7f0fe;
+  --accent: oklch(0.92 0.06 215);
+  --accent-foreground: #002443;
+  --accent-foreground: oklch(0.25 0.08 240);
+
+  --destructive: #ea0000;
+  --destructive: oklch(0.55 0.28 27);
+  --destructive-foreground: #ffffff;
+  --destructive-foreground: oklch(1 0 0);
+
+  --success: #00aa6f;
+  --success: oklch(0.65 0.15 160);
+  --success-foreground: #ffffff;
+  --success-foreground: oklch(1 0 0);
+
+  --border: #d8e3e9;
+  --border: oklch(0.91 0.015 230);
+  --input: #deeaf0;
+  --input: oklch(0.93 0.015 230);
+  --ring: rgba(234, 0, 0, 0.4);
+  --ring: oklch(0.55 0.28 27 / 0.4);
+
+  --gradient-hero: linear-gradient(135deg, #0079ce 0%, #00c3e5 100%);
+  --gradient-hero: linear-gradient(135deg, oklch(0.55 0.18 240) 0%, oklch(0.75 0.14 215) 100%);
+
+  --gradient-soft: linear-gradient(180deg, #f5f9fb 0%, #ffffff 100%);
+  --gradient-soft: linear-gradient(180deg, oklch(0.98 0.01 230) 0%, oklch(1 0 0) 100%);
+
+  --gradient-brand: linear-gradient(135deg, #005f8e, #0077b6);
+  --gradient-brand: linear-gradient(135deg, oklch(0.46 0.11 240), oklch(0.53 0.12 235));
+
+  --shadow-sm: 0 2px 4px rgba(0, 24, 60, 0.04);
+  --shadow-sm: 0 2px 4px oklch(0.2 0.1 235 / 0.04);
+  --shadow-md: 0 12px 24px -8px rgba(0, 19, 78, 0.12);
+  --shadow-md: 0 12px 24px -8px oklch(0.2 0.15 235 / 0.12);
+  --shadow-lg: 0 25px 50px -12px rgba(0, 3, 97, 0.2);
+  --shadow-lg: 0 25px 50px -12px oklch(0.2 0.2 235 / 0.2);
+  --shadow-glow: 0 0 40px rgba(0, 195, 229, 0.35);
+  --shadow-glow: 0 0 40px oklch(0.75 0.14 215 / 0.35);
+
+  --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark {
+  --background: #000710;
+  --background: oklch(0.12 0.03 240);
+  --foreground: #f5f9fb;
+  --foreground: oklch(0.98 0.005 230);
+  --card: #000f1c;
+  --card: oklch(0.16 0.04 240);
+  --primary: #00c3e5;
+  --primary: oklch(0.75 0.14 215);
+  --primary-foreground: #000710;
+  --primary-foreground: oklch(0.12 0.03 240);
+  --border: rgba(255, 255, 255, 0.08);
+  --border: oklch(1 0 0 / 0.08);
+  --destructive: #ff0000;
+  --destructive: oklch(0.65 0.3 27);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    direction: rtl;
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-brand {
+    background-image: var(--gradient-brand);
+  }
+  .shadow-elegant {
+    box-shadow: var(--shadow-lg);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-md);
+  }
+  .text-gradient {
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  .skeleton {
+    overflow: hidden;
+    background-color: #e5edf1;
+    background-color: oklch(0.94 0.01 230);
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shimmer 2s infinite linear;
+  }
+}
+
+/* ============================================================
+ * Hard fallback for browsers that don't support oklch() at all.
+ * Force-rewrites every token to sRGB so Tailwind utilities that
+ * read these CSS variables still render with real colors.
+ * ============================================================ */
+@supports not (color: oklch(0% 0 0)) {
+  :root {
+    --background: #f9fcfe;
+    --foreground: #000d1e;
+    --card: #ffffff;
+    --card-foreground: #000d1e;
+    --popover: #ffffff;
+    --popover-foreground: #000d1e;
+    --primary: #006da6;
+    --primary-foreground: #ffffff;
+    --primary-glow: #00c3e5;
+    --secondary: #e5f5fd;
+    --secondary-foreground: #00243b;
+    --muted: #e5edf1;
+    --muted-foreground: #41596a;
+    --accent: #b7f0fe;
+    --accent-foreground: #002443;
+    --destructive: #ea0000;
+    --destructive-foreground: #ffffff;
+    --success: #00aa6f;
+    --success-foreground: #ffffff;
+    --border: #d8e3e9;
+    --input: #deeaf0;
+    --ring: rgba(234, 0, 0, 0.4);
+    --gradient-hero: linear-gradient(135deg, #0079ce 0%, #00c3e5 100%);
+    --gradient-soft: linear-gradient(180deg, #f5f9fb 0%, #ffffff 100%);
+    --gradient-brand: linear-gradient(135deg, #005f8e, #0077b6);
+    --shadow-sm: 0 2px 4px rgba(0, 24, 60, 0.04);
+    --shadow-md: 0 12px 24px -8px rgba(0, 19, 78, 0.12);
+    --shadow-lg: 0 25px 50px -12px rgba(0, 3, 97, 0.2);
+    --shadow-glow: 0 0 40px rgba(0, 195, 229, 0.35);
+  }
+
+  .dark {
+    --background: #000710;
+    --foreground: #f5f9fb;
+    --card: #000f1c;
+    --primary: #00c3e5;
+    --primary-foreground: #000710;
+    --border: rgba(255, 255, 255, 0.08);
+    --destructive: #ff0000;
+  }
+
+  .skeleton {
+    background-color: #e5edf1;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+/* ============================================================
+ * 🎉 Promo bar shine animation (Anniversary 10y)
+ * ============================================================ */
+@keyframes promo-shine {
+  0% {
+    transform: translateX(0) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(2000%) skewX(-12deg);
+  }
+}
+.animate-promo-shine {
+  animation: promo-shine 3.5s ease-in-out infinite;
+}
+
+/* ============================================================
+ * 🎯 InteractiveButton animations (ripple + pulse + spin)
+ * ============================================================ */
+
+/* Ripple wave from click point */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(20);
+    opacity: 0;
+  }
+}
+.animate-ripple {
+  animation: ripple 0.6s ease-out forwards;
+}
+
+/* Soft pulse (for primary CTAs that should draw attention) */
+@keyframes pulse-slow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 109, 166, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(0, 109, 166, 0);
+  }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 2.5s ease-in-out infinite;
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-ripple,
+  .animate-pulse-slow {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+ * 🎈 Floating product animation (Hero)
+ * ============================================================ */
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.animate-float-slow {
+  animation: float-slow 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-slow {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+ * 🎈 Product float animations for Hero Showcase
+ * Each product floats with slightly different timing for visual depth
+ * ============================================================ */
+@keyframes product-float-0 {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-1deg);
+  }
+}
+@keyframes product-float-1 {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(0deg);
+  }
+}
+@keyframes product-float-2 {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [style*="product-float-"] {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+ * 🛡️ Ultimate Global Layout Safeguard — Force 100% Fluid Width
+ * ============================================================
+ * Forcibly clips and prevents any horizontal scrolling/overflow
+ * on any screen size or browser (especially custom mobile Chrome/Brave).
+ * Marked as !important to override any sub-layout width leaks.
+ * ============================================================ */
+html,
+body {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  width: 100% !important;
+}

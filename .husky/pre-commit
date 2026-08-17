@@ -1,0 +1,13 @@
+# Run lint-staged on changed files
+npx --no-install lint-staged --quiet
+
+# Run typecheck if any TS file changed
+git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx)$' >/dev/null && {
+  echo "🔍 Running typecheck…"
+  npm run typecheck || {
+    echo "❌ Typecheck failed. Fix errors before committing."
+    exit 1
+  }
+}
+
+echo "✅ Pre-commit checks passed."

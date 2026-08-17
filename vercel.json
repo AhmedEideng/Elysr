@@ -1,0 +1,754 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/fonts/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    },
+    {
+      "source": "/images/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(og-default\\.webp|logo\\.png|apple-touch-icon\\.png|favicon.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap-images.xml",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap-index.xml",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-DNS-Prefetch-Control",
+          "value": "on"
+        },
+        {
+          "key": "X-Permitted-Cross-Domain-Policies",
+          "value": "none"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com; worker-src 'self'; frame-ancestors 'self'; form-action 'self'; base-uri 'self'; object-src 'none'; manifest-src 'self'; media-src 'self'; upgrade-insecure-requests; report-uri /api/csp-report;"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/products/m-01",
+      "destination": "/products/hammer-of-thor-capsules",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-02",
+      "destination": "/products/boost-up-man-korean-ginseng-maca-root",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-03",
+      "destination": "/products/powerfully-up-advanced-male-performance-formula",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-04",
+      "destination": "/products/ginseng-1650-capsules",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-05",
+      "destination": "/products/deadly-shark-power-48000-delay-cream",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-06",
+      "destination": "/products/treand-gel",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-07",
+      "destination": "/products/dooz-14000-delay-cream",
+      "permanent": true
+    },
+    {
+      "source": "/products/dooz-gel",
+      "destination": "/products/dooz-14000-delay-cream",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-09",
+      "destination": "/products/royal-cream-for-men",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-11",
+      "destination": "/products/vitamax-doubleshot-energy-honey",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-12",
+      "destination": "/products/royal-honey-gold-vip",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-13",
+      "destination": "/products/king-royal-honey-plus",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-14",
+      "destination": "/products/royal-chocolate-for-him",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-15",
+      "destination": "/products/hilti-bitter-chocolate-man",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-16",
+      "destination": "/products/excellent-hard-leopard-miracle-of-honey",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-17",
+      "destination": "/products/procomil-delay-cream-20g",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-18",
+      "destination": "/products/royal-honey-natural-honey",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-19",
+      "destination": "/products/manuka-honey-75",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-20",
+      "destination": "/products/golden-horse-royal-honey-plus",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-21",
+      "destination": "/products/original-black-horse-caviar-code",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-22",
+      "destination": "/products/black-horse-vital-honey",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-23",
+      "destination": "/products/honeymoon-exclusive-herbal-honey",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-24",
+      "destination": "/products/super-royal-honey-top-pharma",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-25",
+      "destination": "/products/al-ghazala-rayqa-delay-erection-cards",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-26",
+      "destination": "/products/majestic-black-stallion",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-27",
+      "destination": "/products/xsteel-nutriceutical-original-black-horse",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-28",
+      "destination": "/products/stallion-delay-gel-for-men",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-29",
+      "destination": "/products/toro-duro-sachets",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-30",
+      "destination": "/products/emla-7-5-lidocaine-prilocaine-cream",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-31",
+      "destination": "/products/sotara-gel-50gm",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-32",
+      "destination": "/products/titan-gel-gold-special-gel-for-men",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-33",
+      "destination": "/products/mr-big-extra-size-cream-qlito",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-34",
+      "destination": "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-35",
+      "destination": "/products/uni-smart-90-minutes-delay-cream",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-36",
+      "destination": "/products/vegal-extra-sildenafil-130mg-cobra",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-37",
+      "destination": "/products/cialis-tadalafil-20mg-30-tablets",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-38",
+      "destination": "/products/power-36-power-control-for-36-hours",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-39",
+      "destination": "/products/leech-miracle-cream-for-men",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-40",
+      "destination": "/products/dmas-chocolate-for-men-9-pcs",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-41",
+      "destination": "/products/procomil-plus-spray",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-42",
+      "destination": "/products/red-bull-energy-sachets-men",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-43",
+      "destination": "/products/procomil-fort-tablet",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-44",
+      "destination": "/products/remans-dooz-14000-spray",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-45",
+      "destination": "/products/viagra-pfizer-100mg",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-46",
+      "destination": "/products/big-penis-usa-capsules",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-47",
+      "destination": "/products/levitra-100mg",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-48",
+      "destination": "/products/titan-gel-special-gel-for-penis",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-49",
+      "destination": "/products/power-fully-up-tablets",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-50",
+      "destination": "/products/black-horse-long-time-gel",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-52",
+      "destination": "/products/top-sellers-honey",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-53",
+      "destination": "/products/night-hunter-capsules",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-54",
+      "destination": "/products/ferrari-chocolate-men",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-55",
+      "destination": "/products/procomil-spray-indian",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-56",
+      "destination": "/products/dal-el-khair-honey-cherry",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-59",
+      "destination": "/products/lovezone-intimacy-at-its-peak-10x400mg",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-60",
+      "destination": "/products/kreva-gel-for-men",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-61",
+      "destination": "/products/golden-turkish-chocolate-for-men",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-01",
+      "destination": "/products/connubial-new-gold-newgold-spray",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-02",
+      "destination": "/products/lady-era-30ml-drops",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-03",
+      "destination": "/products/spanish-fly-drops-15ml",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-04",
+      "destination": "/products/checoo-love-chocolate-for-women",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-05",
+      "destination": "/products/royal-honey-for-women",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-06",
+      "destination": "/products/sexlove-chewing-gum",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-07",
+      "destination": "/products/top-sellers-honey-women",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-08",
+      "destination": "/products/coffemix-caviar-original-for-women",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-09",
+      "destination": "/products/lipo-6-for-all-10ml",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-10",
+      "destination": "/products/beauty-love",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-11",
+      "destination": "/products/spanish-fly-forte-gum",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-12",
+      "destination": "/products/royal-chocolate-for-her",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-13",
+      "destination": "/products/golden-gum-30-pieces",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-14",
+      "destination": "/products/aromal-emollient-gel",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-15",
+      "destination": "/products/connubial-drops",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-16",
+      "destination": "/products/argi-fem-female-gel-50g",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-17",
+      "destination": "/products/viagra-for-women-20-tablets",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-18",
+      "destination": "/products/lovezone-drops-by-mouth",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-19",
+      "destination": "/products/ferrari-chocolate",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-20",
+      "destination": "/products/paxtone-max-filler",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-21",
+      "destination": "/products/marcin-cherry-women",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-22",
+      "destination": "/products/lovezone-intimacy-at-its-peak-10x380mg",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-23",
+      "destination": "/products/toro-duro-woman",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-24",
+      "destination": "/products/black-widow-drops-for-women",
+      "permanent": true
+    },
+    {
+      "source": "/products/d-01",
+      "destination": "/products/digital-vacuum-pump",
+      "permanent": true
+    },
+    {
+      "source": "/products/d-02",
+      "destination": "/products/power-ved-kit-with-k-y-jelly",
+      "permanent": true
+    },
+    {
+      "source": "/products/d-03",
+      "destination": "/products/manual-ved-pump",
+      "permanent": true
+    },
+    {
+      "source": "/products/d-04",
+      "destination": "/products/big-bro-breast-enlargement-cup",
+      "permanent": true
+    },
+    {
+      "source": "/products/d-05",
+      "destination": "/products/manual-vacuum-pump-sawft",
+      "permanent": true
+    },
+    {
+      "source": "/products/d-06",
+      "destination": "/products/proextender-traction-device",
+      "permanent": true
+    },
+    {
+      "source": "/products/d-07",
+      "destination": "/products/konsa-electric-pump",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/index",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/product/:slug",
+      "destination": "/products/:slug",
+      "permanent": true
+    },
+    {
+      "source": "/products/hammer-of-thor-herbal-supplement",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-57",
+      "destination": "/products/toro-duro-woman",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-58",
+      "destination": "/products/black-widow-drops-for-women",
+      "permanent": true
+    },
+    {
+      "source": "/products/3d-super-green-coffee-30-sachets",
+      "destination": "/products/women",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-51",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-10",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/m-08",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/overtime-erection-delay",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/original-black-horse-royal-honey",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/merson-gel-50-gm",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/blog",
+      "destination": "/education",
+      "permanent": true
+    },
+    {
+      "source": "/blog/:slug",
+      "destination": "/education/:slug",
+      "permanent": true
+    },
+    {
+      "source": "/articles",
+      "destination": "/education",
+      "permanent": true
+    },
+    {
+      "source": "/articles/:slug",
+      "destination": "/education/:slug",
+      "permanent": true
+    },
+    {
+      "source": "/category/:slug",
+      "destination": "/products/:slug",
+      "permanent": true
+    },
+    {
+      "source": "/products/category/:slug",
+      "destination": "/products/:slug",
+      "permanent": true
+    },
+    {
+      "source": "/contact-us",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/about-us",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/shipping-policy",
+      "destination": "/shipping",
+      "permanent": true
+    },
+    {
+      "source": "/return-policy",
+      "destination": "/returns",
+      "permanent": true
+    },
+    {
+      "source": "/terms-and-conditions",
+      "destination": "/terms",
+      "permanent": true
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/products/kreva-gel",
+      "destination": "/products/kreva-gel-for-men",
+      "permanent": true
+    },
+    {
+      "source": "/products/kreva",
+      "destination": "/products/kreva-gel-for-men",
+      "permanent": true
+    },
+    {
+      "source": "/products/sotara-gel",
+      "destination": "/products/sotara-gel-50gm",
+      "permanent": true
+    },
+    {
+      "source": "/products/sotara",
+      "destination": "/products/sotara-gel-50gm",
+      "permanent": true
+    },
+    {
+      "source": "/products/titan-gel-gold",
+      "destination": "/products/titan-gel-gold-special-gel-for-men",
+      "permanent": true
+    },
+    {
+      "source": "/products/sex-women-hot-life-wipes",
+      "destination": "/products/connubial-drops",
+      "permanent": true
+    }
+  ]
+}

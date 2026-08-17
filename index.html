@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Favicons (multi-size PNGs + ICO for legacy + Apple touch icon) -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0085ca" />
+    <meta name="color-scheme" content="light" />
+
+    <title>اليسر — منتجات الصحة الزوجية الأصلية في مصر | شحن سري ودفع عند الاستلام</title>
+    <meta
+      name="description"
+      content="اليسر هو أكبر متجر متخصص في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. شحن سري 100%، دفع عند الاستلام، أكثر من 90 منتج مضمون ودعم متخصص على واتساب."
+    />
+    <meta name="author" content="Elysr Medical Group" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1" />
+    <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1" />
+    <!-- 🔍 Google Search Console: verified via DNS TXT record -->
+    <!-- 🔍 Meta (Facebook) Business Domain Verification -->
+    <meta name="facebook-domain-verification" content="zstcyw0san2v3f1vkhmg755t90flu6" />
+
+    <link rel="canonical" href="https://elysrmedical.store/" />
+    <link rel="alternate" hreflang="ar-eg" href="https://elysrmedical.store/" />
+    <link rel="alternate" hreflang="x-default" href="https://elysrmedical.store/" />
+
+    <!-- Open Graph -->
+    <meta
+      property="og:title"
+      content="اليسر — منتجات الصحة الزوجية الأصلية في مصر | شحن سري ودفع عند الاستلام"
+    />
+    <meta
+      property="og:description"
+      content="اليسر هو أكبر متجر متخصص في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. شحن سري 100%، دفع عند الاستلام، أكثر من 90 منتج مضمون ودعم متخصص على واتساب."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://elysrmedical.store/" />
+    <meta property="og:image" content="https://elysrmedical.store/og-default.webp" />
+    <meta property="og:locale" content="ar_EG" />
+    <meta property="og:site_name" content="اليسر ميديكال" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="منتجات الصحة الزوجية الأصلية في مصر | شحن سري ودفع عند الاستلام — Elysr Medical"
+    />
+    <meta
+      name="twitter:description"
+      content="أكبر متجر متخصص في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. شحن سري 100%، دفع عند الاستلام، أكثر من 90 منتج مضمون ودعم متخصص على واتساب."
+    />
+    <meta name="twitter:image" content="https://elysrmedical.store/og-default.webp" />
+    <!-- 🚀 Early preconnect to third-party origins — saves 100-300ms on first pixel/tag load -->
+
+    <!-- 🚀 Self-hosted font (no Google Fonts round-trip).
+         Preload only the Arabic subset since the page is Arabic. -->
+    <link rel="preload" href="/fonts/cairo.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/cairo-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Hero image is loaded eagerly with fetchpriority in the home Hero component.
+         Avoid global preload here because this template is reused by every route,
+         which causes unused-preload warnings on pages that do not render the hero. -->
+    <style>
+      /* ⚡ Critical CSS — يُحمّل قبل أي حاجة عشان أول رسمة تظهر فوراً */
+      @font-face {
+        font-family: "Cairo";
+        font-style: normal;
+        font-weight: 400 800;
+        font-display: swap;
+        src: url("/fonts/cairo.woff2") format("woff2");
+        unicode-range:
+          U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E,
+          U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+      }
+      @font-face {
+        font-family: "Cairo";
+        font-style: normal;
+        font-weight: 400 800;
+        font-display: swap;
+        src: url("/fonts/cairo-latin.woff2") format("woff2");
+        unicode-range:
+          U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+          U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      /* Minimal critical CSS — paint the background instantly even before
+         the main stylesheet arrives. Prevents the flash of unstyled background. */
+      html,
+      body {
+        background: #f9fcfe;
+        color: #000d1e;
+        margin: 0;
+        padding: 0;
+        font-family:
+          "Cairo",
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+      }
+      /* Before the main CSS loads, hide the FOUC for the hero section */
+      #root {
+        min-height: 100vh;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        width: 100% !important;
+      }
+    </style>
+
+    <!-- 🏢 Organization + MedicalOrganization + LocalBusiness + Store + WebSite schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": ["Organization", "MedicalOrganization"],
+            "@id": "https://elysrmedical.store/#organization",
+            "name": "اليسر ميديكال",
+            "legalName": "مجموعة اليسر الطبية",
+            "alternateName": [
+              "اليسر",
+              "اليسر ميديكال",
+              "Elysr",
+              "Elysr Medical",
+              "Elysr Medical Group"
+            ],
+            "url": "https://elysrmedical.store",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://elysrmedical.store/logo.png",
+              "width": 256,
+              "height": 256
+            },
+            "image": "https://elysrmedical.store/og-default.webp",
+            "description": "أكبر متجر متخصص في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. شحن سري 100%، دفع عند الاستلام، أكثر من 90 منتج مضمون ودعم متخصص على واتساب.",
+            "foundingDate": "2016",
+            "numberOfEmployees": {
+              "@type": "QuantitativeValue",
+              "minValue": 5,
+              "maxValue": 15
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "شارع القصر العيني",
+              "addressCountry": "EG",
+              "addressLocality": "القاهرة",
+              "addressRegion": "القاهرة",
+              "postalCode": "11562"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": "30.0286",
+              "longitude": "31.2325"
+            },
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "telephone": "+201098088206",
+                "contactType": "customer service",
+                "areaServed": "EG",
+                "availableLanguage": ["ar", "en"],
+                "hoursAvailable": {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
+                  "opens": "09:00",
+                  "closes": "22:00"
+                }
+              },
+              {
+                "@type": "ContactPoint",
+                "telephone": "+201098088206",
+                "contactType": "sales",
+                "areaServed": "EG",
+                "availableLanguage": ["ar", "en"]
+              }
+            ],
+            "email": "info@elysrmedical.store",
+            "sameAs": ["https://www.facebook.com/ElysrMedical", "https://wa.me/201098088206"],
+            "knowsAbout": [
+              "منتجات الصحة الزوجية",
+              "المكملات الغذائية",
+              "الأجهزة الطبية",
+              "Sexual Health Products",
+              "Dietary Supplements"
+            ],
+            "medicalSpecialty": "Sexual Health",
+            "isAcceptingNewPatients": false
+          },
+          {
+            "@type": "LocalBusiness",
+            "@id": "https://elysrmedical.store/#localbusiness",
+            "name": "اليسر ميديكال — متجر الصحة الزوجية",
+            "image": "https://elysrmedical.store/logo.png",
+            "url": "https://elysrmedical.store",
+            "telephone": "+201098088206",
+            "priceRange": "$$",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "شارع القصر العيني",
+              "addressCountry": "EG",
+              "addressLocality": "القاهرة",
+              "addressRegion": "القاهرة",
+              "postalCode": "11562"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": "30.0286",
+              "longitude": "31.2325"
+            },
+            "openingHoursSpecification": [
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
+                "opens": "09:00",
+                "closes": "22:00"
+              }
+            ],
+            "areaServed": {
+              "@type": "Country",
+              "name": "Egypt"
+            },
+            "currenciesAccepted": "EGP",
+            "paymentAccepted": "Cash on Delivery",
+            "hasOfferCatalog": {
+              "@type": "OfferCatalog",
+              "name": "منتجات الصحة الزوجية",
+              "itemListElement": [
+                { "@type": "OfferCatalog", "name": "منتجات الرجال", "numberOfItems": 59 },
+                { "@type": "OfferCatalog", "name": "منتجات النساء", "numberOfItems": 23 },
+                { "@type": "OfferCatalog", "name": "الأجهزة الطبية", "numberOfItems": 7 }
+              ]
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://elysrmedical.store/#website",
+            "url": "https://elysrmedical.store",
+            "name": "اليسر ميديكال",
+            "alternateName": ["اليسر", "Elysr", "Elysr Medical"],
+            "description": "أكبر متجر متخصص في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. شحن سري 100%، دفع عند الاستلام، أكثر من 90 منتج مضمون ودعم متخصص على واتساب.",
+            "publisher": { "@id": "https://elysrmedical.store/#organization" },
+            "inLanguage": "ar-EG",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://elysrmedical.store/?q={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ]
+      }
+    </script>
+
+    <!-- 🚀 Third-Party Scripts — Google Analytics with cache-busting version -->
+    <script src="/scripts/ga-loader.js?v=27" defer></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Meta Pixel <noscript> fallback — معطل حالياً -->
+    <noscript>
+      <div style="padding: 24px; text-align: center; font-family: sans-serif; direction: rtl">
+        <p>منتجات الصحة الزوجية الأصلية في مصر | شحن سري ودفع عند الاستلام — Elysr Medical</p>
+        <p>هذا الموقع يتطلب تفعيل JavaScript للحصول على التجربة الكاملة.</p>
+        <p>
+          يمكنك التواصل معنا مباشرة على واتساب:
+          <a href="https://wa.me/201098088206">+20 109 808 8206</a>
+        </p>
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

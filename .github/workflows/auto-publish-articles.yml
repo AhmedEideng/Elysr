@@ -1,0 +1,50 @@
+name: 💎 Auto Publish Weekly Medical Articles (AI Copywriter)
+
+on:
+  schedule:
+    # ⏱️ Wakes up automatically every Monday at 9:00 AM UTC (12:00 PM Cairo Time)
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+    # 🚀 Allows manual triggering from the GitHub Actions UI at any time!
+
+jobs:
+  publish-article:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: 📦 Install Dependencies
+        run: npm install
+
+      - name: 🤖 Auto-Generate Premium Medical Article (Google Gemini API)
+        run: node scripts/auto-generate-article.mjs
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: 🧹 Auto-Format Updated Code (Prettier)
+        run: npm run format
+
+      - name: ⚡ Rebuild Static HTML & Sitemap Suite
+        run: npm run build
+
+      - name: 🔒 Commit and Push New Article back to GitHub
+        run: |
+          git config --global user.name "Elysr Medical Developer"
+          git config --global user.email "developer@elysrmedical.store"
+          git add .
+          # Check if there are any changes to commit
+          if git diff-index --quiet HEAD --; then
+            echo "No new articles to publish."
+          else
+            git commit -m "cron: auto-publish new weekly medical article with optimized SEO & E-E-A-T"
+            git push origin main
+          fi
