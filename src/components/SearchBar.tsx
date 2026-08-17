@@ -1,8 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
-import { products } from "@/data/products";
-import { formatPrice } from "@/data/product-types";
+import { formatPrice, type Product } from "@/data/product-types";
 import Fuse from "fuse.js";
 
 /**
@@ -16,13 +15,18 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [q, setQ] = useState("");
   const [activeIdx, setActiveIdx] = useState(0);
+  // 🚀 تحميل كسول للمنتجات: لا نحمّل كل الكتالوج (254KB) عند فتح الصفحة،
+  // بل نحمّله فقط عندما يبدأ المستخدم بالكتابة في البحث. هذا يقلل حمولة
+  // المسار الحرج (LCP) ويحسّن سرعة تحميل الصفحة الرئيسية بشكل كبير.
+  const [products, setProducts] = useState<Product[] | null>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  // إعداد Fuse.js مرة واحدة
+  // إعداد Fuse.js مرة واحدة — بعد تحميل المنتجات كسولاً
   const fuse = useMemo(() => {
+    if (!products) return null;
     return new Fuse(products, {
       keys: [
         { name: "name", weight: 2 },
@@ -32,11 +36,18 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
       threshold: 0.4, // قيمة التسامح مع الأخطاء الإملائية (0 دقيق جداً، 1 غير دقيق)
       ignoreLocation: true,
     });
-  }, []);
+  }, [products]);
+
+  // عند أول حرف يكتبه المستخدم → حمّل الكتالوج (مرة واحدة فقط)
+  useEffect(() => {
+    if (!products && q.trim().length > 0) {
+      import("@/data/products").then(({ products }) => setProducts(products));
+    }
+  }, [q, products]);
 
   const results = useMemo(() => {
     const term = q.trim();
-    if (!term) return [];
+    if (!term || !fuse) return [];
     // Fuse يُرجع مصفوفة من الكائنات بالشكل { item, refIndex }
     return fuse
       .search(term)
