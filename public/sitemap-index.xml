@@ -8,4 +8,8 @@
     <loc>https://elysrmedical.store/sitemap-images.xml</loc>
     <lastmod>2026-08-18</lastmod>
   </sitemap>
+  <sitemap>
+    <loc>https://elysrmedical.store/catalog-feed.xml</loc>
+    <lastmod>2026-08-18</lastmod>
+  </sitemap>
 </sitemapindex>

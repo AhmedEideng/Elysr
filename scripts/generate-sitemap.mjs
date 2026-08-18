@@ -261,6 +261,10 @@ ${articleImageEntries}
     <loc>${SITE_URL}/sitemap-images.xml</loc>
     <lastmod>${today}</lastmod>
   </sitemap>
+  <sitemap>
+    <loc>${SITE_URL}/catalog-feed.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
 </sitemapindex>
 `;
 
@@ -341,6 +345,7 @@ Allow: /apple-touch-icon.png
 Sitemap: ${SITE_URL}/sitemap-index.xml
 Sitemap: ${SITE_URL}/sitemap.xml
 Sitemap: ${SITE_URL}/sitemap-images.xml
+Sitemap: ${SITE_URL}/catalog-feed.xml
 `;
 
     const outDir = resolve(ROOT, "public");

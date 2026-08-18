@@ -37,3 +37,4 @@ Allow: /apple-touch-icon.png
 Sitemap: https://elysrmedical.store/sitemap-index.xml
 Sitemap: https://elysrmedical.store/sitemap.xml
 Sitemap: https://elysrmedical.store/sitemap-images.xml
+Sitemap: https://elysrmedical.store/catalog-feed.xml
