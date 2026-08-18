@@ -24,7 +24,7 @@ export const devices: Product[] = [
       "يُدهن القليل من الجل المرفق لسهولة الاستخدام، ثم يُوضع الجهاز وتُشغل المضخة تدريجياً لمراقبة الضغط المريح لك عبر الشاشة. يُنصح باستخدامه لمدة 10 إلى 15 دقيقة في الجلسة كحد أقصى للحصول على أفضل تمدد دون إجهاد الأنسجة. يُرجى التوقف عن الاستخدام للراحة في حال الشعور بالشد الزائد.",
     badge: "جهاز معتمد",
     emoji: "🔧",
-    image: "/images/digital-vacuum-pump.webp?v=7",
+    image: "/images/digital-vacuum-pump.webp",
     rating: 4.9,
     reviews: 139,
     stock: 50,
@@ -53,7 +53,7 @@ export const devices: Product[] = [
       "يُدهن الجل المرفق لسهولة الانزلاق، ثم يتم الضخ تدريجياً للوصول لمستوى الشد المناسب. يُنصح باستخدامه لمدة 10 إلى 15 دقيقة لتعزيز تمدد الأنسجة وتنشيط تدفق الدم الفوري للأنسجة بشكل مكثف بفعالية. تجنب الضغط المفرط للحفاظ على راحة وسلامة الأنسجة.",
     badge: "رائج",
     emoji: "🧰",
-    image: "/images/power-ved-kit-with-k-y-jelly.webp?v=7",
+    image: "/images/power-ved-kit-with-k-y-jelly.webp",
     rating: 4.8,
     reviews: 76,
     stock: 80,
@@ -81,7 +81,7 @@ export const devices: Product[] = [
     usage:
       "تُثبت الأسطوانة على العضو (مع تشحيم إذا لزم). يُستخدم التفريغ اليدوي تدريجياً لعدة دقائق (10-15 دقيقة كحد أقصى لكل جلسة)، مع تخفيف الضغط فوراً عند الشعور بعدم الراحة أو ألم أو تنميل. بعد الحصول على الانتصاب، ضع الحلقة في قاعدة العضو للحفاظ عليه ثم أزل الأسطوانة. لا تتجاوز الضغط الموصى به أو الوقت. استشر الطبيب قبل الاستخدام (خاصة مع مشاكل صحية أو أدوية). لا تستخدم إذا كان لديك زرعة قضيبية أو حساسية أو تاريخ priapism أو مشاكل دموية.",
     emoji: "🔩",
-    image: "/images/manual-ved-pump.webp?v=7",
+    image: "/images/manual-ved-pump.webp",
     rating: 4.7,
     reviews: 147,
     stock: 200,
@@ -107,7 +107,7 @@ export const devices: Product[] = [
     usage:
       "استخدمي المنتج أو الجهاز بلطف ووفق التعليمات فقط. تجنبي الاستخدام على جروح أو التهابات أو جلد متهيج. توقفي فوراً عند ألم أو احمرار زائد أو حساسية. لا يُنصح بالاستخدام أثناء الحمل أو الرضاعة أو بعد جراحات سابقة إلا بعد استشارة طبيب.",
     emoji: "🩷",
-    image: "/images/big-bro-breast-enlargement-cup.webp?v=7",
+    image: "/images/big-bro-breast-enlargement-cup.webp",
     rating: 4.8,
     reviews: 160,
     stock: 150,
@@ -132,7 +132,7 @@ export const devices: Product[] = [
     usage:
       "اختر حلقة السيليكون المناسبة وركبها على فوهة الأسطوانة. ادهن المنطقة بقليل من المزلق المائي (مثل K-Y Jelly). قم بالضخ تدريجياً حتى تصل للصلابة المطلوبة. لا تزيد مدة الاستخدام عن 15 دقيقة. استخدم صمام التنفيس لإخراج الهواء عند الانتهاء.",
     emoji: "⚙️",
-    image: "/images/manual-vacuum-pump-sawft.webp?v=7",
+    image: "/images/manual-vacuum-pump-sawft.webp",
     rating: 4.5,
     reviews: 59,
     stock: 15,
@@ -159,7 +159,7 @@ export const devices: Product[] = [
     usage:
       "يُرجى اتباع الدليل المرفق مع الجهاز وتطبيق قوة الشد أو الشفط بشكل تدريجي ومريح. للحصول على أفضل النتائج مع الحفاظ على الأمان، لا تتجاوز المدة الموصى بها في الجلسة الواحدة. يُفضل تنظيف الجهاز بعد كل استخدام وحفظه في مكان آمن.",
     emoji: "📏",
-    image: "/images/proextender-traction-device.webp?v=7",
+    image: "/images/proextender-traction-device.webp",
     rating: 4.7,
     reviews: 152,
     stock: 20,
@@ -186,7 +186,7 @@ export const devices: Product[] = [
     usage:
       "يُرجى اتباع الدليل المرفق مع الجهاز وتطبيق قوة الشد أو الشفط بشكل تدريجي ومريح. للحصول على أفضل النتائج مع الحفاظ على الأمان، لا تتجاوز المدة الموصى بها في الجلسة الواحدة. يُفضل تنظيف الجهاز بعد كل استخدام وحفظه في مكان آمن.",
     emoji: "🔋",
-    image: "/images/konsa-electric-pump.webp?v=7",
+    image: "/images/konsa-electric-pump.webp",
     rating: 4.8,
     reviews: 96,
     stock: 12,

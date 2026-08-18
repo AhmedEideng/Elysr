@@ -23,7 +23,7 @@ export const women: Product[] = [
       "تُنظف المنطقة المستهدفة وتُجفف جيداً قبل الاستخدام. يُرش القليل من البخاخ على المنطقة المستهدفة قبل جودة ومتعة الحياة الزوجية بدقائق معدودة. يُفضل تجربته على مساحة صغيرة من الجلد أولاً للتأكد من راحة بشرتك. يُراعى عدم استخدامه على الجروح أو التهيجات الجلدية. للاستخدام الخارجي فقط.",
     badge: "رائج",
     emoji: "💛",
-    image: "/images/connubial-new-gold-newgold-spray.webp?v=7",
+    image: "/images/connubial-new-gold-newgold-spray.webp",
     rating: 4.9,
     reviews: 25,
     stock: 90,
@@ -52,7 +52,7 @@ export const women: Product[] = [
     usage:
       "رجّي العبوة قبل الاستخدام. أضيفي 5-7 قطرات إلى ماء أو عصير أو مشروب بارد، أو حتى 4 قطرات بالفم مباشرة قبل العلاقة بـ 30-60 دقيقة. لا تتجاوزي الجرعة المدونة. لا تستخدمي أثناء الحمل أو الرضاعة أو مع أدوية دون استشارة طبيب. إذا ظهر أي أثر جانبي توقفي واستشيري الطبيب.",
     emoji: "💗",
-    image: "/images/lady-era-30ml-drops.webp?v=7",
+    image: "/images/lady-era-30ml-drops.webp",
     rating: 4.9,
     reviews: 164,
     stock: 300,
@@ -80,7 +80,7 @@ export const women: Product[] = [
     usage:
       "أضيفي 15-20 قطرة في ماء أو عصير أو مشروب بارد قبل العلاقة بساعة واحدة. العبوة تكفي تقريباً 3-5 استخدامات. لا تتجاوزي الجرعة. لا تستخدمي أثناء الحمل أو الرضاعة أو مع أدوية دون استشارة. إذا ظهر أي تهيج أو أثر جانبي توقفي فوراً واستشيري الطبيب.",
     emoji: "💧",
-    image: "/images/spanish-fly-drops-15ml.webp?v=7",
+    image: "/images/spanish-fly-drops-15ml.webp",
     rating: 4.7,
     reviews: 148,
     stock: 110,
@@ -108,7 +108,7 @@ export const women: Product[] = [
     usage:
       "تناولي قطعة واحدة قبل العلاقة بمدة مناسبة أو عند الحاجة. لا تتجاوزي قطعة واحدة خلال 24 ساعة. تجنبي الاستخدام أثناء الحمل أو الرضاعة أو مع الأدوية المزمنة دون استشارة الطبيب.",
     emoji: "🍫",
-    image: "/images/checoo-love-chocolate-for-women.webp?v=7",
+    image: "/images/checoo-love-chocolate-for-women.webp",
     rating: 4.8,
     reviews: 58,
     stock: 130,
@@ -136,7 +136,7 @@ export const women: Product[] = [
     usage:
       "تناولي كيس واحد قبل العلاقة بـ 30-60 دقيقة (مباشرة أو مع ماء دافئ). يمكن تناوله عند الحاجة حسب الحاجة. لا تتجاوزي الجرعة. اشربي الماء بكثرة. استشيري الطبيب قبل الاستخدام إذا كنتِ حاملاً أو مرضعة أو تعانين من أمراض مزمنة. غير مناسب للأطفال.",
     emoji: "🍯",
-    image: "/images/royal-honey-for-women.webp?v=7",
+    image: "/images/royal-honey-for-women.webp",
     rating: 4.7,
     reviews: 102,
     stock: 220,
@@ -164,7 +164,7 @@ export const women: Product[] = [
     usage:
       "تمضغي قطعة واحدة قبل العلاقة بـ 10-20 دقيقة. لا يُنصح بتجاوز قطعتين عند الحاجة. اشربي الماء بكثرة. لا تستخدمي أثناء الحمل أو الرضاعة دون استشارة. إذا ظهر أي أثر جانبي توقفي. استشيري الطبيب إذا كان لديك حساسية.",
     emoji: "🍓",
-    image: "/images/sexlove-chewing-gum.webp?v=7",
+    image: "/images/sexlove-chewing-gum.webp",
     rating: 4.7,
     reviews: 146,
     stock: 100,
@@ -192,7 +192,7 @@ export const women: Product[] = [
       "تناولي كيس واحد عند الحاجة؛ يؤخذ مباشرة بالفم أو يذاب في كوب ماء أو عصير. يفضل بعد الأكل بساعتين أو على معدة فارغة وقبل العلاقة بساعة. لا تتجاوزي الجرعة. استشيري الطبيب إذا كنتِ حاملاً أو مرضعة أو تعانين من أمراض مزمنة أو حساسية من منتجات النحل. اشربي الماء بكثرة.",
     badge: "الأكثر مبيعاً",
     emoji: "🍯",
-    image: "/images/top-sellers-honey-women.webp?v=7",
+    image: "/images/top-sellers-honey-women.webp",
     rating: 4.9,
     reviews: 88,
     stock: 180,
@@ -220,7 +220,7 @@ export const women: Product[] = [
     usage:
       "يُذاب كيس واحد في كوب ماء ساخن (حوالي 150-200 مل) وحركي جيداً. يُشرب قبل العلاقة بـ 30-60 دقيقة. لا تتجاوزي كيساً واحداً عند الحاجة. اشربي الماء بكثرة. استشيري الطبيب قبل الاستخدام إذا كنتِ حاملاً أو تعانين من أمراض مزمنة.",
     emoji: "☕",
-    image: "/images/coffemix-caviar-original-for-women.webp?v=7",
+    image: "/images/coffemix-caviar-original-for-women.webp",
     rating: 4.8,
     reviews: 52,
     stock: 400,
@@ -247,7 +247,7 @@ export const women: Product[] = [
     usage:
       "تناولي العسل مباشرة أو مذاباً في ماء دافئ قبل العلاقة بـ 30-60 دقيقة. لا تتجاوزي الجرعة المدونة على العبوة. استشيري الطبيب قبل الاستخدام إذا كنتِ حاملاً أو مرضعة أو تعانين من مشاكل في القلب أو الضغط أو تتناولين أدوية مزمنة.",
     emoji: "💧",
-    image: "/images/lipo-6-for-all-10ml.webp?v=7",
+    image: "/images/lipo-6-for-all-10ml.webp",
     rating: 4.7,
     reviews: 121,
     stock: 150,
@@ -274,7 +274,7 @@ export const women: Product[] = [
     usage:
       "تناولي نصف قرص أو قطعة واحدة قبل العلاقة بـ 30-60 دقيقة. لا تتجاوزي الجرعة. لا تستخدمي أثناء الحمل أو الرضاعة دون استشارة. إذا ظهر أي أثر جانبي توقفي واستشيري الطبيب.",
     emoji: "💖",
-    image: "/images/beauty-love.webp?v=7",
+    image: "/images/beauty-love.webp",
     rating: 4.7,
     reviews: 56,
     stock: 70,
@@ -301,7 +301,7 @@ export const women: Product[] = [
     usage:
       "تمضغي قطعة واحدة قبل العلاقة بنحو 30-60 دقيقة. لا تتجاوزي الجرعة المدونة. يُتجنب للحامل أو من لديهم أمراض مزمنة إلا بعد استشارة الطبيب. إذا ظهر أي أثر جانبي توقفي فوراً.",
     emoji: "🍬",
-    image: "/images/spanish-fly-forte-gum.webp?v=7",
+    image: "/images/spanish-fly-forte-gum.webp",
     rating: 4.7,
     reviews: 153,
     stock: 90,
@@ -328,7 +328,7 @@ export const women: Product[] = [
     usage:
       "تناولي قطعة واحدة عند الحاجة أو قبل العلاقة بفترة وجيزة. لا تتجاوزي الجرعة الموصى بها. اشربي الماء بكثرة. استشيري الطبيب عند وجود أمراض مزمنة أو حمل/رضاعة. غير مناسب للأطفال.",
     emoji: "🍫",
-    image: "/images/royal-chocolate-for-her.webp?v=7",
+    image: "/images/royal-chocolate-for-her.webp",
     rating: 4.7,
     reviews: 82,
     stock: 120,
@@ -355,7 +355,7 @@ export const women: Product[] = [
     usage:
       "تمضغي قطعة واحدة قبل العلاقة بـ 30-60 دقيقة. لا تتجاوزي الكمية المدونة على العبوة. اشربي الماء بكثرة. لا تستخدمي أثناء الحمل أو الرضاعة دون استشارة. إذا ظهر أي أثر جانبي توقفي.",
     emoji: "🍬",
-    image: "/images/golden-gum-30-pieces.webp?v=7",
+    image: "/images/golden-gum-30-pieces.webp",
     rating: 4.7,
     reviews: 61,
     stock: 140,
@@ -382,7 +382,7 @@ export const women: Product[] = [
     usage:
       "ضعي كمية مناسبة موضعياً عند الحاجة للترطيب والراحة. دلكي بلطف حتى يمتص. تجنبي الجروح والالتهابات والعينين. يمكن استخدامه عند الحاجة. إذا ظهر تهيج توقفي. استشيري الطبيب إذا كان لديك حساسية أو مشاكل جلدية.",
     emoji: "💗",
-    image: "/images/aromal-emollient-gel.webp?v=7",
+    image: "/images/aromal-emollient-gel.webp",
     rating: 4.7,
     reviews: 113,
     stock: 140,
@@ -410,7 +410,7 @@ export const women: Product[] = [
       "يضاف من 10 إلى 15 نقطة إلى كوب ماء أو عصير قبل العلاقة بحوالي 30 دقيقة. لا يُستخدم أكثر من مرة خلال 24 ساعة. لا تستخدمي أثناء الحمل أو الرضاعة. استشيري الطبيب إذا كان لديك أمراض مزمنة أو تتناولين أدوية. إذا ظهر أي أثر جانبي توقفي فوراً.",
     badge: "رائج",
     emoji: "❤️",
-    image: "/images/connubial-drops.webp?v=7",
+    image: "/images/connubial-drops.webp",
     rating: 4.9,
     reviews: 136,
     stock: 90,
@@ -438,7 +438,7 @@ export const women: Product[] = [
     usage:
       "ضعي كمية صغيرة موضعياً على المناطق الحساسة عند الحاجة قبل العلاقة. دلكي بلطف حتى يمتص. للاستخدام الخارجي فقط. تجنبي الجروح أو الالتهابات أو المناطق المتهيجة. إذا ظهر تهيج أو حساسية توقفي فوراً. استشيري الطبيب إذا كان لديك حساسية أو مشاكل جلدية أو أمراض مزمنة.",
     emoji: "🧴",
-    image: "/images/argi-fem-female-gel-50g.webp?v=7",
+    image: "/images/argi-fem-female-gel-50g.webp",
     rating: 4.7,
     reviews: 34,
     stock: 110,
@@ -465,7 +465,7 @@ export const women: Product[] = [
     usage:
       "تناولي نصف قرص (أو حسب الحاجة المحددة على العبوة) قبل العلاقة بـ 30-60 دقيقة، مع كوب من الماء. لا تتجاوزي قرصاً واحداً خلال 24 ساعة. يُمنع استخدامه أثناء الحمل أو الرضاعة، ولمن يعانين من أمراض القلب أو ضغط الدم دون استشارة طبية مسبقة. يُحفظ بعيداً عن متناول الأطفال.",
     emoji: "💊",
-    image: "/images/viagra-for-women-20-tablets.webp?v=7",
+    image: "/images/viagra-for-women-20-tablets.webp",
     rating: 4.7,
     reviews: 49,
     stock: 100,
@@ -492,7 +492,7 @@ export const women: Product[] = [
     usage:
       "توضع الجرعة في ماء أو عصير/مشروب بارد، وتؤخذ قبل العلاقة بـ 60 دقيقة. الالتزام بالجرعة المدونة. لا تستخدميها للحامل أو المرضع. استشيري الطبيب إذا كان لديك أمراض مزمنة أو تتناولين أدوية. إذا ظهر أي أثر جانبي توقفي.",
     emoji: "🌸",
-    image: "/images/lovezone-drops-by-mouth.webp?v=7",
+    image: "/images/lovezone-drops-by-mouth.webp",
     rating: 4.7,
     reviews: 169,
     stock: 130,
@@ -518,7 +518,7 @@ export const women: Product[] = [
     usage:
       "تُؤكل قطعة واحدة فقط قبل جودة ومتعة الحياة الزوجية بحوالي 45-60 دقيقة. لا يُنصح بتناول أكثر من قطعة واحدة خلال 24 ساعة. يُمنع استخدامه أثناء الحمل أو الرضاعة أو لمن تعانين من أمراض مزمنة دون استشارة الطبيب. يُحفظ بعيداً عن متناول الأطفال في درجة حرارة الغرفة.",
     emoji: "🍫",
-    image: "/images/ferrari-chocolate.webp?v=7",
+    image: "/images/ferrari-chocolate.webp",
     rating: 4.9,
     reviews: 159,
     stock: 380,
@@ -545,7 +545,7 @@ export const women: Product[] = [
     usage:
       "استخدمي المنتج أو الجهاز بلطف ووفق التعليمات فقط. تجنبي الاستخدام على جروح أو التهابات أو جلد متهيج. توقفي فوراً عند ألم أو احمرار زائد أو حساسية. لا يُنصح بالاستخدام أثناء الحمل أو الرضاعة أو بعد جراحات سابقة إلا بعد استشارة طبيب.",
     emoji: "💧",
-    image: "/images/paxtone-max-filler.webp?v=7",
+    image: "/images/paxtone-max-filler.webp",
     rating: 4.7,
     reviews: 89,
     stock: 70,
@@ -572,7 +572,7 @@ export const women: Product[] = [
     usage:
       "تناولي قطعة أو قرص واحد قبل العلاقة بـ 30-60 دقيقة. لا تتجاوزي الجرعة. اشربي الماء بكثرة. لا تستخدمي أثناء الحمل أو الرضاعة. استشيري الطبيب إذا كان لديك حساسية أو أمراض مزمنة أو تتناولين أدوية. غير مناسب للأطفال.",
     emoji: "🍒",
-    image: "/images/marcin-cherry-women.webp?v=7",
+    image: "/images/marcin-cherry-women.webp",
     rating: 4.7,
     reviews: 176,
     stock: 95,
@@ -600,7 +600,7 @@ export const women: Product[] = [
     usage:
       "تناولي نصف قرص أو كبسولة واحدة قبل العلاقة بـ 30-60 دقيقة. لا تتجاوزي الجرعة المدونة على العبوة. لا تستخدمي أثناء الحمل أو الرضاعة. استشيري الطبيب إذا كان لديك أمراض مزمنة أو تتناولين أدوية. اشربي الماء بكثرة.",
     emoji: "💙",
-    image: "/images/lovezone-intimacy-at-its-peak-10x380mg.webp?v=7",
+    image: "/images/lovezone-intimacy-at-its-peak-10x380mg.webp",
     rating: 4.8,
     reviews: 151,
     stock: 250,
@@ -626,7 +626,7 @@ export const women: Product[] = [
     usage:
       "يُفتح منديل واحد ويُمسح به برفق على المنطقة المستهدفة قبل جودة ومتعة الحياة الزوجية بعدة دقائق. يُفضل تجربته على مساحة صغيرة من الجلد أولاً للتأكد من راحة بشرتك. يُراعى عدم استخدامه على الجروح أو التهيجات الجلدية. للاستخدام الخارجي فقط.",
     emoji: "❤️",
-    image: "/images/toro-duro-woman.webp?v=7",
+    image: "/images/toro-duro-woman.webp",
     rating: 4.9,
     reviews: 29,
     stock: 80,
@@ -653,7 +653,7 @@ export const women: Product[] = [
     usage:
       "ضعي 15 قطرة تقريباً أو نصف العبوة في كوب ماء واخلطيها ثم اشربيها قبل العلاقة بـ 15-30 دقيقة. لا تستخدميها أكثر من مرة خلال 24 ساعة. لا تستخدمي أثناء الحمل أو الرضاعة. إذا ظهر أي أثر جانبي مثل تهيج أو غثيان توقفي فوراً واستشيري الطبيب. اشربي الماء بكثرة.",
     emoji: "🖤",
-    image: "/images/black-widow-drops-for-women.webp?v=7",
+    image: "/images/black-widow-drops-for-women.webp",
     rating: 4.7,
     reviews: 74,
     stock: 320,
