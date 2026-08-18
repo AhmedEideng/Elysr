@@ -16,6 +16,8 @@
  * ============================================================
  */
 
+import { APP_VERSION } from "./version";
+
 interface ErrorContext {
   feature?: string;
   route?: string;
@@ -32,7 +34,6 @@ interface Breadcrumb {
 
 const SINK_URL = import.meta.env.VITE_ERROR_SINK_URL;
 const IS_PROD = import.meta.env.PROD;
-const APP_VERSION = "1.1.0";
 const MAX_BREADCRUMBS = 20;
 
 // ── Correlation ID: stable per page-session ──
