@@ -1,46 +1,20 @@
 /**
  * قائمة محافظات مصر + مصاريف الشحن.
- * مصدر واحد للحقيقة لتجنب اختلاف أسماء المحافظات عن مفاتيح الشحن.
+ * المصدر الوحيد للحقيقة هو `api/lib/config-db.json` (يقرؤه السيرفر أيضاً) —
+ * تُستورد القيم هنا عبر site-config حتى لا تختلف أسماء المحافظات أو تكلفة
+ * الشحن بين ما يعرضه الموقع وما يحاسبه السيرفر على الطلب.
  */
 import { secureLoad, secureStore } from "@/lib/local-secure-store";
+import {
+  GOVERNORATE_SHIPPING,
+  FREE_SHIPPING_THRESHOLD,
+  getShippingCost as sharedGetShippingCost,
+} from "@/lib/site-config";
 
-export const GOVERNORATE_SHIPPING = [
-  { name: "القاهرة", shipping: 50, region: "القاهرة والجيزة" },
-  { name: "الإسكندرية", shipping: 70, region: "وجه بحري" },
-  { name: "الجيزة", shipping: 50, region: "القاهرة والجيزة" },
-  { name: "القليوبية", shipping: 70, region: "وجه بحري" },
-  { name: "البحيرة", shipping: 70, region: "وجه بحري" },
-  { name: "مطروح", shipping: 120, region: "وجه بحري" }, // مرسى مطروح 120 ج.م
-  { name: "دمياط", shipping: 70, region: "وجه بحري" },
-  { name: "الدقهلية", shipping: 70, region: "وجه بحري" },
-  { name: "الشرقية", shipping: 70, region: "وجه بحري" },
-  { name: "الغربية", shipping: 70, region: "وجه بحري" },
-  { name: "المنوفية", shipping: 70, region: "وجه بحري" },
-  { name: "كفر الشيخ", shipping: 70, region: "وجه بحري" },
-  { name: "الإسماعيلية", shipping: 70, region: "وجه بحري" },
-  { name: "السويس", shipping: 70, region: "وجه بحري" },
-  { name: "بورسعيد", shipping: 70, region: "وجه بحري" },
-  { name: "شمال سيناء", shipping: 120, region: "سيناء" }, // شمال سيناء 120 ج.م
-  { name: "جنوب سيناء", shipping: 120, region: "سيناء" }, // جنوب سيناء 120 ج.م
-  { name: "البحر الأحمر", shipping: 120, region: "وجه بحري" }, // البحر الأحمر 120 ج.م
-  { name: "الفيوم", shipping: 80, region: "وجه قبلي" },
-  { name: "بني سويف", shipping: 80, region: "وجه قبلي" },
-  { name: "المنيا", shipping: 80, region: "وجه قبلي" },
-  { name: "أسيوط", shipping: 100, region: "وجه قبلي" }, // أسيوط 100 ج.م
-  { name: "سوهاج", shipping: 100, region: "وجه قبلي" }, // سوهاج 100 ج.م
-  { name: "قنا", shipping: 120, region: "وجه قبلي" }, // قنا 120 ج.م
-  { name: "الأقصر", shipping: 120, region: "وجه قبلي" }, // الأقصر 120 ج.م
-  { name: "أسوان", shipping: 120, region: "وجه قبلي" }, // أسوان 120 ج.م
-  { name: "الوادي الجديد", shipping: 120, region: "وجه قبلي" }, // الوادي الجديد 120 ج.م
-] as const;
+// إعادة تصدير للتوافق الخلفي — المصدر الفعلي هو site-config.
+export { GOVERNORATE_SHIPPING, FREE_SHIPPING_THRESHOLD } from "@/lib/site-config";
 
 export const EGYPT_GOVERNORATES = GOVERNORATE_SHIPPING.map((g) => g.name);
-
-export const FREE_SHIPPING_THRESHOLD = 2000;
-
-function normalizeGovernorate(governorate: string): string {
-  return governorate.trim().replace(/\s+/g, " ");
-}
 
 export function qualifiesForFreeShipping(subtotal: number): boolean {
   return subtotal >= FREE_SHIPPING_THRESHOLD;
@@ -48,14 +22,12 @@ export function qualifiesForFreeShipping(subtotal: number): boolean {
 
 /** 🚚 حساب مصاريف الشحن حسب المحافظة مع دعم الشحن المجاني */
 export function getShippingCost(governorate: string, subtotal = 0): number {
-  if (qualifiesForFreeShipping(subtotal)) return 0;
-  const normalized = normalizeGovernorate(governorate);
-  return GOVERNORATE_SHIPPING.find((g) => g.name === normalized)?.shipping ?? 70;
+  return sharedGetShippingCost(governorate, subtotal);
 }
 
 /** 🏷️ وصف منطقة الشحن */
 export function getShippingLabel(governorate: string): string {
-  const normalized = normalizeGovernorate(governorate);
+  const normalized = governorate.trim().replace(/\s+/g, " ");
   return GOVERNORATE_SHIPPING.find((g) => g.name === normalized)?.region ?? "وجه بحري";
 }
 

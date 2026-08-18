@@ -13,6 +13,13 @@
  * ============================================================
  */
 
+import {
+  PROMO_TIERS as SHARED_PROMO_TIERS,
+  PROMO_MIN_THRESHOLD as SHARED_MIN,
+  type PromoTier,
+} from "./site-config";
+export type { PromoTier } from "./site-config";
+
 export const PROMO_TITLE = "مبادرة الرعاية الماسية";
 export const PROMO_TAGLINE = "رعاية طبية متكاملة.. بتوفير استثنائي!";
 export const PROMO_ORDER_LABEL = "💎 مبادرة الرعاية الماسية";
@@ -40,44 +47,13 @@ export function getPromoEndIso(now: Date = new Date()): string {
  */
 export const PROMO_END_ISO = getPromoEndIso();
 
-export interface PromoTier {
-  threshold: number;
-  discount: number;
-  label: string;
-  icon: string;
-  name: string;
-  color: string;
-}
+/**
+ * الشرائح تُقرأ من مصدر الحقيقة الوحيد (api/lib/config-db.json) عبر site-config.
+ * مرتّبة من الأعلى للأدنى — مهم لمنطق الحساب (find أول شريحة يساوي/يقل عنها المبلغ).
+ */
+export const PROMO_TIERS: PromoTier[] = SHARED_PROMO_TIERS;
 
-/** الشرائح مرتّبة من الأعلى للأدنى (مهم لمنطق الحساب) */
-export const PROMO_TIERS: PromoTier[] = [
-  {
-    threshold: 2000,
-    discount: 0.25,
-    label: "25%",
-    icon: "👑",
-    name: "شريحة التميز والرعاية النخبوية",
-    color: "from-indigo-600 to-indigo-800",
-  },
-  {
-    threshold: 1500,
-    discount: 0.2,
-    label: "20%",
-    icon: "⚡",
-    name: "شريحة العناية الماسية المتقدمة",
-    color: "from-teal-500 to-teal-700",
-  },
-  {
-    threshold: 1000,
-    discount: 0.15,
-    label: "15%",
-    icon: "💎",
-    name: "شريحة الرعاية الأساسية المتميزة",
-    color: "from-sky-500 to-sky-700",
-  },
-];
-
-export const PROMO_MIN_THRESHOLD = PROMO_TIERS[PROMO_TIERS.length - 1].threshold;
+export const PROMO_MIN_THRESHOLD: number = SHARED_MIN;
 
 export function isPromoActive(_now: Date = new Date()): boolean {
   // المبادرة ممتدة ونشطة وتتجدد تلقائياً دائماً
