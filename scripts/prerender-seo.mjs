@@ -534,6 +534,22 @@ async function prerender() {
               .join("")}</ul>`
           : "";
 
+      // 🚀 روابط داخلية للمقالات في صفحة /education (crawler-visible)
+      // صفحة الفهرس ترسم قائمة المقالات عبر JS (SPA) ولا يقرؤها الزاحف،
+      // لذلك نضيف هنا قائمة روابط ثابتة لجميع المقالات حتى تكون كل مقالة
+      // "مكتشفة" ومربوطة من الفهرس بمسار زحف حقيقي — كما فُعل مع المنتجات.
+      const articleLinksBody =
+        r.path === "/education" && articles.length > 0
+          ? `<h2>جميع المقالات التوعوية</h2><ul>${articles
+              .map(
+                (a) =>
+                  `<li><a href="${SITE_URL}/education/${a.slug}">${esc(a.title)}</a> — ${esc(
+                    makeMetaDescription(a.excerpt),
+                  )}</li>`,
+              )
+              .join("")}</ul>`
+          : "";
+
       const html = buildHtml(template, {
         title: r.title,
         description: r.desc,
@@ -542,7 +558,7 @@ async function prerender() {
         type: "website",
         noindex: Boolean(r.noindex),
         jsonLd,
-        bodyContent: `<h1>${esc(r.h1)}</h1><p>${esc(r.desc)}</p>${productLinksBody}${faqBody}`,
+        bodyContent: `<h1>${esc(r.h1)}</h1><p>${esc(r.desc)}</p>${productLinksBody}${articleLinksBody}${faqBody}`,
       });
 
       // Write to dist/<path>.html (cleanUrls handles trailing-slash routing)
@@ -790,6 +806,7 @@ async function prerender() {
               <h2>المصادر الطبية المستخدمة</h2>
               <ul>${sourcesBody}</ul>
             </section>
+            <p><a href="${SITE_URL}/education">← تصفح جميع المقالات التوعوية</a></p>
           </article>
         `;
 
