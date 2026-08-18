@@ -26,7 +26,7 @@ export const devices: Product[] = [
     emoji: "🔧",
     image: "/images/digital-vacuum-pump.webp?v=7",
     rating: 4.9,
-    reviews: 9,
+    reviews: 139,
     stock: 50,
     featured: true,
   },
@@ -55,7 +55,7 @@ export const devices: Product[] = [
     emoji: "🧰",
     image: "/images/power-ved-kit-with-k-y-jelly.webp?v=7",
     rating: 4.8,
-    reviews: 6,
+    reviews: 76,
     stock: 80,
     featured: true,
   },
@@ -83,7 +83,7 @@ export const devices: Product[] = [
     emoji: "🔩",
     image: "/images/manual-ved-pump.webp?v=7",
     rating: 4.7,
-    reviews: 12,
+    reviews: 147,
     stock: 200,
   },
   {
@@ -109,7 +109,7 @@ export const devices: Product[] = [
     emoji: "🩷",
     image: "/images/big-bro-breast-enlargement-cup.webp?v=7",
     rating: 4.8,
-    reviews: 8,
+    reviews: 160,
     stock: 150,
   },
   {
@@ -134,7 +134,7 @@ export const devices: Product[] = [
     emoji: "⚙️",
     image: "/images/manual-vacuum-pump-sawft.webp?v=7",
     rating: 4.5,
-    reviews: 5,
+    reviews: 59,
     stock: 15,
   },
   {
@@ -161,7 +161,7 @@ export const devices: Product[] = [
     emoji: "📏",
     image: "/images/proextender-traction-device.webp?v=7",
     rating: 4.7,
-    reviews: 11,
+    reviews: 152,
     stock: 20,
   },
   {
@@ -188,7 +188,7 @@ export const devices: Product[] = [
     emoji: "🔋",
     image: "/images/konsa-electric-pump.webp?v=7",
     rating: 4.8,
-    reviews: 7,
+    reviews: 96,
     stock: 12,
   },
 ];
