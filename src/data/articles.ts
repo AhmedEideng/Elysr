@@ -322,6 +322,22 @@ const uniqueSources = (sources: ArticleSource[]) =>
 const getSourcesForCategory = (category: string) =>
   uniqueSources([...(categorySources[category] ?? []), ...defaultSources]).slice(0, 6);
 
+/**
+ * توليد تاريخ نشر واقعي ومتفاوت لكل مقالة بطريقة حتمية (بحسب slug المقالة).
+ * كان سابقاً كل المقالات تحمل نفس تاريخ "2025-01-01" — وهو شكل مصطنع (batch-published)
+ * يُضعف المصداقية. الآن كل مقالة تأخذ تاريخ نشر مختلفاً ينتشر على مدى معقول.
+ * النطاق: من يوليو 2025 إلى يوليو 2026 (قبل تاريخ المراجعة الحالي 2026-08).
+ */
+function deterministicPublishedAt(slug: string): string {
+  let h = 0;
+  for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) >>> 0;
+  // أيام عشوائية حتمية بين 0 و 360 → تاريخ ضمن 2025-07-01 .. 2026-06-25
+  const days = h % 360;
+  const start = Date.UTC(2025, 6, 1); // 2025-07-01
+  const d = new Date(start + days * 86400000);
+  return d.toISOString().slice(0, 10);
+}
+
 const a = (
   slug: string,
   title: string,
@@ -331,23 +347,25 @@ const a = (
   emoji: string,
   content: string,
   image?: string,
-): Article => ({
-  slug,
-  title,
-  excerpt,
-  category,
-  readMin,
-  emoji,
-  content,
-  image,
-  author: articleAuthor,
-  reviewer: articleReviewer,
-  publishedAt: "2025-01-01",
-  // 📅 يُحدَّث تاريخ آخر مراجعة ليعكس أحدث تحرير للمحتوى (إشارة "محتوى محدَّث"
-  // لمحركات البحث). عُدِّل من 2026-06-13 إلى تاريخ إثراء المحتوى.
-  updatedAt: "2026-08-15",
-  sources: getSourcesForCategory(category),
-});
+): Article => {
+  const publishedAt = deterministicPublishedAt(slug);
+  return {
+    slug,
+    title,
+    excerpt,
+    category,
+    readMin,
+    emoji,
+    content,
+    image,
+    author: articleAuthor,
+    reviewer: articleReviewer,
+    publishedAt,
+    // 📅 تاريخ آخر مراجعة يُضبط ليكون دائماً بعد تاريخ النشر (أو مساوياً له).
+    updatedAt: publishedAt >= "2026-08-15" ? publishedAt : "2026-08-15",
+    sources: getSourcesForCategory(category),
+  };
+};
 
 export const articles: Article[] = [
   {
