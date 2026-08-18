@@ -3,6 +3,7 @@
  * Elysr Hero — صورة كاملة مدمجة
  * ============================================================
  */
+import { assetUrl } from "@/lib/cache";
 
 export function Hero() {
   return (
@@ -18,8 +19,8 @@ export function Hero() {
         style={{ aspectRatio: "1200 / 663" }}
       >
         <img
-          src="/images/hero-banner.webp?v=27"
-          srcSet="/images/hero-banner-768.webp?v=27 768w, /images/hero-banner.webp?v=27 1200w"
+          src={assetUrl("/images/hero-banner.webp")}
+          srcSet={`${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner.webp")} 1200w`}
           sizes="100vw"
           alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري 100% — دفع عند الاستلام — شحن سريع لجميع المحافظات"
           className="block h-full w-full object-cover"

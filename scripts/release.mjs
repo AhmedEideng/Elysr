@@ -59,8 +59,33 @@ console.log(`🏷️  رفع الإصدار: ${current} → ${next}`);
 pkg.version = next;
 writeFileSync(PKG_PATH, JSON.stringify(pkg, null, 2) + "\n");
 
+// ── 🔄 رفع رقم إصدار الكاش تلقائياً (لكسر كاش الصور/الأصول في المتصفحات) ──
+// نزيّد CACHE_VERSION في الملفات الثلاثة التي تعرّفه حتى تظهر أي صور معدّلة
+// فوراً بعد كل إصدار، بدون أي تدخل يدوي.
+function bumpCacheVersion() {
+  const files = [
+    { path: "../src/lib/cache.ts", re: /CACHE_VERSION = "\d+"/ },
+    { path: "../scripts/prerender-seo.mjs", re: /CACHE_VERSION = "\d+"/ },
+    { path: "../scripts/generate-sitemap.mjs", re: /CACHE_VERSION = "\d+"/ },
+  ];
+  for (const { path, re } of files) {
+    const abs = new URL(path, import.meta.url);
+    const content = readFileSync(abs, "utf-8");
+    const match = content.match(re);
+    if (!match) {
+      console.warn(`⚠️  لم أجد CACHE_VERSION في ${path}`);
+      continue;
+    }
+    const currentV = parseInt(match[0].match(/\d+/)[0], 10) || 0;
+    const newV = currentV + 1;
+    writeFileSync(abs, content.replace(re, `CACHE_VERSION = "${newV}"`), "utf-8");
+    console.log(`🗂️  رفع كاش ${path} → ${newV}`);
+  }
+}
+bumpCacheVersion();
+
 try {
-  execSync("git add package.json", { stdio: "inherit" });
+  execSync("git add package.json src/lib/cache.ts scripts/prerender-seo.mjs scripts/generate-sitemap.mjs", { stdio: "inherit" });
   execSync(`git commit -m "release: v${next}"`, { stdio: "inherit" });
   execSync(`git tag "v${next}"`, { stdio: "inherit" });
   console.log(`✅ تم إنشاء tag: v${next}`);

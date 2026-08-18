@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Zap, Clock, Activity, Heart } from "lucide-react";
 import { getProductById, getFeaturedProducts } from "@/data/products";
+import { thumbUrl, assetUrl } from "@/lib/cache";
 
 // قوائم المعرفات المرشحة الأكثر طلباً ومبيعاً بكل فئة (مرتبة تنازلياً حسب الأكثر مبيعاً)
 // تم تفعيل آلية فلترة ديناميكية تستبعد فوراً أي منتج معروض بالفعل بقسم الأكثر طلباً العلوي
@@ -114,15 +115,10 @@ export function ShopByConcern() {
                     >
                       <div className="relative h-20 bg-muted overflow-hidden">
                         <img
-                          src={
-                            prod.image
-                              ? prod.image.split("?")[0].replace(/^\/images\//, "/images/thumbs/") +
-                                "?v=elysr_v28"
-                              : ""
-                          }
+                          src={prod.image ? thumbUrl(prod.image, "thumbs") : ""}
                           srcSet={
                             prod.image
-                              ? `${prod.image.split("?")[0].replace(/^\/images\//, "/images/thumbs-180/") + "?v=elysr_v28"} 360w, ${prod.image.split("?")[0].replace(/^\/images\//, "/images/thumbs/") + "?v=elysr_v28"} 480w, ${prod.image.split("?")[0] + "?v=elysr_v28"} 800w`
+                              ? `${thumbUrl(prod.image, "thumbs-180")} 360w, ${thumbUrl(prod.image, "thumbs")} 480w, ${assetUrl(prod.image)} 800w`
                               : ""
                           }
                           sizes="(max-width: 640px) 180px, 240px"

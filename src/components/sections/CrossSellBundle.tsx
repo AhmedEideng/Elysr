@@ -5,6 +5,7 @@ import type { Product } from "@/data/product-types";
 import { formatPrice } from "@/data/product-types";
 import { useCart } from "@/hooks/use-cart";
 import { toast } from "sonner";
+import { thumbUrl, assetUrl } from "@/lib/cache";
 
 export function CrossSellBundle({
   mainProduct,
@@ -68,11 +69,8 @@ export function CrossSellBundle({
                 <div className="relative aspect-square w-full overflow-hidden rounded-2xl border bg-white p-2 shadow-sm transition-transform group-hover:scale-105 group-hover:border-primary/50 group-hover:shadow-md">
                   {item.image ? (
                     <img
-                      src={
-                        item.image.split("?")[0].replace(/^\/images\//, "/images/thumbs/") +
-                        "?v=elysr_v28"
-                      }
-                      srcSet={`${item.image.split("?")[0].replace(/^\/images\//, "/images/thumbs-180/") + "?v=elysr_v28"} 360w, ${item.image.split("?")[0].replace(/^\/images\//, "/images/thumbs/") + "?v=elysr_v28"} 480w, ${item.image.split("?")[0] + "?v=elysr_v28"} 800w`}
+                      src={thumbUrl(item.image, "thumbs")}
+                      srcSet={`${thumbUrl(item.image, "thumbs-180")} 360w, ${thumbUrl(item.image, "thumbs")} 480w, ${assetUrl(item.image)} 800w`}
                       sizes="(max-width: 640px) 180px, 240px"
                       alt={item.name}
                       loading="lazy"

@@ -2,6 +2,7 @@ import { useRecentlyViewed } from "@/hooks/use-recently-viewed";
 import { formatPrice } from "@/data/product-types";
 import { getProductBySlug } from "@/data/products";
 import { X } from "lucide-react";
+import { thumbUrl, assetUrl } from "@/lib/cache";
 
 /**
  * ============================================================
@@ -75,11 +76,8 @@ export function RecentlyViewed({ currentSlug }: { currentSlug?: string }) {
             <div className="aspect-square overflow-hidden bg-muted">
               {product.image ? (
                 <img
-                  src={
-                    product.image.split("?")[0].replace(/^\/images\//, "/images/thumbs/") +
-                    "?v=elysr_v28"
-                  }
-                  srcSet={`${product.image.split("?")[0].replace(/^\/images\//, "/images/thumbs-180/") + "?v=elysr_v28"} 360w, ${product.image.split("?")[0].replace(/^\/images\//, "/images/thumbs/") + "?v=elysr_v28"} 480w, ${product.image.split("?")[0] + "?v=elysr_v28"} 800w`}
+                  src={thumbUrl(product.image, "thumbs")}
+                  srcSet={`${thumbUrl(product.image, "thumbs-180")} 360w, ${thumbUrl(product.image, "thumbs")} 480w, ${assetUrl(product.image)} 800w`}
                   sizes="(max-width: 640px) 180px, 240px"
                   alt={product.name}
                   loading="lazy"

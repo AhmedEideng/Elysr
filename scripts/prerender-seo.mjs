@@ -29,6 +29,19 @@ const SITE_URL = (process.env.SITE_URL || "https://elysrmedical.store").replace(
 const SITE_NAME = "اليسر ميديكال";
 const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
+/**
+ * 🗂️ رقم إصدار الكاش المركزي — نفس القيمة في `src/lib/cache.ts`.
+ * يُلحق تلقائياً بكل صورة/أصل في HTML المولّد (og:image, preload, sitemap, feed)
+ * ليكسر كاش المتصفح عند أي تغيير للصور. ارفعه هنا فقط عند تغيير الصور.
+ */
+const CACHE_VERSION = "28";
+
+/** يلحق رقم الإصدار بمسار صورة/أصل (يزيل أي ?v= قديم أولاً). */
+function assetUrl(path) {
+  const base = String(path).split("?")[0];
+  return `${base}?v=${CACHE_VERSION}`;
+}
+
 /** HTML-escape */
 function esc(str = "") {
   return String(str)
@@ -185,7 +198,7 @@ function buildHtml(template, opts) {
   if (heroPreload) {
     html = html.replace(
       "</head>",
-      `  <link rel="preload" as="image" href="/images/hero-banner.webp?v=27" imagesrcset="/images/hero-banner-768.webp?v=27 768w, /images/hero-banner.webp?v=27 1200w" imagesizes="100vw" fetchpriority="high" />
+      `  <link rel="preload" as="image" href="${assetUrl("/images/hero-banner.webp")}" imagesrcset="${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner.webp")} 1200w" imagesizes="100vw" fetchpriority="high" />
 </head>`,
     );
   }
@@ -582,7 +595,7 @@ async function prerender() {
       // 🎯 meta description مُقتطع إلى ~155 حرفاً (يُعرض كاملاً في نتائج Google).
       // الوصف الكامل (product.description) يبقى في JSON-LD ومحتوى الصفحة.
       const desc = makeMetaDescription(product.description);
-      const img = product.image ? `${SITE_URL}${product.image}` : `${SITE_URL}/og-default.webp`;
+      const img = product.image ? `${SITE_URL}${assetUrl(product.image)}` : `${SITE_URL}/og-default.webp`;
       const canonical = `${SITE_URL}/products/${product.slug}`;
 
       // ⭐ aggregateRating — لعرض نجوم التقييم في نتائج Google.
@@ -758,7 +771,7 @@ async function prerender() {
         const img = article.image
           ? article.image.startsWith("http")
             ? article.image
-            : `${SITE_URL}${article.image}`
+            : `${SITE_URL}${assetUrl(article.image)}`
           : `${SITE_URL}/og-default.webp`;
         const canonical = `${SITE_URL}/education/${article.slug}`;
 
@@ -822,7 +835,7 @@ async function prerender() {
           <article>
             <h1>${esc(article.title)}</h1>
             <p><em>${esc(article.category)} — ${article.readMin} دقائق قراءة — آخر تحديث: ${esc(article.updatedAt || "")}</em></p>
-            ${article.image ? `<img src="${article.image.startsWith("http") ? article.image : article.image}" alt="${esc(article.title)}" width="800" height="450" loading="eager" style="width:100%;height:auto;border-radius:16px;margin:16px 0" />` : ""}
+            ${article.image ? `<img src="${article.image.startsWith("http") ? article.image : assetUrl(article.image)}" alt="${esc(article.title)}" width="800" height="450" loading="eager" style="width:100%;height:auto;border-radius:16px;margin:16px 0" />` : ""}
             <p><strong>${esc(article.excerpt)}</strong></p>
             <section>
               <h2>بيانات الثقة والمراجعة</h2>

@@ -8,6 +8,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const SITE_URL = (process.env.SITE_URL || "https://elysrmedical.store").replace(/\/$/, "");
 
+/** 🗂️ رقم إصدار الكاش المركزي — نفس القيمة في src/lib/cache.ts و scripts/prerender-seo.mjs */
+const CACHE_VERSION = "28";
+
+/** يلحق رقم الإصدار بمسار صورة/أصل (يزيل أي ?v= قديم أولاً). */
+function assetUrl(path) {
+  const base = String(path).split("?")[0];
+  return `${base}?v=${CACHE_VERSION}`;
+}
+
 function getGitLastmod(filePath, fallback) {
   try {
     const out = execSync(`git log -1 --format=%cs -- ${filePath}`, {
@@ -201,7 +210,7 @@ ${urls
     const imageBlock = u.image
       ? `
     <image:image>
-      <image:loc>${SITE_URL}${u.image}</image:loc>
+      <image:loc>${SITE_URL}${assetUrl(u.image)}</image:loc>
       <image:title>${esc(u.imageTitle)}</image:title>
     </image:image>`
       : "";
@@ -224,7 +233,7 @@ ${urls
         (a) => `  <url>
     <loc>${SITE_URL}/education/${a.slug}</loc>
     <image:image>
-      <image:loc>${SITE_URL}${a.image}</image:loc>
+      <image:loc>${SITE_URL}${assetUrl(a.image)}</image:loc>
       <image:title>${esc(a.title)}</image:title>
       <image:caption>${esc(a.title)} — اليسر ميديكال</image:caption>
     </image:image>
@@ -240,7 +249,7 @@ ${products
     (p) => `  <url>
     <loc>${SITE_URL}/products/${p.slug}</loc>
     <image:image>
-      <image:loc>${SITE_URL}${p.image}</image:loc>
+      <image:loc>${SITE_URL}${assetUrl(p.image)}</image:loc>
       <image:title>${esc(p.name)}</image:title>
       <image:caption>${esc(p.name)} — اليسر ميديكال</image:caption>
     </image:image>
@@ -294,7 +303,7 @@ ${catalogProducts
       <g:title>${esc(p.name)}</g:title>
       <g:description>${esc(fullDesc)}</g:description>
       <g:link>${SITE_URL}/products/${p.slug}</g:link>
-      <g:image_link>${SITE_URL}${p.image}</g:image_link>
+      <g:image_link>${SITE_URL}${assetUrl(p.image)}</g:image_link>
       <g:brand>اليسر ميديكال</g:brand>
       <g:condition>new</g:condition>
       <g:availability>${p.stock > 0 ? "in stock" : "out of stock"}</g:availability>

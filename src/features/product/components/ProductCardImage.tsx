@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { thumbUrl, assetUrl } from "@/lib/cache";
 
 /**
  * 🖼️ Product Card Image — مكون منعزل لصورة بطاقة المنتج مع دعم الـ Responsive SrcSet.
@@ -52,12 +53,8 @@ export function ProductCardImage({
     );
   }
 
-  const baseWebP = image.split("?")[0];
-  const t180 = baseWebP.replace(/^\/images\//, "/images/thumbs-180/");
-  const t480 = baseWebP.replace(/^\/images\//, "/images/thumbs/");
-
-  const srcUrl = `${t480}?v=elysr_v28`;
-  const srcSetUrl = `${t180}?v=elysr_v28 360w, ${t480}?v=elysr_v28 480w, ${baseWebP}?v=elysr_v28 800w`;
+  const srcUrl = thumbUrl(image, "thumbs");
+  const srcSetUrl = `${thumbUrl(image, "thumbs-180")} 360w, ${thumbUrl(image, "thumbs")} 480w, ${assetUrl(image)} 800w`;
 
   return (
     <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-[#f0f9ff] via-white to-[#fef9c3]">
