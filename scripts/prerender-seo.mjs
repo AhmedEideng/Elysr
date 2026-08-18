@@ -686,7 +686,34 @@ async function prerender() {
       };
 
       const benefits = (product.benefits || []).map((b) => `<li>${esc(b)}</li>`).join("");
+
+      // اسم القسم + رابط القسم (crawler-visible)
+      const categoryName =
+        product.category === "men"
+          ? "منتجات الصحة الزوجية للرجال"
+          : product.category === "women"
+            ? "منتجات الصحة الزوجية للنساء"
+            : "الأجهزة والمستلزمات الطبية";
+      const categoryUrl = `${SITE_URL}/products/${product.category}`;
+
+      // منتجات مشابهة من نفس القسم (حتى 4، مع استبعاد المنتج الحالي)
+      const relatedProducts = products
+        .filter((p) => p.category === product.category && p.slug !== product.slug)
+        .slice(0, 4);
+      const relatedBody =
+        relatedProducts.length > 0
+          ? `<h2>منتجات مشابهة</h2><ul>${relatedProducts
+              .map(
+                (p) =>
+                  `<li><a href="${SITE_URL}/products/${p.slug}">${esc(p.name)}</a></li>`,
+              )
+              .join("")}</ul>`
+          : "";
+
       const body = `
+        <nav aria-label="Breadcrumb">
+          <a href="${SITE_URL}/">الرئيسية</a> › <a href="${categoryUrl}">${esc(categoryName)}</a> › ${esc(product.name)}
+        </nav>
         <h1>${esc(product.name)}</h1>
         <p><strong>${esc(product.nameEn || "")}</strong></p>
         <p>${esc(product.description)}</p>
@@ -699,6 +726,8 @@ async function prerender() {
             ? `<h2>تقييمات العملاء</h2><p>التقييم العام: ${productRating} من 5 (${productReviews} تقييم)</p>`
             : ""
         }
+        <p><a href="${categoryUrl}">تصفح كل ${esc(categoryName)}</a></p>
+        ${relatedBody}
       `;
 
       const html = buildHtml(template, {
