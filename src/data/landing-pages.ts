@@ -1105,12 +1105,12 @@ export const seoLandingPages: SeoLandingPage[] = [
     links: [
       {
         label: "كريمات التأخير",
-        href: "/products/guides/delay-cream-for-men-guide",
+        href: "/products/guides/best-delay-products-egypt",
         description: "دليل شامل لكريمات التأخير وطريقة الاستخدام",
       },
       {
         label: "بخاخات التأخير",
-        href: "/products/guides/delay-spray-for-men-egypt",
+        href: "/products/guides/best-delay-products-egypt",
         description: "مقارنة أفضل بخاخات التأخير المتوفرة",
       },
     ],
@@ -1167,12 +1167,12 @@ export const seoLandingPages: SeoLandingPage[] = [
     links: [
       {
         label: "بخاخات التأخير",
-        href: "/products/guides/delay-spray-for-men-egypt",
+        href: "/products/guides/best-delay-products-egypt",
         description: "أفضل بخاخات التأخير في مصر",
       },
       {
         label: "كريمات التأخير",
-        href: "/products/guides/delay-cream-for-men-guide",
+        href: "/products/guides/best-delay-products-egypt",
         description: "دليل كريمات التأخير",
       },
     ],
@@ -1228,7 +1228,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     links: [
       {
         label: "بخاخات التأخير",
-        href: "/products/guides/delay-spray-for-men-egypt",
+        href: "/products/guides/best-delay-products-egypt",
         description: "أفضل بخاخات التأخير",
       },
       {
@@ -1294,7 +1294,7 @@ export const seoLandingPages: SeoLandingPage[] = [
       },
       {
         label: "بخاخ بروكوميل",
-        href: "/products/guides/procomil-spray-guide",
+        href: "/products/guides/best-delay-products-egypt",
         description: "دليل بخاخ بروكوميل",
       },
     ],
@@ -1350,12 +1350,12 @@ export const seoLandingPages: SeoLandingPage[] = [
     links: [
       {
         label: "بخاخات التأخير",
-        href: "/products/guides/delay-spray-for-men-egypt",
+        href: "/products/guides/best-delay-products-egypt",
         description: "أفضل البخاخات",
       },
       {
         label: "كريمات التأخير",
-        href: "/products/guides/delay-cream-for-men-guide",
+        href: "/products/guides/best-delay-products-egypt",
         description: "أفضل الكريمات",
       },
     ],
@@ -1532,7 +1532,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     links: [
       {
         label: "فياجرا أم سياليس",
-        href: "/products/guides/viagra-vs-cialis-egypt",
+        href: "/products/guides/erectile-dysfunction-products-egypt",
         description: "مقارنة بين الخيارين",
       },
       {
@@ -1593,12 +1593,12 @@ export const seoLandingPages: SeoLandingPage[] = [
     links: [
       {
         label: "فياجرا أم سياليس",
-        href: "/products/guides/viagra-vs-cialis-egypt",
+        href: "/products/guides/erectile-dysfunction-products-egypt",
         description: "مقارنة شاملة",
       },
       {
         label: "منتجات السيلدينافيل",
-        href: "/products/guides/sildenafil-products-guide",
+        href: "/products/guides/erectile-dysfunction-products-egypt",
         description: "بدائل السيلدينافيل",
       },
     ],
@@ -1724,7 +1724,7 @@ export const seoLandingPages: SeoLandingPage[] = [
       },
       {
         label: "بخاخات التأخير",
-        href: "/products/guides/delay-spray-for-men-egypt",
+        href: "/products/guides/best-delay-products-egypt",
         description: "بديل موضعي أكثر أماناً",
       },
     ],
@@ -1839,7 +1839,7 @@ export const seoLandingPages: SeoLandingPage[] = [
       },
       {
         label: "قلق الأداء",
-        href: "/products/guides/anxiety-performance-products",
+        href: "/products/guides/marital-products-giza",
         description: "التعامل مع قلق الأداء",
       },
     ],
@@ -2213,7 +2213,7 @@ export const seoLandingPages: SeoLandingPage[] = [
       },
       {
         label: "قطرات الرغبة",
-        href: "/products/guides/female-arousal-drops-guide",
+        href: "/products/guides/women-libido-products-egypt",
         description: "بديل القطرات",
       },
     ],
@@ -2272,7 +2272,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     links: [
       {
         label: "قطرات الرغبة",
-        href: "/products/guides/female-arousal-drops-guide",
+        href: "/products/guides/women-libido-products-egypt",
         description: "كل قطرات الرغبة",
       },
       {
@@ -2331,7 +2331,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     links: [
       {
         label: "قطرات أخرى",
-        href: "/products/guides/female-arousal-drops-guide",
+        href: "/products/guides/women-libido-products-egypt",
         description: "بدائل قطرات الرغبة",
       },
       {
@@ -2448,12 +2448,12 @@ export const seoLandingPages: SeoLandingPage[] = [
     links: [
       {
         label: "قطرات الرغبة",
-        href: "/products/guides/female-arousal-drops-guide",
+        href: "/products/guides/women-libido-products-egypt",
         description: "منتجات دعم الرغبة",
       },
       {
         label: "منتجات الراحة",
-        href: "/products/guides/female-comfort-gel-guide",
+        href: "/products/guides/women-libido-products-egypt",
         description: "جل الراحة والترطيب",
       },
     ],
@@ -2692,7 +2692,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     links: [
       {
         label: "دليل VED",
-        href: "/products/guides/ved-device-guide",
+        href: "/products/guides/vacuum-pump-men-guide",
         description: "كيف تستخدم VED بأمان",
       },
       {
@@ -2873,7 +2873,7 @@ export const seoLandingPages: SeoLandingPage[] = [
     links: [
       {
         label: "منتجات آمنة",
-        href: "/products/guides/safe-marital-products-guide",
+        href: "/products/guides/marital-products-giza",
         description: "دليل المنتجات الآمنة",
       },
       {
@@ -3292,7 +3292,7 @@ export const seoLandingPages: SeoLandingPage[] = [
       },
       {
         label: "قطرات الرغبة",
-        href: "/products/guides/female-arousal-drops-guide",
+        href: "/products/guides/women-libido-products-egypt",
         description: "دليل القطرات",
       },
     ],
@@ -6358,7 +6358,7 @@ export const seoLandingPages: SeoLandingPage[] = [
       },
       {
         label: "قطرات الرغبة",
-        href: "/products/guides/female-arousal-drops-guide",
+        href: "/products/guides/women-libido-products-egypt",
         description: "دليل القطرات النسائية.",
       },
       {
