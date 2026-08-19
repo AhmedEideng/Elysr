@@ -1026,7 +1026,7 @@ export const men: Product[] = [
   },
   {
     id: "m-40",
-    slug: "dmas-chocolate-for-men-9-pcs",
+    slug: "dmas-chocolate-9-pcs",
     name: "شوكولاتة ديماس الملكية للرجال (DMAS Chocolate)",
     nameEn: "DMAS Chocolate for Men (9 Pcs)",
     category: "men",

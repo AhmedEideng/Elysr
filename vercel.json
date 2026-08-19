@@ -343,7 +343,7 @@
     },
     {
       "source": "/products/m-40",
-      "destination": "/products/dmas-chocolate-for-men-9-pcs",
+      "destination": "/products/dmas-chocolate-9-pcs",
       "permanent": true
     },
     {
@@ -518,7 +518,7 @@
     },
     {
       "source": "/products/w-17",
-      "destination": "/products/viagra-for-women-20-tablets",
+      "destination": "/products/viagra-20-tablets",
       "permanent": true
     },
     {
@@ -862,6 +862,11 @@
       "permanent": true
     },
     {
+      "source": "/products/dmas-chocolate-for-men-9-pcs",
+      "destination": "/products/dmas-chocolate-9-pcs",
+      "permanent": true
+    },
+    {
       "source": "/products/kreva-gel-for-men",
       "destination": "/products/kreva-gel",
       "permanent": true
@@ -884,6 +889,11 @@
     {
       "source": "/products/coffemix-caviar-original-for-women",
       "destination": "/products/coffemix-caviar-original",
+      "permanent": true
+    },
+    {
+      "source": "/products/viagra-for-women-20-tablets",
+      "destination": "/products/viagra-20-tablets",
       "permanent": true
     },
     {

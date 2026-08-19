@@ -445,7 +445,7 @@ export const women: Product[] = [
   },
   {
     id: "w-17",
-    slug: "viagra-for-women-20-tablets",
+    slug: "viagra-20-tablets",
     name: "أقراص فياجرا النسائية الأصلية (Viagra For Women)",
     nameEn: "Viagra for Women (20 Tablets)",
     category: "women",
