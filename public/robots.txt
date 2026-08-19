@@ -3,10 +3,10 @@
 
 User-agent: *
 Allow: /
-Disallow: /cart
-Disallow: /thank-you
-Disallow: /order-confirmed
-Disallow: /wishlist
+
+# ملاحظة: صفحات /cart و /wishlist و /order-confirmed و /thank-you تحمل وسم
+# noindex في HTML مباشرة. لذا لا نضعها في Disallow هنا — لأن منع الزحف
+# (Disallow) يمنع Google من قراءة وسم noindex، والتكرار بينهما غير مفيد.
 
 # Allow AI bots for AI Overviews, ChatGPT discovery, Perplexity, etc.
 User-agent: GPTBot
@@ -21,8 +21,6 @@ User-agent: anthropic-ai
 Allow: /
 User-agent: Claude-Web
 Allow: /
-
-# Block aggressive scrapers (not AI assistants)
 User-agent: CCBot
 Disallow: /
 User-agent: Bytespider
