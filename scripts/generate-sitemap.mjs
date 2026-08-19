@@ -330,11 +330,9 @@ ${catalogProducts
 User-agent: *
 Allow: /
 
-# ملاحظة: صفحات /cart و/thank-you و/order-confirmed و/wishlist
-# لا تُحظر هنا في robots.txt، بل تُدار عبر <meta name="robots" content="noindex">
-# في صفحاتها. حظرها في robots.txt كان سيمنع Google من زحفها ورؤية وسم noindex،
-# فيبقى محتواها في الفهرس — عكس المطلوب. (الـ noindex وحده يسمح بالزحف
-# ويرى جوجل الوسم فيزيل الصفحة من الفهرس).
+# ملاحظة: صفحات /cart و /wishlist و /order-confirmed و /thank-you تحمل وسم
+# noindex في HTML مباشرة. لذا لا نضعها في Disallow هنا — لأن منع الزحف
+# (Disallow) يمنع Google من قراءة وسم noindex، والتكرار بينهما غير مفيد.
 
 # Allow AI bots for AI Overviews, ChatGPT discovery, Perplexity, etc.
 User-agent: GPTBot
@@ -349,8 +347,6 @@ User-agent: anthropic-ai
 Allow: /
 User-agent: Claude-Web
 Allow: /
-
-# Block aggressive scrapers (not AI assistants)
 User-agent: CCBot
 Disallow: /
 User-agent: Bytespider
