@@ -30,20 +30,13 @@ function getGitLastmod(filePath, fallback) {
   }
 }
 
-// 🗓️ أداة تجعل الـ lastmod دقيقاً بعد تطهير الـ history:
-// نأخذ "أحدث" التاريخين (آخر commit للملف، أو تاريخ اليوم).
-// هذا يمنع ظهور تواريخ قديمة لصفحات محتواها حي ومتجدّد، خاصةً بعد
-// تقليص الـ history الذي أعاد ضبط تواريخ git log للملفات.
+// 🗓️ الـ lastmod يجب أن يعكس "آخر تعديل حقيقي" للملف، لا تاريخ اليوم دائماً.
+// لو رجعنا دائماً "النهاردة" (حتى بدون تعديل)، ستلاحظ Google ذلك وتتجاهل
+// إشارة lastmod للموقع كله — مما يقلل كفاءة إعادة الزحف.
+// نستخدم تاريخ آخر commit حقيقي للملف عبر git log، ونستخدم اليوم فقط
+// كـ fallback للملفات الجديدة التي ليس لها تاريخ commit بعد.
 function freshLastmod(filePath, fallback) {
-  const gitDate = getGitLastmod(filePath, fallback);
-  const today = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Africa/Cairo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-  // عيّن "الأحدث" بين التواريخ النصية (Y-M-D يقارن معجمياً بشكل صحيح)
-  return gitDate > today ? gitDate : today;
+  return getGitLastmod(filePath, fallback);
 }
 
 const esc = (s = "") =>
@@ -389,6 +382,17 @@ Sitemap: ${SITE_URL}/catalog-feed.xml
 
     const mod2 = await vite.ssrLoadModule("/src/data/landing-pages.ts");
     const allPages = mod2.seoLandingPages || [];
+
+    // 🧹 حذف ملفات JSON القديمة غير الموجودة بعد الآن في المصدر (عند حذف/دمج
+    // أي landing page). يمنع بقاء صفحات محذوفة في public/ من تحديثات سابقة.
+    const { readdirSync, unlinkSync } = await import("node:fs");
+    const validSlugs = new Set(allPages.map((p) => p.slug));
+    for (const f of readdirSync(landingPagesDir)) {
+      if (f.endsWith(".json") && !validSlugs.has(f.replace(/\.json$/, ""))) {
+        unlinkSync(resolve(landingPagesDir, f));
+      }
+    }
+
     for (const page of allPages) {
       const safeData = {
         slug: page.slug,

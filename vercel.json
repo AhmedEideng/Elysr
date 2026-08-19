@@ -750,6 +750,101 @@
       "source": "/products/tiger-power-tablets",
       "destination": "/products/men",
       "permanent": true
+    },
+    {
+      "source": "/products/guides/delay-spray-for-men-egypt",
+      "destination": "/products/guides/best-delay-products-egypt",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/delay-cream-for-men-guide",
+      "destination": "/products/guides/best-delay-products-egypt",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/procomil-spray-guide",
+      "destination": "/products/guides/best-delay-products-egypt",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/emla-delay-guide",
+      "destination": "/products/guides/best-delay-products-egypt",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/sildenafil-products-guide",
+      "destination": "/products/guides/erectile-dysfunction-products-egypt",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/viagra-products-egypt",
+      "destination": "/products/guides/erectile-dysfunction-products-egypt",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/viagra-vs-cialis-egypt",
+      "destination": "/products/guides/erectile-dysfunction-products-egypt",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/tadalafil-products-guide",
+      "destination": "/products/guides/erectile-dysfunction-products-egypt",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/best-honey-for-men",
+      "destination": "/products/guides/royal-honey-for-men-egypt",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/female-comfort-gel-guide",
+      "destination": "/products/guides/women-libido-products-egypt",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/female-arousal-drops-guide",
+      "destination": "/products/guides/women-libido-products-egypt",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/marital-products-cairo",
+      "destination": "/products/guides/marital-products-giza",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/first-time-buying-marital-products",
+      "destination": "/products/guides/marital-products-giza",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/safe-marital-products-guide",
+      "destination": "/products/guides/marital-products-giza",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/improve-marital-performance-naturally",
+      "destination": "/products/guides/marital-products-giza",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/original-marital-products-egypt",
+      "destination": "/products/guides/marital-products-giza",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/anxiety-performance-products",
+      "destination": "/products/guides/marital-products-giza",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/fake-vs-original-performance-products",
+      "destination": "/products/guides/marital-products-giza",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/ved-device-guide",
+      "destination": "/products/guides/vacuum-pump-men-guide",
+      "permanent": true
     }
   ]
 }
