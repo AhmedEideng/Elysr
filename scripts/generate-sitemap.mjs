@@ -329,10 +329,10 @@ ${catalogProducts
 
 User-agent: *
 Allow: /
-Disallow: /cart
-Disallow: /thank-you
-Disallow: /order-confirmed
-Disallow: /wishlist
+# ملاحظة: لا نضيف Disallow لصفحات /cart و /wishlist و /thank-you و /order-confirmed
+# لأنها صفحات session تحمل noindex في HTML. لو منعنا زحفها هنا، فلن يتمكن
+# Google من قراءة وسم noindex أصلاً، فيبقى سلوكها غامضاً. الـ noindex وحده
+# هو الأسلوب الصحيح لمنع فهرستها.
 
 # Allow AI bots for AI Overviews, ChatGPT discovery, Perplexity, etc.
 User-agent: GPTBot
