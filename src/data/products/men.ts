@@ -202,7 +202,7 @@ export const men: Product[] = [
 
   {
     id: "m-09",
-    slug: "royal-cream-for-men",
+    slug: "royal-cream",
     name: "الكريم الملكي - كريم عشبي للرجال",
     nameEn: "Royal Cream for Men",
     category: "men",
@@ -704,7 +704,7 @@ export const men: Product[] = [
   },
   {
     id: "m-28",
-    slug: "stallion-delay-gel-for-men",
+    slug: "stallion-delay-gel",
     name: "جل ستاليون المتطور للتأخير للرجال (Stallion Delay Gel)",
     nameEn: "Stallion Delay Gel for Men",
     category: "men",
@@ -810,7 +810,7 @@ export const men: Product[] = [
   },
   {
     id: "m-32",
-    slug: "titan-gel-gold-special-gel-for-men",
+    slug: "titan-gel-gold-special-gel",
     name: "جل تيتان جولد الروسي الذهبي للرجال (Titan Gel Gold)",
     nameEn: "Titan Gel Gold – Special Gel for Men",
     category: "men",
@@ -999,7 +999,7 @@ export const men: Product[] = [
   },
   {
     id: "m-39",
-    slug: "leech-miracle-cream-for-men",
+    slug: "leech-miracle-cream",
     name: "كريم العلق العجيب المطور للرجال (Leech Miracle Cream)",
     nameEn: "Leech Miracle Cream – For Men",
     category: "men",
@@ -1026,7 +1026,7 @@ export const men: Product[] = [
   },
   {
     id: "m-40",
-    slug: "dmas-chocolate-for-men-9-pcs",
+    slug: "dmas-chocolate-9-pcs",
     name: "شوكولاتة ديماس الملكية للرجال (DMAS Chocolate)",
     nameEn: "DMAS Chocolate for Men (9 Pcs)",
     category: "men",
@@ -1487,7 +1487,7 @@ export const men: Product[] = [
   },
   {
     id: "m-60",
-    slug: "kreva-gel-for-men",
+    slug: "kreva-gel",
     name: "جل كريفا الألماني المتطور للرجال (50 جم)",
     nameEn: "Kreva Gel – Advanced Formula for Men",
     category: "men",
@@ -1516,7 +1516,7 @@ export const men: Product[] = [
   },
   {
     id: "m-61",
-    slug: "golden-turkish-chocolate-for-men",
+    slug: "golden-turkish-chocolate",
     name: "شوكولاتة جولدن توركيش التركية للرجال (Golden Turkish)",
     nameEn: "Golden Turkish Chocolate for Men",
     category: "men",
