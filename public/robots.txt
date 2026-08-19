@@ -3,10 +3,12 @@
 
 User-agent: *
 Allow: /
-Disallow: /cart
-Disallow: /thank-you
-Disallow: /order-confirmed
-Disallow: /wishlist
+
+# ملاحظة: صفحات /cart و/thank-you و/order-confirmed و/wishlist
+# لا تُحظر هنا في robots.txt، بل تُدار عبر <meta name="robots" content="noindex">
+# في صفحاتها. حظرها في robots.txt كان سيمنع Google من زحفها ورؤية وسم noindex،
+# فيبقى محتواها في الفهرس — عكس المطلوب. (الـ noindex وحده يسمح بالزحف
+# ويرى جوجل الوسم فيزيل الصفحة من الفهرس).
 
 # Allow AI bots for AI Overviews, ChatGPT discovery, Perplexity, etc.
 User-agent: GPTBot
