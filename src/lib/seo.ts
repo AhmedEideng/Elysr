@@ -64,7 +64,7 @@ export function applySeo(meta: SeoMeta = {}) {
   const path = typeof window !== "undefined" ? window.location.pathname : "/";
   const url = `${SITE_URL}${path}`;
   const title =
-    meta.title ?? "منتجات الصحة الزوجية الأصلية في مصر | شحن سري ودفع عند الاستلام — Elysr Medical";
+    meta.title ?? "اليسر — منتجات الصحة الزوجية الأصلية في مصر | دفع عند الاستلام";
   const description =
     meta.description ??
     "اليسر أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. شحن سري وتغليف محايد ودفع عند الاستلام مع دعم متخصص عبر واتساب.";
