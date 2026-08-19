@@ -8,7 +8,7 @@ export const COMPANY = {
   name: "اليسر ميديكال",
   nameEn: "Elysr Medical Group",
   email: "info@elysrmedical.store",
-  address: "القاهرة، جمهورية مصر العربية",
+  address: "العاشر من رمضان، محافظة الشرقية، جمهورية مصر العربية",
 };
 
 export const waLink = (message: string) =>
