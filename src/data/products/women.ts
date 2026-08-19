@@ -88,7 +88,7 @@ export const women: Product[] = [
   },
   {
     id: "w-04",
-    slug: "checoo-love-chocolate-for-women",
+    slug: "checoo-love-chocolate",
     name: "شوكولاتة تشيكو لوف الفاخرة للنساء (Checoo Love)",
     nameEn: "Checoo Love Chocolate for Women",
     category: "women",
@@ -116,7 +116,7 @@ export const women: Product[] = [
   },
   {
     id: "w-05",
-    slug: "royal-honey-for-women",
+    slug: "royal-honey",
     name: "العسل الملكي الماليزي المطور للنساء (Royal Honey)",
     nameEn: "Royal Honey for Women",
     category: "women",
@@ -200,7 +200,7 @@ export const women: Product[] = [
   },
   {
     id: "w-08",
-    slug: "coffemix-caviar-original-for-women",
+    slug: "coffemix-caviar-original",
     name: "قهوة كوفي مكس بالكافيار الأصلية للنساء (CoffeMix CAVIAR)",
     nameEn: "CoffeMix CAVIAR Original for Women",
     category: "women",
@@ -633,7 +633,7 @@ export const women: Product[] = [
   },
   {
     id: "w-24",
-    slug: "black-widow-drops-for-women",
+    slug: "black-widow-drops",
     name: "قطرات بلاك ويدو المثيرة للنساء (Black Widow Drops)",
     nameEn: "Black Widow Drops for Women",
     category: "women",
