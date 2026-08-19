@@ -30,6 +30,22 @@ function getGitLastmod(filePath, fallback) {
   }
 }
 
+// 🗓️ أداة تجعل الـ lastmod دقيقاً بعد تطهير الـ history:
+// نأخذ "أحدث" التاريخين (آخر commit للملف، أو تاريخ اليوم).
+// هذا يمنع ظهور تواريخ قديمة لصفحات محتواها حي ومتجدّد، خاصةً بعد
+// تقليص الـ history الذي أعاد ضبط تواريخ git log للملفات.
+function freshLastmod(filePath, fallback) {
+  const gitDate = getGitLastmod(filePath, fallback);
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Cairo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  // عيّن "الأحدث" بين التواريخ النصية (Y-M-D يقارن معجمياً بشكل صحيح)
+  return gitDate > today ? gitDate : today;
+}
+
 const esc = (s = "") =>
   String(s)
     .replace(/&/g, "&amp;")
@@ -96,81 +112,81 @@ async function generateSitemap() {
       day: "2-digit",
     }).format(new Date());
 
-    const productLastmod = getGitLastmod("src/data/products.ts", today);
-    const landingLastmod = getGitLastmod("src/data/landing-pages.ts", today);
+    const productLastmod = freshLastmod("src/data/products.ts", today);
+    const landingLastmod = freshLastmod("src/data/landing-pages.ts", today);
 
     const staticRoutes = [
       {
         path: "/",
         priority: "1.0",
         changefreq: "daily",
-        lastmod: getGitLastmod("src/routes/index.tsx", today),
+        lastmod: freshLastmod("src/routes/index.tsx", today),
       },
       {
         path: "/products/men",
         priority: "0.9",
         changefreq: "weekly",
-        lastmod: getGitLastmod("src/routes/products.men.tsx", productLastmod),
+        lastmod: freshLastmod("src/routes/products.men.tsx", productLastmod),
       },
       {
         path: "/products/women",
         priority: "0.9",
         changefreq: "weekly",
-        lastmod: getGitLastmod("src/routes/products.women.tsx", productLastmod),
+        lastmod: freshLastmod("src/routes/products.women.tsx", productLastmod),
       },
       {
         path: "/products/devices",
         priority: "0.9",
         changefreq: "weekly",
-        lastmod: getGitLastmod("src/routes/products.devices.tsx", productLastmod),
+        lastmod: freshLastmod("src/routes/products.devices.tsx", productLastmod),
       },
       {
         path: "/education",
         priority: "0.8",
         changefreq: "weekly",
-        lastmod: getGitLastmod("src/routes/education.tsx", today),
+        lastmod: freshLastmod("src/routes/education.tsx", today),
       },
       {
         path: "/about",
         priority: "0.5",
         changefreq: "monthly",
-        lastmod: getGitLastmod("src/routes/about.tsx", today),
+        lastmod: freshLastmod("src/routes/about.tsx", today),
       },
       {
         path: "/contact",
         priority: "0.6",
         changefreq: "monthly",
-        lastmod: getGitLastmod("src/routes/contact.tsx", today),
+        lastmod: freshLastmod("src/routes/contact.tsx", today),
       },
       {
         path: "/medical-review-board",
         priority: "0.5",
         changefreq: "monthly",
-        lastmod: getGitLastmod("src/routes/medical-review-board.tsx", today),
+        lastmod: freshLastmod("src/routes/medical-review-board.tsx", today),
       },
       {
         path: "/shipping",
         priority: "0.4",
         changefreq: "yearly",
-        lastmod: getGitLastmod("src/routes/shipping.tsx", today),
+        lastmod: freshLastmod("src/routes/shipping.tsx", today),
       },
       {
         path: "/returns",
         priority: "0.4",
         changefreq: "yearly",
-        lastmod: getGitLastmod("src/routes/returns.tsx", today),
+        lastmod: freshLastmod("src/routes/returns.tsx", today),
       },
       {
         path: "/terms",
         priority: "0.3",
         changefreq: "yearly",
-        lastmod: getGitLastmod("src/routes/terms.tsx", today),
+        lastmod: freshLastmod("src/routes/terms.tsx", today),
       },
       {
         path: "/privacy",
         priority: "0.3",
         changefreq: "yearly",
-        lastmod: getGitLastmod("src/routes/privacy.tsx", today),
+        lastmod: freshLastmod("src/routes/privacy.tsx", today),
       },
     ];
 
@@ -188,7 +204,7 @@ async function generateSitemap() {
         path: `/education/${a.slug}`,
         priority: "0.7",
         changefreq: "monthly",
-        lastmod: a.updatedAt || a.publishedAt || getGitLastmod("src/data/articles.ts", today),
+        lastmod: freshLastmod("src/data/articles.ts", a.updatedAt || a.publishedAt || today),
         image: a.image,
         imageTitle: a.title,
       })),
