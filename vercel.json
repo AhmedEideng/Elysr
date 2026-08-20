@@ -900,6 +900,26 @@
       "source": "/products/black-widow-drops-for-women",
       "destination": "/products/black-widow-drops",
       "permanent": true
+    },
+    {
+      "source": "/products/turbo-fitness-gel-50gm",
+      "destination": "/products/stallion-delay-gel",
+      "permanent": true
+    },
+    {
+      "source": "/products/brioge-gel",
+      "destination": "/products/sotara-gel-50gm",
+      "permanent": true
+    },
+    {
+      "source": "/products/royal-honey-malaysian",
+      "destination": "/products/royal-honey-gold-vip",
+      "permanent": true
+    },
+    {
+      "source": "/products/hulk-gel-50gm",
+      "destination": "/products/titan-gel-gold-special-gel",
+      "permanent": true
     }
   ]
 }
