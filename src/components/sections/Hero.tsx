@@ -11,7 +11,7 @@ import { assetUrl } from "@/lib/cache";
 export function Hero() {
   return (
     <section className="relative w-full overflow-hidden">
-      <h1 className="sr-only">اليسر — منتجات الصحة الزوجية الأصلية في مصر | دفع عند الاستلام</h1>
+      <h1 className="sr-only">اليسر — منتجات الصحة الزوجية الأصلية في مصر | شحن سري</h1>
 
       {/* ── Hero Image — كل المحتوى المدمج ظاهر بالكامل ── */}
       {/* 🚀 CLS fix: حاوية بنسبة aspect-ratio ثابتة تطابق الأبعاد الفعلية للصورة

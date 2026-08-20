@@ -137,7 +137,7 @@
     }
   ],
   "FREE_SHIPPING_THRESHOLD": 2000,
-  "PROMO_END_ISO": "2026-08-20T00:00:00.000Z",
+  "PROMO_END_ISO": "2026-08-23T00:00:00.000Z",
   "PROMO_TIERS": [
     {
       "threshold": 2000,

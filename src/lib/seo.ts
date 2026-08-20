@@ -64,7 +64,7 @@ export function applySeo(meta: SeoMeta = {}) {
   const path = typeof window !== "undefined" ? window.location.pathname : "/";
   const url = `${SITE_URL}${path}`;
   const title =
-    meta.title ?? "اليسر — منتجات الصحة الزوجية الأصلية في مصر | دفع عند الاستلام";
+    meta.title ?? "اليسر — منتجات الصحة الزوجية الأصلية في مصر | شحن سري";
   const description =
     meta.description ??
     "اليسر أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. شحن سري وتغليف محايد ودفع عند الاستلام مع دعم متخصص عبر واتساب.";
