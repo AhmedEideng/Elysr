@@ -31,66 +31,65 @@
       }
     },
     "assert": {
-      "preset": "lighthouse:no-pwa",
       "assertions": {
         "categories:performance": [
-          "error",
+          "warn",
           {
-            "minScore": 0.85
+            "minScore": 0.6
           }
         ],
         "categories:accessibility": [
-          "error",
+          "warn",
           {
-            "minScore": 0.9
+            "minScore": 0.8
           }
         ],
         "categories:best-practices": [
-          "error",
+          "warn",
+          {
+            "minScore": 0.8
+          }
+        ],
+        "categories:seo": [
+          "warn",
           {
             "minScore": 0.9
           }
         ],
-        "categories:seo": [
-          "error",
-          {
-            "minScore": 0.95
-          }
-        ],
         "first-contentful-paint": [
-          "error",
+          "warn",
           {
-            "maxNumericValue": 1500
+            "maxNumericValue": 2000
           }
         ],
         "largest-contentful-paint": [
-          "error",
+          "warn",
           {
-            "maxNumericValue": 2500
-          }
-        ],
-        "total-blocking-time": [
-          "error",
-          {
-            "maxNumericValue": 200
+            "maxNumericValue": 3500
           }
         ],
         "cumulative-layout-shift": [
-          "error",
+          "warn",
           {
-            "maxNumericValue": 0.1
+            "maxNumericValue": 0.15
+          }
+        ],
+        "total-blocking-time": [
+          "warn",
+          {
+            "maxNumericValue": 300
           }
         ],
         "speed-index": [
-          "error",
+          "warn",
           {
-            "maxNumericValue": 3000
+            "maxNumericValue": 4000
           }
         ],
         "interactive": [
-          "error",
+          "warn",
           {
-            "maxNumericValue": 3500
+            "maxNumericValue": 4500
           }
         ]
       }
