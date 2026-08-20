@@ -1725,9 +1725,9 @@ export const seoLandingPages: SeoLandingPage[] = [
     productIds: ["m-03"],
     links: [
       {
-        label: "السيلدينافيل والدابوكستين",
-        href: "/products/guides/sildenafil-dapoxetine-combo",
-        description: "دليل التركيبة المزدوجة",
+        label: "منتجات دعم الانتصاب",
+        href: "/products/guides/erectile-dysfunction-products-egypt",
+        description: "بدائل آمنة لدعم الانتصاب",
       },
       {
         label: "بخاخات التأخير",

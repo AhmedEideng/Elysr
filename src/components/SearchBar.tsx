@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { formatPrice, type Product } from "@/data/product-types";
+import { isRedProduct } from "@/lib/product-compliance";
 import Fuse from "fuse.js";
 
 /**
@@ -39,9 +40,12 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
   }, [products]);
 
   // عند أول حرف يكتبه المستخدم → حمّل الكتالوج (مرة واحدة فقط)
+  // مع استبعاد منتجات RED (أدوية/مخدّرات محظورة) من نتائج البحث
   useEffect(() => {
     if (!products && q.trim().length > 0) {
-      import("@/data/products").then(({ products }) => setProducts(products));
+      import("@/data/products").then(({ products }) =>
+        setProducts(products.filter((p) => !isRedProduct(p.id))),
+      );
     }
   }, [q, products]);
 
