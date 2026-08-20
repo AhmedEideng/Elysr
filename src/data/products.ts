@@ -2,6 +2,7 @@ import { men } from "./products/men";
 import { women } from "./products/women";
 import { devices } from "./products/devices";
 import type { Product, ProductCategory } from "@/data/product-types";
+import { isRedProduct } from "@/lib/product-compliance";
 
 // ✅ إزالة نظام التقييمات التلقائي (Dynamic Review Growth).
 // كان يزيد عدد المراجعات تلقائيًا كل بضعة أيام بدون مراجعات حقيقية من
@@ -23,7 +24,10 @@ const PINNED_MEN_ORDER = [
 ];
 
 export const getProductsByCategory = (cat: ProductCategory) => {
-  const filtered = products.filter((p) => p.category === cat);
+  // استبعاد منتجات RED (أدوية/مخدّرات محظورة) من أي قائمة تصفّح/تسوق واقعة في
+  // وجهة إعلانية (صفحات الفئات، تبويبات الرئيسية، المنتجات ذات الصلة).
+  // صفحات هذه المنتجات تبقى مفهرسة عضويًا ويمكن الوصول إليها مباشرةً عبر روابطها.
+  const filtered = products.filter((p) => p.category === cat && !isRedProduct(p.id));
   const PINNED_WOMEN_ORDER = [
     "w-16", // Argi fem جل
     "w-12", // الشوكولاتة الملكي Royal Chocolate for Her

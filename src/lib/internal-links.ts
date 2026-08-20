@@ -176,13 +176,13 @@ export function getArticlesForProduct(product: Product): string[] {
 const PRODUCT_RULES: { articleSlug: string; productIds: string[] }[] = [
   {
     articleSlug: "erectile-dysfunction",
-    productIds: ["m-01", "m-02", "m-04", "m-45", "d-01", "d-02"],
+    productIds: ["m-01", "m-02", "m-04", "d-01", "d-02"],
   },
   {
     articleSlug: "premature-ejaculation",
-    productIds: ["m-17", "m-30", "m-41", "m-44", "m-05", "m-06"],
+    productIds: ["m-05", "m-06", "m-35", "m-48", "m-60"],
   },
-  { articleSlug: "delay-sprays-safe-use", productIds: ["m-41", "m-44", "m-55", "m-30", "m-05"] },
+  { articleSlug: "delay-sprays-safe-use", productIds: ["m-05", "m-35", "m-60", "m-48"] },
   {
     articleSlug: "royal-honey-benefits",
     productIds: ["m-52", "m-12", "m-20", "m-13", "m-22"],
@@ -191,10 +191,10 @@ const PRODUCT_RULES: { articleSlug: string; productIds: string[] }[] = [
   { articleSlug: "nutrition-libido", productIds: ["m-01", "m-02", "m-04", "m-52", "w-05", "w-07"] },
   {
     articleSlug: "womens-libido-boosters",
-    productIds: ["w-02", "w-15", "w-07", "w-05", "w-03", "w-04"],
+    productIds: ["w-02", "w-15", "w-07", "w-05", "w-04", "w-16"],
   },
   { articleSlug: "women-orgasm", productIds: ["w-02", "w-15", "w-14", "w-16", "w-05", "w-07"] },
-  { articleSlug: "kegel-exercises", productIds: ["m-17", "m-41", "d-01", "d-02", "w-16"] },
+  { articleSlug: "kegel-exercises", productIds: ["d-01", "d-02", "w-16", "m-05", "m-35"] },
   { articleSlug: "sleep-and-sex", productIds: ["m-01", "m-02", "m-04", "w-05", "m-52", "m-42"] },
   {
     articleSlug: "stress-and-libido",
@@ -208,7 +208,7 @@ const PRODUCT_RULES: { articleSlug: string; productIds: string[] }[] = [
   { articleSlug: "hormonal-changes", productIds: ["m-01", "m-04", "w-05", "w-02", "w-14", "w-16"] },
   {
     articleSlug: "when-to-see-doctor",
-    productIds: ["m-01", "d-01", "w-02", "m-45", "m-30", "w-14"],
+    productIds: ["m-01", "d-01", "w-02", "w-14", "m-04", "m-48"],
   },
   {
     articleSlug: "max-filler-breast-guide",
@@ -251,11 +251,11 @@ const PRODUCT_RULES: { articleSlug: string; productIds: string[] }[] = [
   },
   {
     articleSlug: "drug-interactions-sexual-products",
-    productIds: ["m-05", "m-30", "m-41", "m-06", "m-09", "d-01"],
+    productIds: ["m-05", "m-06", "m-09", "d-01", "m-48", "m-35"],
   },
   {
     articleSlug: "side-effects-management",
-    productIds: ["m-06", "m-09", "m-30", "m-41", "m-01", "w-14"],
+    productIds: ["m-06", "m-09", "m-01", "w-14", "m-48", "m-05"],
   },
   {
     articleSlug: "zinc-sexual-health",
@@ -336,7 +336,7 @@ const PRODUCT_RULES: { articleSlug: string; productIds: string[] }[] = [
   },
   {
     articleSlug: "pelvic-floor-men-advanced",
-    productIds: ["m-41", "m-17", "d-01", "m-02", "m-30", "m-44"],
+    productIds: ["d-01", "m-02", "m-05", "m-35", "m-48", "m-60"],
   },
   {
     articleSlug: "device-maintenance-hygiene",
@@ -405,7 +405,7 @@ export function getProductsForArticle(articleSlug: string): string[] {
       ) {
         return ["w-02", "w-15", "w-24", "w-16", "w-05", "w-12"]; // Drops first
       }
-      return ["w-02", "w-15", "w-11", "w-16", "w-05", "w-12"];
+      return ["w-02", "w-15", "w-16", "w-05", "w-12", "w-04"];
     }
 
     if (isDevices) {
@@ -426,21 +426,21 @@ export function getProductsForArticle(articleSlug: string): string[] {
         titleAndContent.includes("توقيت") ||
         titleAndContent.includes("تخدير")
       ) {
-        return ["m-44", "m-60", "m-41", "m-30", "m-17"]; // Delay products (Dooz cream, Kreva gel, Procomil spray, etc.)
+        return ["m-60", "m-48", "m-05", "m-35"]; // منتجات تأخير موضعية آمنة (كريما/جل/بخاخ عشبي)
       }
       if (
         titleAndContent.includes("انتصاب") ||
         titleAndContent.includes("صلابة") ||
         titleAndContent.includes("ضعف")
       ) {
-        return ["m-34", "m-01", "m-02", "m-60", "m-11"]; // Erection & double action
+        return ["m-01", "m-02", "m-60", "m-11", "m-03"]; // Erection & double action
       }
-      return ["m-11", "m-44", "m-60", "m-02", "m-34"];
+      return ["m-11", "m-60", "m-02", "m-48", "m-03"];
     }
   }
 
   // Absolute general fallback: return popular products from each category
-  return ["m-11", "m-44", "w-02", "w-15", "d-01", "m-60"];
+  return ["m-11", "w-02", "w-15", "d-01", "m-60", "m-48"];
 }
 
 /**

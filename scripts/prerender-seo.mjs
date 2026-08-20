@@ -246,6 +246,8 @@ async function prerender() {
 
   try {
     const { products } = await vite.ssrLoadModule("/src/data/products.ts");
+    const { RED_PRODUCT_IDS } = await vite.ssrLoadModule("/src/lib/product-compliance.ts");
+    const isCompliantProduct = (p) => !RED_PRODUCT_IDS.has(p.id);
     let articles = [];
     try {
       const mod = await vite.ssrLoadModule("/src/data/articles.ts");
@@ -540,11 +542,11 @@ async function prerender() {
 
     for (const r of staticRoutes) {
       const catItems = r.path.includes("/products/men")
-        ? products.filter((p) => p.category === "men")
+        ? products.filter((p) => p.category === "men" && isCompliantProduct(p))
         : r.path.includes("/products/women")
-          ? products.filter((p) => p.category === "women")
+          ? products.filter((p) => p.category === "women" && isCompliantProduct(p))
           : r.path === "/products/devices"
-            ? products.filter((p) => p.category === "devices")
+            ? products.filter((p) => p.category === "devices" && isCompliantProduct(p))
             : [];
 
       const jsonLd = [];
@@ -777,7 +779,10 @@ async function prerender() {
 
       // منتجات مشابهة من نفس القسم (حتى 4، مع استبعاد المنتج الحالي)
       const relatedProducts = products
-        .filter((p) => p.category === product.category && p.slug !== product.slug)
+        .filter(
+          (p) =>
+            p.category === product.category && p.slug !== product.slug && isCompliantProduct(p),
+        )
         .slice(0, 4);
       const relatedBody =
         relatedProducts.length > 0
