@@ -28,6 +28,8 @@ export interface SeoLandingPage {
   faqs: SeoLandingFaq[];
   primaryKeyword: string;
   relatedKeywords: string[];
+  /** true = إخفاء الصفحة من محركات البحث (noindex) + استبعادها من sitemap */
+  noindex?: boolean;
 }
 
 export const seoLandingPages: SeoLandingPage[] = [
@@ -1504,6 +1506,7 @@ export const seoLandingPages: SeoLandingPage[] = [
   },
   {
     slug: "cialis-20mg-guide",
+    noindex: true, // دليل دوائي لأدوية غير متوافقة مع إعلانات جوجل في مصر → يبقى تعليمياً خارج الفهرسة
     title: "دليل سياليس 20 مجم",
     metaTitle: "دليل سياليس Cialis 20mg: الاستخدام والتحذيرات | اليسر ميديكال",
     metaDescription:
@@ -1565,6 +1568,7 @@ export const seoLandingPages: SeoLandingPage[] = [
   },
   {
     slug: "levitra-guide",
+    noindex: true, // دليل دوائي لأدوية غير متوافقة مع إعلانات جوجل في مصر
     title: "دليل ليفيترا",
     metaTitle: "دليل ليفيترا Levitra: الاستخدام والفرق عن فياجرا | اليسر ميديكال",
     metaDescription:
@@ -1626,6 +1630,7 @@ export const seoLandingPages: SeoLandingPage[] = [
   },
   {
     slug: "sildenafil-dapoxetine-combo",
+    noindex: true, // دليل دوائي لأدوية غير متوافقة مع إعلانات جوجل في مصر
     title: "حبوب سيلدينافيل ودابوكستين المركبة",
     metaTitle: "حبوب سيلدينافيل + دابوكستين: انتصاب وتأخير معاً | اليسر ميديكال",
     metaDescription:
@@ -2361,6 +2366,7 @@ export const seoLandingPages: SeoLandingPage[] = [
   },
   {
     slug: "female-viagra-guide",
+    noindex: true, // دليل دوائي لأدوية غير متوافقة مع إعلانات جوجل في مصر
     title: "فياجرا نسائية",
     metaTitle: "الفياجرا النسائية: ما هي وهل تعمل؟ | اليسر ميديكال",
     metaDescription:

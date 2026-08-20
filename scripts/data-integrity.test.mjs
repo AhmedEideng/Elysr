@@ -137,6 +137,7 @@ try {
     );
   }
   for (const page of seoLandingPages) {
+    if (page.noindex) continue; // صفحات noindex مستبعدة من sitemap عمداً
     assert.ok(
       sitemap.includes(`<loc>https://elysrmedical.store/products/guides/${page.slug}</loc>`),
       `Sitemap missing landing page: ${page.slug}`,

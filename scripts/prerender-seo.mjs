@@ -1042,6 +1042,7 @@ async function prerender() {
           image: `${SITE_URL}/og-default.webp`,
           canonical,
           type: "website",
+          noindex: Boolean(page.noindex),
           jsonLd: [webPageJsonLd, breadcrumb, faqJsonLd, itemList],
           bodyContent: body,
         });

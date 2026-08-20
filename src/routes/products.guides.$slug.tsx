@@ -54,6 +54,7 @@ export const Route = createFileRoute("/products/guides/$slug")({
     meta: [
       { title: loaderData?.page.metaTitle },
       { name: "description", content: loaderData?.page.metaDescription },
+      ...(loaderData?.page.noindex ? [{ name: "robots", content: "noindex, follow" }] : []),
     ],
   }),
   component: SeoLandingPageComponent,

@@ -201,12 +201,14 @@ async function generateSitemap() {
         image: a.image,
         imageTitle: a.title,
       })),
-      ...seoLandingPages.map((page) => ({
-        path: `/products/guides/${page.slug}`,
-        priority: "0.75",
-        changefreq: "monthly",
-        lastmod: landingLastmod,
-      })),
+      ...seoLandingPages
+        .filter((page) => !page.noindex)
+        .map((page) => ({
+          path: `/products/guides/${page.slug}`,
+          priority: "0.75",
+          changefreq: "monthly",
+          lastmod: landingLastmod,
+        })),
     ];
 
     // 2. بناء ملفات الـ XML
@@ -406,6 +408,7 @@ Sitemap: ${SITE_URL}/catalog-feed.xml
         faqs: page.faqs,
         primaryKeyword: page.primaryKeyword,
         relatedKeywords: page.relatedKeywords,
+        noindex: page.noindex,
       };
       writeFileSync(
         resolve(landingPagesDir, `${page.slug}.json`),
