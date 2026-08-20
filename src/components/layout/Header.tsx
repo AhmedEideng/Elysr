@@ -20,8 +20,7 @@ import {
   Sparkles,
   Heart,
 } from "lucide-react";
-import logo from "@/assets/logo.webp";
-import logoSmall from "@/assets/logo-small.webp";
+import logoMono from "@/assets/logo-mono.webp";
 import logoSquare from "@/assets/logo-square.webp";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
@@ -177,13 +176,11 @@ export function Header() {
         <div className="container mx-auto flex h-14 items-center justify-between gap-4 px-4 md:h-16">
           <Link to="/" className="flex items-center">
             <img
-              src={logo}
-              srcSet={`${logoSmall} 126w, ${logo} 249w`}
-              sizes="(min-width: 768px) 132px, 121px"
+              src={logoMono}
               alt="اليسر ميديكال — Elysr Medical Group"
-              className="h-11 w-auto object-contain brightness-0 md:h-12"
-              width={249}
-              height={96}
+              className="h-11 w-auto object-contain md:h-12"
+              width={250}
+              height={94}
               fetchPriority="high"
               decoding="async"
             />
