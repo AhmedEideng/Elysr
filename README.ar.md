@@ -26,7 +26,7 @@
 
 ### المميزات الرئيسية
 
-- 🔍 **SEO ممتاز** — schema.org JSON-LD لكل صفحة، sitemap.xml (277 رابط)، catalog-feed.xml
+- 🔍 **SEO ممتاز** — schema.org JSON-LD لكل صفحة، sitemap.xml (257 رابط)، catalog-feed.xml
 - 🛒 **سلة ذكية** — localStorage مع auto-sync + حماية من تجاوز المخزون
 - 🏆 **خصم متدرج** — 10% / 15% / 20% حسب قيمة الطلب
 - 🛡️ **نظام Compliance** — 3 مستويات (أخضر / كهرماني / أحمر) لحماية الإعلانات
@@ -44,13 +44,13 @@
 
 | المقياس              | القيمة                               |
 | -------------------- | ------------------------------------ |
-| 📦 المنتجات          | **89** (60 رجال · 22 نساء · 7 أجهزة) |
+| 📦 المنتجات          | **87** (56 رجال · 24 نساء · 7 أجهزة) |
 | 📚 المقالات الطبية   | **56** بمصادر NIH/Mayo/NHS           |
-| 🎯 صفحات SEO         | **125** صفحة landing                 |
-| 📄 صفحات prerendered | **281** ملف HTML                     |
-| 🗺️ روابط sitemap     | **277**                              |
-| ↪️ Redirects         | **129**                              |
-| 🖼️ الصور             | **322** ملف WebP محسّن               |
+| 🎯 صفحات SEO         | **106** صفحة landing                 |
+| 📄 صفحات prerendered | **265** ملف HTML                     |
+| 🗺️ روابط sitemap     | **257**                              |
+| ↪️ Redirects         | **154**                              |
+| 🖼️ الصور             | **318** ملف WebP محسّن               |
 
 ---
 
@@ -73,7 +73,7 @@
 ## 🚀 التشغيل المحلي
 
 ```bash
-# متطلبات: Node 20+
+# متطلبات: Node 24+
 nvm use                  # يقرأ من .nvmrc
 
 # تثبيت
@@ -132,8 +132,8 @@ Elysr/
 │   ├── sw.js              # 🆕 Service Worker
 │   ├── offline.html       # 🆕 offline fallback
 │   ├── site.webmanifest   # 🆕 PWA manifest
-│   └── images/            # 235 ملف WebP
-├── vercel.json            # 128 redirect + CSP + headers
+│   └── images/            # 318 ملف WebP
+├── vercel.json            # 154 redirect + CSP + headers
 ├── .lighthouserc.json     # 🆕 Performance budgets
 ├── .github/workflows/ci.yml  # 🆕 Enhanced (Lint+Typecheck+Test+Build+Lighthouse)
 ├── .husky/pre-commit      # 🆕 Pre-commit hooks
@@ -150,7 +150,7 @@ Elysr/
 
 ### ⚙️ البنية التحتية
 
-- `.nvmrc` يثبّت Node 20
+- `.nvmrc` يثبّت Node 24
 - `SECURITY.md` لسياسة الإبلاغ عن الثغرات
 - Enhanced `.github/workflows/ci.yml` مع Lighthouse + schema validation
 

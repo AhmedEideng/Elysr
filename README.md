@@ -28,11 +28,11 @@ Elysr Medical is a production Arabic (RTL) e-commerce store serving Egypt. It ru
 | ------------------ | -------------------------------------- |
 | Products           | **87** (56 men · 24 women · 7 devices) |
 | Articles           | **56** educational health articles     |
-| SEO Guides         | **125** long-form landing pages        |
-| Pre-rendered Pages | **281** static HTML files              |
-| Sitemap URLs       | **280**                                |
-| Catalog Feed       | **77** items (META / Google Shopping)  |
-| Redirects          | **128** (301 permanent)                |
+| SEO Guides         | **106** long-form landing pages        |
+| Pre-rendered Pages | **265** static HTML files              |
+| Sitemap URLs       | **257**                                |
+| Catalog Feed       | **67** items (META / Google Shopping)  |
+| Redirects          | **154** (301 permanent)                |
 | Image Format       | WebP only — optimized 8–55 KB each     |
 
 ---
@@ -70,7 +70,7 @@ Browser ──→ Vercel CDN (static dist/)
 | Icons     | Lucide React                                           |
 | Hosting   | Vercel (Edge CDN)                                      |
 | Orders    | Google Apps Script → Google Sheets                     |
-| SEO       | Pre-render (262 pages) + JSON-LD + Sitemaps + Hreflang |
+| SEO       | Pre-render (265 pages) + JSON-LD + Sitemaps + Hreflang |
 | Images    | WebP (sharp processing, 700–800px, q45–55)             |
 | Security  | CSP headers + CORS + API rate limiting                 |
 
@@ -89,7 +89,7 @@ Browser ──→ Vercel CDN (static dist/)
 │   ├── data/
 │   │   ├── products.ts         # 87 products with full metadata
 │   │   ├── articles.ts         # 56 educational articles
-│   │   ├── landing-pages.ts    # 125 SEO guide pages
+│   │   ├── landing-pages.ts    # 106 SEO guide pages
 │   │   ├── product-types.ts    # TypeScript interfaces
 │   │   └── product-faqs.ts     # Shared FAQ schema
 │   ├── lib/
@@ -110,13 +110,13 @@ Browser ──→ Vercel CDN (static dist/)
 │   ├── submit-order.js         # Vercel serverless → Google Sheets
 │   └── csp-report.js           # CSP violation reports
 ├── public/
-│   ├── images/                 # 87 product images (M-XX, W-XX, D-XX)
+│   ├── images/                 # Product images (slug-based WebP)
 │   ├── images/thumbs/          # 88 thumbnail versions
-│   ├── sitemap.xml             # 280 URLs
+│   ├── sitemap.xml             # 257 URLs
 │   ├── sitemap-images.xml      # Product image sitemap
 │   ├── sitemap-index.xml       # Sitemap index
-│   └── catalog-feed.xml        # META/Google Shopping feed (78 items)
-├── vercel.json                 # Headers, redirects (128), rewrites, CSP
+│   └── catalog-feed.xml        # META/Google Shopping feed (67 items)
+├── vercel.json                 # Headers, redirects (154), rewrites, CSP
 ├── google-apps-script.gs       # Google Sheets webhook receiver
 └── index.html                  # SPA shell with full SEO meta
 ```
@@ -129,11 +129,12 @@ Every product is classified into a compliance tier that controls **advertising s
 
 | Tier     | Count | Catalog Feed | Organic Search | Badges     | Featured Sort | Ad Eligible |
 | -------- | ----- | ------------ | -------------- | ---------- | ------------- | ----------- |
-| 🟢 GREEN | 77    | ✅           | ✅ Indexed     | ✅         | Top priority  | ✅          |
-| 🔴 RED   | 10    | ❌ Excluded   | ✅ Indexed     | ❌ Removed | Bottom        | ❌          |
+| 🟢 GREEN | 67    | ✅           | ✅ Indexed     | ✅         | Top priority  | ✅          |
+| 🔴 RED   | 20    | ❌ Excluded   | ✅ Indexed     | ❌ Removed | Bottom        | ❌          |
 
 > **نقطة مهمة:** نظام RED يحمي **الإعلانات فقط**. كل منتجات RED (بما فيها الأسماء التجارية
-> مثل فياجرا/سياليس/ليفيترا) تبقى **مفهرسة في البحث العضوي (Google/Bing) وظاهرة في sitemap.xml**،
+> مثل فياجرا/سياليس/ليفيترا، والمخدّرات الموضعية ليدوكايين/بنزوكايين، ومنتجات سبانش فلاي)
+> تبقى **مفهرسة في البحث العضوي (Google/Bing) وظاهرة في sitemap.xml**،
 > لأن الزيارات العضوية وتحويلات واتساب قيّمة. ما يُستثنى فعلاً هو **كشتلوج الإعلانات المدفوعة**
 > (Google Merchant / Facebook Catalog) لتجنّب تحذيرات سياسات الإعلانات.
 
@@ -148,13 +149,13 @@ Classification lives in `src/lib/product-compliance.ts` and is consumed by:
 
 ## Home Page Strategy
 
-The home page displays **20 hand-picked products** in `HOME_FEATURED_ORDER`, selected for maximum conversion:
+The home page displays **21 hand-picked products** in `HOME_FEATURED_ORDER`, selected for maximum conversion:
 
 - **Zero RED products** (compliance safe)
-- **Category mix**: 12 men + 6 women + 2 devices
-- **Type variety**: honey, capsules, gel, spray, drops, chocolate, devices
+- **Category mix**: 15 men + 6 women
+- **Type variety**: honey, capsules, gel, drops, chocolate
 - **Social proof first**: highest review counts lead
-- **Price range**: ج.م150 – ج.م3,800 (covers impulse + premium)
+- **Price range**: ج.م150 – ج.م590 (covers impulse + premium)
 
 ---
 
@@ -189,7 +190,7 @@ Copy `.env.example` and configure in Vercel dashboard. Required variables: `GOOG
 ### New Product
 
 ```ts
-// src/data/products.ts — append to the appropriate array (men/women/devices)
+// src/data/products/men.ts (or women.ts / devices.ts) — append to the array
 {
   id: "m-68",                              // next sequential ID
   slug: "your-product-slug",               // URL-friendly English name
@@ -197,18 +198,18 @@ Copy `.env.example` and configure in Vercel dashboard. Required variables: `GOOG
   nameEn: "Product Name",                  // English name (for catalog feed)
   category: "men",                         // men | women | devices
   price: 300,                              // EGP
-  description: "وصف تفصيلي للمنتج...",     // ≥200 chars
+  description: "وصف تفصيلي للمنتج...",     // ≥80 chars
   benefits: ["فائدة 1", "فائدة 2"],        // 5–7 benefits
   ingredients: "المكونات مع أدوارها...",
   usage: "طريقة الاستخدام + تحذيرات...",
-  image: "/images/M-68.webp",              // must match ID prefix
+  image: "/images/your-product-slug.webp", // slug-based (must match slug)
   stock: 100,
   rating: 4.7,
   reviews: 50,
 }
 ```
 
-Then add the image (800×800 WebP) to `public/images/M-68.webp` and its thumbnail (320×320) to `public/images/thumbs/M-68.webp`. Run `npm run build` — the sitemap, prerender, and catalog feed update automatically.
+Then add the image (800×800 WebP) to `public/images/your-product-slug.webp` and its thumbnail (320×320) to `public/images/thumbs/your-product-slug.webp`. Run `npm run build` — the sitemap, prerender, and catalog feed update automatically.
 
 ### New Article
 
@@ -240,7 +241,7 @@ The build pipeline:
 
 1. `vite build` → generates optimized `dist/`
 2. `generate-sitemap.mjs` → creates sitemap.xml, sitemap-images.xml, catalog-feed.xml
-3. `prerender-seo.mjs` → generates 262 static HTML pages with full SEO meta + JSON-LD
+3. `prerender-seo.mjs` → generates 265 static HTML pages with full SEO meta + JSON-LD
 4. Vercel deploys `dist/` to global Edge CDN
 
 After deploying, submit `sitemap-index.xml` in Google Search Console for faster indexing.
