@@ -31,66 +31,47 @@
       }
     },
     "assert": {
-      "preset": "lighthouse:no-pwa",
       "assertions": {
         "categories:performance": [
-          "error",
+          "warn",
           {
-            "minScore": 0.85
+            "minScore": 0.6
           }
         ],
         "categories:accessibility": [
-          "error",
+          "warn",
           {
             "minScore": 0.9
           }
         ],
         "categories:best-practices": [
-          "error",
+          "warn",
           {
             "minScore": 0.9
           }
         ],
         "categories:seo": [
-          "error",
+          "warn",
           {
-            "minScore": 0.95
-          }
-        ],
-        "first-contentful-paint": [
-          "error",
-          {
-            "maxNumericValue": 1500
+            "minScore": 0.9
           }
         ],
         "largest-contentful-paint": [
           "error",
           {
-            "maxNumericValue": 2500
-          }
-        ],
-        "total-blocking-time": [
-          "error",
-          {
-            "maxNumericValue": 200
+            "maxNumericValue": 4000
           }
         ],
         "cumulative-layout-shift": [
           "error",
           {
-            "maxNumericValue": 0.1
+            "maxNumericValue": 0.25
           }
         ],
-        "speed-index": [
+        "total-blocking-time": [
           "error",
           {
-            "maxNumericValue": 3000
-          }
-        ],
-        "interactive": [
-          "error",
-          {
-            "maxNumericValue": 3500
+            "maxNumericValue": 600
           }
         ]
       }

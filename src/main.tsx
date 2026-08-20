@@ -27,7 +27,7 @@ if (typeof window !== "undefined") {
       }
       localStorage.setItem(FORCE_CLEAR_KEY, "true");
     }
-  } catch (err) {
+  } catch {
     // Ignore storage errors (private browsing etc)
   }
 }
