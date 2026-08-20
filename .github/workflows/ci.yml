@@ -45,10 +45,6 @@ jobs:
       - name: Data integrity tests
         run: npm test
 
-      - name: Validate JSON-LD schemas
-        if: always()
-        run: node scripts/validate-schemas.mjs
-
   # ─────────────────────────────────────────────────────────
   # 2) Build — generates prerendered HTML, sitemaps, feeds
   # ─────────────────────────────────────────────────────────
@@ -74,6 +70,10 @@ jobs:
         env:
           SITE_URL: https://elysrmedical.store
         run: npm run build
+
+      # 🔍 Validate JSON-LD schemas AFTER build (requires the generated dist/)
+      - name: Validate JSON-LD schemas
+        run: node scripts/validate-schemas.mjs
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
