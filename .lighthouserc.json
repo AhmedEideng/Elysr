@@ -2,11 +2,11 @@
   "ci": {
     "collect": {
       "url": [
-        "/",
-        "/products/men",
-        "/products/women",
-        "/products/devices",
-        "/education"
+        "http://localhost:8080/",
+        "http://localhost:8080/products/men",
+        "http://localhost:8080/products/women",
+        "http://localhost:8080/products/devices",
+        "http://localhost:8080/education"
       ],
       "numberOfRuns": 3,
       "settings": {
@@ -28,8 +28,7 @@
           "deviceScaleFactor": 1,
           "disabled": false
         }
-      },
-      "staticDistDir": "dist"
+      }
     },
     "assert": {
       "preset": "lighthouse:no-pwa",

@@ -108,6 +108,17 @@ jobs:
           name: dist
           path: dist
 
+      # 🚀 Serve dist/ via the real server (handles clean URLs like /products/men -> men.html)
+      - name: Serve dist/ (server/index.js)
+        run: |
+          PORT=8080 node server/index.js > /tmp/server.log 2>&1 &
+          # wait for server to be ready (check root returns 200)
+          for i in $(seq 1 15); do
+            if curl -sf -o /dev/null http://localhost:8080/; then break; fi
+            sleep 1
+          done
+          curl -sf -o /dev/null http://localhost:8080/products/men && echo "Server OK (clean URLs work)"
+
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
         with:
