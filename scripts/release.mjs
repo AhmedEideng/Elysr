@@ -85,7 +85,10 @@ function bumpCacheVersion() {
 bumpCacheVersion();
 
 try {
-  execSync("git add package.json src/lib/cache.ts scripts/prerender-seo.mjs scripts/generate-sitemap.mjs", { stdio: "inherit" });
+  execSync(
+    "git add package.json src/lib/cache.ts scripts/prerender-seo.mjs scripts/generate-sitemap.mjs",
+    { stdio: "inherit" },
+  );
   execSync(`git commit -m "release: v${next}"`, { stdio: "inherit" });
   execSync(`git tag "v${next}"`, { stdio: "inherit" });
   console.log(`✅ تم إنشاء tag: v${next}`);

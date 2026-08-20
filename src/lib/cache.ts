@@ -35,6 +35,8 @@ export function assetUrl(path: string): string {
 
 /** نسخة thumbs (الـ srcSet) — تستخدم نفس رقم الإصدار. */
 export function thumbUrl(baseWebP: string, thumbDir: "thumbs" | "thumbs-180"): string {
-  const base = String(baseWebP).split("?")[0].replace(/^\/images\//, `/images/${thumbDir}/`);
+  const base = String(baseWebP)
+    .split("?")[0]
+    .replace(/^\/images\//, `/images/${thumbDir}/`);
   return `${base}?v=${CACHE_VERSION}`;
 }

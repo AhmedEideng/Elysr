@@ -321,11 +321,7 @@ export function getProductReviews(
   maxReviews = 5,
 ): ProductReviewsResult {
   const pool =
-    category === "women"
-      ? WOMEN_REVIEWS
-      : category === "devices"
-        ? DEVICE_REVIEWS
-        : MEN_REVIEWS;
+    category === "women" ? WOMEN_REVIEWS : category === "devices" ? DEVICE_REVIEWS : MEN_REVIEWS;
 
   const seed = hashCode(slug || "default");
   const rand = mulberry32(seed);

@@ -371,8 +371,7 @@ export const articles: Article[] = [
   {
     image: "/images/article-ginseng-guide-hero.webp",
     slug: "red-korean-ginseng-energy-endurance-benefits",
-    title:
-      "الجينسنج الكوري الأحمر: الطاقة والتحمل البدني",
+    title: "الجينسنج الكوري الأحمر: الطاقة والتحمل البدني",
     excerpt:
       "دليل صيدلاني يكشف الآلية الفسيولوجية للجينسنج الكوري الأحمر في زيادة إنتاج ATP وتحسين التحمل البدني دون إجهاد الجهاز العصبي، مع جرعات آمنة ونصائح عملية.",
     category: "men",
@@ -489,8 +488,7 @@ export const articles: Article[] = [
   {
     image: "/images/article-omega3-hero.webp",
     slug: "omega-3-omega-6-benefits-skin-cell-elasticity",
-    title:
-      "الأحماض الدهنية أوميغا 3 وأوميغا 6 للبشرة",
+    title: "الأحماض الدهنية أوميغا 3 وأوميغا 6 للبشرة",
     excerpt:
       "اكتشف كيف تعمل أحماض الأوميغا 3 والأوميغا 6 على تدعيم الغشاء الخلوي للجلد، وتجديد حاجز البشرة الطبيعي للحفاظ على النضارة والمرونة الحيوية.",
     category: "women",
@@ -529,8 +527,7 @@ export const articles: Article[] = [
   {
     image: "/images/article-physiological-methods-for-stamina-and-timing-without-numbing.webp",
     slug: "physiological-methods-for-stamina-and-timing-without-numbing",
-    title:
-      "التحكم في التوقيت بطرق فسيولوجية آمنة",
+    title: "التحكم في التوقيت بطرق فسيولوجية آمنة",
     excerpt:
       "تعرف على الآليات الفسيولوجية التي تمنحك التحكم في التوقيت دون فقدان الشعور والمتعة، برؤية صيدلانية متخصصة من اليسر ميديكال، بعيداً عن كريمات التخدير.",
     category: "men",

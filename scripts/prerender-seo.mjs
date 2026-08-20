@@ -659,7 +659,9 @@ async function prerender() {
       // 🎯 meta description مُقتطع إلى ~155 حرفاً (يُعرض كاملاً في نتائج Google).
       // الوصف الكامل (product.description) يبقى في JSON-LD ومحتوى الصفحة.
       const desc = makeMetaDescription(product.description);
-      const img = product.image ? `${SITE_URL}${assetUrl(product.image)}` : `${SITE_URL}/og-default.webp`;
+      const img = product.image
+        ? `${SITE_URL}${assetUrl(product.image)}`
+        : `${SITE_URL}/og-default.webp`;
       const canonical = `${SITE_URL}/products/${product.slug}`;
 
       // ⭐ aggregateRating — لعرض نجوم التقييم في نتائج Google.
@@ -780,10 +782,7 @@ async function prerender() {
       const relatedBody =
         relatedProducts.length > 0
           ? `<h2>منتجات مشابهة</h2><ul>${relatedProducts
-              .map(
-                (p) =>
-                  `<li><a href="${SITE_URL}/products/${p.slug}">${esc(p.name)}</a></li>`,
-              )
+              .map((p) => `<li><a href="${SITE_URL}/products/${p.slug}">${esc(p.name)}</a></li>`)
               .join("")}</ul>`
           : "";
 
