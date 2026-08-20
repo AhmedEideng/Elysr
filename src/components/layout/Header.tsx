@@ -181,7 +181,7 @@ export function Header() {
               srcSet={`${logoSmall} 126w, ${logo} 249w`}
               sizes="(min-width: 768px) 132px, 121px"
               alt="اليسر ميديكال — Elysr Medical Group"
-              className="h-11 w-auto object-contain md:h-12"
+              className="h-11 w-auto object-contain brightness-0 md:h-12"
               width={249}
               height={96}
               fetchPriority="high"
