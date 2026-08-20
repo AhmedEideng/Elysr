@@ -10,6 +10,7 @@ import {
   isRedProduct,
   isCatalogFeedEligible,
   RED_PRODUCT_IDS,
+  ADS_RESTRICTED_PRODUCT_IDS,
 } from "@/lib/product-compliance";
 
 describe("getProductComplianceStatus", () => {
@@ -57,5 +58,16 @@ describe("isCatalogFeedEligible", () => {
 
   it("بدون مخزون → غير مؤهل (default 0)", () => {
     expect(isCatalogFeedEligible({ id: "m-01" })).toBe(false);
+  });
+});
+
+describe("ADS_RESTRICTED (high-risk honey, ads-only exclusion)", () => {
+  it("مستبعد من خلاصة الإعلانات لكنه ليس RED", () => {
+    expect(ADS_RESTRICTED_PRODUCT_IDS.has("m-22")).toBe(true); // Honey Vital
+    expect(isCatalogFeedEligible({ id: "m-22", stock: 10 })).toBe(false);
+  });
+
+  it("المنتجات الآمنة تبقى في الخلاصة", () => {
+    expect(isCatalogFeedEligible({ id: "m-60", stock: 10 })).toBe(true);
   });
 });

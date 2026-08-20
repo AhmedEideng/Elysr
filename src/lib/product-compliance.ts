@@ -54,7 +54,44 @@ export function isRedProduct(productId: string): boolean {
   return getProductComplianceStatus(productId) === "red";
 }
 
-/** Keep high-risk red products out of ad/catalog feeds by default. */
+// 🔴 استبعاد إعلاني إضافي (Ads-Restricted) — مستقلة عن نظام RED:
+// منتجات "العسل الملكي / فيتال" (Royal/Vital/Black Horse Honey) التي يربطها
+// جوجل عالميًا بمنتجات مغشوشة تحتوي سيلدينافيل مخفي، فتُرفض إعلاناتها في مصر
+// (مثل "Honey Vital" و"CIALIS/TADALAFIL" في رسالة الرفض الأخيرة).
+//
+// ⚠️ على عكس RED، هذه المنتجات تبقى **ظاهرة وقابلة للبيع** في الموقع
+// (صفحات التصنيف/البحث/المقترحات) لأنها مش منتجات دوائية؛ نستبعدها فقط من
+// خلاصة الإعلانات المدفوعة لتفادي رفض جوجل وخطر إيقاف الحساب.
+export const ADS_RESTRICTED_PRODUCT_IDS = new Set([
+  "m-12", // Royal Honey Gold VIP
+  "m-13", // KING Royal Honey Plus
+  "m-16", // Excellent Hard Leopard Royal Honey
+  "m-18", // Golden Horse Royal Honey
+  "m-20", // Golden Horse Royal Honey Plus
+  "m-21", // Black Horse Caviar
+  "m-22", // Black Horse Vital Honey ← "Honey Vital"
+  "m-24", // Super Royal Honey – Top Pharma
+  "m-27", // XSteel (Black Horse)
+  "m-52", // Top Sellers Honey
+  "m-56", // Dal El Khair (Royal)
+  "w-05", // Royal Honey (women)
+  "w-07", // Top Sellers Honey (women)
+]);
+
+export function isAdsRestrictedProduct(productId: string): boolean {
+  return ADS_RESTRICTED_PRODUCT_IDS.has(productId);
+}
+
+/**
+ * Keep products out of ad/catalog feeds by default:
+ * - RED (drugs, anesthetics, Spanish Fly)
+ * - Ads-restricted (high-risk royal honey)
+ * - out of stock
+ * They remain fully visible on the site and organically indexed.
+ */
 export function isCatalogFeedEligible(product: { id: string; stock?: number }): boolean {
-  return !RED_PRODUCT_IDS.has(product.id) && (product.stock ?? 0) > 0;
+  const id = product.id;
+  return (
+    !RED_PRODUCT_IDS.has(id) && !ADS_RESTRICTED_PRODUCT_IDS.has(id) && (product.stock ?? 0) > 0
+  );
 }
