@@ -46,6 +46,7 @@ async function syncRedirects() {
       { source: "/index.html", destination: "/", permanent: true },
       { source: "/index", destination: "/", permanent: true },
       { source: "/product/:slug", destination: "/products/:slug", permanent: true },
+<<<<<<< HEAD
       { source: "/products/hammer-of-thor-herbal-supplement", destination: "/products/men", permanent: true },
       // 🗑️ منتجات محذوفة نهائيًا → القسم الخاص بها (مش منتج مختلف)
       { source: "/products/m-61", destination: "/products/men", permanent: true },
@@ -59,6 +60,60 @@ async function syncRedirects() {
       { source: "/products/original-black-horse-royal-honey", destination: "/products/men", permanent: true },
       { source: "/products/merson-gel-50-gm", destination: "/products/men", permanent: true },
       { source: "/products/sex-women-hot-life-wipes", destination: "/products/women", permanent: true },
+=======
+      {
+        source: "/products/hammer-of-thor-herbal-supplement",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/m-61",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/m-57",
+        destination: "/products/women",
+        permanent: true,
+      },
+      {
+        source: "/products/m-58",
+        destination: "/products/women",
+        permanent: true,
+      },
+      {
+        source: "/products/3d-super-green-coffee-30-sachets",
+        destination: "/products/women",
+        permanent: true,
+      },
+      {
+        source: "/products/m-51",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/m-10",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/m-08",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/overtime-erection-delay",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/original-black-horse-royal-honey",
+        destination: "/products/men",
+        permanent: true,
+      },
+      { source: "/products/merson-gel-50-gm", destination: "/products/men", permanent: true },
+      // deleted products -> their section (not to a different product)
+>>>>>>> 9ce8113 (fix(redirects): deleted products redirect to their section, not another product)
       { source: "/products/turbo-fitness-gel-50gm", destination: "/products/men", permanent: true },
       { source: "/products/brioge-gel", destination: "/products/men", permanent: true },
       { source: "/products/hulk-gel-50gm", destination: "/products/men", permanent: true },
@@ -76,6 +131,7 @@ async function syncRedirects() {
       { source: "/return-policy", destination: "/returns", permanent: true },
       { source: "/terms-and-conditions", destination: "/terms", permanent: true },
       { source: "/privacy-policy", destination: "/privacy", permanent: true },
+<<<<<<< HEAD
       // 🔄 أسماء قديمة لنفس المنتج (Alias) → توجّه للمنتج الحالي المطابق
       { source: "/products/kreva", destination: "/products/kreva-gel", permanent: true },
       { source: "/products/kreva-gel-for-men", destination: "/products/kreva-gel", permanent: true },
@@ -93,6 +149,38 @@ async function syncRedirects() {
       { source: "/products/coffemix-caviar-original-for-women", destination: "/products/coffemix-caviar-original", permanent: true },
       { source: "/products/viagra-for-women-20-tablets", destination: "/products/viagra-20-tablets", permanent: true },
       { source: "/products/black-widow-drops-for-women", destination: "/products/black-widow-drops", permanent: true },
+=======
+      {
+        source: "/products/kreva-gel",
+        destination: "/products/kreva-gel",
+        permanent: true,
+      },
+      {
+        source: "/products/kreva",
+        destination: "/products/kreva-gel",
+        permanent: true,
+      },
+      {
+        source: "/products/sotara-gel",
+        destination: "/products/sotara-gel-50gm",
+        permanent: true,
+      },
+      {
+        source: "/products/sotara",
+        destination: "/products/sotara-gel-50gm",
+        permanent: true,
+      },
+      {
+        source: "/products/titan-gel-gold",
+        destination: "/products/titan-gel-gold-special-gel",
+        permanent: true,
+      },
+      {
+        source: "/products/sex-women-hot-life-wipes",
+        destination: "/products/women",
+        permanent: true,
+      },
+>>>>>>> 9ce8113 (fix(redirects): deleted products redirect to their section, not another product)
     ];
 
     for (const redirect of legacyAliases) {
