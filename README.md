@@ -29,8 +29,8 @@ Elysr Medical is a production Arabic (RTL) e-commerce store serving Egypt. It ru
 | Products           | **87** (56 men · 24 women · 7 devices) |
 | Articles           | **56** educational health articles     |
 | SEO Guides         | **106** long-form landing pages        |
-| Pre-rendered Pages | **265** static HTML files              |
-| Sitemap URLs       | **257**                                |
+| Pre-rendered Pages | **267** static HTML files              |
+| Sitemap URLs       | **261**                                |
 | Catalog Feed       | **87** items (META / Google Shopping)  |
 | Redirects          | **154** (301 permanent)                |
 | Image Format       | WebP only — optimized 8–55 KB each     |
@@ -70,7 +70,7 @@ Browser ──→ Vercel CDN (static dist/)
 | Icons     | Lucide React                                           |
 | Hosting   | Vercel (Edge CDN)                                      |
 | Orders    | Google Apps Script → Google Sheets                     |
-| SEO       | Pre-render (265 pages) + JSON-LD + Sitemaps + Hreflang |
+| SEO       | Pre-render (267 pages) + JSON-LD + Sitemaps + Hreflang |
 | Images    | WebP (sharp processing, 700–800px, q45–55)             |
 | Security  | CSP headers + CORS + API rate limiting                 |
 
@@ -112,7 +112,7 @@ Browser ──→ Vercel CDN (static dist/)
 ├── public/
 │   ├── images/                 # Product images (slug-based WebP)
 │   ├── images/thumbs/          # 88 thumbnail versions
-│   ├── sitemap.xml             # 257 URLs
+│   ├── sitemap.xml             # 261 URLs
 │   ├── sitemap-images.xml      # Product image sitemap
 │   ├── sitemap-index.xml       # Sitemap index
 │   └── catalog-feed.xml        # META/Google Shopping feed (87 items)
@@ -137,11 +137,11 @@ The `src/lib/product-compliance.ts` module remains only for code/test compatibil
 
 ## Home Page Strategy
 
-The home page displays **21 hand-picked products** in `HOME_FEATURED_ORDER`, selected for maximum conversion:
+The home page displays **6 hand-picked products** at the top (`HOME_FEATURED_ORDER` first 6), backed by a larger pool of related/suggestion products:
 
-- **Zero RED products** (compliance safe)
-- **Category mix**: 15 men + 6 women
-- **Type variety**: honey, capsules, gel, drops, chocolate
+- **No product exclusion** — every product is eligible (compliance module disabled)
+- **Category mix**: 16 men + 6 women in the pool
+- **Type variety**: honey, capsules, gel, spray, drops, chocolate
 - **Social proof first**: highest review counts lead
 - **Price range**: ج.م150 – ج.م590 (covers impulse + premium)
 
@@ -229,7 +229,7 @@ The build pipeline:
 
 1. `vite build` → generates optimized `dist/`
 2. `generate-sitemap.mjs` → creates sitemap.xml, sitemap-images.xml, catalog-feed.xml
-3. `prerender-seo.mjs` → generates 265 static HTML pages with full SEO meta + JSON-LD
+3. `prerender-seo.mjs` → generates 267 static HTML pages with full SEO meta + JSON-LD
 4. Vercel deploys `dist/` to global Edge CDN
 
 After deploying, submit `sitemap-index.xml` in Google Search Console for faster indexing.
