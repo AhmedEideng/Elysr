@@ -81,7 +81,9 @@ async function generateSitemap() {
       PROMO_TIERS,
     };
     writeFileSync(resolve(apiLibDir, "config-db.json"), JSON.stringify(configDb, null, 2), "utf-8");
-    const { isCatalogFeedEligible } = await vite.ssrLoadModule("/src/lib/product-compliance.ts");
+    const { isCatalogFeedEligible, GOOGLE_SHOPPING_BLOCKED } = await vite.ssrLoadModule(
+      "/src/lib/product-compliance.ts",
+    );
     const catalogProducts = products.filter(isCatalogFeedEligible);
 
     let articles = [];
@@ -183,14 +185,16 @@ async function generateSitemap() {
 
     const urls = [
       ...staticRoutes,
-      ...products.map((p) => ({
-        path: `/products/${p.slug}`,
-        priority: "0.8",
-        changefreq: "weekly",
-        lastmod: productLastmod,
-        image: p.image,
-        imageTitle: p.name,
-      })),
+      ...products
+        .filter((p) => !GOOGLE_SHOPPING_BLOCKED.has(p.id)) // الأدوية المرفوضة خارج sitemap (لا تُفهرس)
+        .map((p) => ({
+          path: `/products/${p.slug}`,
+          priority: "0.8",
+          changefreq: "weekly",
+          lastmod: productLastmod,
+          image: p.image,
+          imageTitle: p.name,
+        })),
       ...articles.map((a) => ({
         path: `/education/${a.slug}`,
         priority: "0.7",

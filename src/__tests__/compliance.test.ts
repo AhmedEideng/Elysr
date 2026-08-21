@@ -8,7 +8,11 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { isCatalogFeedEligible, RED_PRODUCT_IDS, GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
+import {
+  isCatalogFeedEligible,
+  RED_PRODUCT_IDS,
+  GOOGLE_SHOPPING_BLOCKED,
+} from "@/lib/product-compliance";
 
 describe("تم إلغاء نظام RED — لا يُستثنى أي منتج من الموقع", () => {
   it("قائمة RED فارغة تمامًا", () => {

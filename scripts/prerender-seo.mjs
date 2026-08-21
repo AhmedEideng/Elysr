@@ -246,6 +246,10 @@ async function prerender() {
 
   try {
     const { products } = await vite.ssrLoadModule("/src/data/products.ts");
+    const { GOOGLE_SHOPPING_BLOCKED } = await vite.ssrLoadModule("/src/lib/product-compliance.ts");
+    // صفحات المنتجات الدوائية المرفوضة: noindex حتى لا يزحفها جوجل (تبقى على الموقع
+    // وقابلة للشراء عبر الروابط المباشرة/واتساب، لكن لا تُفهرس في نتائج البحث).
+    const isNoindexProduct = (p) => GOOGLE_SHOPPING_BLOCKED.has(p.id);
     let articles = [];
     try {
       const mod = await vite.ssrLoadModule("/src/data/articles.ts");
@@ -812,6 +816,7 @@ async function prerender() {
         image: img,
         canonical,
         type: "product",
+        noindex: isNoindexProduct(product),
         jsonLd: [productJsonLd, breadcrumb],
         bodyContent: body,
       });
