@@ -31,8 +31,6 @@ export function CrossSellBundle({
     setIsAdding(true);
     bundleItems.forEach((item) => {
       add(item, 1);
-      // Tracking معطل
-      // Tracking معطل
     });
 
     setTimeout(() => {

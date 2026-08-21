@@ -81,9 +81,7 @@ async function generateSitemap() {
       PROMO_TIERS,
     };
     writeFileSync(resolve(apiLibDir, "config-db.json"), JSON.stringify(configDb, null, 2), "utf-8");
-    const { isCatalogFeedEligible, RED_PRODUCT_IDS } = await vite.ssrLoadModule(
-      "/src/lib/product-compliance.ts",
-    );
+    const { isCatalogFeedEligible } = await vite.ssrLoadModule("/src/lib/product-compliance.ts");
     const catalogProducts = products.filter(isCatalogFeedEligible);
 
     let articles = [];

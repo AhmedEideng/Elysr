@@ -89,7 +89,6 @@ export function ProductCard({ product }: { product: Product }) {
           const wasAdded = !wishlisted;
           toggleWishlist(product);
           if (wasAdded)
-            // Tracking معطل
             toast.success(wasAdded ? "أضيف للمفضلة ❤️" : "أزيل من المفضلة", {
               duration: 1500,
               className: "rounded-2xl font-bold",
@@ -168,8 +167,6 @@ export function ProductCard({ product }: { product: Product }) {
             onClick={() => {
               if (product.stock <= 0) return;
               add(product);
-              // Tracking معطل
-              // Tracking معطل
               toast.success(promoOn ? "تمت الإضافة للسلة ☀️" : "تمت الإضافة للسلة", {
                 duration: 2000,
                 icon: <ShoppingCart className="h-4 w-4 text-primary" />,

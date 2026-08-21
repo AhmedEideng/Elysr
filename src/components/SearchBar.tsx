@@ -56,8 +56,6 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
   }, [q, fuse]);
 
   const go = (slug: string) => {
-    // TikTok: Search event — fires when user selects a result
-    // Tracking معطل
     navigate({ to: "/products/$slug", params: { slug } });
     onClose?.();
   };

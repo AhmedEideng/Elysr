@@ -129,9 +129,6 @@ function CartPage() {
 
     // Split name for better Meta matching (first + last)
 
-    // TikTok: InitiateCheckout (معطل حالياً)
-    // Meta: InitiateCheckout event (معطل حالياً)
-
     const orderId = generateOrderId();
     const orderItems = items.map((i) => ({
       id: i.id,
@@ -182,8 +179,6 @@ function CartPage() {
       a.click();
       a.remove();
 
-      // Tracking معطل حالياً — Purchase events for WhatsApp
-
       clear();
       setSubmitting(false);
       navigate({ to: "/thank-you" });
@@ -191,7 +186,6 @@ function CartPage() {
       try {
         const result = await submitToGoogleSheets(payload);
         if (!result.success) throw new Error(result.error || "تعذر إرسال الطلب");
-        // Tracking معطل حالياً
         toast.success("✅ تم استلام طلبك بنجاح!", { duration: 4000 });
         clear();
         navigate({ to: "/order-confirmed" });
@@ -422,7 +416,6 @@ function CartPage() {
                 value={customer.phone}
                 onChange={(v) => {
                   setCustomer({ ...customer, phone: v });
-                  // Tracking معطل — updateMatchingData
                 }}
                 type="tel"
                 maxLength={16}

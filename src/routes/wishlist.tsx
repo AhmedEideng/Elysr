@@ -335,7 +335,6 @@ function WishlistPage() {
                           return;
                         }
                         addToCart(product);
-                        // Tracking معطل
                         toast.success(`أضيف ${product.name} للسلة ✅`);
                       }}
                       disabled={!inStock}

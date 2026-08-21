@@ -268,15 +268,6 @@ function ProductPage() {
       const msg = buildOrderMessage(orderItems, sc, orderId, shipping, shipping === 0);
       const url = waLink(msg);
 
-      // Meta: Purchase event with full value tracking
-      // Meta Purchase tracking — معطل
-
-      // TikTok: PlaceAnOrder + CompletePayment + Contact
-      // TikTok tracking — معطل
-
-      // Meta: Contact event for WhatsApp channel tracking
-      // Meta tracking — معطل
-
       const a = document.createElement("a");
       a.href = url;
       a.target = "_blank";
