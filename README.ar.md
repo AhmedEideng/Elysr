@@ -29,10 +29,8 @@
 - 🔍 **SEO ممتاز** — schema.org JSON-LD لكل صفحة، sitemap.xml (257 رابط)، catalog-feed.xml
 - 🛒 **سلة ذكية** — localStorage مع auto-sync + حماية من تجاوز المخزون
 - 🏆 **خصم متدرج** — 10% / 15% / 20% حسب قيمة الطلب
-- 🛡️ **نظام Compliance** — 3 مستويات (أخضر / كهرماني / أحمر) لحماية الإعلانات
-  - **RED = حماية الإعلانات فقط**: تُستثنى من كشتلوج الإعلانات المدفوعة (Google Merchant/Facebook)،
-    لكنها تبقى **مفهرسة وظاهرة في البحث العضوي** (Google/Bing) وفي sitemap.xml، لأن زيارات البحث
-    العضوي وتحويلات واتساب قيّمة.
+- 🛡️ **نظام Compliance مُعطّل** — تم إلغاء التصنيف والاستبعاد نهائيًا بقرار الإدارة،
+  وكل المنتجات الـ 87 الآن ظاهرة في كل الأقسام ومتاحة في خلاصة المنتجات بالكامل.
 - 📱 **متجاوب بالكامل** — Mobile-first مع Cairo font self-hosted
 - 📊 **Google Analytics** — تتبع الزيارات
 - 🌐 **دعم PWA** — Service Worker مع offline fallback
@@ -108,7 +106,7 @@ Elysr/
 │   ├── data/            # products.ts · articles.ts · landing-pages.ts
 │   ├── lib/
 │   │   ├── seo.ts               # SEO helpers + JSON-LD builders
-│   │   ├── product-compliance.ts  # GREEN/RED compliance
+│   │   ├── product-compliance.ts  # مُعطّل (no-op) — توافق برمجي فقط
 │   │   ├── promo.ts             # Diamond Care Initiative dynamic tier discount
 │   │   ├── error-tracking.ts    # Sentry-compatible sink
 │   │   └── service-worker.ts    # opt-in PWA registration

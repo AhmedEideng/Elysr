@@ -1,7 +1,10 @@
 /**
  * ============================================================
- * Unit Tests — نظام الامتثال المبسط (Product Compliance)
+ * Unit Tests — نظام الامتثال (Product Compliance)
  * ============================================================
+ * ⚠️ تم إلغاء نظامي GREEN/RED والاستبعاد الإعلاني نهائيًا بقرار الإدارة.
+ * جميع المنتجات الآن ظاهرة في كل الأقسام ومتاحة في الخلاصة بالكامل.
+ * هذه الاختبارات تؤكد أن النظام لم يعد يستبعد أي منتج.
  */
 
 import { describe, it, expect } from "vitest";
@@ -13,43 +16,38 @@ import {
   ADS_RESTRICTED_PRODUCT_IDS,
 } from "@/lib/product-compliance";
 
-describe("getProductComplianceStatus", () => {
-  it("يصنف المنتجات الحمراء صحيحاً", () => {
-    for (const id of RED_PRODUCT_IDS) {
-      expect(getProductComplianceStatus(id)).toBe("red");
-    }
+describe("تم إلغاء نظام الامتثال — لا يوجد أي استبعاد", () => {
+  it("قائمتي RED و ADS_RESTRICTED فارغتان تمامًا", () => {
+    expect(RED_PRODUCT_IDS.size).toBe(0);
+    expect(ADS_RESTRICTED_PRODUCT_IDS.size).toBe(0);
   });
 
-  it("باقي المنتجات خضراء", () => {
-    expect(getProductComplianceStatus("m-01")).toBe("green");
-    expect(getProductComplianceStatus("m-02")).toBe("green");
-    expect(getProductComplianceStatus("w-05")).toBe("green");
+  it("كل المنتجات تُصنّف خضراء", () => {
+    expect(getProductComplianceStatus("m-34")).toBe("green");
+    expect(getProductComplianceStatus("m-37")).toBe("green");
+    expect(getProductComplianceStatus("m-44")).toBe("green");
+    expect(getProductComplianceStatus("m-22")).toBe("green");
+    expect(getProductComplianceStatus("w-03")).toBe("green");
     expect(getProductComplianceStatus("unknown-99")).toBe("green");
   });
-});
 
-describe("isRedProduct", () => {
-  it("true للمنتجات الحمراء", () => {
-    expect(isRedProduct("m-34")).toBe(true);
-    expect(isRedProduct("m-37")).toBe(true);
-    expect(isRedProduct("w-17")).toBe(true);
+  it("لا يوجد أي منتج أحمر", () => {
+    expect(isRedProduct("m-34")).toBe(false);
+    expect(isRedProduct("m-37")).toBe(false);
+    expect(isRedProduct("w-17")).toBe(false);
   });
 
-  it("false للمنتجات غير الحمراء", () => {
-    expect(isRedProduct("m-01")).toBe(false);
-    expect(isRedProduct("m-05")).toBe(false);
-    expect(isRedProduct("d-01")).toBe(false);
+  it("لا يوجد أي استبعاد إعلاني إضافي", () => {
+    expect(isRedProduct("m-22")).toBe(false);
   });
 });
 
-describe("isCatalogFeedEligible", () => {
-  it("المنتجات الخضراء مع مخزون → مؤهلة", () => {
+describe("isCatalogFeedEligible — يعتمد على المخزون فقط", () => {
+  it("منتج متوفر → مؤهل بغض النظر عن أي تصنيف سابق", () => {
+    expect(isCatalogFeedEligible({ id: "m-34", stock: 100 })).toBe(true);
+    expect(isCatalogFeedEligible({ id: "m-37", stock: 50 })).toBe(true);
+    expect(isCatalogFeedEligible({ id: "m-22", stock: 10 })).toBe(true);
     expect(isCatalogFeedEligible({ id: "m-01", stock: 50 })).toBe(true);
-  });
-
-  it("المنتجات الحمراء → غير مؤهلة حتى مع مخزون", () => {
-    expect(isCatalogFeedEligible({ id: "m-34", stock: 100 })).toBe(false);
-    expect(isCatalogFeedEligible({ id: "m-37", stock: 50 })).toBe(false);
   });
 
   it("مخزون = 0 → غير مؤهل", () => {
@@ -58,16 +56,5 @@ describe("isCatalogFeedEligible", () => {
 
   it("بدون مخزون → غير مؤهل (default 0)", () => {
     expect(isCatalogFeedEligible({ id: "m-01" })).toBe(false);
-  });
-});
-
-describe("ADS_RESTRICTED (high-risk honey, ads-only exclusion)", () => {
-  it("مستبعد من خلاصة الإعلانات لكنه ليس RED", () => {
-    expect(ADS_RESTRICTED_PRODUCT_IDS.has("m-22")).toBe(true); // Honey Vital
-    expect(isCatalogFeedEligible({ id: "m-22", stock: 10 })).toBe(false);
-  });
-
-  it("المنتجات الآمنة تبقى في الخلاصة", () => {
-    expect(isCatalogFeedEligible({ id: "m-60", stock: 10 })).toBe(true);
   });
 });

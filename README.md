@@ -31,7 +31,7 @@ Elysr Medical is a production Arabic (RTL) e-commerce store serving Egypt. It ru
 | SEO Guides         | **106** long-form landing pages        |
 | Pre-rendered Pages | **265** static HTML files              |
 | Sitemap URLs       | **257**                                |
-| Catalog Feed       | **67** items (META / Google Shopping)  |
+| Catalog Feed       | **87** items (META / Google Shopping)  |
 | Redirects          | **154** (301 permanent)                |
 | Image Format       | WebP only — optimized 8–55 KB each     |
 
@@ -54,7 +54,7 @@ Browser ──→ Vercel CDN (static dist/)
 
 - **Zero database** — all product/article data lives in TypeScript files, pre-rendered at build time
 - **Google Sheets as backend** — orders are pushed via a serverless proxy with CSRF protection and rate limiting
-- **Product compliance system** — each product is classified as GREEN / RED to control ad eligibility, catalog feed inclusion, badge display, and sort priority
+- **Product compliance module** — retained for compatibility only; no product is excluded from any section, search, or catalog feed (all 87 products fully visible & shoppable)
 - **Smart sort algorithm** — category pages rank by: stock → featured → popularity score → price (ascending as tie-breaker for impulse buys)
 
 ---
@@ -94,7 +94,7 @@ Browser ──→ Vercel CDN (static dist/)
 │   │   └── product-faqs.ts     # Shared FAQ schema
 │   ├── lib/
 │   │   ├── seo.ts              # Meta tags, JSON-LD, canonical management
-│   │   ├── product-compliance.ts  # GREEN / RED classification
+│   │   ├── product-compliance.ts  # No-op (disabled) compliance module
 │   │   ├── promo.ts            # Tiered discount system
 │   │   ├── governorates.ts     # 27 Egyptian governorates + shipping costs
 │   │   └── whatsapp.ts         # Order message builder
@@ -115,7 +115,7 @@ Browser ──→ Vercel CDN (static dist/)
 │   ├── sitemap.xml             # 257 URLs
 │   ├── sitemap-images.xml      # Product image sitemap
 │   ├── sitemap-index.xml       # Sitemap index
-│   └── catalog-feed.xml        # META/Google Shopping feed (67 items)
+│   └── catalog-feed.xml        # META/Google Shopping feed (87 items)
 ├── vercel.json                 # Headers, redirects (154), rewrites, CSP
 ├── google-apps-script.gs       # Google Sheets webhook receiver
 └── index.html                  # SPA shell with full SEO meta
@@ -123,27 +123,15 @@ Browser ──→ Vercel CDN (static dist/)
 
 ---
 
-## Product Compliance System
+## Product Compliance (Disabled)
 
-Every product is classified into a compliance tier that controls **advertising safety** (not organic visibility):
+The previous GREEN/RED classification and ads-restriction systems have been **fully disabled** by store management decision. All **87 products** — including delay/anesthetic products, ED drugs, and royal honey — are now:
 
-| Tier     | Count | Catalog Feed | Organic Search | Badges     | Featured Sort | Ad Eligible |
-| -------- | ----- | ------------ | -------------- | ---------- | ------------- | ----------- |
-| 🟢 GREEN | 67    | ✅           | ✅ Indexed     | ✅         | Top priority  | ✅          |
-| 🔴 RED   | 20    | ❌ Excluded   | ✅ Indexed     | ❌ Removed | Bottom        | ❌          |
+- **Visible** in every category page, homepage sections, search results, and related-product recommendations
+- **Included** in the full catalog feed (87 items) for Google/Facebook
+- **Indexed** in sitemap.xml for organic search
 
-> **نقطة مهمة:** نظام RED يحمي **الإعلانات فقط**. كل منتجات RED (بما فيها الأسماء التجارية
-> مثل فياجرا/سياليس/ليفيترا، والمخدّرات الموضعية ليدوكايين/بنزوكايين، ومنتجات سبانش فلاي)
-> تبقى **مفهرسة في البحث العضوي (Google/Bing) وظاهرة في sitemap.xml**،
-> لأن الزيارات العضوية وتحويلات واتساب قيّمة. ما يُستثنى فعلاً هو **كشتلوج الإعلانات المدفوعة**
-> (Google Merchant / Facebook Catalog) لتجنّب تحذيرات سياسات الإعلانات.
-
-Classification lives in `src/lib/product-compliance.ts` and is consumed by:
-
-- `catalog-feed.xml` generation (excludes RED)
-- `ProductCard.tsx` badge display logic
-- `getProductsByCategory()` sort algorithm
-- `HOME_FEATURED_ORDER` selection (zero RED)
+The `src/lib/product-compliance.ts` module remains only for code/test compatibility and performs **no filtering** (all functions are no-ops). Products are sorted purely by the smart algorithm (stock → pinned/featured → popularity → price).
 
 ---
 

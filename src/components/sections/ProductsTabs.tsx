@@ -14,10 +14,10 @@ export function ProductsTabs() {
 
     // 2. محاكاة واستبعاد المنتجات الـ 12 المعروضة بداخل قسم "أبرز فئات العناية والاهتمام" (ShopByConcern) لمنع تكرارها أيضاً
     const concernCandidates = {
-      delay: ["m-14", "m-19", "m-48", "m-05", "m-35"], // استُبعدت المخدّرات الموضعية (m-44/m-30/m-55) لتوافق إعلانات جوجل
+      delay: ["m-44", "m-30", "m-14", "m-19", "m-55", "m-48"],
       strength: ["m-11", "m-02", "m-01", "m-04", "m-03", "m-49"],
       devices: ["d-01", "d-02", "d-03", "d-04", "d-05"],
-      women: ["w-02", "w-15", "w-05", "w-01", "w-04", "w-16", "w-07"], // استُبعدت Spanish Fly (w-11/w-03)
+      women: ["w-02", "w-15", "w-05", "w-11", "w-01", "w-03", "w-04"],
     };
 
     const delayIds = concernCandidates.delay.filter((id) => !displayedIds.has(id)).slice(0, 3);
