@@ -1,16 +1,39 @@
 // 🚀 Elysr Medical Group — Product Compliance Module
 //
-// ⚠️ تم إلغاء نظام التصنيف (GREEN/RED) ونظام الاستبعاد الإعلاني (Ads-Restricted)
-// نهائيًا بقرار إدارة المتجر. جميع المنتجات الآن ظاهرة في كل الأقسام (تصنيفات،
-// بحث، واجهة، مقترحات) ومتاحة في خلاصة المنتجات بالكامل.
+// 📌 سياسة الاستبعاد:
+// - كل المنتجات (87) تبقى ظاهرة وقابلة للبيع على الموقع في كل الأقسام
+//   (تصنيفات، بحث، واجهة، مقترحات) — لا يوجد أي حذف أو إخفاء من الموقع.
+// - فقط منتجات Google Shopping المرفوضة (أدوية تستلزم وصفة طبية) تُستثنى
+//   من **خلاصة Google Merchant Center** (catalog-feed.xml) لأن جوجل يكتشفها
+//   عبر الخلاصة. الموقع نفسه يبقى ظاهرًا.
 //
-// هذا الملف بقِيَ للتوافق البرمجي (يستورده سكربت توليد الخلاصة) فقط، ولا يستبعد
-// أي منتج — `isCatalogFeedEligible` يقبل أي منتج متوفر بالمخزون.
+// المنتجات المرفوضة حسب تقرير Google:
+// m-34 (Hard-On / Sildenafil), m-36 (Vegal / Sildenafil),
+// m-37 (Cialis / Tadalafil), m-38 (Power 36 / Sildenafil),
+// m-43 (Procomil Fort / Sildenafil), m-45 (Viagra Pfizer / Sildenafil),
+// m-47 (Levitra / Vardenafil), w-17 (Viagra for Women / Sildenafil).
 
-/** مجموعة فارغة — لا يُستثنى أي منتج. */
+/** منتجات مرفوضة من Google Shopping (تُستثنى من الخلاصة فقط، وتبقى على الموقع). */
+export const GOOGLE_SHOPPING_BLOCKED = new Set<string>([
+  "m-34", // Hard-On (Sildenafil + Dapoxetine)
+  "m-36", // Vegal Extra 130 (Sildenafil)
+  "m-37", // Cialis (Tadalafil)
+  "m-38", // Power 36 (Sildenafil)
+  "m-43", // Procomil Fort (Sildenafil)
+  "m-45", // Viagra Pfizer 100mg (Sildenafil)
+  "m-47", // Levitra (Vardenafil)
+  "w-17", // Viagra for Women (Sildenafil)
+]);
+
+/** مجموعة فارغة — محفوظة للتوافق البرمجي، لا تُستثنى أي منتج من الموقع. */
 export const RED_PRODUCT_IDS = new Set<string>([]);
 
-/** كل المنتجات المتوافرة بالمخزون مؤهلة للخلاصة. */
+/**
+ * مؤهل لخلاصة Google Merchant (catalog-feed.xml):
+ * - يستبعد فقط منتجات Google Shopping المرفوضة (أدوية).
+ * - يستبعد المنتجات غير المتوافرة (stock=0).
+ * - لا يؤثر إطلاقًا على ظهور المنتج على الموقع.
+ */
 export function isCatalogFeedEligible(product: { id?: string; stock?: number }): boolean {
-  return (product.stock ?? 0) > 0;
+  return !GOOGLE_SHOPPING_BLOCKED.has(product.id ?? "") && (product.stock ?? 0) > 0;
 }
