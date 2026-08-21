@@ -187,11 +187,6 @@
       "permanent": true
     },
     {
-      "source": "/products/dooz-gel",
-      "destination": "/products/dooz-14000-delay-cream",
-      "permanent": true
-    },
-    {
       "source": "/products/m-09",
       "destination": "/products/royal-cream",
       "permanent": true
@@ -613,32 +608,32 @@
     },
     {
       "source": "/products/m-57",
-      "destination": "/products/toro-duro-woman",
+      "destination": "/products/women",
       "permanent": true
     },
     {
       "source": "/products/m-58",
-      "destination": "/products/black-widow-drops",
-      "permanent": true
-    },
-    {
-      "source": "/products/3d-super-green-coffee-30-sachets",
       "destination": "/products/women",
       "permanent": true
     },
     {
       "source": "/products/m-51",
-      "destination": "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
+      "destination": "/products/men",
       "permanent": true
     },
     {
       "source": "/products/m-10",
-      "destination": "/products/original-black-horse-caviar-code",
+      "destination": "/products/men",
       "permanent": true
     },
     {
       "source": "/products/m-08",
-      "destination": "/products/sotara-gel-50gm",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/3d-super-green-coffee-30-sachets",
+      "destination": "/products/women",
       "permanent": true
     },
     {
@@ -653,6 +648,36 @@
     },
     {
       "source": "/products/merson-gel-50-gm",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/sex-women-hot-life-wipes",
+      "destination": "/products/women",
+      "permanent": true
+    },
+    {
+      "source": "/products/turbo-fitness-gel-50gm",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/brioge-gel",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/hulk-gel-50gm",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/royal-honey-malaysian",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/dooz-gel",
       "destination": "/products/men",
       "permanent": true
     },
@@ -722,6 +747,11 @@
       "permanent": true
     },
     {
+      "source": "/products/kreva-gel-for-men",
+      "destination": "/products/kreva-gel",
+      "permanent": true
+    },
+    {
       "source": "/products/sotara-gel",
       "destination": "/products/sotara-gel-50gm",
       "permanent": true
@@ -737,108 +767,8 @@
       "permanent": true
     },
     {
-      "source": "/products/sex-women-hot-life-wipes",
-      "destination": "/products/women",
-      "permanent": true
-    },
-    {
-      "source": "/products/tiger-power-tablets",
-      "destination": "/products/men",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/delay-spray-for-men-egypt",
-      "destination": "/products/guides/best-delay-products-egypt",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/delay-cream-for-men-guide",
-      "destination": "/products/guides/best-delay-products-egypt",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/procomil-spray-guide",
-      "destination": "/products/guides/best-delay-products-egypt",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/emla-delay-guide",
-      "destination": "/products/guides/best-delay-products-egypt",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/sildenafil-products-guide",
-      "destination": "/products/guides/erectile-dysfunction-products-egypt",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/viagra-products-egypt",
-      "destination": "/products/guides/erectile-dysfunction-products-egypt",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/viagra-vs-cialis-egypt",
-      "destination": "/products/guides/erectile-dysfunction-products-egypt",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/tadalafil-products-guide",
-      "destination": "/products/guides/erectile-dysfunction-products-egypt",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/best-honey-for-men",
-      "destination": "/products/guides/royal-honey-for-men-egypt",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/female-comfort-gel-guide",
-      "destination": "/products/guides/women-libido-products-egypt",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/female-arousal-drops-guide",
-      "destination": "/products/guides/women-libido-products-egypt",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/marital-products-cairo",
-      "destination": "/products/guides/marital-products-giza",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/first-time-buying-marital-products",
-      "destination": "/products/guides/marital-products-giza",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/safe-marital-products-guide",
-      "destination": "/products/guides/marital-products-giza",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/improve-marital-performance-naturally",
-      "destination": "/products/guides/marital-products-giza",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/original-marital-products-egypt",
-      "destination": "/products/guides/marital-products-giza",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/anxiety-performance-products",
-      "destination": "/products/guides/marital-products-giza",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/fake-vs-original-performance-products",
-      "destination": "/products/guides/marital-products-giza",
-      "permanent": true
-    },
-    {
-      "source": "/products/guides/ved-device-guide",
-      "destination": "/products/guides/vacuum-pump-men-guide",
+      "source": "/products/titan-gel-gold-special-gel-for-men",
+      "destination": "/products/titan-gel-gold-special-gel",
       "permanent": true
     },
     {
@@ -852,11 +782,6 @@
       "permanent": true
     },
     {
-      "source": "/products/titan-gel-gold-special-gel-for-men",
-      "destination": "/products/titan-gel-gold-special-gel",
-      "permanent": true
-    },
-    {
       "source": "/products/leech-miracle-cream-for-men",
       "destination": "/products/leech-miracle-cream",
       "permanent": true
@@ -864,11 +789,6 @@
     {
       "source": "/products/dmas-chocolate-for-men-9-pcs",
       "destination": "/products/dmas-chocolate-9-pcs",
-      "permanent": true
-    },
-    {
-      "source": "/products/kreva-gel-for-men",
-      "destination": "/products/kreva-gel",
       "permanent": true
     },
     {
@@ -899,26 +819,6 @@
     {
       "source": "/products/black-widow-drops-for-women",
       "destination": "/products/black-widow-drops",
-      "permanent": true
-    },
-    {
-      "source": "/products/turbo-fitness-gel-50gm",
-      "destination": "/products/stallion-delay-gel",
-      "permanent": true
-    },
-    {
-      "source": "/products/brioge-gel",
-      "destination": "/products/sotara-gel-50gm",
-      "permanent": true
-    },
-    {
-      "source": "/products/royal-honey-malaysian",
-      "destination": "/products/royal-honey-gold-vip",
-      "permanent": true
-    },
-    {
-      "source": "/products/hulk-gel-50gm",
-      "destination": "/products/titan-gel-gold-special-gel",
       "permanent": true
     }
   ]
