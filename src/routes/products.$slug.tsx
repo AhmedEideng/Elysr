@@ -733,6 +733,7 @@ function ProductPage() {
                 }
                 placeholder="اكتب عنوانك بالتفصيل (اختياري)"
                 autoComplete="street-address"
+                required={false}
               />
             </div>
 
@@ -828,6 +829,7 @@ function QuickInput({
   type = "text",
   maxLength = 100,
   autoComplete,
+  required = true,
 }: {
   label: string;
   value: string;
@@ -836,6 +838,7 @@ function QuickInput({
   type?: string;
   maxLength?: number;
   autoComplete?: string;
+  required?: boolean;
 }) {
   return (
     <label className="block">
@@ -848,7 +851,7 @@ function QuickInput({
         autoComplete={autoComplete}
         onChange={(event) => onChange(event.target.value)}
         className="w-full rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/5"
-        required
+        required={required}
       />
     </label>
   );
