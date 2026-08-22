@@ -1,9 +1,12 @@
-// 🚀 Elysr Medical Group - AI Content & Graphic Auto-Publish Pipeline v1.1 - Optimized with Google Gemini 3.6 Flash
+// 🚀 Elysr Medical Group - AI Content & Graphic Auto-Publish Pipeline v1.2 - Optimized with Google Gemini
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
-const ROOT = process.cwd();
+// 🔒 المسار الجذري ثابت ومستقل عن دليل التشغيل (cwd) — يضمن عمل السكربت من أي مكان.
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, "..");
 
 // 🎯 بنك الكلمات المفتاحية الطبية والاستراتيجية الأكثر طلباً في مصر لـ SEO أسطوري
 const KEYWORD_BANK = [
@@ -112,7 +115,7 @@ JSON Schema:
   let articleData = null;
 
   // 🚀 Using official Google Gemini API with automatic model fallbacks for maximum resilience
-  const models = ["gemini-3.6-flash", "gemini-flash-latest", "gemini-1.5-flash"];
+  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
   let response = null;
   let success = false;
 
@@ -297,7 +300,7 @@ JSON Schema:
         "/images/article-post-partum-recovery-hero.webp",
         "/images/article-routine-revive-hero.webp",
       ];
-      return womenBanners[hash % womenBanners.length];
+      return womenBanners[(hash + Math.floor(Math.random() * 1000)) % womenBanners.length];
     }
 
     if (
@@ -314,7 +317,7 @@ JSON Schema:
         "/images/article-delay-spray-hero.webp",
         "/images/article-premature-ejaculation.webp",
       ];
-      return menBanners[hash % menBanners.length];
+      return menBanners[(hash + Math.floor(Math.random() * 1000)) % menBanners.length];
     }
 
     // 3. اختيار غلاف عام عشوائي مستقر مبني على العنوان:
@@ -347,7 +350,7 @@ JSON Schema:
       "/images/article-std-prevention-hero.webp",
       "/images/article-when-to-see-doctor-hero.webp",
     ];
-    return generalBanners[hash % generalBanners.length];
+    return generalBanners[(hash + Math.floor(Math.random() * 1000)) % generalBanners.length];
   }
 
   // تحديد الغلاف البديل الأنسب للمقال الحالي في حال حدوث أي خطأ في توليد الصورة
