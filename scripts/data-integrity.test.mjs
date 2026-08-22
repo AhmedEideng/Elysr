@@ -29,6 +29,7 @@ try {
   const { articles } = await vite.ssrLoadModule("/src/data/articles.ts");
   const { seoLandingPages } = await vite.ssrLoadModule("/src/data/landing-pages.ts");
   const promo = await vite.ssrLoadModule("/src/lib/promo.ts");
+  const { GOOGLE_SHOPPING_BLOCKED } = await vite.ssrLoadModule("/src/lib/product-compliance.ts");
   const siteConfig = await vite.ssrLoadModule("/src/lib/site-config.ts");
   const vercel = JSON.parse(readFileSync(resolve(ROOT, "vercel.json"), "utf-8"));
   const productsDb = JSON.parse(readFileSync(resolve(ROOT, "api/lib/products-db.json"), "utf-8"));
@@ -205,6 +206,31 @@ try {
   assert.doesNotMatch(appsScript, /Invalid Egyptian phone/, "Stale Egypt-only validation");
 
   const sitemap = readFileSync(resolve(ROOT, "public/sitemap.xml"), "utf-8");
+  const imageSitemap = readFileSync(resolve(ROOT, "public/sitemap-images.xml"), "utf-8");
+  const catalogFeed = readFileSync(resolve(ROOT, "public/catalog-feed.xml"), "utf-8");
+  for (const product of products.filter((item) => GOOGLE_SHOPPING_BLOCKED.has(item.id))) {
+    const productUrl = `https://elysrmedical.store/products/${product.slug}`;
+    assert.equal(sitemap.includes(productUrl), false, `Blocked product in sitemap: ${product.id}`);
+    assert.equal(
+      imageSitemap.includes(productUrl),
+      false,
+      `Blocked product in image sitemap: ${product.id}`,
+    );
+    assert.equal(
+      catalogFeed.includes(`<g:id>${product.id}</g:id>`),
+      false,
+      `Blocked product in catalog feed: ${product.id}`,
+    );
+  }
+  const noindexHeader = vercel.headers.find((entry) => entry.source.includes("hard-on-sildenafil"));
+  assert.ok(noindexHeader, "Missing X-Robots-Tag header rule for blocked product pages");
+  assert.ok(
+    noindexHeader.headers.some(
+      (header) => header.key === "X-Robots-Tag" && header.value.includes("noindex"),
+    ),
+    "Blocked product header rule must include noindex",
+  );
+
   for (const blockedPath of ["/cart", "/thank-you", "/order-confirmed"]) {
     assert.equal(sitemap.includes(`<loc>https://elysrmedical.store${blockedPath}</loc>`), false);
   }

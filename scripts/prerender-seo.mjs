@@ -182,15 +182,18 @@ function buildHtml(template, opts) {
 
   // robots directive (explicit per page)
   const robotsContent = noindex
-    ? "noindex,follow"
+    ? "noindex,follow,noarchive,nosnippet,noimageindex"
     : "index,follow,max-image-preview:large,max-snippet:-1";
-  if (/<meta name="robots"[^>]*>/.test(html)) {
-    html = html.replace(
-      /<meta name="robots"[^>]*>/,
-      `<meta name="robots" content="${robotsContent}" />`,
-    );
-  } else {
-    html = html.replace("</head>", `  <meta name="robots" content="${robotsContent}" />\n</head>`);
+  for (const name of ["robots", "googlebot"]) {
+    const pattern = new RegExp(`<meta name="${name}"[^>]*>`);
+    if (pattern.test(html)) {
+      html = html.replace(pattern, `<meta name="${name}" content="${robotsContent}" />`);
+    } else {
+      html = html.replace(
+        "</head>",
+        `  <meta name="${name}" content="${robotsContent}" />\n</head>`,
+      );
+    }
   }
 
   // Home-only hero preload: keeps the LCP image discoverable in the initial
@@ -592,13 +595,14 @@ async function prerender() {
         url: `${SITE_URL}${r.path}`,
       });
 
-      if (catItems.length > 0) {
+      const structuredCatItems = catItems.filter((p) => !GOOGLE_SHOPPING_BLOCKED.has(p.id));
+      if (structuredCatItems.length > 0) {
         jsonLd.push({
           "@context": "https://schema.org",
           "@type": "ItemList",
           name: r.title,
-          numberOfItems: catItems.length,
-          itemListElement: catItems.map((p, i) => ({
+          numberOfItems: structuredCatItems.length,
+          itemListElement: structuredCatItems.map((p, i) => ({
             "@type": "ListItem",
             position: i + 1,
             url: `${SITE_URL}/products/${p.slug}`,
@@ -639,7 +643,7 @@ async function prerender() {
           ? `<h2>منتجات ${r.title}</h2><ul>${catItems
               .map(
                 (p) =>
-                  `<li><a href="${SITE_URL}/products/${p.slug}">${esc(p.name)}</a> — ${esc(
+                  `<li><a${GOOGLE_SHOPPING_BLOCKED.has(p.id) ? ' rel="nofollow"' : ""} href="${SITE_URL}/products/${p.slug}">${esc(p.name)}</a> — ${esc(
                     makeMetaDescription(p.description),
                   )}</li>`,
               )
@@ -807,7 +811,7 @@ async function prerender() {
         canonical,
         type: "product",
         noindex: isNoindexProduct(product),
-        jsonLd: [productJsonLd, breadcrumb],
+        jsonLd: isNoindexProduct(product) ? [breadcrumb] : [productJsonLd, breadcrumb],
         bodyContent: body,
       });
 

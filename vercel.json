@@ -105,6 +105,28 @@
       ]
     },
     {
+      "source": "/products/(hard-on-sildenafil-130mg-dapoxetine-60mg|vegal-extra-sildenafil-130mg-cobra|cialis-tadalafil-20mg-30-tablets|power-36-power-control-for-36-hours|procomil-fort-tablet|viagra-pfizer-100mg|levitra-100mg|viagra-20-tablets)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow, noarchive, nosnippet, noimageindex"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=300"
+        }
+      ]
+    },
+    {
+      "source": "/images/(thumbs/|thumbs-180/)?(hard-on-sildenafil-130mg-dapoxetine-60mg|vegal-extra-sildenafil-130mg-cobra|cialis-tadalafil-20mg-30-tablets|power-36-power-control-for-36-hours|procomil-fort-tablet|viagra-pfizer-100mg|levitra-100mg|viagra-for-women-20-tablets)\\.webp",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, noimageindex"
+        }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         {

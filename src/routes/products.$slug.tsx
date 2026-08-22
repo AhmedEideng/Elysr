@@ -36,6 +36,7 @@ import { ProductReviews } from "@/features/product/components/ProductReviews";
 import { ProductImage } from "@/features/product/components/ProductImage";
 import { buildOrderMessage, waLink } from "@/lib/whatsapp";
 import { getProductBySlug, getProductsByCategory, getCrossSellsForProduct } from "@/data/products";
+import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
 
 interface LinkedArticle {
   slug: string;
@@ -87,6 +88,9 @@ export const Route = createFileRoute("/products/$slug")({
           name: "description",
           content: makeMetaDescription(loaderData?.product.description),
         },
+        ...(loaderData?.product && GOOGLE_SHOPPING_BLOCKED.has(loaderData.product.id)
+          ? [{ name: "robots", content: "noindex,follow,noarchive,nosnippet,noimageindex" }]
+          : []),
         { property: "og:type", content: "product" },
         { property: "og:image", content: loaderData?.product.image },
         { name: "twitter:image", content: loaderData?.product.image },
@@ -154,7 +158,9 @@ function ProductPage() {
   useEffect(() => {
     // أزل نسخ الـ prerender أولاً حتى لا يتكرر أي schema بعد الـ hydration
     clearPrerenderJsonLd();
-    injectJsonLd("product", productSchema(product));
+    if (!GOOGLE_SHOPPING_BLOCKED.has(product.id)) {
+      injectJsonLd("product", productSchema(product));
+    }
     injectJsonLd(
       "breadcrumb",
       breadcrumbSchema([

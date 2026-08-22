@@ -5,6 +5,7 @@
  */
 
 import { GOVERNORATE_SHIPPING } from "@/lib/site-config";
+import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
 
 const SITE_URL = "https://elysrmedical.store";
 
@@ -76,11 +77,13 @@ export function applySeo(meta: SeoMeta = {}) {
   setMeta('meta[name="description"]', "content", description);
   // Use richer robots directive on indexable pages so Google can preview large images
   // and longer snippets (better SERP CTR).
-  setMeta(
-    'meta[name="robots"]',
-    "content",
-    meta.noindex ? "noindex,follow" : "index,follow,max-image-preview:large,max-snippet:-1",
-  );
+  const robotsContent = meta.noindex
+    ? "noindex,follow,noarchive,nosnippet,noimageindex"
+    : "index,follow,max-image-preview:large,max-snippet:-1";
+  setMeta('meta[name="robots"]', "content", robotsContent);
+  // A Google-specific tag exists in the HTML template, so it must be updated too;
+  // otherwise it can override the general robots directive after SPA navigation.
+  setMeta('meta[name="googlebot"]', "content", robotsContent);
 
   // Open Graph
   setMeta('meta[property="og:title"]', "content", title);
@@ -317,18 +320,21 @@ export const faqSchema = (faqs: { question: string; answer: string }[]) => ({
  * يساعد Google يفهم أن الصفحة قائمة منتجات مرتبة.
  */
 export const itemListSchema = (
-  items: { name: string; slug: string; image?: string; price: number }[],
+  items: { id?: string; name: string; slug: string; image?: string; price: number }[],
   listName: string,
-) => ({
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  name: listName,
-  numberOfItems: items.length,
-  itemListElement: items.map((it, i) => ({
-    "@type": "ListItem",
-    position: i + 1,
-    url: `${SITE_URL}/products/${it.slug}`,
-    name: it.name,
-    image: it.image ? absoluteUrl(it.image) : undefined,
-  })),
-});
+) => {
+  const indexableItems = items.filter((item) => !item.id || !GOOGLE_SHOPPING_BLOCKED.has(item.id));
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: listName,
+    numberOfItems: indexableItems.length,
+    itemListElement: indexableItems.map((it, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${SITE_URL}/products/${it.slug}`,
+      name: it.name,
+      image: it.image ? absoluteUrl(it.image) : undefined,
+    })),
+  };
+};

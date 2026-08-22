@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Strict order validation**: API rejects null/array payloads, fractional quantities,
   quantities above current stock, and governorates outside the shared whitelist.
 - **API test coverage**: added checkout calculation/validation and CSP endpoint tests,
-  bringing the unit suite to 116 tests, plus two Playwright browser tests.
+  bringing the unit suite to 116 tests, plus three Playwright browser tests.
 - **CSP report parsing**: self-hosted Express now accepts both
   `application/csp-report` and `application/reports+json` with the 4 KB endpoint limit.
 - **No local order persistence**: customer names, phones, addresses, notes, and order
@@ -83,6 +83,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🎯 SEO / Indexation
 
+- **Layered noindex protection for prescription products**: the eight blocked medicine
+  pages remain publicly visible but now use matching `robots` + `googlebot` directives,
+  Vercel/self-hosted `X-Robots-Tag` headers, `noimageindex` on product images, nofollow
+  category links, and no Product/ItemList JSON-LD. They are excluded from regular and
+  image sitemaps plus the Merchant feed, with CI guards preventing regressions.
 - **Historical customer ratings restored**: product cards, product pages, wishlist,
   prerendered HTML, and Product JSON-LD show the catalog's historical customer rating
   and review count. Schema validation enforces a 1–5 rating and positive review count.

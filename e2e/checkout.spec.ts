@@ -45,6 +45,22 @@ test("customer can add a product, update quantity, calculate shipping and submit
   });
 });
 
+test("blocked medicine remains public but carries layered noindex protection", async ({ page }) => {
+  const path = "/products/hard-on-sildenafil-130mg-dapoxetine-60mg";
+  const response = await page.goto(path);
+  expect(response?.status()).toBe(200);
+  expect(response?.headers()["x-robots-tag"]).toContain("noindex");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  await expect(page.locator('meta[name="googlebot"]')).toHaveAttribute("content", /noindex/);
+  const imageResponse = await page.request.get(
+    "/images/hard-on-sildenafil-130mg-dapoxetine-60mg.webp",
+  );
+  expect(imageResponse.headers()["x-robots-tag"]).toContain("noimageindex");
+
+  await page.goto("/products/men");
+  await expect(page.locator(`a[href="${path}"]`).first()).toBeAttached();
+});
+
 test("unknown routes return a real HTTP 404", async ({ request }) => {
   const response = await request.get("/this-route-does-not-exist");
   expect(response.status()).toBe(404);

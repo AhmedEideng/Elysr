@@ -35,7 +35,13 @@ function CategoryPage() {
     injectJsonLd(
       "itemlist",
       itemListSchema(
-        items.map((p) => ({ name: p.name, slug: p.slug, image: p.image, price: p.price })),
+        items.map((p) => ({
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          image: p.image,
+          price: p.price,
+        })),
         "الأجهزة والمستلزمات الطبية",
       ),
     );

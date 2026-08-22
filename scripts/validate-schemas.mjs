@@ -30,6 +30,19 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const DIST = resolve(ROOT, "dist");
 const SITE_URL = "https://elysrmedical.store";
+const NOINDEX_PRODUCT_FILES = new Set([
+  "products/hard-on-sildenafil-130mg-dapoxetine-60mg.html",
+  "products/vegal-extra-sildenafil-130mg-cobra.html",
+  "products/cialis-tadalafil-20mg-30-tablets.html",
+  "products/power-36-power-control-for-36-hours.html",
+  "products/procomil-fort-tablet.html",
+  "products/viagra-pfizer-100mg.html",
+  "products/levitra-100mg.html",
+  "products/viagra-20-tablets.html",
+]);
+const NOINDEX_PRODUCT_URLS = new Set(
+  [...NOINDEX_PRODUCT_FILES].map((file) => `${SITE_URL}/${file.replace(/\.html$/, "")}`),
+);
 
 if (!existsSync(DIST)) {
   console.error("❌ dist/ not found. Run `npm run build` first.");
@@ -154,9 +167,19 @@ function validateSchema(filePath, schema) {
       if (!Array.isArray(schema.mainEntity)) errors.push("FAQPage.mainEntity must be an array");
       break;
     case "ItemList":
+      if (!Array.isArray(schema.itemListElement)) {
+        errors.push("ItemList.itemListElement must be an array");
+      } else {
+        for (const item of schema.itemListElement) {
+          if (NOINDEX_PRODUCT_URLS.has(item?.url) || NOINDEX_PRODUCT_URLS.has(item?.item)) {
+            errors.push(`ItemList exposes a noindex product URL: ${item.url ?? item.item}`);
+          }
+        }
+      }
+      break;
     case "BreadcrumbList":
       if (!Array.isArray(schema.itemListElement))
-        errors.push(`${primaryType}.itemListElement must be an array`);
+        errors.push("BreadcrumbList.itemListElement must be an array");
       break;
     case "ImageObject":
     case "Person":
@@ -166,9 +189,6 @@ function validateSchema(filePath, schema) {
       break;
     case "Offer":
       if (schema.price === undefined) errors.push("Offer missing price");
-      break;
-    case "BreadcrumbList":
-      // already handled above
       break;
     default:
       if (primaryType) warnings.push(`Unknown @type "${primaryType}" (${rel})`);
@@ -185,7 +205,26 @@ const errorFiles = [];
 
 for (const file of files) {
   const html = readFileSync(file, "utf-8");
+  const relFile = relative(DIST, file).replace(/\\/g, "/");
+  if (NOINDEX_PRODUCT_FILES.has(relFile)) {
+    for (const metaName of ["robots", "googlebot"]) {
+      const match = html.match(new RegExp(`<meta name="${metaName}" content="([^"]+)"`));
+      if (!match?.[1]?.includes("noindex")) {
+        console.error(`❌ ${relFile}: ${metaName} must include noindex`);
+        totalErrors++;
+        errorFiles.push(file);
+      }
+    }
+  }
   const blocks = extractJsonLd(html);
+  if (
+    NOINDEX_PRODUCT_FILES.has(relFile) &&
+    blocks.some((block) => block.parsed?.["@type"] === "Product")
+  ) {
+    console.error(`❌ ${relFile}: noindex medicine page must not expose Product JSON-LD`);
+    totalErrors++;
+    errorFiles.push(file);
+  }
   for (const block of blocks) {
     if (!block.parsed) {
       console.error(

@@ -7,6 +7,7 @@ import { useWishlist } from "@/hooks/use-wishlist";
 import { toast } from "sonner";
 import { isPromoActive } from "@/lib/promo";
 import { ProductCardImage } from "@/features/product/components/ProductCardImage";
+import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
 
 type UseBadge = { label: string; className: string };
 
@@ -67,6 +68,7 @@ function getUseBadge(product: Product): UseBadge {
 
 export function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
+  const nofollow = GOOGLE_SHOPPING_BLOCKED.has(product.id) ? "nofollow" : undefined;
   const { has: hasInWishlist, toggle: toggleWishlist } = useWishlist();
   const promoOn = isPromoActive();
   const useBadge = getUseBadge(product);
@@ -124,6 +126,7 @@ export function ProductCard({ product }: { product: Product }) {
       <Link
         to="/products/$slug"
         params={{ slug: product.slug }}
+        rel={nofollow}
         className="block"
         aria-label={`عرض تفاصيل ${product.name}`}
       >
@@ -149,6 +152,7 @@ export function ProductCard({ product }: { product: Product }) {
         <Link
           to="/products/$slug"
           params={{ slug: product.slug }}
+          rel={nofollow}
           className="line-clamp-2 font-bold text-foreground/90 hover:text-primary transition-colors duration-300 leading-snug"
         >
           {product.name}

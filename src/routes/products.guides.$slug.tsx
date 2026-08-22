@@ -86,6 +86,7 @@ function SeoLandingPageComponent() {
       "itemlist",
       itemListSchema(
         selectedProducts.map((product) => ({
+          id: product.id,
           name: product.name,
           slug: product.slug,
           image: product.image,
