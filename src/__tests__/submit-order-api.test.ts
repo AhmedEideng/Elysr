@@ -137,7 +137,13 @@ describe("submit-order payload validation", () => {
     expect(validateOrderPayload(payload)).toContain("Price mismatch");
   });
 
-  it("rejects invalid Egyptian phone numbers", () => {
+  it("accepts canonical E.164 international phone numbers", () => {
+    const payload = validPayload();
+    payload.customerPhone = "+971501234567";
+    expect(validateOrderPayload(payload)).toBeUndefined();
+  });
+
+  it("rejects invalid phone numbers", () => {
     const payload = validPayload();
     payload.customerPhone = "123";
     expect(validateOrderPayload(payload)).toBe("Invalid customerPhone");
@@ -166,7 +172,7 @@ describe("submit-order payload validation", () => {
     expect(getShippingCost("أسيوط", 0)).toBe(100);
     expect(getShippingCost("أسوان", 0)).toBe(120);
     expect(getShippingCost("القاهرة", 2000)).toBe(0);
-    expect(getShippingCost("غير موجودة", 0)).toBeUndefined();
+    expect(getShippingCost("غير موجودة", 0)).toBe(70);
   });
 });
 
@@ -251,6 +257,31 @@ describe("submit-order HTTP handler", () => {
     expect(res.body).toEqual({
       error: "انتهت مهلة الاتصال بقاعدة البيانات السحابية. يرجى المحاولة مجدداً.",
     });
+  });
+
+  it("converts an Apps Script logical rejection into HTTP 502", async () => {
+    vi.stubEnv("GOOGLE_SHEETS_WEBHOOK_URL", "https://script.google.com/test");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: false, error: "تعذر تسجيل الطلب. يرجى المحاولة مرة أخرى." }),
+      }),
+    );
+
+    const res = mockResponse();
+    await handler(
+      mockRequest({
+        headers: {
+          origin: "https://elysrmedical.store",
+          "x-forwarded-for": "203.0.113.14",
+          "content-type": "application/json",
+        },
+      }) as never,
+      res as never,
+    );
+    expect(res.statusCode).toBe(502);
+    expect(res.body).toEqual({ error: "تعذر تسجيل الطلب. يرجى المحاولة مرة أخرى." });
   });
 
   it("returns a controlled 500 when the Sheets webhook fails", async () => {

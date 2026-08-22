@@ -215,7 +215,7 @@ function ProductPage() {
     }
 
     if (!isValidEgyptianPhone(quickCustomer.phone)) {
-      toast.error("برجاء إدخال رقم هاتف مصري صحيح");
+      toast.error("برجاء إدخال رقم هاتف صحيح، مصري أو دولي بصيغة +رمز الدولة");
       return;
     }
 

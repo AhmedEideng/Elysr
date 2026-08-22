@@ -85,6 +85,11 @@ describe("isValidEgyptianPhone", () => {
   it("يقبل صيغة دولية بـ 0020", () => {
     expect(isValidEgyptianPhone("00201012345678")).toBe(true);
   });
+
+  it("يقبل أرقاماً دولية أجنبية بصيغة E.164 أو 00", () => {
+    expect(isValidEgyptianPhone("+971501234567")).toBe(true);
+    expect(isValidEgyptianPhone("00971501234567")).toBe(true);
+  });
 });
 
 describe("normalizeEgyptianPhone", () => {
@@ -100,6 +105,11 @@ describe("normalizeEgyptianPhone", () => {
 
   it("يزيل المسافات والشرطات", () => {
     expect(normalizeEgyptianPhone("010-1234-5678")).toBe("01012345678");
+  });
+
+  it("يحافظ على الأرقام الأجنبية بصيغة + ورمز الدولة", () => {
+    expect(normalizeEgyptianPhone("+971 50 123 4567")).toBe("+971501234567");
+    expect(normalizeEgyptianPhone("00971 50 123 4567")).toBe("+971501234567");
   });
 });
 

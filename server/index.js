@@ -171,8 +171,6 @@ app.use("/api", (_req, res) => res.status(404).json({ error: "API route not foun
 // ملاحظة: Express 5 (path-to-regexp v8) أزال دعم الباراميتر "*" العاري،
 // لذا نستخدم RegExp يطابق كل المسارات بدلاً من app.get("*") الذي كان ينهار.
 app.get(/.*/, (req, res) => {
-  if (req.path.startsWith("/api/")) return;
-
   const prerendered = fileForUrl(req.path);
   if (prerendered && existsSync(prerendered)) {
     setCache(res, HTML_MAX_AGE);

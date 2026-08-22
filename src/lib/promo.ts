@@ -8,8 +8,8 @@
  *   ⚡ بدءاً من 1500 ج.م  →  خصم 20% (عناية ماسية متقدمة)
  *   👑 بدءاً من 2000 ج.م  →  خصم 25% (تميز ورعاية نخبوية شاملة)
  *
- * نظام التجديد التلقائي (Urgency Countdowns):
- * يتجدد العرض تلقائياً كل 3 أيام لخلق طاقة رغبة وتجاوب حقيقية.
+ * دورة عرض متجددة:
+ * الخصومات مبادرة مستمرة، والعداد يوضح موعد تحديث الدورة كل 3 أيام دون الادعاء بانتهاء العرض.
  * ============================================================
  */
 
@@ -41,11 +41,6 @@ export function getPromoEndIso(now: Date = new Date()): string {
   const nextExpiryMs = PROMO_EPOCH_MS + (currentCycle + 1) * PROMO_CYCLE_DURATION_MS;
   return new Date(nextExpiryMs).toISOString();
 }
-
-/**
- * تاريخ انتهاء الدورة الحالية من العرض عند لحظة تحميل الموديول.
- */
-export const PROMO_END_ISO = getPromoEndIso();
 
 /**
  * الشرائح تُقرأ من مصدر الحقيقة الوحيد (api/lib/config-db.json) عبر site-config.

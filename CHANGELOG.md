@@ -26,13 +26,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🔒 Security hardening
 
+- **Phone validation parity**: frontend, Node API, and Google Apps Script now all accept
+  Egyptian numbers plus canonical international E.164 numbers; Apps Script logical
+  failures are converted from HTTP 200 into an explicit HTTP 502 at the API boundary.
+- **Main CI unit coverage**: every push and PR now runs the Vitest API, CSP, compliance,
+  promo, shipping, and utility suites before the build job can start.
+- **Generated DB drift guards**: data-integrity tests compare tracked product/config JSON
+  with their TypeScript sources and fail with a build instruction when either is stale.
+- **Promotion transparency/config cleanup**: removed unused generated/fallback
+  `PROMO_END_ISO` values; the only countdown source is `getPromoEndIso()`, and the UI
+  now labels it truthfully as the next recurring cycle refresh rather than offer expiry.
 - **Prescription-product copy**: the eight sildenafil/tadalafil/vardenafil/dapoxetine
   products now use neutral medicine-specific descriptions, no guaranteed safety/results,
   and stronger prescription, nitrate-interaction, and urgent-warning language.
 - **Strict order validation**: API rejects null/array payloads, fractional quantities,
   quantities above current stock, and governorates outside the shared whitelist.
 - **API test coverage**: added checkout calculation/validation and CSP endpoint tests,
-  bringing the unit suite to 112 tests, plus two Playwright browser tests.
+  bringing the unit suite to 116 tests, plus two Playwright browser tests.
 - **CSP report parsing**: self-hosted Express now accepts both
   `application/csp-report` and `application/reports+json` with the 4 KB endpoint limit.
 - **No local order persistence**: customer names, phones, addresses, notes, and order

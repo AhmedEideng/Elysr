@@ -109,7 +109,7 @@ function CartPage() {
       return;
     }
     if (!isValidEgyptianPhone(customer.phone)) {
-      toast.error("برجاء إدخال رقم هاتف مصري صحيح");
+      toast.error("برجاء إدخال رقم هاتف صحيح، مصري أو دولي بصيغة +رمز الدولة");
       return;
     }
     const overStock = items.find((i) => i.qty > (i.stock ?? 10));

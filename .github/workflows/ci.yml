@@ -20,7 +20,7 @@ jobs:
   # 1) Static analysis — fast feedback before expensive jobs
   # ─────────────────────────────────────────────────────────
   static:
-    name: 🔍 Lint • Typecheck • Data Integrity
+    name: 🔍 Lint • Typecheck • Unit • Data Integrity
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -44,6 +44,9 @@ jobs:
 
       - name: Data integrity tests
         run: npm test
+
+      - name: Unit and API security tests
+        run: npm run test:unit
 
   # ─────────────────────────────────────────────────────────
   # 2) Build — generates prerendered HTML, sitemaps, feeds

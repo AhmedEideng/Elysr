@@ -111,7 +111,7 @@ export function AnniversaryPromo() {
         {/* Mobile countdown (tiny row) — values come from React state */}
         <div className="mt-1.5 flex items-center justify-center gap-1.5 text-[10px] font-bold text-white">
           <Clock className="h-3 w-3" />
-          <span>ينتهي:</span>
+          <span>تتجدد الدورة خلال:</span>
           <div className="flex items-center gap-0.5" dir="ltr">
             <span className="tabular-nums">{pad(timeLeft.days)}</span>:
             <span className="tabular-nums">{pad(timeLeft.hours)}</span>:
@@ -158,6 +158,7 @@ export function AnniversaryPromo() {
         {/* Middle-right: countdown — values come from React state */}
         <div className="flex items-center gap-1.5 text-white">
           <Clock className="h-3.5 w-3.5 opacity-90" />
+          <span className="text-[10px] font-bold opacity-90">تتجدد الدورة خلال</span>
           <div className="flex items-center gap-0.5 text-xs font-black tabular-nums" dir="ltr">
             <div className="flex flex-col items-center">
               <span>{pad(timeLeft.days)}</span>

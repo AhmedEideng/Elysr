@@ -73,11 +73,10 @@ async function generateSitemap() {
     const { GOVERNORATE_SHIPPING, FREE_SHIPPING_THRESHOLD } = await vite.ssrLoadModule(
       "/src/lib/governorates.ts",
     );
-    const { PROMO_END_ISO, PROMO_TIERS } = await vite.ssrLoadModule("/src/lib/promo.ts");
+    const { PROMO_TIERS } = await vite.ssrLoadModule("/src/lib/promo.ts");
     const configDb = {
       GOVERNORATE_SHIPPING,
       FREE_SHIPPING_THRESHOLD,
-      PROMO_END_ISO,
       PROMO_TIERS,
     };
     writeFileSync(resolve(apiLibDir, "config-db.json"), JSON.stringify(configDb, null, 2), "utf-8");

@@ -78,7 +78,7 @@ const MAX_ITEMS = 50;
 const MAX_TEXT = {
   orderId: 40,
   name: 100,
-  phone: 15,
+  phone: 16,
   governorate: 50,
   address: 200,
   notes: 300,
@@ -110,7 +110,13 @@ function doPost(e) {
     if (!items.length) throw new Error("No order items");
 
     var customerName = clean(data.customerName, MAX_TEXT.name);
-    var customerPhone = clean(data.customerPhone, MAX_TEXT.phone);
+    // Validate the canonical phone before Sheet formula-escaping. Egyptian local
+    // numbers and E.164 international numbers are both accepted by the frontend/API.
+    var rawCustomerPhone = String(data.customerPhone || "").trim();
+    var isLocalEgypt = /^01[0125][0-9]{8}$/.test(rawCustomerPhone);
+    var isInternational = /^\+[1-9][0-9]{6,14}$/.test(rawCustomerPhone);
+    if (!isLocalEgypt && !isInternational) throw new Error("Invalid customer phone");
+    var customerPhone = clean(rawCustomerPhone, MAX_TEXT.phone);
     var governorate = clean(data.governorate, MAX_TEXT.governorate);
     var address = clean(data.address, MAX_TEXT.address);
     var notes = clean(data.notes, MAX_TEXT.notes);
@@ -120,7 +126,6 @@ function doPost(e) {
     var promoApplied = data.promoApplied ? "نعم" : "لا";
 
     if (!customerName) throw new Error("Missing customer name");
-    if (!/^01[0125][0-9]{8}$/.test(customerPhone)) throw new Error("Invalid Egyptian phone");
     if (!governorate) throw new Error("Missing governorate");
     if (!address && orderMethod !== "واتساب") throw new Error("Missing address");
 

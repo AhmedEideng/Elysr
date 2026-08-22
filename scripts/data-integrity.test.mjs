@@ -29,7 +29,21 @@ try {
   const { articles } = await vite.ssrLoadModule("/src/data/articles.ts");
   const { seoLandingPages } = await vite.ssrLoadModule("/src/data/landing-pages.ts");
   const promo = await vite.ssrLoadModule("/src/lib/promo.ts");
+  const siteConfig = await vite.ssrLoadModule("/src/lib/site-config.ts");
   const vercel = JSON.parse(readFileSync(resolve(ROOT, "vercel.json"), "utf-8"));
+  const productsDb = JSON.parse(readFileSync(resolve(ROOT, "api/lib/products-db.json"), "utf-8"));
+  const configDb = JSON.parse(readFileSync(resolve(ROOT, "api/lib/config-db.json"), "utf-8"));
+
+  assert.deepEqual(productsDb, products, "products-db.json is stale; run npm run build");
+  assert.deepEqual(
+    configDb,
+    {
+      GOVERNORATE_SHIPPING: siteConfig.GOVERNORATE_SHIPPING,
+      FREE_SHIPPING_THRESHOLD: siteConfig.FREE_SHIPPING_THRESHOLD,
+      PROMO_TIERS: promo.PROMO_TIERS,
+    },
+    "config-db.json is stale; run npm run build",
+  );
 
   assert.equal(products.length, 87, "Expected 87 products");
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
@@ -183,6 +197,12 @@ try {
     /lastRow\s*-\s*49/,
     "Order idempotency must not be limited to the last 50 rows",
   );
+  assert.match(
+    appsScript,
+    /isInternational\s*=\s*\/\^\\\+\[1-9\]/,
+    "Apps Script must accept canonical international phone numbers",
+  );
+  assert.doesNotMatch(appsScript, /Invalid Egyptian phone/, "Stale Egypt-only validation");
 
   const sitemap = readFileSync(resolve(ROOT, "public/sitemap.xml"), "utf-8");
   for (const blockedPath of ["/cart", "/thank-you", "/order-confirmed"]) {

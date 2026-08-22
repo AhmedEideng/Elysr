@@ -34,7 +34,6 @@ function getConfigDb() {
     return {
       GOVERNORATE_SHIPPING: [],
       FREE_SHIPPING_THRESHOLD: 2000,
-      PROMO_END_ISO: "2026-07-19T20:59:59Z",
       PROMO_TIERS: [],
     };
   }
@@ -114,7 +113,7 @@ export function getShippingCost(governorate, subtotal = 0) {
   if (subtotal >= config.FREE_SHIPPING_THRESHOLD) return 0; // شحن مجاني عند تخطي الحد الأدنى
   const normalized = String(governorate).trim().replace(/\s+/g, " ");
   const found = config.GOVERNORATE_SHIPPING.find((g) => g.name === normalized);
-  return found?.shipping;
+  return found ? found.shipping : 70;
 }
 
 function isPromoActive() {
@@ -314,10 +313,19 @@ export default async function handler(req, res) {
         .json({ error: "تعذر إرسال الطلب إلى قاعدة البيانات السحابية. يرجى المحاولة مجدداً." });
     }
     const result = await response.json();
-    // 🔒 لا نعيد كل ما يعيده الشيت للعميل — نُقيّده إلى الحقول الأساسية فقط
-    // (حتى لو أضاف الشيت حقولاً إضافية لاحقاً، لا تتسرب للواجهة).
+    // Apps Script returns HTTP 200 for both logical success and logical failure.
+    // Convert a rejected write into an HTTP error so the client never mistakes it
+    // for a completed order. Only the safe public error string is forwarded.
+    if (!result?.success) {
+      return res.status(502).json({
+        error:
+          typeof result?.error === "string"
+            ? result.error.slice(0, 200)
+            : "تعذر تسجيل الطلب في قاعدة البيانات السحابية.",
+      });
+    }
     return res.status(200).json({
-      success: Boolean(result?.success),
+      success: true,
       orderId: typeof result?.orderId === "string" ? result.orderId : undefined,
     });
   } catch (err) {
