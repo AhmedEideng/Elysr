@@ -4,7 +4,6 @@
  * تُستورد القيم هنا عبر site-config حتى لا تختلف أسماء المحافظات أو تكلفة
  * الشحن بين ما يعرضه الموقع وما يحاسبه السيرفر على الطلب.
  */
-import { secureLoad, secureStore } from "@/lib/local-secure-store";
 import {
   GOVERNORATE_SHIPPING,
   FREE_SHIPPING_THRESHOLD,
@@ -62,26 +61,12 @@ export async function submitToGoogleSheets(
     return result;
   } catch (err) {
     console.error("Google Sheets:", err);
-    logOrderLocally(data);
+    // Privacy by design: never persist customer name/phone/address in localStorage.
+    // WhatsApp remains the primary confirmation channel; direct checkout keeps the
+    // cart intact on failure so the customer can retry explicitly.
     return {
       success: false,
       error: err instanceof Error ? err.message : "Unknown Google Sheets error",
     };
-  }
-}
-
-function logOrderLocally(data: Record<string, unknown>) {
-  try {
-    const key = "elysr_fallback";
-    // 🔒 تخزين مشفّر (obfuscated) بدلاً من نص صريح — يقلّل كشف بيانات العميل
-    // (اسم/هاتف/عنوان) لو قُرئ localStorage مباشرة.
-    const raw = localStorage.getItem(key);
-    const orders = secureLoad<Array<Record<string, unknown>>>(raw) ?? [];
-    orders.push({ ...data, time: new Date().toISOString() });
-    if (orders.length > 50) orders.shift();
-    const encoded = secureStore(orders);
-    if (encoded) localStorage.setItem(key, encoded);
-  } catch (err) {
-    console.warn("Failed to store fallback order locally:", err);
   }
 }

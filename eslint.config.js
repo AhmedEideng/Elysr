@@ -39,5 +39,13 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // TanStack Router route modules intentionally export the generated `Route`
+    // object beside their page components; its Vite plugin owns route HMR.
+    files: ["src/routes/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
   eslintPluginPrettier,
 );

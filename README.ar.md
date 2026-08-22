@@ -20,35 +20,35 @@
 فلسفة المشروع تعتمد على:
 
 - ✅ كل البيانات (منتجات، مقالات، صفحات SEO) في ملفات **TypeScript** ثابتة
-- ✅ توليد **264 صفحة HTML** كاملة في وقت البناء
+- ✅ توليد **251 صفحة تطبيقية** كاملة في وقت البناء (253 ملف HTML مع 404 وoffline)
 - ✅ استضافة على **Vercel Edge CDN** (سرعة + تكلفة منخفضة)
 - ✅ الطلبات تُرسل إلى **Google Sheets** عبر Google Apps Script (لا حاجة لـ DB server)
 
 ### المميزات الرئيسية
 
-- 🔍 **SEO ممتاز** — schema.org JSON-LD لكل صفحة، sitemap.xml (261 رابط)، catalog-feed.xml
+- 🔍 **SEO ممتاز** — schema.org JSON-LD لكل صفحة، sitemap.xml (239 رابط)، catalog-feed.xml
 - 🛒 **سلة ذكية** — localStorage مع auto-sync + حماية من تجاوز المخزون
-- 🏆 **خصم متدرج** — 10% / 15% / 20% حسب قيمة الطلب
-- 🛡️ **نظام Compliance مُعطّل** — تم إلغاء التصنيف والاستبعاد نهائيًا بقرار الإدارة،
-  وكل المنتجات الـ 87 الآن ظاهرة في كل الأقسام ومتاحة في خلاصة المنتجات بالكامل.
+- 🏆 **خصم متدرج** — 15% / 20% / 25% حسب قيمة الطلب
+- 🛡️ **توافق حسب القناة** — كل المنتجات الـ87 ظاهرة وقابلة للشراء داخل الموقع، بينما تُستبعد
+  8 منتجات دوائية من Merchant feed وsitemap وتحمل `noindex`، فتضم الخلاصة 79 منتجًا مؤهلًا.
 - 📱 **متجاوب بالكامل** — Mobile-first مع Cairo font self-hosted
 - 📊 **Google Analytics** — تتبع الزيارات
-- 🌐 **دعم PWA** — Service Worker مع offline fallback
+- 📱 **تطبيق ويب قابل للتثبيت** — Web App Manifest؛ التخزين دون اتصال معطّل مؤقتاً لمنع الكاش القديم
 - ♿ **إمكانية وصول** — Focus traps، ARIA live regions، skip-to-content
 
 ---
 
 ## 📊 الأرقام
 
-| المقياس              | القيمة                               |
-| -------------------- | ------------------------------------ |
-| 📦 المنتجات          | **87** (56 رجال · 24 نساء · 7 أجهزة) |
-| 📚 المقالات الطبية   | **56** بمصادر NIH/Mayo/NHS           |
-| 🎯 صفحات SEO         | **106** صفحة landing                 |
-| 📄 صفحات prerendered | **267** ملف HTML                     |
-| 🗺️ روابط sitemap     | **261**                              |
-| ↪️ Redirects         | **154**                              |
-| 🖼️ الصور             | **318** ملف WebP محسّن               |
+| المقياس              | القيمة                                           |
+| -------------------- | ------------------------------------------------ |
+| 📦 المنتجات          | **87** (56 رجال · 24 نساء · 7 أجهزة)             |
+| 📚 المقالات الطبية   | **56** بمصادر NIH/Mayo/NHS                       |
+| 🎯 صفحات SEO         | **92** صفحة landing                              |
+| 📄 صفحات prerendered | **251** صفحة تطبيقية (253 ملفاً مع 404 وoffline) |
+| 🗺️ روابط sitemap     | **239**                                          |
+| ↪️ Redirects         | **148 فريداً**                                   |
+| 🖼️ الصور             | **317** صورة محسّنة                              |
 
 ---
 
@@ -106,10 +106,9 @@ Elysr/
 │   ├── data/            # products.ts · articles.ts · landing-pages.ts
 │   ├── lib/
 │   │   ├── seo.ts               # SEO helpers + JSON-LD builders
-│   │   ├── product-compliance.ts  # مُعطّل (no-op) — توافق برمجي فقط
+│   │   ├── product-compliance.ts  # استبعاد القنوات الخارجية فقط
 │   │   ├── promo.ts             # Diamond Care Initiative dynamic tier discount
 │   │   ├── error-tracking.ts    # Sentry-compatible sink
-│   │   └── service-worker.ts    # opt-in PWA registration
 │   ├── hooks/
 │   │   ├── use-cart.ts
 │   │   ├── use-wishlist.ts       # 🆕 localStorage favourites
@@ -120,18 +119,18 @@ Elysr/
 │   ├── submit-order.js    # → Google Sheets
 │   └── csp-report.js      # تقارير أمان CSP
 ├── scripts/
-│   ├── prerender-seo.mjs       # يولّد 264 HTML
+│   ├── prerender-seo.mjs       # يولّد 251 صفحة تطبيقية
 │   ├── generate-sitemap.mjs
 │   ├── validate-schemas.mjs    # 🆕 JSON-LD validator
 │   ├── health-check.mjs        # 🆕 post-build report
 │   ├── optimize-images.mjs     # 🆕 sharp pipeline
 │   └── data-integrity.test.mjs
 ├── public/
-│   ├── sw.js              # 🆕 Service Worker
-│   ├── offline.html       # 🆕 offline fallback
-│   ├── site.webmanifest   # 🆕 PWA manifest
-│   └── images/            # 318 ملف WebP
-├── vercel.json            # 154 redirect + CSP + headers
+│   ├── sw.js              # kill-switch لإزالة Service Workers القديمة
+│   ├── offline.html       # صفحة احتياطية محفوظة وغير مفعّلة حالياً
+│   ├── site.webmanifest   # Web App Manifest للتثبيت
+│   └── images/            # 317 صورة محسّنة
+├── vercel.json            # 148 redirect فريد + CSP + headers
 ├── .lighthouserc.json     # 🆕 Performance budgets
 ├── .github/workflows/ci.yml  # 🆕 Enhanced (Lint+Typecheck+Test+Build+Lighthouse)
 ├── .husky/pre-commit      # 🆕 Pre-commit hooks
@@ -164,11 +163,12 @@ Elysr/
 - `<LiveRegion />` و `<AssertiveLiveRegion />` — إعلانات screen reader
 - `useFocusTrap()` — focus trap للـ modals
 
-### 📱 PWA
+### 📱 تطبيق الويب القابل للتثبيت
 
-- `public/sw.js` — Service Worker مع 3 استراتيجيات caching
-- `public/offline.html` — صفحة offline جميلة
-- `public/site.webmanifest` — manifest كامل مع shortcuts
+- `public/site.webmanifest` يوفّر بيانات التثبيت والاختصارات والأيقونات.
+- وضع التشغيل الحالي **network-only**: لا يتم تسجيل Service Worker ولا يوجد offline cache.
+- `public/sw.js` باقٍ مؤقتاً كـ kill-switch لمسح Service Workers والكاش القديمين ثم يلغي تسجيل نفسه.
+- هذا القرار مقصود لمنع تقديم HTML/CSS/JS قديم؛ لا ينبغي وصف الوضع الحالي كدعم offline كامل.
 
 ### 🛠️ أدوات المطور
 

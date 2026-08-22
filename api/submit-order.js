@@ -1,4 +1,4 @@
-import { createRateLimiter, initRedis } from "./lib/rate-limiter.js";
+import { createRateLimiter } from "./lib/rate-limiter.js";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -53,8 +53,9 @@ const ALLOWED_ORIGINS = new Set(
 );
 
 const MAX_BODY_SIZE_BYTES = 64_000;
+export const GOOGLE_SHEETS_TIMEOUT_MS = 10_000;
 
-// 🚀 Redis-backed rate limiter with automatic in-memory fallback
+// Fast per-instance limit; Google Apps Script applies a second per-phone limit.
 const rateLimiter = createRateLimiter({
   windowMs: 60_000,
   max: 30,
@@ -101,19 +102,19 @@ function readPayload(req) {
     if (req.body.length > MAX_BODY_SIZE_BYTES) throw new Error("Payload too large");
     return JSON.parse(req.body || "{}");
   }
-  return req.body || {};
+  return req.body === undefined ? {} : req.body;
 }
 
 function isNonEmptyString(value, maxLength) {
   return typeof value === "string" && value.trim().length > 0 && value.length <= maxLength;
 }
 
-function getShippingCost(governorate, subtotal = 0) {
+export function getShippingCost(governorate, subtotal = 0) {
   const config = getConfigDb();
   if (subtotal >= config.FREE_SHIPPING_THRESHOLD) return 0; // شحن مجاني عند تخطي الحد الأدنى
-  const normalized = governorate.trim().replace(/\s+/g, " ");
+  const normalized = String(governorate).trim().replace(/\s+/g, " ");
   const found = config.GOVERNORATE_SHIPPING.find((g) => g.name === normalized);
-  return found ? found.shipping : 70; // 70 ج.م كافتراضي
+  return found?.shipping;
 }
 
 function isPromoActive() {
@@ -131,7 +132,11 @@ function calcDiscount(subtotal) {
 }
 
 // 🔒 دالة التحقق الأمني والرياضي الصارم من سلامة الأسعار ومحتويات الطلب
-function validateOrderPayload(payload) {
+export function validateOrderPayload(payload) {
+  // JSON primitives, null and arrays are never valid order objects.
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return "Invalid payload";
+  }
   if (!isNonEmptyString(payload.orderId, 60)) return "Invalid orderId";
   if (!isNonEmptyString(payload.customerName, 120)) return "Invalid customerName";
 
@@ -142,7 +147,25 @@ function validateOrderPayload(payload) {
     return "Invalid customerPhone";
   }
 
+  if (!new Set(["cart", "شراء فوري"]).has(payload.orderType)) return "Invalid orderType";
+  if (!new Set(["واتساب", "طلب مباشر"]).has(payload.paymentMethod)) return "Invalid paymentMethod";
+  if (!isNonEmptyString(payload.address, 200)) return "Invalid address";
+  if (
+    payload.notes !== undefined &&
+    (typeof payload.notes !== "string" || payload.notes.length > 300)
+  )
+    return "Invalid notes";
+  if (typeof payload.promoApplied !== "boolean") return "Invalid promoApplied";
+
   if (!isNonEmptyString(payload.governorate, 80)) return "Invalid governorate";
+  const normalizedGovernorate = payload.governorate.trim().replace(/\s+/g, " ");
+  const validGovernorate = getConfigDb().GOVERNORATE_SHIPPING.some(
+    (entry) => entry.name === normalizedGovernorate,
+  );
+  if (!validGovernorate) return "Invalid governorate";
+  // Keep the canonical spelling that is shared with the frontend/config DB.
+  payload.governorate = normalizedGovernorate;
+
   if (!Array.isArray(payload.items) || payload.items.length === 0 || payload.items.length > 50)
     return "Invalid items";
 
@@ -150,15 +173,23 @@ function validateOrderPayload(payload) {
   let calculatedSubtotal = 0;
 
   for (const item of payload.items) {
-    if (!item || !isNonEmptyString(item.id, 30) || !isNonEmptyString(item.name, 180))
+    if (!item || typeof item !== "object" || Array.isArray(item)) return "Invalid item structure";
+    if (!isNonEmptyString(item.id, 30) || !isNonEmptyString(item.name, 180))
       return "Invalid item structure";
-    if (!Number.isFinite(Number(item.qty)) || Number(item.qty) < 1 || Number(item.qty) > 999)
+    const quantity = Number(item.qty);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 999)
       return "Invalid item quantity";
 
     // 🔒 البحث عن المنتج بالكتالوج الرسمي المعتمد في السيرفر للتحقق من سعره الحقيقي
     const officialProduct = productsDb.find((p) => p.id === item.id);
     if (!officialProduct) {
       return `Product with ID ${item.id} not found in official catalog`;
+    }
+    if (!Number.isInteger(officialProduct.stock) || officialProduct.stock < 1) {
+      return `Product out of stock: ${item.id}`;
+    }
+    if (quantity > officialProduct.stock) {
+      return `Quantity exceeds stock for product: ${item.id}`;
     }
 
     // تفعيل مبدأ "مصدر الحقيقة الموحد" واستبدال الاسم المرسل من العميل بالاسم الرسمي المعتمد في الكتالوج لمنع ثغرات الحقن
@@ -169,7 +200,7 @@ function validateOrderPayload(payload) {
       return `Price mismatch for product: ${item.name}. Submitted: ${item.price}, Official: ${officialProduct.price}`;
     }
 
-    calculatedSubtotal += officialProduct.price * Number(item.qty);
+    calculatedSubtotal += officialProduct.price * quantity;
   }
 
   // 🔒 التحقق الصارم من صحة الحقول المالية الإجمالية
@@ -201,9 +232,6 @@ function validateOrderPayload(payload) {
 }
 
 export default async function handler(req, res) {
-  // 🚀 Warm Redis connection early (best-effort, non-blocking)
-  initRedis().catch(() => {});
-
   const requestOrigin = getRequestOrigin(req);
   const corsOrigin = ALLOWED_ORIGINS.has(requestOrigin)
     ? requestOrigin
@@ -266,11 +294,15 @@ export default async function handler(req, res) {
     if (payload[key] !== undefined) safePayload[key] = payload[key];
   }
 
+  const sheetsController = new AbortController();
+  const sheetsTimeout = setTimeout(() => sheetsController.abort(), GOOGLE_SHEETS_TIMEOUT_MS);
+
   try {
     const response = await fetch(SHEET_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ data: JSON.stringify({ ...safePayload, clientIp }) }),
+      signal: sheetsController.signal,
     });
     if (!response.ok) {
       // 🔒 لا نمرر الرد الكامل للسجل — نقتصر على أول 200 حرف لمنع تسجيل أي
@@ -289,7 +321,15 @@ export default async function handler(req, res) {
       orderId: typeof result?.orderId === "string" ? result.orderId : undefined,
     });
   } catch (err) {
+    if (sheetsController.signal.aborted) {
+      console.error(`Google Sheets request timed out after ${GOOGLE_SHEETS_TIMEOUT_MS}ms`);
+      return res.status(504).json({
+        error: "انتهت مهلة الاتصال بقاعدة البيانات السحابية. يرجى المحاولة مجدداً.",
+      });
+    }
     console.error("Error submitting order:", err);
     return res.status(500).json({ error: "Internal server error" });
+  } finally {
+    clearTimeout(sheetsTimeout);
   }
 }

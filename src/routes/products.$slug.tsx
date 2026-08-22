@@ -87,6 +87,9 @@ export const Route = createFileRoute("/products/$slug")({
           name: "description",
           content: makeMetaDescription(loaderData?.product.description),
         },
+        { property: "og:type", content: "product" },
+        { property: "og:image", content: loaderData?.product.image },
+        { name: "twitter:image", content: loaderData?.product.image },
       ],
     };
   },
@@ -338,7 +341,7 @@ function ProductPage() {
           <ProductImage key={product.id} product={product} categoryName={categoryName} />
 
           <div className="mt-3 grid grid-cols-3 gap-2">
-            <MiniFeature title="الضمان" value="أصلي 100%" />
+            <MiniFeature title="العبوة" value="بيانات واضحة" />
             <MiniFeature title="الشحن" value="سري وسريع" />
             <MiniFeature title="الطلب" value="دفع عند الاستلام" />
           </div>
@@ -381,7 +384,7 @@ function ProductPage() {
             </div>
             <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 font-bold text-emerald-700 border border-emerald-200">
               <ShieldCheck className="h-4 w-4" />
-              موثوق ومجرب
+              إرشادات وتحذيرات واضحة
             </div>
           </div>
 
@@ -394,7 +397,7 @@ function ProductPage() {
                 </div>
               </div>
               <div className="text-left text-xs leading-6 text-muted-foreground">
-                <div>✅ أصلية ومضمونة</div>
+                <div>✅ بيانات المنتج موضحة على العبوة</div>
                 <div>✅ شحن سري وآمن</div>
                 <div>✅ دعم مباشر عبر واتساب</div>
               </div>
@@ -542,7 +545,7 @@ function ProductPage() {
               </p>
 
               <div className="mt-4 grid grid-cols-3 gap-3">
-                <Trust icon={<ShieldCheck className="h-5 w-5" />} label="أصلي 100%" />
+                <Trust icon={<ShieldCheck className="h-5 w-5" />} label="عبوة موضحة البيانات" />
                 <Trust icon={<Truck className="h-5 w-5" />} label="توصيل سريع" />
                 <Trust icon={<Lock className="h-5 w-5" />} label="سرية تامة" />
               </div>

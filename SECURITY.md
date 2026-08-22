@@ -48,7 +48,7 @@ responsibly:
 | **CSP**                | `vercel.json` + `server/index.js` — كلا المستويين                           |
 | **HSTS**               | `max-age=63072000; includeSubDomains; preload`                              |
 | **CORS**               | صارم — فقط `elysrmedical.store` و `www.elysrmedical.store`                  |
-| **Rate Limiting**      | Redis (auto-fallback to in-memory) — 30 req/min orders                      |
+| **Rate Limiting**      | In-process IP limit + Google Apps Script per-phone limit                    |
 | **Price Validation**   | منع تلاعب العميل بأسعار المنتجات (server-side lookup من `products-db.json`) |
 | **Input Sanitization** | كل الإدخالات تُنظف (remove XSS, strip dangerous chars)                      |
 | **Phone Validation**   | regex صارم للأرقام المصرية على الـ client + الـ server                      |

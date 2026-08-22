@@ -1,50 +1,70 @@
-name: 💎 Auto Publish Weekly Medical Articles (AI Copywriter)
+name: 💎 Auto Publish Weekly Medical Article
 
 on:
   schedule:
-    # ⏱️ Wakes up automatically every Monday at 9:00 AM UTC (12:00 PM Cairo Time)
+    # Every Monday at 09:00 UTC (12:00 Cairo during daylight-saving time).
     - cron: "0 9 * * 1"
   workflow_dispatch:
-    # 🚀 Allows manual triggering from the GitHub Actions UI at any time!
+
+# Publishing is automatic after the full technical validation pipeline passes.
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-medical-article
+  cancel-in-progress: false
 
 jobs:
   publish-article:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+      - name: 📥 Checkout main
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
 
       - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
-          cache: "npm"
-          cache-dependency-path: package-lock.json
+          cache: npm
 
-      - name: 📦 Install Dependencies
-        run: npm install
+      - name: 📦 Install locked dependencies
+        run: npm ci --no-audit --prefer-offline
 
-      - name: 🤖 Auto-Generate Premium Medical Article (Google Gemini API)
+      - name: 🤖 Generate medical article
         run: node scripts/auto-generate-article.mjs
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
-      - name: 🧹 Auto-Format Updated Code (Prettier)
+      - name: 🔗 Validate live trusted sources and claim support
+        run: npm run test:sources
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: 🧹 Format generated files
         run: npm run format
 
-      - name: ⚡ Rebuild Static HTML & Sitemap Suite
-        run: npm run build
+      - name: ✅ Run full technical validation
+        run: npm run ci
+        env:
+          SITE_URL: https://elysrmedical.store
 
-      - name: 🔒 Commit and Push New Article back to GitHub
+      - name: 🚀 Commit and publish to main
         run: |
-          git config --global user.name "Elysr Medical Developer"
-          git config --global user.email "developer@elysrmedical.store"
+          git config user.name "Elysr Medical Automation"
+          git config user.email "automation@elysrmedical.store"
           git add .
-          # Check if there are any changes to commit
-          if git diff-index --quiet HEAD --; then
-            echo "No new articles to publish."
-          else
-            git commit -m "cron: auto-publish new weekly medical article with optimized SEO & E-E-A-T"
-            git push origin main
+
+          if git diff --cached --quiet; then
+            echo "No article changes were generated."
+            exit 0
           fi
+
+          git commit -m "content: publish weekly medical article"
+          # Rebase on any main updates that landed while validation was running.
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -373,17 +373,16 @@ function isDuplicateOrder(sheet, orderId) {
   var lastRow = sheet.getLastRow();
   if (lastRow <= 1) return false;
 
-  // ابحث في آخر 50 صف فقط (أداء أفضل)
-  var searchStart = Math.max(2, lastRow - 49);
-  var searchRows = lastRow - searchStart + 1;
-  var existingIds = sheet
-    .getRange(searchStart, orderIdColIdx, searchRows, 1)
-    .getValues()
-    .map(function (r) {
-      return String(r[0]).trim();
-    });
+  // بحث دائم في عمود أرقام الطلبات بالكامل. يعمل داخل ScriptLock في doPost،
+  // لذلك يمنع السباق بين طلبين متزامنين ويحافظ على idempotency حتى للطلبات القديمة.
+  var orderIdRange = sheet.getRange(2, orderIdColIdx, lastRow - 1, 1);
+  var match = orderIdRange
+    .createTextFinder(orderId)
+    .matchEntireCell(true)
+    .matchCase(true)
+    .findNext();
 
-  return existingIds.indexOf(orderId) !== -1;
+  return Boolean(match);
 }
 
 // ============================================================

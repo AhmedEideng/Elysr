@@ -2,12 +2,12 @@
  * ============================================================
  * Unit Tests — نظام الامتثال (Product Compliance)
  * ============================================================
- * ⚠️ تم إلغاء نظامي GREEN/RED والاستبعاد الإعلاني نهائيًا بقرار الإدارة.
- * جميع المنتجات الآن ظاهرة في كل الأقسام ومتاحة في الخلاصة بالكامل.
- * هذه الاختبارات تؤكد أن النظام لم يعد يستبعد أي منتج.
+ * جميع المنتجات ظاهرة داخل الموقع، بينما تُستبعد المنتجات الدوائية المحددة
+ * من Merchant feed وتخضع لنصوص دوائية أكثر تحفظاً.
  */
 
 import { describe, it, expect } from "vitest";
+import { products } from "@/data/products";
 import {
   isCatalogFeedEligible,
   RED_PRODUCT_IDS,
@@ -26,6 +26,17 @@ describe("GOOGLE_SHOPPING_BLOCKED — يستبعد الأدوية المرفوض
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-37")).toBe(true); // Cialis
     expect(GOOGLE_SHOPPING_BLOCKED.has("w-17")).toBe(true); // Viagra Women
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-01")).toBe(false); // منتج عادي
+  });
+});
+
+describe("النصوص الدوائية", () => {
+  it("لا تستخدم وعود أمان أو نتائج مطلقة في المنتجات الدوائية المحجوبة", () => {
+    const prohibited =
+      /آمن(?:ة)?\s*(?:تمام|100%)|أمان\s*تام|منتج\s*مضمون|مضمون\s*100%|يضمن\s+لك|مجرب\s*سريري|نتائج\s*مؤكدة|ثقة\s*مطلقة/i;
+    for (const product of products.filter((item) => GOOGLE_SHOPPING_BLOCKED.has(item.id))) {
+      const copy = [product.description, ...product.benefits, product.usage ?? ""].join(" ");
+      expect(copy, `Risky absolute claim in ${product.id}`).not.toMatch(prohibited);
+    }
   });
 });
 

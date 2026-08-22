@@ -260,6 +260,7 @@ function CartPage() {
                     <div className="flex items-center rounded-full border bg-background">
                       <button
                         onClick={() => setQty(it.id, it.qty - 1)}
+                        aria-label={`تقليل كمية ${it.name}`}
                         className="p-1.5 hover:bg-accent rounded-r-full"
                       >
                         <Minus className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
@@ -269,6 +270,7 @@ function CartPage() {
                       </span>
                       <button
                         onClick={() => setQty(it.id, it.qty + 1)}
+                        aria-label={`زيادة كمية ${it.name}`}
                         disabled={atLimit}
                         className={`p-1.5 rounded-l-full ${atLimit ? "opacity-30 cursor-not-allowed" : "hover:bg-accent"}`}
                       >

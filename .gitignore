@@ -50,3 +50,10 @@ dist/
 
 # Cache
 .cache/
+
+# Temporary marker written by the weekly article generator
+.generated-article-slug
+
+# Browser test artifacts
+playwright-report/
+test-results/

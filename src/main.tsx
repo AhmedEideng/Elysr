@@ -7,6 +7,10 @@ import { router } from "./router";
 // 🛡️ Force unregister service workers and clear browser Cache Storage once to bypass persistent Android Chrome caches
 if (typeof window !== "undefined") {
   try {
+    // Privacy migration: delete any fallback orders stored by older releases.
+    // Current releases never persist customer name, phone, address, or order payloads locally.
+    localStorage.removeItem("elysr_fallback");
+
     const FORCE_CLEAR_KEY = "elysr_sw_force_clear_v28";
     if (localStorage.getItem(FORCE_CLEAR_KEY) !== "true") {
       // 1. Clear all service workers

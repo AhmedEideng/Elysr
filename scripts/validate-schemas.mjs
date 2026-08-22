@@ -95,25 +95,15 @@ function validateSchema(filePath, schema) {
       for (const key of required) {
         if (!schema[key]) errors.push(`Product missing required field: ${key}`);
       }
-      // ⭐ aggregateRating is highly recommended by Google for star ratings in SERP.
-      // Skip warning only when reviews == 0 (data-product has no real ratings).
-      if (!schema.aggregateRating) {
-        const hasReviews =
-          typeof schema.review === "object" ||
-          (Array.isArray(schema.review) && schema.review.length > 0);
-        if (!hasReviews) {
-          warnings.push(
-            `Product missing aggregateRating (Google won't show stars in SERP) — ${rel}`,
-          );
-        } else {
-          errors.push(
-            "Product has 'review' but missing 'aggregateRating' (must include both, or just aggregateRating)",
-          );
-        }
-      } else {
-        const ar = schema.aggregateRating;
-        if (!ar.ratingValue) errors.push("Product aggregateRating.ratingValue missing");
-        if (typeof ar.reviewCount !== "number" || ar.reviewCount < 1)
+      if (schema.aggregateRating) {
+        const aggregate = schema.aggregateRating;
+        if (
+          typeof aggregate.ratingValue !== "number" ||
+          aggregate.ratingValue < 1 ||
+          aggregate.ratingValue > 5
+        )
+          errors.push("Product aggregateRating.ratingValue must be between 1 and 5");
+        if (typeof aggregate.reviewCount !== "number" || aggregate.reviewCount < 1)
           errors.push("Product aggregateRating.reviewCount must be a positive number");
       }
       if (schema.offers && typeof schema.offers === "object") {

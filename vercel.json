@@ -187,11 +187,6 @@
       "permanent": true
     },
     {
-      "source": "/products/dooz-gel",
-      "destination": "/products/men",
-      "permanent": true
-    },
-    {
       "source": "/products/m-09",
       "destination": "/products/royal-cream",
       "permanent": true
@@ -592,6 +587,11 @@
       "permanent": true
     },
     {
+      "source": "/products/dooz-gel",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
       "source": "/index.html",
       "destination": "/",
       "permanent": true
@@ -642,11 +642,6 @@
       "permanent": true
     },
     {
-      "source": "/products/3d-super-green-coffee-30-sachets",
-      "destination": "/products/women",
-      "permanent": true
-    },
-    {
       "source": "/products/overtime-erection-delay",
       "destination": "/products/men",
       "permanent": true
@@ -683,11 +678,6 @@
     },
     {
       "source": "/products/royal-honey-malaysian",
-      "destination": "/products/men",
-      "permanent": true
-    },
-    {
-      "source": "/products/dooz-gel",
       "destination": "/products/men",
       "permanent": true
     },
@@ -829,26 +819,6 @@
     {
       "source": "/products/black-widow-drops-for-women",
       "destination": "/products/black-widow-drops",
-      "permanent": true
-    },
-    {
-      "source": "/products/turbo-fitness-gel-50gm",
-      "destination": "/products/men",
-      "permanent": true
-    },
-    {
-      "source": "/products/brioge-gel",
-      "destination": "/products/men",
-      "permanent": true
-    },
-    {
-      "source": "/products/royal-honey-malaysian",
-      "destination": "/products/men",
-      "permanent": true
-    },
-    {
-      "source": "/products/hulk-gel-50gm",
-      "destination": "/products/men",
       "permanent": true
     },
     {

@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, MessageCircle, Home, ShoppingBag } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { waLink } from "@/lib/whatsapp";
-import { secureLoad } from "@/lib/local-secure-store";
 
 export const Route = createFileRoute("/thank-you")({
   head: () => ({
@@ -28,64 +27,6 @@ function ThankYouPage() {
       return null;
     }
   });
-
-  // 🔄 معالج المزامنة التلقائية والنسخ الاحتياطي للطلبات المتعثرة (Background Sync Retry)
-  useEffect(() => {
-    async function retryFailedOrders() {
-      try {
-        const key = "elysr_fallback";
-        const raw = localStorage.getItem(key);
-        if (!raw) return;
-
-        // 🔒 قراءة مشفّرة (كانت تُخزَّن كنص صريح سابقاً) — مع دعم قراءة أي
-        // بيانات قديمة غير مشفّرة للتدرّج الأمني.
-        const orders: Array<Record<string, unknown>> =
-          secureLoad<Array<Record<string, unknown>>>(raw) ??
-          (raw.startsWith("elysr_enc_v1:")
-            ? []
-            : (JSON.parse(raw) as Array<Record<string, unknown>>));
-        if (orders.length === 0) return;
-
-        console.log(`🔄 Found ${orders.length} failed orders in local backup. Retrying sync...`);
-        const remainingOrders: Array<Record<string, unknown>> = [];
-
-        for (const order of orders) {
-          try {
-            const response = await fetch("/api/submit-order", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(order),
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              if (result?.success) {
-                console.log(`   ✅ Successfully retried and synced order ${order.orderId}!`);
-                continue; // تم بنجاح، لا نضيفه للمتبقي ليُحذف من الذاكرة
-              }
-            }
-            // إذا فشل مجدداً، نحتفظ به في القائمة لإعادة المحاولة لاحقاً
-            remainingOrders.push(order);
-          } catch (err) {
-            console.warn(`   ⚠️ Failed to sync order ${order.orderId}:`, err);
-            remainingOrders.push(order);
-          }
-        }
-
-        if (remainingOrders.length > 0) {
-          localStorage.setItem(key, JSON.stringify(remainingOrders));
-        } else {
-          localStorage.removeItem(key);
-        }
-      } catch (err) {
-        console.error("Failed to run background order sync:", err);
-      }
-    }
-
-    // تشغيل عملية المزامنة الاحتياطية بعد ثانيتين من تحميل الصفحة لتجنب حظر التحولات البصرية
-    const timer = setTimeout(retryFailedOrders, 2000);
-    return () => clearTimeout(timer);
-  }, []);
 
   // تفريغ السلة تلقائياً عند الوصول لهذه الصفحة (بعد تحويل العميل لواتساب)
   useEffect(() => {

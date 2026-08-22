@@ -83,6 +83,19 @@ export const getProductsByCategory = (cat: ProductCategory) => {
   });
 };
 
+/** منتجات طلبت الإدارة عدم إظهارها في أي قسم من أقسام الصفحة الرئيسية. */
+export const HOMEPAGE_EXCLUDED_PRODUCT_IDS = new Set([
+  "m-34", // Hard-On
+  "m-02", // Boost Up MAN
+  "m-03", // Powerfully Up
+  "m-49", // Power Fully Up Advanced
+  "m-45", // Viagra Pfizer للرجال
+  "w-17", // Viagra For Women
+]);
+
+export const isHomepageProductEligible = (product: Pick<Product, "id">): boolean =>
+  !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(product.id);
+
 const HOME_FEATURED_ORDER = [
   // 🎯 المنتجات الـ VIP التي ستباع فوراً بفضل قوة اسمها وشعبيتها:
   "m-11", //  1. 🔥 عسل فيتامكس دبل شوت للرجال (الأكثر طلباً ورواجاً بالشركة)
@@ -90,10 +103,10 @@ const HOME_FEATURED_ORDER = [
   "m-44", //  3. 💊 بخاخ ريمانز دووز 14000 (أقوى منتج تأخير وأكثرهم شهرة)
   "m-60", //  4. 🧴 جل كريفا الألماني المتطور للرجال (أقوى منتج تأخير وتنشيط موضعي موضعه الجديد بالواجهة)
   "w-15", //  5. 🌸 قطرات كونيبال للنساء (حل سريع ومطلوب جداً)
-  "m-02", //  6. 💊 كبسولات بوست أب MAN (مكمل الجينسنج والماكا الفاخر)
+  "w-02", //  6. 🌸 قطرات ليدي إيرا — بديل غير حبوب في الواجهة الرئيسية
 
   // الباقي يمكن تركه في المصفوفة لاستخدامه كمنتجات ذات صلة أو مقترحات:
-  "w-02", // قطرات ليدي إيرا (للإشارة والمقترحات)
+  "m-02", // كبسولات بوست أب MAN (خارج المنتجات الستة الرئيسية)
   "m-32", // جل تيتان جولد (منتجات ذات صلة/مقترحات)
   "m-52",
   "w-07",
@@ -116,9 +129,10 @@ const HOME_FEATURED_ORDER = [
  * - تعرض 6 منتجات فقط تم اختيارها بعناية لزيادة معدل التحويل وتقليل حجم الـ DOM
  */
 export const getFeaturedProducts = (): Product[] =>
-  HOME_FEATURED_ORDER.slice(0, 6)
-    .map((id) => getProductById(id))
-    .filter((p): p is Product => Boolean(p));
+  HOME_FEATURED_ORDER.map((id) => getProductById(id))
+    .filter((p): p is Product => Boolean(p))
+    .filter(isHomepageProductEligible)
+    .slice(0, 6);
 
 export const getProductById = (id: string) => products.find((p) => p.id === id);
 

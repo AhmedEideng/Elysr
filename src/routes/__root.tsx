@@ -18,7 +18,6 @@ import { CartProvider } from "@/contexts/cart";
 import { Layout } from "@/components/layout/Layout";
 import { applySeo } from "@/lib/seo";
 import { installErrorTracking } from "@/lib/error-tracking";
-import { trackPageViewForSW } from "@/lib/service-worker";
 
 // 🛡️ تفعيل تتبع الأخطاء العالمي — يلتقط أي uncaught error أو promise rejection
 installErrorTracking();
@@ -53,13 +52,6 @@ function trackPageView(url: string) {
     }
   } catch {
     // Ignore GA tracking errors
-  }
-
-  // 📱 PWA — Service Worker registration
-  try {
-    trackPageViewForSW();
-  } catch {
-    // Ignore SW registration errors
   }
 }
 
@@ -127,6 +119,8 @@ function RouteHeadSync() {
   useEffect(() => {
     let title: string | undefined;
     let description: string | undefined;
+    let image: string | undefined;
+    let type: "website" | "article" | "product" | undefined;
     let noindex = false;
 
     for (let i = matches.length - 1; i >= 0; i--) {
@@ -156,6 +150,20 @@ function RouteHeadSync() {
           if (!description && m?.name === "description" && typeof m?.content === "string") {
             description = m.content as string;
           }
+          if (
+            !image &&
+            (m?.property === "og:image" || m?.name === "twitter:image") &&
+            typeof m?.content === "string"
+          ) {
+            image = m.content as string;
+          }
+          if (
+            !type &&
+            m?.property === "og:type" &&
+            (m?.content === "website" || m?.content === "article" || m?.content === "product")
+          ) {
+            type = m.content;
+          }
           if (m?.name === "robots" && typeof m?.content === "string") {
             noindex = m.content.toLowerCase().includes("noindex");
           }
@@ -166,7 +174,7 @@ function RouteHeadSync() {
       }
     }
 
-    applySeo({ title, description, noindex });
+    applySeo({ title, description, image, type, noindex });
     // Google Analytics page tracking
     trackPageView(window.location.pathname);
   }, [matches, router]);

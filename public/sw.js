@@ -1,13 +1,12 @@
 /**
  * ============================================================
- * Elysr Service Worker v11 — Ultimate Self-Destruct & Cache Purge
+ * Elysr legacy Service Worker kill-switch — network-only PWA migration
  * ============================================================
  *
- * This version acts as a permanent, server-controlled kill-switch.
- * It immediately clears all persistent Cache Storage and unregisters
- * itself on activation. This forces Chrome, Brave, and all other
- * browsers to completely discard cached HTML/CSS/JS and fetch the
- * latest non-cached production files from the server.
+ * Runtime policy is intentionally network-only: the manifest/install UI stay active,
+ * but the application does not register an offline caching worker. This file remains
+ * at the legacy URL only so previously installed workers activate once, clear old
+ * Cache Storage, unregister themselves, and return control to normal HTTP caching.
  * ============================================================
  */
 

@@ -4,6 +4,8 @@
  * - حقن JSON-LD (Schema.org)
  */
 
+import { GOVERNORATE_SHIPPING } from "@/lib/site-config";
+
 const SITE_URL = "https://elysrmedical.store";
 
 /**
@@ -129,6 +131,45 @@ export function clearPrerenderJsonLd() {
 }
 
 // Schema builders جاهزة
+/** Merchant shipping bands generated from the same governorate config used at checkout. */
+export function merchantShippingDetails() {
+  const byRate = new Map<number, string[]>();
+  for (const entry of GOVERNORATE_SHIPPING) {
+    const regions = byRate.get(entry.shipping) ?? [];
+    regions.push(entry.name);
+    byRate.set(entry.shipping, regions);
+  }
+
+  return [...byRate.entries()].map(([rate, regions]) => ({
+    "@type": "OfferShippingDetails",
+    shippingDestination: {
+      "@type": "DefinedRegion",
+      addressCountry: "EG",
+      addressRegion: regions,
+    },
+    shippingRate: {
+      "@type": "MonetaryAmount",
+      value: rate,
+      currency: "EGP",
+    },
+    deliveryTime: {
+      "@type": "ShippingDeliveryTime",
+      handlingTime: {
+        "@type": "QuantitativeValue",
+        minValue: 0,
+        maxValue: 1,
+        unitCode: "DAY",
+      },
+      transitTime: {
+        "@type": "QuantitativeValue",
+        minValue: 1,
+        maxValue: 5,
+        unitCode: "DAY",
+      },
+    },
+  }));
+}
+
 export const productSchema = (p: {
   id: string;
   slug: string;
@@ -148,13 +189,12 @@ export const productSchema = (p: {
     sku: p.id,
     mpn: p.id,
     image: absoluteUrl(p.image),
-    // ⭐ aggregateRating — قيم معقولة (reviewCount 5-13) مطابقة لما يظهر على الصفحة
     ...(p.reviews > 0
       ? {
           aggregateRating: {
             "@type": "AggregateRating",
             ratingValue: Math.max(0, Math.min(5, Number(p.rating ?? 0))),
-            reviewCount: Math.max(0, Math.floor(p.reviews ?? 0)),
+            reviewCount: Math.max(1, Math.floor(p.reviews)),
             bestRating: 5,
             worstRating: 1,
           },
@@ -175,39 +215,8 @@ export const productSchema = (p: {
         merchantReturnDays: 14,
         returnMethod: "https://schema.org/ReturnByMail",
         returnFees: "https://schema.org/ReturnShippingFees",
-        returnShippingFeesAmount: {
-          "@type": "MonetaryAmount",
-          value: 50,
-          currency: "EGP",
-        },
       },
-      shippingDetails: {
-        "@type": "OfferShippingDetails",
-        shippingDestination: {
-          "@type": "DefinedRegion",
-          addressCountry: "EG",
-        },
-        shippingRate: {
-          "@type": "MonetaryAmount",
-          value: 50,
-          currency: "EGP",
-        },
-        deliveryTime: {
-          "@type": "ShippingDeliveryTime",
-          handlingTime: {
-            "@type": "QuantitativeValue",
-            minValue: 0,
-            maxValue: 1,
-            unitCode: "DAY",
-          },
-          transitTime: {
-            "@type": "QuantitativeValue",
-            minValue: 1,
-            maxValue: 5,
-            unitCode: "DAY",
-          },
-        },
-      },
+      shippingDetails: merchantShippingDetails(),
     },
     brand: { "@type": "Brand", name: "Elysr Medical" },
   };

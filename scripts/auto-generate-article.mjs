@@ -137,8 +137,8 @@ Generate the article based on this newly invented unique topic.`;
 
   // 📝 توجيهات الصياغة البشرية النقية والخالية تماماً من علامات المارك داون الروبوتية مثل (#، *، **)
   const systemPrompt = `
-You are an experienced Arabic clinical pharmacist and a warm, compassionate medical copywriter writing for "اليسر ميديكال" (Elysr Medical Group).
-Your writing MUST be completely indistinguishable from a highly educated human writer. It must pass all AI detectors (like Winston, GPTZero, CopyLeaks) by being written in a highly organic, natural, and fluid human narrative style.
+Write careful, accessible Arabic health education content for "اليسر ميديكال" (Elysr Medical Group).
+Use a natural, precise narrative style without claiming a diagnosis, guaranteed outcome, certification, or human medical review.
 
 STRICT HUMAN WRITING DIRECTIVES FOR 100% PLAIN-TEXT HUMAN LAYOUT:
 1. NEVER use cliché AI openings (e.g., "في هذا المقال سنتحدث عن", "في عالمنا المعاصر", "تعتبر هذه المشكلة", "من الجدير بالذكر"). Start immediately with a real-world clinical scenario, a warm, reassuring medical observation, or an interesting physiological question.
@@ -146,11 +146,12 @@ STRICT HUMAN WRITING DIRECTIVES FOR 100% PLAIN-TEXT HUMAN LAYOUT:
 3. NEVER use generic AI conclusions or start paragraphs with "في النهاية", "خلاصة القول", "في الختام", "بناء على ما سبق". Instead, close the article naturally by offering genuine, compassionate pharmacist advice or inviting the reader to consult with Elysr medical team on WhatsApp.
 4. Avoid empty, robotic AI transition words (e.g., "علاوة على ذلك", "بالإضافة إلى ذلك", "جدير بالذكر", "بشكل عام"). Let paragraphs flow organically as if written by a passionate human doctor.
 5. Avoid superficial marketing hype words (e.g., "ثوري", "مذهل", "خارق", "معجزة"). Use precise, calm, and professional medical terminology (e.g., "تآزر فسيولوجي", "تأثير موضعي لطيف", "تحفيز الدورة الدموية الدقيقة").
-6. Explain the exact biochemical/anatomical mechanisms like a friendly doctor explaining to a patient. (e.g. explain how cellular receptors respond, how Nitric Oxide dilates vessels, how local sensitivity is gently modulated).
-7. Interweave the Elysr Medical products naturally as safe, original options, never in a pushy or aggressive sales tone.
+6. Explain mechanisms cautiously and only when supported by the cited sources. Distinguish established evidence from preliminary or traditional use, and never present uncertainty as fact.
+7. Mention relevant Elysr Medical categories only as optional commercial context. Never call a product safe, approved, clinically proven, guaranteed, or suitable for the reader; direct medicine-specific decisions to a doctor or pharmacist.
 8. ⚠️ STRICT RULE FOR FORMATTING: Do NOT use ANY markdown formatting symbols like "#" (hashtags for headers) or "*" (asterisks for bold/italic/lists) in the article body. The output article text must be written in normal, clean plain Arabic with regular spaces and paragraphs (double newlines to separate paragraphs) so it looks 100% human-written and completely professional.
 9. Also generate a highly detailed, unique, and strictly G-rated English image prompt for the AI image generator that visually represents this article. WARNING: The image prompt MUST be completely G-rated, extremely safe, and neutral. NEVER use any words related to sex, intimacy, gender, anatomy, body parts, or clinical conditions. Instead, describe beautiful natural scenes, elegant herbal tea, pure honey dripping from a wooden spoon, abstract organic shapes, a clean apothecary glass bottle on a wooden table, fresh mint leaves, or premium cardboard packaging boxes under warm morning sunlight. Use only beautiful, professional, safe keywords. No text, letters, or human faces.
-10. Output MUST be strictly in JSON format matching the following schema. Return pure raw JSON without any markdown code block wrappers (do not wrap in triple backticks).
+10. Include at least 3 distinct sources. Every URL must be a real, directly relevant HTTPS page from WHO, NIH/NCBI/MedlinePlus, CDC, NHS, Mayo Clinic, Cleveland Clinic, Cochrane, BMJ, JAMA, NEJM, The Lancet, Nature, Springer, Wiley, ScienceDirect, Frontiers, Harvard, or Johns Hopkins. Never invent a title, publisher, paper, or URL.
+11. Output MUST be strictly in JSON format matching the following schema. Return pure raw JSON without any markdown code block wrappers (do not wrap in triple backticks).
 
 JSON Schema:
 {
@@ -164,6 +165,7 @@ JSON Schema:
   "content": "A highly comprehensive article body in elegant Arabic. Use normal Arabic text, regular spacing, and clean paragraphs. DO NOT include any '#' or '*' characters. Must be at least 600 words. Add a supportive, reassuring conclusion. Recommend Elysr Medical products and direct WhatsApp consultation smoothly.",
   "sources": [
     { "title": "Title of medical paper or organization (e.g. Mayo Clinic, NHS, NIH)", "url": "https://...", "publisher": "Organization name" },
+    { "title": "Title of medical paper or organization", "url": "https://...", "publisher": "Organization name" },
     { "title": "Title of medical paper or organization", "url": "https://...", "publisher": "Organization name" }
   ]
 }
@@ -484,16 +486,16 @@ JSON Schema:
     emoji: articleData.emoji || "🌿",
     content: articleData.content,
     author: {
-      name: "د. أحمد عيد — فريق المحتوى الصحي",
-      role: "إعداد ومراجعة المحتوى",
+      name: "فريق المحتوى الصحي — اليسر ميديكال",
+      role: "إعداد المحتوى الصحي",
       credentials:
-        "بكالوريوس صيدلة — متخصص في تبسيط المعلومات الصحية والزوجية. يعتمد على مصادر طبية عالمية (WHO, Mayo Clinic, NHS, NIH) مع مراجعة التحذيرات والمكونات.",
+        "محتوى تثقيفي يستند إلى مصادر صحية منشورة، ولا يُعد تشخيصاً أو وصفة علاجية أو بديلاً عن استشارة الطبيب أو الصيدلي.",
     },
     reviewer: {
-      name: "هيئة المراجعة الطبية — اليسر ميديكال",
-      role: "مراجعة طبية وصيدلانية",
+      name: "قسم مراجعة المحتوى — اليسر ميديكال",
+      role: "مراجعة المصادر والتحذيرات",
       credentials:
-        "مراجعة شاملة للسلامة، التحذيرات، التداخلات الدوائية، ودقة المعلومات الصحية. لا نقدم وعوداً علاجية ونوصي بالاستشارة الطبية المتخصصة.",
+        "تُراجع بنية المحتوى والمصادر والتحذيرات والبيانات المنظمة وفق معايير النشر بالموقع، مع ضرورة الرجوع إلى مختص قبل اتخاذ أي قرار صحي أو دوائي.",
     },
     publishedAt: todayStr,
     updatedAt: todayStr,
@@ -509,7 +511,8 @@ JSON Schema:
     fileContent.slice(insertPos);
 
   writeFileSync(filePath, updatedContent, "utf-8");
-  console.log(`\n✅ AI Article successfully appended to articles.ts! Title: "${newArticle.title}"`);
+  writeFileSync(resolve(ROOT, ".generated-article-slug"), newArticle.slug, "utf-8");
+  console.log(`\n✅ Article successfully appended to articles.ts! Title: "${newArticle.title}"`);
   console.log(`   Slug:   /education/${newArticle.slug}`);
   console.log(`   Img:    ${newArticle.image}`);
 }

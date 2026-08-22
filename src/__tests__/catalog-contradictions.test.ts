@@ -2,7 +2,7 @@ import { products } from "@/data/products";
 import { describe, it } from "vitest";
 
 describe("Catalog Contradiction Audit", () => {
-  it("scans all 89 products for topical vs edible description-usage contradictions", () => {
+  it("scans all 87 products for topical vs edible description-usage contradictions", () => {
     const contradictions: Array<{ id: string; name: string; issue: string }> = [];
 
     const topicalKeywords = [

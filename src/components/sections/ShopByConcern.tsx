@@ -1,13 +1,17 @@
 import { Link } from "@tanstack/react-router";
 import { Zap, Clock, Activity, Heart } from "lucide-react";
-import { getProductById, getFeaturedProducts } from "@/data/products";
+import {
+  getProductById,
+  getFeaturedProducts,
+  HOMEPAGE_EXCLUDED_PRODUCT_IDS,
+} from "@/data/products";
 import { thumbUrl, assetUrl } from "@/lib/cache";
 
 // قوائم المعرفات المرشحة الأكثر طلباً ومبيعاً بكل فئة (مرتبة تنازلياً حسب الأكثر مبيعاً)
 // تم تفعيل آلية فلترة ديناميكية تستبعد فوراً أي منتج معروض بالفعل بقسم الأكثر طلباً العلوي
 const concernCandidates = {
   delay: ["m-44", "m-30", "m-14", "m-19", "m-55", "m-48"],
-  strength: ["m-11", "m-02", "m-01", "m-04", "m-03", "m-49"],
+  strength: ["m-11", "m-02", "m-01", "m-04", "m-03", "m-49", "m-52", "m-20", "m-32"],
   devices: ["d-01", "d-02", "d-03", "d-04", "d-05"],
   women: ["w-02", "w-15", "w-05", "w-11", "w-01", "w-03", "w-04"],
 };
@@ -26,7 +30,7 @@ export function ShopByConcern() {
       desc: "أفضل حلول التأخير والتحكم في سرعة القذف مع خيارات موضعية قوية ومجربة",
       link: "/products/men",
       products: concernCandidates.delay
-        .filter((id) => !featuredIds.has(id))
+        .filter((id) => !featuredIds.has(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id))
         .slice(0, 3)
         .map(getProductById)
         .filter((p): p is NonNullable<typeof p> => Boolean(p)),
@@ -38,7 +42,7 @@ export function ShopByConcern() {
       desc: "أفضل المكملات الطبيعية لدعم القوة والأداء والتحمل — تركيبات عشبية آمنة وفعالة",
       link: "/products/men",
       products: concernCandidates.strength
-        .filter((id) => !featuredIds.has(id))
+        .filter((id) => !featuredIds.has(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id))
         .slice(0, 3)
         .map(getProductById)
         .filter((p): p is NonNullable<typeof p> => Boolean(p)),
@@ -50,7 +54,7 @@ export function ShopByConcern() {
       desc: "أفضل أجهزة الأداء والدعم غير الدوائي، مع أولوية لأجهزة الـ VED الأكثر احترافية",
       link: "/products/devices",
       products: concernCandidates.devices
-        .filter((id) => !featuredIds.has(id))
+        .filter((id) => !featuredIds.has(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id))
         .slice(0, 3)
         .map(getProductById)
         .filter((p): p is NonNullable<typeof p> => Boolean(p)),
@@ -62,7 +66,7 @@ export function ShopByConcern() {
       desc: "أفضل المنتجات المخصصة لدعم الرغبة والإثارة والراحة للنساء مع خيارات موثوقة وعالية الطلب",
       link: "/products/women",
       products: concernCandidates.women
-        .filter((id) => !featuredIds.has(id))
+        .filter((id) => !featuredIds.has(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id))
         .slice(0, 3)
         .map(getProductById)
         .filter((p): p is NonNullable<typeof p> => Boolean(p)),

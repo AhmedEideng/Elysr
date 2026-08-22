@@ -42,6 +42,9 @@ export const Route = createFileRoute("/education_/$slug")({
     meta: [
       { title: loaderData?.article.title },
       { name: "description", content: loaderData?.article.excerpt },
+      { property: "og:type", content: "article" },
+      { property: "og:image", content: loaderData?.article.image },
+      { name: "twitter:image", content: loaderData?.article.image },
     ],
   }),
   component: ArticlePage,

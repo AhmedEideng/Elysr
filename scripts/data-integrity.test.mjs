@@ -24,7 +24,8 @@ const vite = await createServer({
 });
 
 try {
-  const { products } = await vite.ssrLoadModule("/src/data/products.ts");
+  const { products, getFeaturedProducts, getProductsByCategory, HOMEPAGE_EXCLUDED_PRODUCT_IDS } =
+    await vite.ssrLoadModule("/src/data/products.ts");
   const { articles } = await vite.ssrLoadModule("/src/data/articles.ts");
   const { seoLandingPages } = await vite.ssrLoadModule("/src/data/landing-pages.ts");
   const promo = await vite.ssrLoadModule("/src/lib/promo.ts");
@@ -65,6 +66,44 @@ try {
     return acc;
   }, {});
   assert.deepEqual(categories, { men: 56, women: 24, devices: 7 }, "Unexpected category split");
+
+  const kreva = products.find((product) => product.id === "m-60");
+  assert.equal(kreva?.price, 300, "Kreva price must be 300 EGP");
+
+  // Verify every product-bearing homepage section, not only the top featured grid.
+  const featuredProducts = getFeaturedProducts();
+  assert.equal(featuredProducts.length, 6, "Homepage must show exactly 6 featured products");
+  const featuredIds = new Set(featuredProducts.map((product) => product.id));
+  const concernCandidates = {
+    delay: ["m-44", "m-30", "m-14", "m-19", "m-55", "m-48"],
+    strength: ["m-11", "m-02", "m-01", "m-04", "m-03", "m-49", "m-52", "m-20", "m-32"],
+    devices: ["d-01", "d-02", "d-03", "d-04", "d-05"],
+    women: ["w-02", "w-15", "w-05", "w-11", "w-01", "w-03", "w-04"],
+  };
+  const concernIds = Object.values(concernCandidates).flatMap((ids) =>
+    ids.filter((id) => !featuredIds.has(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id)).slice(0, 3),
+  );
+  assert.equal(concernIds.length, 12, "Homepage concern sections must show 12 products");
+  const previouslyDisplayedIds = new Set([...featuredIds, ...concernIds]);
+  const tabProducts = ["men", "women", "devices"].flatMap((category) =>
+    getProductsByCategory(category)
+      .filter(
+        (product) =>
+          !previouslyDisplayedIds.has(product.id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(product.id),
+      )
+      .slice(0, 4),
+  );
+  assert.equal(tabProducts.length, 12, "Homepage category tabs must show 4 products per category");
+  const allHomepageProductIds = [
+    ...featuredProducts.map((product) => product.id),
+    ...concernIds,
+    ...tabProducts.map((product) => product.id),
+  ];
+  assert.deepEqual(
+    allHomepageProductIds.filter((id) => HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id)),
+    [],
+    "An excluded product is still present in a homepage section",
+  );
 
   for (const product of products) {
     assert.match(product.slug, /^[a-z0-9-]+$/, `Invalid slug: ${product.id}`);
@@ -111,6 +150,11 @@ try {
     }
   }
 
+  assert.deepEqual(
+    duplicates(vercel.redirects.map((r) => r.source)),
+    [],
+    "Duplicate redirect sources in vercel.json",
+  );
   const redirectBySource = new Map(vercel.redirects.map((r) => [r.source, r]));
   for (const product of products) {
     const redirect = redirectBySource.get(`/products/${product.id}`);
@@ -128,6 +172,18 @@ try {
     "Missing /index.html redirect",
   );
   assert.equal(redirectBySource.get("/index")?.destination, "/", "Missing /index redirect");
+  const appsScript = readFileSync(resolve(ROOT, "google-apps-script.gs"), "utf-8");
+  assert.match(
+    appsScript,
+    /createTextFinder\(orderId\)/,
+    "Durable order idempotency search missing",
+  );
+  assert.doesNotMatch(
+    appsScript,
+    /lastRow\s*-\s*49/,
+    "Order idempotency must not be limited to the last 50 rows",
+  );
+
   const sitemap = readFileSync(resolve(ROOT, "public/sitemap.xml"), "utf-8");
   for (const blockedPath of ["/cart", "/thank-you", "/order-confirmed"]) {
     assert.equal(sitemap.includes(`<loc>https://elysrmedical.store${blockedPath}</loc>`), false);

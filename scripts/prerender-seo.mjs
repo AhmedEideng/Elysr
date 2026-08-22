@@ -246,6 +246,37 @@ async function prerender() {
 
   try {
     const { products } = await vite.ssrLoadModule("/src/data/products.ts");
+    const { GOVERNORATE_SHIPPING } = await vite.ssrLoadModule("/src/lib/site-config.ts");
+    const shippingBands = new Map();
+    for (const entry of GOVERNORATE_SHIPPING) {
+      const regions = shippingBands.get(entry.shipping) ?? [];
+      regions.push(entry.name);
+      shippingBands.set(entry.shipping, regions);
+    }
+    const merchantShippingDetails = [...shippingBands.entries()].map(([rate, regions]) => ({
+      "@type": "OfferShippingDetails",
+      shippingDestination: {
+        "@type": "DefinedRegion",
+        addressCountry: "EG",
+        addressRegion: regions,
+      },
+      shippingRate: { "@type": "MonetaryAmount", value: rate, currency: "EGP" },
+      deliveryTime: {
+        "@type": "ShippingDeliveryTime",
+        handlingTime: {
+          "@type": "QuantitativeValue",
+          minValue: 0,
+          maxValue: 1,
+          unitCode: "DAY",
+        },
+        transitTime: {
+          "@type": "QuantitativeValue",
+          minValue: 1,
+          maxValue: 5,
+          unitCode: "DAY",
+        },
+      },
+    }));
     const { GOOGLE_SHOPPING_BLOCKED } = await vite.ssrLoadModule("/src/lib/product-compliance.ts");
     // صفحات المنتجات الدوائية المرفوضة: noindex حتى لا يزحفها جوجل (تبقى على الموقع
     // وقابلة للشراء عبر الروابط المباشرة/واتساب، لكن لا تُفهرس في نتائج البحث).
@@ -667,12 +698,6 @@ async function prerender() {
         ? `${SITE_URL}${assetUrl(product.image)}`
         : `${SITE_URL}/og-default.webp`;
       const canonical = `${SITE_URL}/products/${product.slug}`;
-
-      // ⭐ aggregateRating — لعرض نجوم التقييم في نتائج Google.
-      // القيم معقولة ومطابقة لما يظهر فعلاً على الصفحة:
-      //  - reviewCount = product.reviews (5-13) وهو نفس الرقم المعروض في عنوان القسم
-      //  - ratingValue = product.rating وهو نفس المتوسط المعروض
-      // ملاحظة: لا تُضاف إلا عند وجود تقييمات >= 1.
       const productReviews = Math.max(0, Math.floor(product.reviews ?? 0));
       const productRating = Math.max(0, Math.min(5, Number(product.rating ?? 0)));
 
@@ -705,33 +730,7 @@ async function prerender() {
           url: canonical,
           priceValidUntil,
           validFrom: "2026-01-01",
-          shippingDetails: {
-            "@type": "OfferShippingDetails",
-            shippingDestination: {
-              "@type": "DefinedRegion",
-              addressCountry: "EG",
-            },
-            shippingRate: {
-              "@type": "MonetaryAmount",
-              value: 50,
-              currency: "EGP",
-            },
-            deliveryTime: {
-              "@type": "ShippingDeliveryTime",
-              handlingTime: {
-                "@type": "QuantitativeValue",
-                minValue: 0,
-                maxValue: 1,
-                unitCode: "DAY",
-              },
-              transitTime: {
-                "@type": "QuantitativeValue",
-                minValue: 1,
-                maxValue: 5,
-                unitCode: "DAY",
-              },
-            },
-          },
+          shippingDetails: merchantShippingDetails,
           hasMerchantReturnPolicy: {
             "@type": "MerchantReturnPolicy",
             applicableCountry: "EG",
@@ -739,11 +738,6 @@ async function prerender() {
             merchantReturnDays: 14,
             returnMethod: "https://schema.org/ReturnByMail",
             returnFees: "https://schema.org/ReturnShippingFees",
-            returnShippingFeesAmount: {
-              "@type": "MonetaryAmount",
-              value: 50,
-              currency: "EGP",
-            },
           },
         },
       };
@@ -801,11 +795,7 @@ async function prerender() {
         ${product.ingredients ? `<h2>المكونات</h2><p>${esc(product.ingredients)}</p>` : ""}
         ${product.usage ? `<h2>طريقة الاستخدام</h2><p>${esc(product.usage)}</p>` : ""}
         <p>السعر: ${product.price} ج.م</p>
-        ${
-          productReviews > 0
-            ? `<h2>تقييمات العملاء</h2><p>التقييم العام: ${productRating} من 5 (${productReviews} تقييم)</p>`
-            : ""
-        }
+        ${productReviews > 0 ? `<h2>تقييمات العملاء</h2><p>التقييم العام: ${productRating} من 5 (${productReviews} تقييم)</p>` : ""}
         <p><a href="${categoryUrl}">تصفح كل ${esc(categoryName)}</a></p>
         ${relatedBody}
       `;

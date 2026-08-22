@@ -57,19 +57,16 @@ export default async function handler(req, res) {
 
   try {
     // 🔒 حد أقصى لحجم الـ body — يمنع استهلاك الذاكرة (DoS) وحشر سجلات ضخمة.
-    const rawBody = typeof req.body === "string" ? req.body : "";
-    const body =
-      typeof req.body === "string" && rawBody.length > 4096
-        ? (() => {
-            throw new Error("payload too large");
-          })()
-        : req.body;
+    const rawBody = typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? null);
+    if (Buffer.byteLength(rawBody, "utf8") > 4096) throw new Error("payload too large");
 
-    if (!body || !body["csp-report"]) {
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    // Support both legacy application/csp-report and the modern Reporting API
+    // application/reports+json array shape.
+    const report = body?.["csp-report"] ?? (Array.isArray(body) ? body[0]?.body : undefined);
+    if (!report || typeof report !== "object" || Array.isArray(report)) {
       return res.status(400).end();
     }
-
-    const report = body["csp-report"];
     // 🔒 ساسنة الحقول قبل التسجيل — هذه القيم قادمة من المتصفح (قد يزوّرها مهاجم)
     // لمنع Log Injection (حقن سطور/رموز تحكم في السجلات).
     const sanitize = (s) =>

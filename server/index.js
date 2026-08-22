@@ -6,8 +6,7 @@
  * Architecture:
  *   1. SSG (Static Site Generation) — serves pre-rendered HTML
  *      from dist/ with single-digit-millisecond TTFB.
- *   2. SPA Fallback — serves index.html shell for dynamic client-side
- *      rendering (CSR) on routes that aren't pre-rendered.
+ *   2. Real 404 handling — unknown routes return public/404.html with HTTP 404.
  *   3. API Proxy — forwards /api/* to the Vercel serverless functions
  *      (or handles inline for self-hosted deployments).
  *
@@ -15,7 +14,7 @@
  *   ┌─ /api/*               → API handler (inline)
  *   ├─ Static asset (.js,.css,.webp) → express.static (long cache)
  *   ├─ Prerendered HTML exists → serve static .html (SSG ⚡)
- *   └─ Otherwise            → serve index.html shell (SPA Fallback ⚡)
+ *   └─ Otherwise            → serve 404.html with HTTP 404
  *
  * Deployment:
  *   • Vercel: not used (Vercel uses api/ + dist/ directly)
@@ -26,28 +25,14 @@
 
 import express from "express";
 import compression from "compression";
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { initRedis } from "../api/lib/rate-limiter.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const DIST = resolve(ROOT, "dist");
 const PORT = parseInt(process.env.PORT || "8080", 10);
-
-// ── Cached template ──
-let template = null;
-function loadTemplate() {
-  if (!template) {
-    const indexPath = resolve(DIST, "index.html");
-    if (!existsSync(indexPath)) {
-      return null;
-    }
-    template = readFileSync(indexPath, "utf-8");
-  }
-  return template;
-}
 
 // ── Pattern matching for route-to-file mapping ──
 function fileForUrl(url) {
@@ -72,19 +57,19 @@ function fileForUrl(url) {
 // ── Cache control helpers ──
 const STATIC_MAX_AGE = "public, max-age=31536000, immutable";
 const HTML_MAX_AGE = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400";
-const SSR_MAX_AGE = "public, max-age=300, s-maxage=600, stale-while-revalidate=3600";
 
 function setCache(res, policy) {
   res.setHeader("Cache-Control", policy);
   res.setHeader("CDN-Cache-Control", policy);
 }
 
-// ── SSR fallback (serves the SPA shell for routes without prerendered HTML) ──
-function spaFallback(res) {
-  const tpl = loadTemplate();
-  if (!tpl) return res.status(503).send("Server not ready — run npm run build first");
-  setCache(res, SSR_MAX_AGE);
-  res.type("html").send(tpl);
+// ── Real 404 response for routes that were not generated at build time ──
+function notFoundResponse(res) {
+  const notFoundPath = resolve(DIST, "404.html");
+  res.status(404);
+  res.setHeader("Cache-Control", "no-store");
+  if (existsSync(notFoundPath)) return res.type("html").sendFile(notFoundPath);
+  return res.type("text").send("404 — Page not found");
 }
 
 // ── Express app ──
@@ -93,8 +78,14 @@ const app = express();
 // Gzip/brotli
 app.use(compression());
 
-// 🚀 JSON body parser — ضروري جداً لاستقبال الطلبات!
-app.use(express.json({ limit: "64kb" }));
+// JSON parser for checkout plus both legacy and Reporting API CSP report media types.
+// The endpoint applies its own stricter 4 KB validation after parsing.
+app.use(
+  express.json({
+    limit: "64kb",
+    type: ["application/json", "application/csp-report", "application/reports+json"],
+  }),
+);
 
 // Trust proxy
 app.set("trust proxy", 1);
@@ -174,6 +165,7 @@ const mountApi = (path, modPath) => {
 
 mountApi("/api/submit-order", "../api/submit-order.js");
 mountApi("/api/csp-report", "../api/csp-report.js");
+app.use("/api", (_req, res) => res.status(404).json({ error: "API route not found" }));
 
 // ── Main route handler: SSG first, then SPA fallback ──
 // ملاحظة: Express 5 (path-to-regexp v8) أزال دعم الباراميتر "*" العاري،
@@ -187,28 +179,21 @@ app.get(/.*/, (req, res) => {
     return res.type("html").sendFile(prerendered);
   }
 
-  // SPA fallback for dynamic routes
-  spaFallback(res);
+  // Every valid production route is prerendered; unknown paths must be a real 404.
+  return notFoundResponse(res);
 });
 
 // ── Boot ──
-async function boot() {
-  try {
-    await initRedis();
-  } catch {
-    // Will retry on first request
-  }
-
+function boot() {
   const server = app.listen(PORT, "0.0.0.0", () => {
     const ssgReady = existsSync(resolve(DIST, "index.html"));
-    const redisReady = !!(process.env.UPSTASH_REDIS_URL || process.env.REDIS_URL);
 
     console.log(`\n🚀 Elysr Medical SSR/SSG server ready`);
     console.log(`   Mode:   ${process.env.NODE_ENV || "development"}`);
     console.log(`   Port:   ${PORT}`);
     console.log(`   URL:    http://0.0.0.0:${PORT}`);
     console.log(`   SSG:    ${ssgReady ? "✅ ready" : "⚠️  run 'npm run build:ssr' first"}`);
-    console.log(`   Redis:  ${redisReady ? "✅ configured" : "⚠️  using in-memory fallback"}`);
+    console.log("   Rate limit: in-process + Google Apps Script per-phone limit");
     console.log("");
   });
 
@@ -222,7 +207,4 @@ async function boot() {
   process.on("SIGINT", shutdown);
 }
 
-boot().catch((err) => {
-  console.error("[ssr] Boot failed:", err);
-  process.exit(1);
-});
+boot();

@@ -1,7 +1,11 @@
 import { useState, useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import { ProductCard } from "@/components/ProductCard";
-import { getProductsByCategory, getFeaturedProducts } from "@/data/products";
+import {
+  getProductsByCategory,
+  getFeaturedProducts,
+  HOMEPAGE_EXCLUDED_PRODUCT_IDS,
+} from "@/data/products";
 import { ArrowLeft } from "lucide-react";
 
 export function ProductsTabs() {
@@ -15,17 +19,23 @@ export function ProductsTabs() {
     // 2. محاكاة واستبعاد المنتجات الـ 12 المعروضة بداخل قسم "أبرز فئات العناية والاهتمام" (ShopByConcern) لمنع تكرارها أيضاً
     const concernCandidates = {
       delay: ["m-44", "m-30", "m-14", "m-19", "m-55", "m-48"],
-      strength: ["m-11", "m-02", "m-01", "m-04", "m-03", "m-49"],
+      strength: ["m-11", "m-02", "m-01", "m-04", "m-03", "m-49", "m-52", "m-20", "m-32"],
       devices: ["d-01", "d-02", "d-03", "d-04", "d-05"],
       women: ["w-02", "w-15", "w-05", "w-11", "w-01", "w-03", "w-04"],
     };
 
-    const delayIds = concernCandidates.delay.filter((id) => !displayedIds.has(id)).slice(0, 3);
-    const strengthIds = concernCandidates.strength
-      .filter((id) => !displayedIds.has(id))
+    const delayIds = concernCandidates.delay
+      .filter((id) => !displayedIds.has(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id))
       .slice(0, 3);
-    const devicesIds = concernCandidates.devices.filter((id) => !displayedIds.has(id)).slice(0, 3);
-    const womenIds = concernCandidates.women.filter((id) => !displayedIds.has(id)).slice(0, 3);
+    const strengthIds = concernCandidates.strength
+      .filter((id) => !displayedIds.has(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id))
+      .slice(0, 3);
+    const devicesIds = concernCandidates.devices
+      .filter((id) => !displayedIds.has(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id))
+      .slice(0, 3);
+    const womenIds = concernCandidates.women
+      .filter((id) => !displayedIds.has(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id))
+      .slice(0, 3);
 
     // دمج كافة معرفات المنتجات المعروضة مسبقاً بالصفحة في الأقسام العلوية
     const allHomepageIds = new Set([
@@ -38,7 +48,7 @@ export function ProductsTabs() {
 
     // جلب المنتجات للفئة المحددة وتصفيتها كلياً من أي ظهور سابق بالصفحة، مع عرض أفضل المنتجات مبيعاً المتبقية
     return getProductsByCategory(activeTab)
-      .filter((p) => !allHomepageIds.has(p.id))
+      .filter((p) => !allHomepageIds.has(p.id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(p.id))
       .slice(0, 4);
   }, [activeTab]);
 

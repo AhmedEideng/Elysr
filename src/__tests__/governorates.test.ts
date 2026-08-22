@@ -4,13 +4,14 @@
  * ============================================================
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   getShippingCost,
   getShippingLabel,
   qualifiesForFreeShipping,
   EGYPT_GOVERNORATES,
   GOVERNORATE_SHIPPING,
+  submitToGoogleSheets,
 } from "@/lib/governorates";
 
 describe("GOVERNORATE_SHIPPING data", () => {
@@ -98,5 +99,25 @@ describe("qualifiesForFreeShipping", () => {
   it("false تحت 2000", () => {
     expect(qualifiesForFreeShipping(1999)).toBe(false);
     expect(qualifiesForFreeShipping(0)).toBe(false);
+  });
+});
+
+describe("order privacy", () => {
+  it("never stores a failed order payload in localStorage", async () => {
+    const setItem = vi.spyOn(Storage.prototype, "setItem");
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network unavailable")));
+
+    const result = await submitToGoogleSheets({
+      customerName: "Private Name",
+      customerPhone: "01012345678",
+      address: "Private Address",
+    });
+
+    expect(result.success).toBe(false);
+    expect(setItem).not.toHaveBeenCalled();
+    setItem.mockRestore();
+    consoleError.mockRestore();
+    vi.unstubAllGlobals();
   });
 });
