@@ -8,6 +8,8 @@
  * ============================================================
  */
 
+export const MAX_CUSTOMER_PHONE_LENGTH = 16;
+
 /**
  * التحقق من رقم هاتف العميل: رقم مصري صحيح أو رقم دولي بصيغة E.164/00.
  * اسم الدالة محفوظ للتوافق الخلفي رغم دعم الأرقام الدولية.
@@ -134,16 +136,13 @@ export function sanitizeInput(input: string, maxLength = 200): string {
   return cleaned;
 }
 
-/**
- * تنظيف النصوص للاستخدام في رسائل واتساب و Google Sheets.
- *
- * يزيل رموز Markdown ورموز التنسيق التي قد تُفسر بشكل خاطئ
- * في سياقات المراسلة النصية.
- *
- * يستخدم sanitizeInput كقاعدة ثم يزيل رموز markdown الإضافية.
- */
+/** تنظيف النصوص لرسائل واتساب دون تطبيق بادئة حماية معادلات Sheets. */
 export function sanitizeForMsg(text: string, maxLen: number): string {
-  return sanitizeInput(text, maxLen)
+  let cleaned = sanitizeInput(text, maxLen);
+  // sanitizeInput يضيف apostrophe لحماية Google Sheets؛ في رسالة واتساب لا توجد
+  // معادلات، لذا نزيل علامة الحماية مع الإبقاء على + في أرقام E.164 كاملة.
+  if (cleaned.startsWith("'") && /^[=+\-@\t\r]/.test(text.trim())) cleaned = cleaned.slice(1);
+  return cleaned
     .replace(/[*~|#{}]/g, "")
     .replace(/[\][]/g, "")
     .trim();

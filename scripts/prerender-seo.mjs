@@ -29,12 +29,10 @@ const SITE_URL = (process.env.SITE_URL || "https://elysrmedical.store").replace(
 const SITE_NAME = "اليسر ميديكال";
 const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-/**
- * 🗂️ رقم إصدار الكاش المركزي — نفس القيمة في `src/lib/cache.ts`.
- * يُلحق تلقائياً بكل صورة/أصل في HTML المولّد (og:image, preload, sitemap, feed)
- * ليكسر كاش المتصفح عند أي تغيير للصور. ارفعه هنا فقط عند تغيير الصور.
- */
-const CACHE_VERSION = "28";
+/** 🗂️ رقم إصدار الكاش من المصدر المركزي الوحيد. */
+const { version: CACHE_VERSION } = JSON.parse(
+  readFileSync(resolve(ROOT, "config/cache-version.json"), "utf-8"),
+);
 
 /** يلحق رقم الإصدار بمسار صورة/أصل (يزيل أي ?v= قديم أولاً). */
 function assetUrl(path) {

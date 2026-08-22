@@ -1,5 +1,5 @@
 import { createServer } from "vite";
-import { writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -8,8 +8,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const SITE_URL = (process.env.SITE_URL || "https://elysrmedical.store").replace(/\/$/, "");
 
-/** 🗂️ رقم إصدار الكاش المركزي — نفس القيمة في src/lib/cache.ts و scripts/prerender-seo.mjs */
-const CACHE_VERSION = "28";
+/** 🗂️ رقم إصدار الكاش من المصدر المركزي الوحيد. */
+const { version: CACHE_VERSION } = JSON.parse(
+  readFileSync(resolve(ROOT, "config/cache-version.json"), "utf-8"),
+);
 
 /** يلحق رقم الإصدار بمسار صورة/أصل (يزيل أي ?v= قديم أولاً). */
 function assetUrl(path) {

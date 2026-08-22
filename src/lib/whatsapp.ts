@@ -1,5 +1,5 @@
 import { getPromoTier, isPromoActive, PROMO_ORDER_LABEL } from "@/lib/promo";
-import { sanitizeForMsg } from "@/lib/utils";
+import { MAX_CUSTOMER_PHONE_LENGTH, sanitizeForMsg } from "@/lib/utils";
 
 // رقم الواتساب الرسمي للشركة
 const WHATSAPP_NUMBER = "201098088206";
@@ -51,7 +51,8 @@ export const buildOrderMessage = (
   lines.push("");
 
   if (customer?.name) lines.push(`الاسم: ${sanitizeForMsg(customer.name, 100)}`);
-  if (customer?.phone) lines.push(`الهاتف: ${sanitizeForMsg(customer.phone, 15)}`);
+  if (customer?.phone)
+    lines.push(`الهاتف: ${sanitizeForMsg(customer.phone, MAX_CUSTOMER_PHONE_LENGTH)}`);
   if (customer?.governorate) lines.push(`المحافظة: ${sanitizeForMsg(customer.governorate, 50)}`);
   lines.push(
     `العنوان: ${customer?.address ? sanitizeForMsg(customer.address, 200) : "سيتم تأكيده على واتساب"}`,

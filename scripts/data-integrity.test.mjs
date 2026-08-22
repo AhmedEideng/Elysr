@@ -34,6 +34,17 @@ try {
   const vercel = JSON.parse(readFileSync(resolve(ROOT, "vercel.json"), "utf-8"));
   const productsDb = JSON.parse(readFileSync(resolve(ROOT, "api/lib/products-db.json"), "utf-8"));
   const configDb = JSON.parse(readFileSync(resolve(ROOT, "api/lib/config-db.json"), "utf-8"));
+  const cacheConfig = JSON.parse(readFileSync(resolve(ROOT, "config/cache-version.json"), "utf-8"));
+  const cacheModule = await vite.ssrLoadModule("/src/lib/cache.ts");
+  assert.equal(cacheModule.CACHE_VERSION, cacheConfig.version, "Cache version source mismatch");
+  for (const script of ["scripts/prerender-seo.mjs", "scripts/generate-sitemap.mjs"]) {
+    const content = readFileSync(resolve(ROOT, script), "utf-8");
+    assert.doesNotMatch(
+      content,
+      /CACHE_VERSION\s*=\s*"\d+"/,
+      `Duplicate cache version in ${script}`,
+    );
+  }
 
   assert.deepEqual(productsDb, products, "products-db.json is stale; run npm run build");
   assert.deepEqual(
