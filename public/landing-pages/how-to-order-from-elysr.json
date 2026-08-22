@@ -27,12 +27,12 @@
   "links": [
     {
       "label": "الشحن السري",
-      "href": "/products/guides/discreet-packaging-all-governorates",
+      "href": "/shipping",
       "description": "تفاصيل التغليف المحايد."
     },
     {
       "label": "الدفع عند الاستلام",
-      "href": "/products/guides/payment-methods-cod-guide",
+      "href": "/products/guides/how-to-order-from-elysr",
       "description": "كل اللي محتاج تعرفه عن الدفع."
     }
   ],

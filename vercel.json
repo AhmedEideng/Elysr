@@ -850,6 +850,76 @@
       "source": "/products/hulk-gel-50gm",
       "destination": "/products/men",
       "permanent": true
+    },
+    {
+      "source": "/products/guides/marital-products-giza",
+      "destination": "/products/guides/sexual-health-products",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/marital-products-alexandria",
+      "destination": "/products/guides/sexual-health-products",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/delay-products-cairo",
+      "destination": "/products/guides/men-delay-products",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/erection-products-cairo",
+      "destination": "/products/guides/sexual-health-products",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/women-products-cairo",
+      "destination": "/products/guides/women-intimacy-products",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/marital-products-delta",
+      "destination": "/products/guides/sexual-health-products",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/marital-products-upper-egypt",
+      "destination": "/products/guides/sexual-health-products",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/discreet-shipping-egypt",
+      "destination": "/shipping",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/discreet-packaging-all-governorates",
+      "destination": "/shipping",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/intimacy-devices-privacy-shipping",
+      "destination": "/shipping",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/privacy-discreet-shipping-guide",
+      "destination": "/shipping",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/cash-on-delivery-egypt",
+      "destination": "/products/guides/how-to-order-from-elysr",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/cash-on-delivery-marital-products",
+      "destination": "/products/guides/how-to-order-from-elysr",
+      "permanent": true
+    },
+    {
+      "source": "/products/guides/payment-methods-cod-guide",
+      "destination": "/products/guides/how-to-order-from-elysr",
+      "permanent": true
     }
   ]
 }
