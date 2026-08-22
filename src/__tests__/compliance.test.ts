@@ -30,6 +30,21 @@ describe("GOOGLE_SHOPPING_BLOCKED — يستبعد الأدوية المرفوض
 });
 
 describe("النصوص الدوائية", () => {
+  it("توضح الغرض التجاري الأساسي والمكونات والاستخدام لكل منتج محمي", () => {
+    for (const product of products.filter((item) => GOOGLE_SHOPPING_BLOCKED.has(item.id))) {
+      expect(product.description, `Missing customer purpose in ${product.id}`).toMatch(
+        /انتصاب|القذف|الإحساس|الاستجابة/,
+      );
+      expect(product.benefits.length, `Too few benefits in ${product.id}`).toBeGreaterThanOrEqual(
+        5,
+      );
+      expect(product.ingredients?.length, `Missing ingredients in ${product.id}`).toBeGreaterThan(
+        80,
+      );
+      expect(product.usage?.length, `Missing usage in ${product.id}`).toBeGreaterThan(80);
+    }
+  });
+
   it("لا تستخدم وعود أمان أو نتائج مطلقة في المنتجات الدوائية المحجوبة", () => {
     const prohibited =
       /آمن(?:ة)?\s*(?:تمام|100%)|أمان\s*تام|منتج\s*مضمون|مضمون\s*100%|يضمن\s+لك|مجرب\s*سريري|نتائج\s*مؤكدة|ثقة\s*مطلقة/i;
