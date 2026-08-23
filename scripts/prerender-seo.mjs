@@ -739,7 +739,7 @@ async function prerender() {
             returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
             merchantReturnDays: 14,
             returnMethod: "https://schema.org/ReturnByMail",
-            returnFees: "https://schema.org/ReturnShippingFees",
+            returnFees: "https://schema.org/ReturnFeesCustomerResponsibility",
           },
         },
       };

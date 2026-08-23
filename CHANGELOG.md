@@ -97,7 +97,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Real HTTP 404s**: the production server serves `404.html` with status 404 instead
   of returning the SPA shell with status 200 for unknown paths.
 - **Shipping/returns structured data** now uses the checkout governorate bands
-  (50–120 EGP) and the documented customer-paid return shipping policy.
+  (50–120 EGP) and `ReturnFeesCustomerResponsibility` for the documented customer-paid
+  carrier return cost, removing Google's `returnShippingFeesAmount` warning.
 - **SPA metadata sync** now carries route-specific Open Graph type and image on
   product/article client navigation.
 - **Redirect cleanup**: 148 unique redirects; duplicate sources are now rejected by

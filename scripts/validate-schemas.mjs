@@ -129,6 +129,18 @@ function validateSchema(filePath, schema) {
         if (!schema.offers.availability) errors.push("Product offers.availability missing");
         if (!schema.offers.url || !schema.offers.url.startsWith(SITE_URL))
           errors.push(`Product offers.url must be absolute ${SITE_URL} URL`);
+
+        const returnPolicy = schema.offers.hasMerchantReturnPolicy;
+        if (returnPolicy && typeof returnPolicy === "object") {
+          const returnFees = returnPolicy.returnFees;
+          const feesAmount = returnPolicy.returnShippingFeesAmount;
+          if (returnFees === "https://schema.org/ReturnShippingFees" && !feesAmount) {
+            errors.push("ReturnShippingFees requires returnShippingFeesAmount");
+          }
+          if (returnFees === "https://schema.org/ReturnFeesCustomerResponsibility" && feesAmount) {
+            errors.push("Customer-responsibility returns must omit returnShippingFeesAmount");
+          }
+        }
       }
       if (schema.image && !String(schema.image).startsWith("http")) {
         errors.push(`Product image must be absolute URL (got "${schema.image}")`);
