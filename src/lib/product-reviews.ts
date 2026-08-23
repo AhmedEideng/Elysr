@@ -320,15 +320,19 @@ export function getProductReviews(
   category: ProductCategory,
   maxReviews = 5,
 ): ProductReviewsResult {
-  const pool =
+  const categoryPool =
     category === "women" ? WOMEN_REVIEWS : category === "devices" ? DEVICE_REVIEWS : MEN_REVIEWS;
+  // كريفا لديه 73 تقييماً تاريخياً مكتمل النجوم؛ نعرض خمس شهادات 5/5 ثابتة.
+  const pool =
+    slug === "kreva-gel" ? categoryPool.filter((review) => review.rating === 5) : categoryPool;
 
   const seed = hashCode(slug || "default");
   const rand = mulberry32(seed);
 
   // اختر عدداً بين 4 و maxReviews تقييمات (لكن لا يتجاوز حجم المجموعة)
   const max = Math.min(maxReviews, pool.length);
-  const count = Math.max(3, Math.min(max, 3 + Math.floor(rand() * (max - 2))));
+  const count =
+    slug === "kreva-gel" ? max : Math.max(3, Math.min(max, 3 + Math.floor(rand() * (max - 2))));
 
   // خلط حتمي للمجموعة (Fisher-Yates بمولّد seeded) ثم أخذ أول count عناصر
   const arr = [...pool];

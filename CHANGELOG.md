@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🔄 Catalog / Product changes
 
-- **Kreva Gel (`m-60`)** price updated to **300 EGP**.
+- **Kreva Gel (`m-60`)**: price **300 EGP**, historical rating **5/5** from
+  **73 ratings**, with exactly five visible 5-star customer comments.
 - **Homepage selection**: Lady Era Drops (`w-02`) replaced Boost Up MAN (`m-02`) in
   the top six, and Hard-On (`m-34`), both Powerfully Up variants (`m-03`/`m-49`),
   Viagra Men (`m-45`), and Viagra Women (`w-17`) are excluded from every homepage
@@ -45,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Strict order validation**: API rejects null/array payloads, fractional quantities,
   quantities above current stock, and governorates outside the shared whitelist.
 - **API test coverage**: added checkout calculation/validation and CSP endpoint tests,
-  bringing the unit suite to 118 tests, plus three Playwright browser tests.
+  bringing the unit suite to 119 tests, plus three Playwright browser tests.
 - **CSP report parsing**: self-hosted Express now accepts both
   `application/csp-report` and `application/reports+json` with the 4 KB endpoint limit.
 - **No local order persistence**: customer names, phones, addresses, notes, and order
