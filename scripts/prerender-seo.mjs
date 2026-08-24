@@ -775,14 +775,17 @@ async function prerender() {
             : "الأجهزة والمستلزمات الطبية";
       const categoryUrl = `${SITE_URL}/products/${product.category}`;
 
-      // منتجات مشابهة من نفس القسم (حتى 4، مع استبعاد المنتج الحالي)
+      // منتجات مشابهة من نفس القسم (حتى 4، مع استبعاد المنتج الحالي) - مع صور واضحة alt/title لمنع لخبطة Google Images
       const relatedProducts = products
-        .filter((p) => p.category === product.category && p.slug !== product.slug)
+        .filter((p) => p.category === product.category && p.slug !== product.slug && !GOOGLE_SHOPPING_BLOCKED.has(p.id))
         .slice(0, 4);
       const relatedBody =
         relatedProducts.length > 0
           ? `<h2>منتجات مشابهة</h2><ul>${relatedProducts
-              .map((p) => `<li><a href="${SITE_URL}/products/${p.slug}">${esc(p.name)}</a></li>`)
+              .map(
+                (p) =>
+                  `<li><a href="${SITE_URL}/products/${p.slug}"><img src="${SITE_URL}${assetUrl(p.image)}" alt="${esc(p.name)}" title="${esc(p.name)}" width="240" height="240" loading="lazy" />${esc(p.name)}</a></li>`,
+              )
               .join("")}</ul>`
           : "";
 
@@ -1010,7 +1013,7 @@ async function prerender() {
         const productsBody = selectedProducts
           .map(
             (product) =>
-              `<li><a href="${SITE_URL}/products/${product.slug}">${esc(product.name)}</a> — ${esc(product.description)}</li>`,
+              `<li><a href="${SITE_URL}/products/${product.slug}"><img src="${SITE_URL}${assetUrl(product.image)}" alt="${esc(product.name)}" title="${esc(product.name)}" width="240" height="240" loading="lazy" />${esc(product.name)}</a> — ${esc(makeMetaDescription(product.description))}</li>`,
           )
           .join("");
 
