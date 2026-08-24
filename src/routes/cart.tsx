@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/data/product-types";
-import { waLink, buildOrderMessage } from "@/lib/whatsapp";
+import { waLink } from "@/lib/whatsapp";
 import {
   generateOrderId,
   isValidEgyptianPhone,
@@ -157,7 +157,15 @@ function CartPage() {
     };
 
     if (method === "whatsapp") {
-      const msg = buildOrderMessage(orderItems, sc, orderId, shipping, freeShippingApplied);
+      // 🔒 استخدم رسالة مصغرة بدون PII حساس في رابط واتساب (العنوان والهاتف والملاحظات تبقى في الشيت فقط)
+      const { buildMinimalOrderMessage } = await import("@/lib/whatsapp");
+      const msg = buildMinimalOrderMessage(
+        orderItems,
+        { name: sc.name, governorate: sc.governorate },
+        orderId,
+        shipping,
+        freeShippingApplied,
+      );
       const url = waLink(msg);
 
       // واتساب هو قناة التأكيد الأساسية. نسجل الطلب فوراً بدون مطالبة العميل بالعودة للموقع.

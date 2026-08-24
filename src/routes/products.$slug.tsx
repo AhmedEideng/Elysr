@@ -34,7 +34,7 @@ import { CrossSellBundle } from "@/components/sections/CrossSellBundle";
 import { FAQ } from "@/components/FAQ";
 import { ProductReviews } from "@/features/product/components/ProductReviews";
 import { ProductImage } from "@/features/product/components/ProductImage";
-import { buildOrderMessage, waLink } from "@/lib/whatsapp";
+import { waLink } from "@/lib/whatsapp";
 import { getProductBySlug, getProductsByCategory, getCrossSellsForProduct } from "@/data/products";
 import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
 
@@ -280,7 +280,15 @@ function ProductPage() {
       // 🔒 Run Google Sheets submission as a non-blocking background fetch so the redirect is instant!
       void submitToGoogleSheets(payload);
 
-      const msg = buildOrderMessage(orderItems, sc, orderId, shipping, shipping === 0);
+      // 🔒 رسالة مصغرة بدون PII حساس في رابط واتساب
+      const { buildMinimalOrderMessage } = await import("@/lib/whatsapp");
+      const msg = buildMinimalOrderMessage(
+        orderItems,
+        { name: sc.name, governorate: sc.governorate },
+        orderId,
+        shipping,
+        shipping === 0,
+      );
       const url = waLink(msg);
 
       const a = document.createElement("a");
