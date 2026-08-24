@@ -127,6 +127,11 @@ app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Embedder-Policy", "credentialless");
   res.setHeader("Origin-Agent-Cluster", "?1");
   res.setHeader("X-XSS-Protection", "0");
+  res.setHeader(
+    "Report-To",
+    '{"group":"csp","max_age":10886400,"endpoints":[{"url":"https://elysrmedical.store/api/csp-report"}]}',
+  );
+  res.setHeader("NEL", '{"report_to":"csp","max_age":10886400}');
   // API routes should not be indexed
   if (req.path.startsWith("/api/")) {
     res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet");

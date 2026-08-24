@@ -223,6 +223,14 @@
         {
           "key": "X-XSS-Protection",
           "value": "0"
+        },
+        {
+          "key": "Report-To",
+          "value": "{\"group\":\"csp\",\"max_age\":10886400,\"endpoints\":[{\"url\":\"https://elysrmedical.store/api/csp-report\"}]}"
+        },
+        {
+          "key": "NEL",
+          "value": "{\"report_to\":\"csp\",\"max_age\":10886400}"
         }
       ]
     }
