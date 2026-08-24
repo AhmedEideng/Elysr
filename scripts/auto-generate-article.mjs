@@ -418,7 +418,8 @@ JSON Schema:
     articleData.title,
     articleData.content,
   );
-  relativeImagePath = `${chosenImage}?v=27`;
+  const cacheVersion = JSON.parse(readFileSync(resolve(ROOT, "config/cache-version.json"), "utf-8")).version;
+  relativeImagePath = `${chosenImage}?v=${cacheVersion}`;
 
   if (articleData.imagePrompt) {
     // 🚀 100% Free & Unlimited AI Image Generation via Pollinations AI (Stable Diffusion)
@@ -458,7 +459,7 @@ JSON Schema:
           .webp({ quality: 55 })
           .toFile(`${outDir}/thumbs-180/${imageFilename}.webp`);
 
-        relativeImagePath = `/images/${imageFilename}.webp?v=27`;
+        relativeImagePath = `/images/${imageFilename}.webp?v=${cacheVersion}`;
         console.log(
           `   ✅ Image successfully downloaded, WebP compressed, and thumbnails generated!`,
         );

@@ -70,7 +70,6 @@ export function ProductImage({
         width={800}
         height={800}
         loading="eager"
-        // @ts-ignore fetchpriority is valid but not in React types yet
         fetchPriority="high"
         decoding="async"
         onLoad={() => {
