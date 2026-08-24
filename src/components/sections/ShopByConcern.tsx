@@ -126,8 +126,7 @@ export function ShopByConcern() {
                               : ""
                           }
                           sizes="(max-width: 640px) 180px, 240px"
-                          alt=""
-                          aria-hidden="true"
+                          alt={prod.name}
                           loading="lazy"
                           decoding="async"
                           className="h-full w-full object-cover transition-transform group-hover/prod:scale-110"

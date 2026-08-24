@@ -64,8 +64,7 @@ export function ProductCardImage({
         src={srcUrl}
         srcSet={srcSetUrl}
         sizes="(max-width: 640px) 180px, (max-width: 1024px) 240px, 300px"
-        alt=""
-        aria-hidden="true"
+        alt={alt}
         loading="lazy"
         decoding="async"
         width={480}

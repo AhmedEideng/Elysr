@@ -243,7 +243,7 @@ function ArticlePage() {
                 {p.image && (
                   <img
                     src={p.image}
-                    alt=""
+                    alt={p.name}
                     className="w-16 h-16 object-cover rounded-lg"
                     loading="lazy"
                   />

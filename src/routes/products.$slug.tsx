@@ -81,6 +81,12 @@ export const Route = createFileRoute("/products/$slug")({
     return { product, related, crossSells };
   },
   head: ({ loaderData }) => {
+    const SITE_URL = "https://elysrmedical.store";
+    const absImg = loaderData?.product.image
+      ? loaderData.product.image.startsWith("http")
+        ? loaderData.product.image
+        : `${SITE_URL}${loaderData.product.image}`
+      : `${SITE_URL}/og-default.webp`;
     return {
       meta: [
         { title: loaderData?.product.name },
@@ -92,8 +98,8 @@ export const Route = createFileRoute("/products/$slug")({
           ? [{ name: "robots", content: "noindex,follow,noarchive,nosnippet,noimageindex" }]
           : []),
         { property: "og:type", content: "product" },
-        { property: "og:image", content: loaderData?.product.image },
-        { name: "twitter:image", content: loaderData?.product.image },
+        { property: "og:image", content: absImg },
+        { name: "twitter:image", content: absImg },
       ],
     };
   },
@@ -611,8 +617,7 @@ function ProductPage() {
                   <div className="h-32 w-full overflow-hidden bg-muted relative">
                     <img
                       src={a.image}
-                      alt=""
-                      aria-hidden="true"
+                      alt={a.title}
                       loading="lazy"
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />

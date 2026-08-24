@@ -126,8 +126,7 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
                       <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md border bg-gradient-soft">
                         <img
                           src={p.image}
-                          alt=""
-                          aria-hidden="true"
+                          alt={p.name}
                           width={40}
                           height={40}
                           loading="lazy"
