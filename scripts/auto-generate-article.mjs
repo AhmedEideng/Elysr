@@ -418,7 +418,9 @@ JSON Schema:
     articleData.title,
     articleData.content,
   );
-  const cacheVersion = JSON.parse(readFileSync(resolve(ROOT, "config/cache-version.json"), "utf-8")).version;
+  const cacheVersion = JSON.parse(
+    readFileSync(resolve(ROOT, "config/cache-version.json"), "utf-8"),
+  ).version;
   relativeImagePath = `${chosenImage}?v=${cacheVersion}`;
 
   if (articleData.imagePrompt) {
