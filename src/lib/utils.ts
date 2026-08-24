@@ -81,14 +81,14 @@ export function normalizeEgyptianPhone(phone: string): string {
   return digits;
 }
 
-// 🔧 توليد رقم طلب آمن بدون تكرار
+// 🔧 توليد رقم طلب آمن بدون تكرار - محسن لمنع التصادم في الاختبارات السريعة
 export function generateOrderId(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
   let randomPart: string;
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    randomPart = crypto.randomUUID().slice(0, 4).toUpperCase();
+    randomPart = crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase();
   } else {
-    randomPart = Math.random().toString(36).slice(2, 6).toUpperCase();
+    randomPart = Math.random().toString(36).slice(2, 10).toUpperCase();
   }
   return `#EL-${timestamp}-${randomPart}`;
 }

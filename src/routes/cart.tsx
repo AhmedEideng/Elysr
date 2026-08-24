@@ -157,31 +157,46 @@ function CartPage() {
     };
 
     if (method === "whatsapp") {
-      // 🔒 استخدم رسالة مصغرة بدون PII حساس في رابط واتساب (العنوان والهاتف والملاحظات تبقى في الشيت فقط)
-      const { buildMinimalOrderMessage } = await import("@/lib/whatsapp");
-      const msg = buildMinimalOrderMessage(
-        orderItems,
-        { name: sc.name, governorate: sc.governorate },
-        orderId,
-        shipping,
-        freeShippingApplied,
-      );
-      const url = waLink(msg);
-
-      // واتساب هو قناة التأكيد الأساسية. نسجل الطلب فوراً بدون مطالبة العميل بالعودة للموقع.
+      // 🔒 أقوى حماية على الإطلاق: PII كامل في Google Sheets فقط، رابط واتساب فيه تشفير AES-256-GCM فقط
       void submitToGoogleSheets(payload);
 
+      let secureLink = "";
       try {
-        // 🔒 لا نخزن رابط واتساب الكامل الذي يحتوي PII (اسم، هاتف، عنوان)
-        // نخزن فقط رقم الطلب للمراجعة، بدون أي بيانات عميل
-        sessionStorage.setItem("elysr_last_order_id", orderId);
-        sessionStorage.removeItem("elysr_last_whatsapp_url"); // تنظيف أي بيانات قديمة تحتوي PII
+        const encRes = await fetch("/api/encrypt-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId,
+            customerName: sc.name,
+            customerPhone: sc.phone,
+            governorate: sc.governorate,
+            address: sc.address,
+            notes: sc.notes,
+            items: orderItems,
+            total: grandTotal,
+          }),
+        });
+        const encData = await encRes.json();
+        if (encData.encrypted) {
+          secureLink = `${window.location.origin}/order-view?d=${encData.encrypted}`;
+        }
       } catch {
-        // Ignore storage failures.
+        // ignore encryption failure
       }
 
-      // 🔧 فتح موثوق للواتساب
-      // سنعود للطريقة البسيطة القديمة التي لا تستفز المتصفح
+      try {
+        sessionStorage.setItem("elysr_last_order_id", orderId);
+        if (secureLink) sessionStorage.setItem("elysr_last_secure_link", secureLink);
+        sessionStorage.removeItem("elysr_last_whatsapp_url");
+      } catch {
+        // ignore encryption failure
+      }
+
+      const waMessage = secureLink
+        ? `طلب جديد ${orderId}\nالمحافظة: ${sc.governorate}\nالإجمالي: ${grandTotal} ج.م\n\nالتفاصيل الكاملة (مشفرة AES-256-GCM - تنتهي بعد 24 ساعة):\n${secureLink}`
+        : `طلب جديد ${orderId}\nالمحافظة: ${sc.governorate}\nالإجمالي: ${grandTotal} ج.م`;
+
+      const url = waLink(waMessage);
       const a = document.createElement("a");
       a.href = url;
       a.target = "_blank";

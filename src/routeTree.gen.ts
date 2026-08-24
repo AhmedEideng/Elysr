@@ -16,6 +16,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as EducationRouteImport } from './routes/education'
 import { Route as MedicalReviewBoardRouteImport } from './routes/medical-review-board'
 import { Route as OrderConfirmedRouteImport } from './routes/order-confirmed'
+import { Route as OrderViewRouteImport } from './routes/order-view'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReturnsRouteImport } from './routes/returns'
 import { Route as ShippingRouteImport } from './routes/shipping'
@@ -62,6 +63,11 @@ const MedicalReviewBoardRoute = MedicalReviewBoardRouteImport.update({
 const OrderConfirmedRoute = OrderConfirmedRouteImport.update({
   id: '/order-confirmed',
   path: '/order-confirmed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrderViewRoute = OrderViewRouteImport.update({
+  id: '/order-view',
+  path: '/order-view',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/education': typeof EducationRoute
   '/medical-review-board': typeof MedicalReviewBoardRoute
   '/order-confirmed': typeof OrderConfirmedRoute
+  '/order-view': typeof OrderViewRoute
   '/privacy': typeof PrivacyRoute
   '/returns': typeof ReturnsRoute
   '/shipping': typeof ShippingRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/education': typeof EducationRoute
   '/medical-review-board': typeof MedicalReviewBoardRoute
   '/order-confirmed': typeof OrderConfirmedRoute
+  '/order-view': typeof OrderViewRoute
   '/privacy': typeof PrivacyRoute
   '/returns': typeof ReturnsRoute
   '/shipping': typeof ShippingRoute
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/education': typeof EducationRoute
   '/medical-review-board': typeof MedicalReviewBoardRoute
   '/order-confirmed': typeof OrderConfirmedRoute
+  '/order-view': typeof OrderViewRoute
   '/privacy': typeof PrivacyRoute
   '/returns': typeof ReturnsRoute
   '/shipping': typeof ShippingRoute
@@ -199,6 +208,7 @@ export interface FileRouteTypes {
     | '/education'
     | '/medical-review-board'
     | '/order-confirmed'
+    | '/order-view'
     | '/privacy'
     | '/returns'
     | '/shipping'
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/education'
     | '/medical-review-board'
     | '/order-confirmed'
+    | '/order-view'
     | '/privacy'
     | '/returns'
     | '/shipping'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/education'
     | '/medical-review-board'
     | '/order-confirmed'
+    | '/order-view'
     | '/privacy'
     | '/returns'
     | '/shipping'
@@ -263,6 +275,7 @@ export interface RootRouteChildren {
   EducationRoute: typeof EducationRoute
   MedicalReviewBoardRoute: typeof MedicalReviewBoardRoute
   OrderConfirmedRoute: typeof OrderConfirmedRoute
+  OrderViewRoute: typeof OrderViewRoute
   PrivacyRoute: typeof PrivacyRoute
   ReturnsRoute: typeof ReturnsRoute
   ShippingRoute: typeof ShippingRoute
@@ -326,6 +339,13 @@ declare module '@tanstack/react-router' {
       path: '/order-confirmed'
       fullPath: '/order-confirmed'
       preLoaderRoute: typeof OrderConfirmedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/order-view': {
+      id: '/order-view'
+      path: '/order-view'
+      fullPath: '/order-view'
+      preLoaderRoute: typeof OrderViewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -423,6 +443,7 @@ const rootRouteChildren: RootRouteChildren = {
   EducationRoute: EducationRoute,
   MedicalReviewBoardRoute: MedicalReviewBoardRoute,
   OrderConfirmedRoute: OrderConfirmedRoute,
+  OrderViewRoute: OrderViewRoute,
   PrivacyRoute: PrivacyRoute,
   ReturnsRoute: ReturnsRoute,
   ShippingRoute: ShippingRoute,
