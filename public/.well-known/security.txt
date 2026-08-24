@@ -1,0 +1,8 @@
+Contact: mailto:security@elysrmedical.store
+Contact: https://wa.me/201098088206
+Expires: 2027-08-25T00:00:00.000Z
+Acknowledgments: https://elysrmedical.store/about
+Preferred-Languages: ar, en
+Canonical: https://elysrmedical.store/.well-known/security.txt
+Policy: https://elysrmedical.store/privacy
+Hiring: https://elysrmedical.store/contact

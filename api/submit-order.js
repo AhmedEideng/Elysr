@@ -136,7 +136,14 @@ export function validateOrderPayload(payload) {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
     return "Invalid payload";
   }
+  // Prototype pollution protection - reject dangerous keys
+  const dangerousKeys = ["__proto__", "constructor", "prototype"];
+  for (const key of Object.keys(payload)) {
+    if (dangerousKeys.includes(key)) return "Invalid payload key";
+  }
   if (!isNonEmptyString(payload.orderId, 60)) return "Invalid orderId";
+  // Strict orderId pattern: EL-... with optional leading # (allows test fixtures)
+  if (!/^#?EL-[A-Z0-9-]{4,60}$/.test(payload.orderId)) return "Invalid orderId format";
   if (!isNonEmptyString(payload.customerName, 120)) return "Invalid customerName";
 
   const phoneStr = String(payload.customerPhone || "").trim();

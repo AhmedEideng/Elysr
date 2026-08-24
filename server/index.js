@@ -110,17 +110,28 @@ app.use(
 // Trust proxy
 app.set("trust proxy", 1);
 
-// Security headers (unified and synchronized with vercel.json for perfect security parity)
+// Security headers (unified and synchronized with vercel.json for perfect security parity) - 2026 hardened
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "SAMEORIGIN");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+  );
   res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
   res.setHeader("X-DNS-Prefetch-Control", "on");
   res.setHeader("X-Permitted-Cross-Domain-Policies", "none");
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
+  res.setHeader("Cross-Origin-Embedder-Policy", "credentialless");
+  res.setHeader("Origin-Agent-Cluster", "?1");
+  res.setHeader("X-XSS-Protection", "0");
+  // API routes should not be indexed
+  if (req.path.startsWith("/api/")) {
+    res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet");
+    res.setHeader("Cache-Control", "no-store");
+  }
   if (NOINDEX_PRODUCT_PATHS.has(req.path.replace(/\/$/, ""))) {
     res.setHeader("X-Robots-Tag", "noindex, follow, noarchive, nosnippet, noimageindex");
   } else if (

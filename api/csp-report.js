@@ -18,6 +18,12 @@ const MEMORY_CLEANUP_INTERVAL_MS = 5 * 60_000; // كل 5 دقائق
 const rateLimitMap = new Map();
 let lastCleanup = Date.now();
 
+// Use hashed IP like submit-order to avoid storing raw IPs in memory
+import { createHash } from "node:crypto";
+function hashIp(ip) {
+  return createHash("sha256").update(String(ip)).digest("hex").slice(0, 16);
+}
+
 function cleanupMemory() {
   const now = Date.now();
   if (now - lastCleanup < MEMORY_CLEANUP_INTERVAL_MS) return;
@@ -30,21 +36,30 @@ function cleanupMemory() {
 }
 
 function checkRateLimit(key) {
-  cleanupMemory(); // تنظيف الذاكرة قبل كل طلب
+  cleanupMemory();
   const now = Date.now();
-  const entry = rateLimitMap.get(key);
+  const hashed = hashIp(key);
+  const entry = rateLimitMap.get(hashed);
   if (!entry || now - entry.start > RATE_LIMIT_WINDOW_MS) {
-    rateLimitMap.set(key, { start: now, count: 1 });
+    rateLimitMap.set(hashed, { start: now, count: 1 });
     return true;
   }
   entry.count += 1;
   return entry.count <= RATE_LIMIT_MAX_REPORTS;
 }
 
+const ALLOWED_ORIGINS = new Set(["https://elysrmedical.store", "https://www.elysrmedical.store"]);
+
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  const origin = req.headers.origin;
+  const allowedOrigin =
+    origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://elysrmedical.store";
+  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+  res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet");
+  res.setHeader("Cache-Control", "no-store");
 
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).end();
