@@ -777,7 +777,12 @@ async function prerender() {
 
       // منتجات مشابهة من نفس القسم (حتى 4، مع استبعاد المنتج الحالي) - مع صور واضحة alt/title لمنع لخبطة Google Images
       const relatedProducts = products
-        .filter((p) => p.category === product.category && p.slug !== product.slug && !GOOGLE_SHOPPING_BLOCKED.has(p.id))
+        .filter(
+          (p) =>
+            p.category === product.category &&
+            p.slug !== product.slug &&
+            !GOOGLE_SHOPPING_BLOCKED.has(p.id),
+        )
         .slice(0, 4);
       const relatedBody =
         relatedProducts.length > 0
