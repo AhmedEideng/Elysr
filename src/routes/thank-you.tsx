@@ -20,9 +20,9 @@ export const Route = createFileRoute("/thank-you")({
 
 function ThankYouPage() {
   const { clear, items } = useCart();
-  const [lastWhatsAppUrl] = useState<string | null>(() => {
+  const [lastOrderId] = useState<string | null>(() => {
     try {
-      return sessionStorage.getItem("elysr_last_whatsapp_url");
+      return sessionStorage.getItem("elysr_last_order_id");
     } catch {
       return null;
     }
@@ -70,12 +70,18 @@ function ThankYouPage() {
 
         {/* لم تصلك رسالة؟ */}
         <div className="rounded-2xl border bg-card p-5 space-y-3">
-          <p className="text-sm text-muted-foreground">لم تصل رسالة الواتساب أو واجهت مشكلة؟</p>
+          <p className="text-sm text-muted-foreground">
+            {lastOrderId ? `رقم طلبك: ${lastOrderId}` : "لم تصل رسالة الواتساب أو واجهت مشكلة؟"}
+          </p>
           <div className="flex justify-center">
             <a
-              href={lastWhatsAppUrl ?? waLink("مرحباً، أرغب في تأكيد طلبي")}
+              href={waLink(
+                lastOrderId
+                  ? `مرحباً، أرغب في تأكيد طلبي ${lastOrderId}`
+                  : "مرحباً، أرغب في تأكيد طلبي",
+              )}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-bold text-white shadow-md hover:scale-[1.02] transition-smooth"
             >
               <MessageCircle className="h-4 w-4" /> فتح الواتساب مرة أخرى

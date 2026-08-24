@@ -499,6 +499,64 @@ function now() {
   return Utilities.formatDate(new Date(), "Africa/Cairo", "d/M/yyyy h:mm:ss a");
 }
 
+// ============================================================
+// 🔒 حماية بيانات العملاء - GDPR-like
+// ============================================================
+
+// حذف الطلبات القديمة تلقائياً بعد 90 يوم (لتقليل الاحتفاظ بـ PII)
+function autoCleanupOldOrders() {
+  try {
+    var sheet = getOrCreateSheet(SHEET_NAME);
+    var lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return;
+    var dateColIdx = -1;
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    for (var i = 0; i < headers.length; i++) {
+      if (String(headers[i]).trim() === "التاريخ") { dateColIdx = i + 1; break; }
+    }
+    if (dateColIdx <= 0) return;
+    var cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 90);
+    // نحذف من الأسفل للأعلى لتجنب إزاحة الصفوف
+    for (var r = lastRow; r >= 2; r--) {
+      var cell = sheet.getRange(r, dateColIdx).getValue();
+      if (cell && cell instanceof Date && cell < cutoff) {
+        sheet.deleteRow(r);
+      }
+    }
+  } catch (err) {
+    console.error("autoCleanupOldOrders failed:", err);
+  }
+}
+
+// حذف كل بيانات عميل حسب رقم الهاتف (حق النسيان)
+function deleteCustomerData(phone) {
+  try {
+    var sheet = getOrCreateSheet(SHEET_NAME);
+    var lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return 0;
+    var phoneColIdx = -1;
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    for (var i = 0; i < headers.length; i++) {
+      if (String(headers[i]).trim() === "الهاتف") { phoneColIdx = i + 1; break; }
+    }
+    if (phoneColIdx <= 0) return 0;
+    var cleanedPhone = String(phone || "").trim();
+    var deleted = 0;
+    for (var r = lastRow; r >= 2; r--) {
+      var cell = String(sheet.getRange(r, phoneColIdx).getValue() || "").trim();
+      if (cell === cleanedPhone) {
+        sheet.deleteRow(r);
+        deleted++;
+      }
+    }
+    return deleted;
+  } catch (err) {
+    console.error("deleteCustomerData failed:", err);
+    return 0;
+  }
+}
+
 function json(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
     ContentService.MimeType.JSON,

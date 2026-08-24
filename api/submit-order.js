@@ -300,6 +300,13 @@ export default async function handler(req, res) {
     if (payload[key] !== undefined) safePayload[key] = payload[key];
   }
 
+  // 🔒 حماية IP العميل - نخزن hash فقط في الشيت لحماية الخصوصية، مع الاحتفاظ بآخر 3 أرقام للكشف عن الاحتيال
+  const { createHash } = await import("node:crypto");
+  const hashedIp =
+    clientIp !== "unknown"
+      ? createHash("sha256").update(clientIp).digest("hex").slice(0, 16)
+      : "unknown";
+
   const sheetsController = new AbortController();
   const sheetsTimeout = setTimeout(() => sheetsController.abort(), GOOGLE_SHEETS_TIMEOUT_MS);
 
@@ -307,7 +314,9 @@ export default async function handler(req, res) {
     const response = await fetch(SHEET_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ data: JSON.stringify({ ...safePayload, clientIp }) }),
+      body: new URLSearchParams({
+        data: JSON.stringify({ ...safePayload, clientIp: hashedIp, clientIpHash: hashedIp }),
+      }),
       signal: sheetsController.signal,
     });
     if (!response.ok) {

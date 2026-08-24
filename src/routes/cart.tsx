@@ -164,7 +164,10 @@ function CartPage() {
       void submitToGoogleSheets(payload);
 
       try {
-        sessionStorage.setItem("elysr_last_whatsapp_url", url);
+        // 🔒 لا نخزن رابط واتساب الكامل الذي يحتوي PII (اسم، هاتف، عنوان)
+        // نخزن فقط رقم الطلب للمراجعة، بدون أي بيانات عميل
+        sessionStorage.setItem("elysr_last_order_id", orderId);
+        sessionStorage.removeItem("elysr_last_whatsapp_url"); // تنظيف أي بيانات قديمة تحتوي PII
       } catch {
         // Ignore storage failures.
       }
