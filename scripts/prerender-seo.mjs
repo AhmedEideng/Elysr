@@ -937,7 +937,8 @@ async function prerender() {
         const canonical = `${SITE_URL}/products/guides/${page.slug}`;
         const selectedProducts = (page.productIds || [])
           .map((id) => products.find((p) => p.id === id))
-          .filter(Boolean);
+          .filter(Boolean)
+          .filter((p) => !GOOGLE_SHOPPING_BLOCKED.has(p.id));
 
         const webPageJsonLd = {
           "@context": "https://schema.org",
@@ -990,7 +991,7 @@ async function prerender() {
             position: i + 1,
             url: `${SITE_URL}/products/${product.slug}`,
             name: product.name,
-            image: product.image ? `${SITE_URL}${product.image}` : undefined,
+            image: product.image ? `${SITE_URL}${assetUrl(product.image)}` : undefined,
           })),
         };
 
