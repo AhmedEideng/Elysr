@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Product } from "@/data/product-types";
+import { assetUrl } from "@/lib/cache";
 
 /**
  * 🖼️ Product Image — مكون منعزل لصورة المنتج مع skeleton loading.
@@ -63,11 +64,14 @@ export function ProductImage({
 
       <img
         ref={imgRef}
-        src={product.image.split("?")[0] + "?v=elysr_v28"}
+        src={assetUrl(product.image)}
         alt={product.name}
+        title={product.name}
         width={800}
         height={800}
         loading="eager"
+        // @ts-ignore fetchpriority is valid but not in React types yet
+        fetchPriority="high"
         decoding="async"
         onLoad={() => {
           setLoaded(true);

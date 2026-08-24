@@ -6,6 +6,7 @@ import { products as allProducts } from "@/data/products";
 import { formatPrice } from "@/data/product-types";
 import { toast } from "sonner";
 import { useState, useMemo } from "react";
+import { thumbUrl, assetUrl } from "@/lib/cache";
 
 export const Route = createFileRoute("/wishlist")({
   head: () => ({
@@ -262,13 +263,11 @@ function WishlistPage() {
                 >
                   {product.image ? (
                     <img
-                      src={
-                        product.image.split("?")[0].replace(/^\/images\//, "/images/thumbs/") +
-                        "?v=elysr_v28"
-                      }
-                      srcSet={`${product.image.split("?")[0].replace(/^\/images\//, "/images/thumbs-180/") + "?v=elysr_v28"} 360w, ${product.image.split("?")[0].replace(/^\/images\//, "/images/thumbs/") + "?v=elysr_v28"} 480w, ${product.image.split("?")[0] + "?v=elysr_v28"} 800w`}
+                      src={thumbUrl(product.image, "thumbs")}
+                      srcSet={`${thumbUrl(product.image, "thumbs-180")} 360w, ${thumbUrl(product.image, "thumbs")} 480w, ${assetUrl(product.image)} 800w`}
                       sizes="(max-width: 640px) 180px, 240px"
                       alt={product.name}
+                      title={product.name}
                       loading="lazy"
                       decoding="async"
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
