@@ -44,8 +44,8 @@ const WOMEN_CATEGORY_FAQS: CategoryFAQItem[] = [
 
 export const Route = createFileRoute("/products/women")({
   loader: async () => {
-    const { getProductsByCategory } = await import("@/data/products");
-    return { items: getProductsByCategory("women") };
+    const { getPublicProductsByCategory } = await import("@/data/products");
+    return { items: getPublicProductsByCategory("women") };
   },
   head: () => ({
     meta: [

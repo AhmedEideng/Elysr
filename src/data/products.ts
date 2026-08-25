@@ -145,6 +145,25 @@ export const getFeaturedProducts = (): Product[] =>
 
 export const getProductById = (id: string) => products.find((p) => p.id === id);
 
+/**
+ * منتجات ظاهرة للعامة في صفحات الفئات - تستبعد الأدوية المحظورة من Google Merchant
+ * لضمان عدم رؤيتها من قبل جوجل في الصفحات المفهرسة. الأدوية تبقى قابلة للشراء
+ * برابط مباشر فقط (مثلاً /products/hard-on-... ) مع حماية noindex كاملة
+ */
+export const getPublicProductsByCategory = (cat: ProductCategory) => {
+  const blockedIds = new Set([
+    "m-34",
+    "m-36",
+    "m-37",
+    "m-38",
+    "m-43",
+    "m-45",
+    "m-47",
+    "w-17",
+  ]);
+  return getProductsByCategory(cat).filter((p) => !blockedIds.has(p.id));
+};
+
 /** محرك البيع المتقاطع (Cross Sell Engine) */
 export const getCrossSellsForProduct = (product: Product): Product[] => {
   if (product.crossSell && product.crossSell.length > 0) {

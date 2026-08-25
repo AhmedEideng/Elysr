@@ -12,8 +12,8 @@ import {
 
 export const Route = createFileRoute("/products/devices")({
   loader: async () => {
-    const { getProductsByCategory } = await import("@/data/products");
-    return { items: getProductsByCategory("devices") };
+    const { getPublicProductsByCategory } = await import("@/data/products");
+    return { items: getPublicProductsByCategory("devices") };
   },
   head: () => ({
     meta: [
