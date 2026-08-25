@@ -443,7 +443,7 @@ export const women: Product[] = [
     reviews: 34,
     stock: 110,
   },
-    {
+  {
     id: "w-18",
     slug: "lovezone-drops-by-mouth",
     name: "قطرات لوف زون المبتكرة بالفم للنساء (Lovezone Drops)",

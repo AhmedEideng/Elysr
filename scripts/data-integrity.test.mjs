@@ -57,7 +57,11 @@ try {
     "config-db.json is stale; run npm run build",
   );
 
-  assert.equal(products.length, 82, "Expected 82 products after deleting 5 blocked pharma (including w-17)");
+  assert.equal(
+    products.length,
+    82,
+    "Expected 82 products after deleting 5 blocked pharma (including w-17)",
+  );
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
   assert.ok(
     seoLandingPages.length >= 90,

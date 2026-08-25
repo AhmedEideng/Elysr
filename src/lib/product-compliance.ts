@@ -21,7 +21,7 @@ export const GOOGLE_SHOPPING_BLOCKED = new Set<string>([
   "m-38", // Power 36 (Sildenafil)
   "m-43", // Procomil Fort (Sildenafil)
   "m-45", // Viagra Pfizer 100mg (Sildenafil)
-  ]);
+]);
 
 /** مجموعة فارغة — محفوظة للتوافق البرمجي، لا تُستثنى أي منتج من الموقع. */
 export const RED_PRODUCT_IDS = new Set<string>([]);
