@@ -22,10 +22,13 @@ describe("تم إلغاء نظام RED — لا يُستثنى أي منتج م�
 
 describe("GOOGLE_SHOPPING_BLOCKED — يستبعد الأدوية المرفوضة من الخلاصة فقط", () => {
   it("تحوي منتجات الأدوية المرفوضة من Google Shopping", () => {
-    expect(GOOGLE_SHOPPING_BLOCKED.has("m-34")).toBe(true); // Hard-On
-    expect(GOOGLE_SHOPPING_BLOCKED.has("m-37")).toBe(true); // Cialis
+    // تم حذف m-34,m-36,m-37,m-47 نهائياً، المتبقي 4 فقط
+    expect(GOOGLE_SHOPPING_BLOCKED.has("m-38")).toBe(true); // Power 36
+    expect(GOOGLE_SHOPPING_BLOCKED.has("m-43")).toBe(true); // Procomil Fort
+    expect(GOOGLE_SHOPPING_BLOCKED.has("m-45")).toBe(true); // Viagra Pfizer
     expect(GOOGLE_SHOPPING_BLOCKED.has("w-17")).toBe(true); // Viagra Women
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-01")).toBe(false); // منتج عادي
+    expect(GOOGLE_SHOPPING_BLOCKED.has("m-34")).toBe(false); // محذوف نهائياً
   });
 });
 
@@ -62,8 +65,8 @@ describe("isCatalogFeedEligible — يستثني الأدوية من الخلا�
   });
 
   it("دواء مرفوض → غير مؤهل للخلاصة حتى لو متوفر", () => {
-    expect(isCatalogFeedEligible({ id: "m-34", stock: 100 })).toBe(false);
-    expect(isCatalogFeedEligible({ id: "m-37", stock: 50 })).toBe(false);
+    expect(isCatalogFeedEligible({ id: "m-38", stock: 100 })).toBe(false);
+    expect(isCatalogFeedEligible({ id: "m-45", stock: 50 })).toBe(false);
     expect(isCatalogFeedEligible({ id: "w-17", stock: 10 })).toBe(false);
   });
 

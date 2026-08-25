@@ -57,7 +57,7 @@ try {
     "config-db.json is stale; run npm run build",
   );
 
-  assert.equal(products.length, 87, "Expected 87 products");
+  assert.equal(products.length, 83, "Expected 83 products after deleting 4 blocked pharma");
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
   assert.ok(
     seoLandingPages.length >= 90,
@@ -91,7 +91,7 @@ try {
     acc[p.category] = (acc[p.category] || 0) + 1;
     return acc;
   }, {});
-  assert.deepEqual(categories, { men: 56, women: 24, devices: 7 }, "Unexpected category split");
+  assert.deepEqual(categories, { men: 52, women: 24, devices: 7 }, "Unexpected category split after deletion");
 
   const kreva = products.find((product) => product.id === "m-60");
   assert.equal(kreva?.price, 300, "Kreva price must be 300 EGP");
@@ -235,7 +235,7 @@ try {
       `Blocked product in catalog feed: ${product.id}`,
     );
   }
-  const noindexHeader = vercel.headers.find((entry) => entry.source.includes("hard-on-sildenafil"));
+  const noindexHeader = vercel.headers.find((entry) => entry.source.includes("power-36-power-control-for-36-hours"));
   assert.ok(noindexHeader, "Missing X-Robots-Tag header rule for blocked product pages");
   assert.ok(
     noindexHeader.headers.some(

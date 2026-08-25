@@ -85,21 +85,15 @@ export const getProductsByCategory = (cat: ProductCategory) => {
 };
 
 /** منتجات طلبت الإدارة عدم إظهارها في أي قسم من أقسام الصفحة الرئيسية.
- * تمت إضافة كل الأدوية المحظورة من Google Merchant (8 منتجات) + 3 منتجات إضافية
- * لتقليل أثرها على SEO والـ Merchant Center - تبقى موجودة وقابلة للشراء برابط مباشر فقط
+ * الأصلية كانت 6 منتجات، بعد حذف m-34 نهائياً أصبحت 5
+ * باقي الأدوية المحظورة (m-38,m-43) ترجع ظاهرة كما كانت
  */
 export const HOMEPAGE_EXCLUDED_PRODUCT_IDS = new Set([
-  "m-34", // Hard-On (Sildenafil) - محظور
-  "m-36", // Vegal Extra (Sildenafil) - محظور
-  "m-37", // Cialis (Tadalafil) - محظور
-  "m-38", // Power 36 (Sildenafil) - محظور
-  "m-43", // Procomil Fort (Sildenafil) - محظور
-  "m-45", // Viagra Pfizer (Sildenafil) - محظور
-  "m-47", // Levitra (Vardenafil) - محظور
-  "w-17", // Viagra For Women - محظور
   "m-02", // Boost Up MAN
   "m-03", // Powerfully Up
   "m-49", // Power Fully Up Advanced
+  "m-45", // Viagra Pfizer للرجال - كان مستبعد أصلاً
+  "w-17", // Viagra For Women - كان مستبعد أصلاً
 ]);
 
 export const isHomepageProductEligible = (product: Pick<Product, "id">): boolean =>
@@ -146,22 +140,11 @@ export const getFeaturedProducts = (): Product[] =>
 export const getProductById = (id: string) => products.find((p) => p.id === id);
 
 /**
- * منتجات ظاهرة للعامة في صفحات الفئات - تستبعد الأدوية المحظورة من Google Merchant
- * لضمان عدم رؤيتها من قبل جوجل في الصفحات المفهرسة. الأدوية تبقى قابلة للشراء
- * برابط مباشر فقط (مثلاً /products/hard-on-... ) مع حماية noindex كاملة
+ * منتجات ظاهرة للعامة في صفحات الفئات - بعد حذف 4 منتجات محظورة نهائياً (m-34,m-36,m-37,m-47)
+ * باقي الأدوية المحظورة (m-38,m-43,m-45,w-17) ترجع ظاهرة في الفئات كما كانت مع حماية noindex
  */
 export const getPublicProductsByCategory = (cat: ProductCategory) => {
-  const blockedIds = new Set([
-    "m-34",
-    "m-36",
-    "m-37",
-    "m-38",
-    "m-43",
-    "m-45",
-    "m-47",
-    "w-17",
-  ]);
-  return getProductsByCategory(cat).filter((p) => !blockedIds.has(p.id));
+  return getProductsByCategory(cat);
 };
 
 /** محرك البيع المتقاطع (Cross Sell Engine) */

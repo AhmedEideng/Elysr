@@ -148,7 +148,7 @@
       ]
     },
     {
-      "source": "/products/(hard-on-sildenafil-130mg-dapoxetine-60mg|vegal-extra-sildenafil-130mg-cobra|cialis-tadalafil-20mg-30-tablets|power-36-power-control-for-36-hours|procomil-fort-tablet|viagra-pfizer-100mg|levitra-100mg|viagra-20-tablets)",
+      "source": "/products/(power-36-power-control-for-36-hours|procomil-fort-tablet|viagra-pfizer-100mg|viagra-20-tablets)",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -161,7 +161,7 @@
       ]
     },
     {
-      "source": "/images/(thumbs/|thumbs-180/)?(hard-on-sildenafil-130mg-dapoxetine-60mg|vegal-extra-sildenafil-130mg-cobra|cialis-tadalafil-20mg-30-tablets|power-36-power-control-for-36-hours|procomil-fort-tablet|viagra-pfizer-100mg|levitra-100mg|viagra-for-women-20-tablets)\\.webp",
+      "source": "/images/(thumbs/|thumbs-180/)?(power-36-power-control-for-36-hours|procomil-fort-tablet|viagra-pfizer-100mg|viagra-for-women-20-tablets)\\.webp",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -385,7 +385,7 @@
     },
     {
       "source": "/products/m-34",
-      "destination": "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
+      "destination": "/products/men",
       "permanent": true
     },
     {
@@ -395,12 +395,12 @@
     },
     {
       "source": "/products/m-36",
-      "destination": "/products/vegal-extra-sildenafil-130mg-cobra",
+      "destination": "/products/men",
       "permanent": true
     },
     {
       "source": "/products/m-37",
-      "destination": "/products/cialis-tadalafil-20mg-30-tablets",
+      "destination": "/products/men",
       "permanent": true
     },
     {
@@ -450,7 +450,7 @@
     },
     {
       "source": "/products/m-47",
-      "destination": "/products/levitra-100mg",
+      "destination": "/products/men",
       "permanent": true
     },
     {
@@ -966,6 +966,26 @@
     {
       "source": "/products/guides/payment-methods-cod-guide",
       "destination": "/products/guides/how-to-order-from-elysr",
+      "permanent": true
+    },
+    {
+      "source": "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/vegal-extra-sildenafil-130mg-cobra",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/cialis-tadalafil-20mg-30-tablets",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/levitra-100mg",
+      "destination": "/products/men",
       "permanent": true
     }
   ]

@@ -34,23 +34,15 @@ const ROOT = resolve(__dirname, "..");
 const DIST = resolve(ROOT, "dist");
 const PORT = parseInt(process.env.PORT || "8080", 10);
 const NOINDEX_PRODUCT_PATHS = new Set([
-  "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
-  "/products/vegal-extra-sildenafil-130mg-cobra",
-  "/products/cialis-tadalafil-20mg-30-tablets",
   "/products/power-36-power-control-for-36-hours",
   "/products/procomil-fort-tablet",
   "/products/viagra-pfizer-100mg",
-  "/products/levitra-100mg",
   "/products/viagra-20-tablets",
 ]);
 const NOINDEX_IMAGE_NAMES = new Set([
-  "hard-on-sildenafil-130mg-dapoxetine-60mg.webp",
-  "vegal-extra-sildenafil-130mg-cobra.webp",
-  "cialis-tadalafil-20mg-30-tablets.webp",
   "power-36-power-control-for-36-hours.webp",
   "procomil-fort-tablet.webp",
   "viagra-pfizer-100mg.webp",
-  "levitra-100mg.webp",
   "viagra-for-women-20-tablets.webp",
 ]);
 
