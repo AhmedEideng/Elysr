@@ -27,7 +27,7 @@ import {
   clearPrerenderJsonLd,
   productSchema,
   breadcrumbSchema,
-  makeMetaDescription,
+  makeProductMetaDescription,
 } from "@/lib/seo";
 import { ProductCard } from "@/components/ProductCard";
 import { CrossSellBundle } from "@/components/sections/CrossSellBundle";
@@ -92,7 +92,7 @@ export const Route = createFileRoute("/products/$slug")({
         { title: loaderData?.product.name },
         {
           name: "description",
-          content: makeMetaDescription(loaderData?.product.description),
+          content: loaderData?.product ? makeProductMetaDescription(loaderData.product) : "",
         },
         ...(loaderData?.product && GOOGLE_SHOPPING_BLOCKED.has(loaderData.product.id)
           ? [{ name: "robots", content: "noindex,follow,noarchive,nosnippet,noimageindex" }]

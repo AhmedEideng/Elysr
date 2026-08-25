@@ -59,11 +59,21 @@ function esc(str = "") {
 function makeMetaDescription(text = "", maxLength = 155) {
   const clean = String(text).trim().replace(/\s+/g, " ");
   if (clean.length <= maxLength) return clean;
-  // اقتطاع عند آخر مسافة قبل الحد
   const cut = clean.slice(0, maxLength);
   const lastSpace = cut.lastIndexOf(" ");
   const base = lastSpace > 40 ? cut.slice(0, lastSpace) : cut;
   return `${base}…`;
+}
+
+function makeProductMetaDescription(p, maxLength = 155) {
+  const firstBenefit = p.benefits?.[0] ? ` - ${String(p.benefits[0]).slice(0, 50)}` : "";
+  const ratingPart = p.reviews > 0 ? ` ⭐${p.rating}/5 (${p.reviews} تقييم)` : "";
+  const pricePart = ` - ${p.price} ج.م - شحن سري، دفع عند الاستلام`;
+  const candidate = `${p.name}${firstBenefit}${ratingPart}${pricePart} - اليسر ميديكال`;
+  if (candidate.length <= maxLength) return candidate;
+  const baseDesc = String(p.description).split("。")[0].split(".")[0].slice(0, 80);
+  const short = `${p.name} - ${baseDesc}${ratingPart} - ${p.price} ج.م - شحن سري - اليسر ميديكال`;
+  return makeMetaDescription(short, maxLength);
 }
 
 /**
@@ -688,14 +698,9 @@ async function prerender() {
     if (!existsSync(productsDir)) mkdirSync(productsDir, { recursive: true });
 
     for (const product of products) {
-      // 🎯 العنوان بلا لاحقة "— اليسر ميديكال" لأن أسماء المنتجات طويلة بطبيعتها
-      // (تحتوي وصفاً + اسم إنجليزي). اللاحقة كانت تُطيل العنوان فوق 65 حرفاً
-      // فتُقتطع في نتائج Google وتُفقد كلمات مفتاحية. الـ brand موجود في
-      // Organization + Product schema، فحذفها من العنوان لا يضر العلامة.
       const title = product.name;
-      // 🎯 meta description مُقتطع إلى ~155 حرفاً (يُعرض كاملاً في نتائج Google).
-      // الوصف الكامل (product.description) يبقى في JSON-LD ومحتوى الصفحة.
-      const desc = makeMetaDescription(product.description);
+      // 🎯 وصف غني بالبيانات الفريدة (سعر، تقييم) لمنع Google من إعادة كتابته بوصف الموقع العام
+      const desc = makeProductMetaDescription(product);
       const img = product.image
         ? `${SITE_URL}${assetUrl(product.image)}`
         : `${SITE_URL}/og-default.webp`;

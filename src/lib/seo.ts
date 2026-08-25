@@ -22,6 +22,34 @@ export function makeMetaDescription(text = "", maxLength = 155): string {
   const base = lastSpace > 40 ? cut.slice(0, lastSpace) : cut;
   return `${base}…`;
 }
+
+/**
+ * 🎯 وصف منتج مخصص لـ Google لا يتم إعادة كتابته
+ * يبني وصف غني بالبيانات الفريدة (السعر، التقييم، الشحن) لمنع Google من
+ * استبداله بوصف الموقع العام. جوجل يعيد كتابة الـ meta descriptions
+ * التي تعتبرها مكررة أو مبالغ فيها، لكن الوصف الغني بالبيانات الفريدة
+ * يتم الاحتفاظ به.
+ */
+export function makeProductMetaDescription(p: {
+  name: string;
+  description: string;
+  price: number;
+  rating: number;
+  reviews: number;
+  benefits?: string[];
+}): string {
+  const firstBenefit = p.benefits?.[0] ? ` - ${p.benefits[0].slice(0, 50)}` : "";
+  const ratingPart = p.reviews > 0 ? ` ⭐${p.rating}/5 (${p.reviews} تقييم)` : "";
+  const pricePart = ` - ${p.price} ج.م - شحن سري، دفع عند الاستلام`;
+  // حاول استخدام وصف المنتج أولاً، لو طويل اقتطعه
+  const baseDesc = String(p.description).split("。")[0].split(".")[0].slice(0, 80);
+  const candidate = `${p.name}${firstBenefit}${ratingPart}${pricePart} - اليسر ميديكال`;
+  // لو المرشح أطول من 155، استخدم الوصف المختصر
+  if (candidate.length <= 155) return candidate;
+  // Fallback: اسم + سعر + تقييم + شحن (مضمون قصير وفريد)
+  const short = `${p.name} - ${baseDesc}${ratingPart} - ${p.price} ج.م - شحن سري - اليسر ميديكال`;
+  return makeMetaDescription(short, 155);
+}
 const DEFAULT_OG = `${SITE_URL}/og-default.webp`;
 
 function oneYearFromToday(): string {
