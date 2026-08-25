@@ -123,8 +123,6 @@ app.use((req, res, next) => {
   res.setHeader("X-DNS-Prefetch-Control", "on");
   res.setHeader("X-Permitted-Cross-Domain-Policies", "none");
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-  res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
-  res.setHeader("Cross-Origin-Embedder-Policy", "credentialless");
   res.setHeader("Origin-Agent-Cluster", "?1");
   res.setHeader("X-XSS-Protection", "0");
   res.setHeader(
