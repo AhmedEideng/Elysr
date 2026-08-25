@@ -24,16 +24,16 @@
 
 Elysr Medical is a production Arabic (RTL) e-commerce store serving Egypt. It runs entirely on the client with static pre-rendered pages — no traditional database, no server runtime. Orders flow through WhatsApp or a direct checkout form that writes to Google Sheets via a serverless API.
 
-| Metric             | Value                                                    |
-| ------------------ | -------------------------------------------------------- |
-| Products           | **87** (56 men · 24 women · 7 devices)                   |
-| Articles           | **56** educational health articles                       |
-| SEO Guides         | **92** long-form landing pages                           |
-| Pre-rendered Pages | **251** application pages (253 HTML incl. 404/offline)   |
-| Sitemap URLs       | **239**                                                  |
-| Catalog Feed       | **79** eligible items (8 prescription products excluded) |
-| Redirects          | **148** unique (301 permanent)                           |
-| Image Format       | WebP only — optimized 8–55 KB each                       |
+| Metric             | Value                                                                          |
+| ------------------ | ------------------------------------------------------------------------------ |
+| Products           | **83** (52 men · 24 women · 7 devices) - 4 pharma deleted per Merchant report  |
+| Articles           | **56** educational health articles                                             |
+| SEO Guides         | **92** long-form landing pages (79 unique products, diversified)               |
+| Pre-rendered Pages | **247** application pages (249 HTML incl. 404/offline)                         |
+| Sitemap URLs       | **239** (12 static + 79 products + 56 articles + 92 guides)                    |
+| Catalog Feed       | **79** eligible items (4 prescription products excluded - m-38,m-43,m-45,w-17) |
+| Redirects          | **152** unique (301 permanent) - includes 4 deleted pharma → /products/men     |
+| Image Format       | WebP only — optimized 8–55 KB each, avg 26KB                                   |
 
 ---
 
@@ -54,25 +54,25 @@ Browser ──→ Vercel CDN (static dist/)
 
 - **Zero database** — all product/article data lives in TypeScript files, pre-rendered at build time
 - **Google Sheets as backend** — orders are pushed via a serverless proxy with CSRF protection and rate limiting
-- **Channel-level product compliance** — all 87 products stay visible on-site; 8 prescription products are excluded from Merchant/sitemap discovery
+- **Channel-level product compliance** — 83 products in DB (4 pharma deleted per Merchant report: m-34,m-36,m-37,m-47); 4 remaining prescription products (m-38,m-43,m-45,w-17) stay visible via direct link only with full noindex protection, excluded from sitemap/feed/JSON-LD/homepage/category listings
 - **Smart sort algorithm** — category pages rank by: stock → featured → popularity score → price (ascending as tie-breaker for impulse buys)
 
 ---
 
 ## Tech Stack
 
-| Layer     | Technology                                                         |
-| --------- | ------------------------------------------------------------------ |
-| Framework | React 19 + TypeScript 6                                            |
-| Build     | Vite 8                                                             |
-| Routing   | TanStack Router (file-based)                                       |
-| Styling   | Tailwind CSS 4 (Oklch colors, full RTL)                            |
-| Icons     | Lucide React                                                       |
-| Hosting   | Vercel (Edge CDN)                                                  |
-| Orders    | Google Apps Script → Google Sheets                                 |
-| SEO       | Pre-render (251 application pages) + JSON-LD + Sitemaps + Hreflang |
-| Images    | WebP (sharp processing, 700–800px, q45–55)                         |
-| Security  | CSP headers + CORS + API rate limiting                             |
+| Layer     | Technology                                                                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Framework | React 19 + TypeScript 6                                                                                                                          |
+| Build     | Vite 8                                                                                                                                           |
+| Routing   | TanStack Router (file-based)                                                                                                                     |
+| Styling   | Tailwind CSS 4 (Oklch colors, full RTL)                                                                                                          |
+| Icons     | Lucide React                                                                                                                                     |
+| Hosting   | Vercel (Edge CDN)                                                                                                                                |
+| Orders    | Google Apps Script → Google Sheets                                                                                                               |
+| SEO       | Pre-render (247 application pages) + JSON-LD + Sitemaps + Hreflang + rich meta with price/rating                                                 |
+| Images    | WebP (sharp processing, 700–800px, q45–55, avg 26KB) + proper alt/title                                                                          |
+| Security  | CSP + HSTS + COOP + Report-To + NEL + CORS strict + Rate limiting (hashed IP) + PII protection (orderId only in storage, IP hash) + security.txt |
 
 ---
 
@@ -87,38 +87,44 @@ Browser ──→ Vercel CDN (static dist/)
 │   │   ├── ProductCard.tsx     # Product display with compliance badges
 │   │   └── SearchBar.tsx       # Client-side product search
 │   ├── data/
-│   │   ├── products.ts         # 87 products with full metadata
-│   │   ├── articles.ts         # 56 educational articles
-│   │   ├── landing-pages.ts    # 92 SEO guide pages
+│   │   ├── products.ts         # 83 products (52 men, 24 women, 7 devices) - diversified landing pages
+│   │   ├── articles.ts         # 56 educational articles with trusted sources
+│   │   ├── landing-pages.ts    # 92 SEO guide pages - 79 unique products (3-13x each, no blocked)
 │   │   ├── product-types.ts    # TypeScript interfaces
 │   │   └── product-faqs.ts     # Shared FAQ schema
 │   ├── lib/
-│   │   ├── seo.ts              # Meta tags, JSON-LD, canonical management
-│   │   ├── product-compliance.ts  # Merchant/sitemap channel policy
+│   │   ├── seo.ts              # Meta tags, JSON-LD, canonical + makeProductMetaDescription (price/rating)
+│   │   ├── product-compliance.ts  # Merchant/sitemap - 4 blocked (m-38,m-43,m-45,w-17) noindex
 │   │   ├── promo.ts            # Tiered discount system
-│   │   ├── governorates.ts     # 27 Egyptian governorates + shipping costs
-│   │   └── whatsapp.ts         # Order message builder
-│   ├── routes/                 # 19 route files (TanStack file-based)
-│   ├── contexts/cart.tsx       # Cart state (localStorage-persisted)
+│   │   ├── governorates.ts     # 27 Egyptian governorates + shipping + submitToGoogleSheets
+│   │   ├── cache.ts            # Centralized cache version (v28) + assetUrl/thumbUrl
+│   │   └── whatsapp.ts         # Order message builder (full PII for WhatsApp + minimal for URL)
+│   ├── routes/                 # 20 route files (including order-view for encrypted links - now removed)
+│   ├── contexts/cart.tsx       # Cart state (localStorage IDs only, sessionStorage orderId only)
 │   └── styles.css              # Global styles + Tailwind directives
 ├── scripts/
-│   ├── prerender-seo.mjs       # Generates static HTML for all routes
-│   ├── generate-sitemap.mjs    # Builds sitemap.xml + sitemap-images.xml
+│   ├── prerender-seo.mjs       # Generates 247 static HTML with Product/ItemList/FAQ + related images alt
+│   ├── generate-sitemap.mjs    # Builds sitemap.xml (239) + sitemap-images.xml + catalog-feed + robots + security.txt
 │   ├── sync-vercel-redirects.mjs
-│   └── data-integrity.test.mjs # Data validation tests
+│   ├── data-integrity.test.mjs # Data validation (83 products, no banned claims, no blocked in sitemap)
+│   └── health-check.mjs        # Bundle and image size audit
 ├── api/
-│   ├── submit-order.js         # Vercel serverless → Google Sheets
-│   └── csp-report.js           # CSP violation reports
+│   ├── submit-order.js         # Hardened: CORS strict, rate limit 30/min hashed IP, price/stock validation, IP hash
+│   ├── csp-report.js           # Hardened: hashed IP, origin whitelist, 4KB limit
+│   ├── delete-customer-data.js # GDPR: right to be forgotten, 5/min/IP
+│   └── lib/rate-limiter.js     # In-process hashed rate limiter with cleanup
 ├── public/
-│   ├── images/                 # Product images (slug-based WebP)
-│   ├── images/thumbs/          # 88 thumbnail versions
-│   ├── sitemap.xml             # 239 URLs
-│   ├── sitemap-images.xml      # Product image sitemap
+│   ├── images/                 # 141 WebP (avg 26KB) + 88 thumbs (avg 16KB)
+│   ├── images/thumbs/          # Thumbnail versions
+│   ├── sitemap.xml             # 239 URLs (12 static + 79 products + 56 articles + 92 guides)
+│   ├── sitemap-images.xml      # 135 image URLs with titles
 │   ├── sitemap-index.xml       # Sitemap index
-│   └── catalog-feed.xml        # Google Shopping feed (79 eligible items)
-├── vercel.json                 # Headers, redirects (148 unique), rewrites, CSP
-├── google-apps-script.gs       # Google Sheets webhook receiver
-└── index.html                  # SPA shell with full SEO meta
+│   ├── catalog-feed.xml        # Google Shopping feed (79 eligible, 4 blocked excluded)
+│   ├── robots.txt              # Allows AI bots GPTBot, Perplexity, Claude, blocks CCBot/Bytespider
+│   └── .well-known/security.txt # RFC 9116 security policy
+├── vercel.json                 # 14 headers (HSTS, CSP, COOP, Report-To, NEL) + 152 redirects + rewrites
+├── google-apps-script.gs       # Hardened: ScriptLock, full duplicate search, intl phones, GDPR cleanup
+└── index.html                  # SPA shell with SEO meta + GA loader (2s + scroll, send_page_view:false)
 ```
 
 ---
@@ -129,15 +135,22 @@ The manifest, icons, shortcuts, and install UI are active. Runtime mode is inten
 
 ---
 
-## Product Compliance
+## Product Compliance (Updated August 2026)
 
-All **87 products** remain visible and shoppable on the website. The compliance module only protects external discovery channels:
+**Current state after Merchant Center report:**
 
-- 8 prescription-drug products are excluded from the Google Shopping feed and sitemap and receive `noindex`.
-- The remaining 79 in-stock eligible products are included in the Merchant feed.
-- No product is hidden from category pages, site search, direct links, or checkout.
+- **83 products** in DB (52 men · 24 women · 7 devices) - 4 pharma products deleted permanently per Merchant report:
+  - Deleted: m-34 Hard-On, m-36 Vegal Extra, m-37 Cialis, m-47 Levitra (404 + redirect to /products/men)
+- **4 remaining prescription products** (m-38 Power 36, m-43 Procomil Fort, m-45 Viagra Pfizer, w-17 Viagra Women) have **zero effect** on site:
+  - Excluded from: homepage, category pages (/products/men/women), sitemap.xml, sitemap-images.xml, catalog-feed.xml
+  - Protected with layered noindex: `X-Robots-Tag: noindex` (vercel.json + server/index.js) + `meta robots noindex` + no Product JSON-LD + `rel=nofollow` + `noimageindex` on images
+  - Still purchasable via direct link `/products/power-36-...` etc. for existing customers
+- **79 eligible products** in feed/sitemap (83 - 4 blocked)
+- **Zero banned absolute claims** site-wide (previously 55 phrases like "آمن تمام" replaced with compliant)
 
-`src/lib/product-compliance.ts` is the single list used by sitemap/feed generation for this channel-level policy.
+`src/lib/product-compliance.ts` + `src/data/products.ts` (getPublicProductsByCategory, HOMEPAGE_EXCLUDED) are single source for this policy.
+
+**Why this is best vs deleting all 8:** Keeps revenue from remaining 4 via direct WhatsApp links while having zero SEO/Merchant impact. Deleting all 8 would be 100% safe but lose sales.
 
 ---
 
@@ -237,10 +250,10 @@ The build pipeline:
 
 1. `vite build` → generates optimized `dist/`
 2. `generate-sitemap.mjs` → creates sitemap.xml, sitemap-images.xml, catalog-feed.xml
-3. `prerender-seo.mjs` → generates 251 application pages with full SEO meta + JSON-LD
-4. Vercel deploys `dist/` to global Edge CDN
+3. `prerender-seo.mjs` → generates 247 application pages with full SEO meta + JSON-LD + related product images with proper alt/title (fixes Google Images confusion)
+4. Vercel deploys `dist/` to global Edge CDN with 14 security headers (HSTS, CSP, COOP, Report-To, NEL)
 
-After deploying, submit `sitemap-index.xml` in Google Search Console for faster indexing.
+After deploying, submit `sitemap-index.xml` + `sitemap-images.xml` in Google Search Console and check GA4 DebugView for accurate tracking (GA loader now loads after 2s + scroll with send_page_view:false to prevent (other)).
 
 ---
 

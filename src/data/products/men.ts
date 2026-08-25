@@ -862,7 +862,7 @@ export const men: Product[] = [
     reviews: 67,
     stock: 85,
   },
-    {
+  {
     id: "m-35",
     slug: "uni-smart-90-minutes-delay-cream",
     name: "كريم يوني سمارت المطور للتأخير (Uni Smart 90 Minutes)",
@@ -889,7 +889,7 @@ export const men: Product[] = [
     reviews: 132,
     stock: 100,
   },
-      {
+  {
     id: "m-38",
     slug: "power-36-power-control-for-36-hours",
     name: "أقراص باور 36 المزدوجة للرجال (Power 36)",
@@ -1128,7 +1128,7 @@ export const men: Product[] = [
     reviews: 140,
     stock: 110,
   },
-    {
+  {
     id: "m-48",
     slug: "titan-gel-special-gel-for-penis",
     name: "جل تيتان الروسي المطور للرجال (Titan Gel)",
