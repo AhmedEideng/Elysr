@@ -37,13 +37,11 @@ const NOINDEX_PRODUCT_PATHS = new Set([
   "/products/power-36-power-control-for-36-hours",
   "/products/procomil-fort-tablet",
   "/products/viagra-pfizer-100mg",
-  "/products/viagra-20-tablets",
 ]);
 const NOINDEX_IMAGE_NAMES = new Set([
   "power-36-power-control-for-36-hours.webp",
   "procomil-fort-tablet.webp",
   "viagra-pfizer-100mg.webp",
-  "viagra-for-women-20-tablets.webp",
 ]);
 
 // ── Pattern matching for route-to-file mapping ──

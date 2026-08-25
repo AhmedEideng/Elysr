@@ -93,7 +93,6 @@ export const HOMEPAGE_EXCLUDED_PRODUCT_IDS = new Set([
   "m-03", // Powerfully Up
   "m-49", // Power Fully Up Advanced
   "m-45", // Viagra Pfizer للرجال - كان مستبعد أصلاً
-  "w-17", // Viagra For Women - كان مستبعد أصلاً
 ]);
 
 export const isHomepageProductEligible = (product: Pick<Product, "id">): boolean =>

@@ -57,7 +57,7 @@ try {
     "config-db.json is stale; run npm run build",
   );
 
-  assert.equal(products.length, 83, "Expected 83 products after deleting 4 blocked pharma");
+  assert.equal(products.length, 82, "Expected 82 products after deleting 5 blocked pharma (including w-17)");
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
   assert.ok(
     seoLandingPages.length >= 90,
@@ -93,7 +93,7 @@ try {
   }, {});
   assert.deepEqual(
     categories,
-    { men: 52, women: 24, devices: 7 },
+    { men: 52, women: 23, devices: 7 },
     "Unexpected category split after deletion",
   );
 

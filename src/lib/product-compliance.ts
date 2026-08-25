@@ -15,14 +15,13 @@
 
 /** منتجات مرفوضة من Google Shopping (تُستثنى من الخلاصة فقط، وتبقى على الموقع).
  * تم حذف 4 منتجات نهائياً (m-34,m-36,m-37,m-47) بناء على تقرير Merchant Center،
- * المتبقي 4 منتجات محظورة فقط مع حماية noindex كاملة
+ * المتبقي 3 منتجات محظورة فقط مع حماية noindex كاملة (تم حذف w-17)
  */
 export const GOOGLE_SHOPPING_BLOCKED = new Set<string>([
   "m-38", // Power 36 (Sildenafil)
   "m-43", // Procomil Fort (Sildenafil)
   "m-45", // Viagra Pfizer 100mg (Sildenafil)
-  "w-17", // Viagra for Women (Sildenafil)
-]);
+  ]);
 
 /** مجموعة فارغة — محفوظة للتوافق البرمجي، لا تُستثنى أي منتج من الموقع. */
 export const RED_PRODUCT_IDS = new Set<string>([]);

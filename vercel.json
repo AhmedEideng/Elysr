@@ -148,7 +148,7 @@
       ]
     },
     {
-      "source": "/products/(power-36-power-control-for-36-hours|procomil-fort-tablet|viagra-pfizer-100mg|viagra-20-tablets)",
+      "source": "/products/(power-36-power-control-for-36-hours|procomil-fort-tablet|viagra-pfizer-100mg)",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -161,7 +161,7 @@
       ]
     },
     {
-      "source": "/images/(thumbs/|thumbs-180/)?(power-36-power-control-for-36-hours|procomil-fort-tablet|viagra-pfizer-100mg|viagra-for-women-20-tablets)\\.webp",
+      "source": "/images/(thumbs/|thumbs-180/)?(power-36-power-control-for-36-hours|procomil-fort-tablet|viagra-pfizer-100mg)\\.webp",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -590,7 +590,7 @@
     },
     {
       "source": "/products/w-17",
-      "destination": "/products/viagra-20-tablets",
+      "destination": "/products/women",
       "permanent": true
     },
     {
