@@ -13,15 +13,16 @@ export const products: Product[] = [...men, ...women, ...devices];
 
 /**
  * ترتيب ثابت لأول المنتجات في كل فئة — الباقي بالشعبية
+ * تم إزالة الأدوية المحظورة من التثبيت العلوي (m-34,m-36,m-37,m-38,m-43,m-45,m-47,w-17)
+ * لتقليل أثرها على الـ SEO والـ Merchant Center
  */
 const PINNED_MEN_ORDER = [
-  "m-02", // Boost Up MAN
+  "m-01", // Hammer of Thor - بديل آمن لـ Hard-On
   "m-11", // Vitamax Doubleshot
   "m-44", // بخاخ ريمانز دووز 14000
-  "m-34", // Hard-On
   "m-14", // الشوكولاتة الملكي للرجال
   "m-12", // العسل الملكي الذهبي Gold VIP
-  "m-45", // فياجرا Pfizer
+  "m-20", // Golden Horse - بديل آمن لـ Viagra
 ];
 
 export const getProductsByCategory = (cat: ProductCategory) => {
@@ -31,12 +32,12 @@ export const getProductsByCategory = (cat: ProductCategory) => {
     "w-16", // Argi fem جل
     "w-12", // الشوكولاتة الملكي Royal Chocolate for Her
     "w-05", // العسل الملكي للنساء
-    "w-17", // Viagra For Women
-    "w-02", // قطرات Lady Era
+    "w-02", // قطرات Lady Era - بديل آمن لـ Viagra Women
     "w-08", // قهوة CoffeMix CAVIAR نسائي
     "w-06", // علكة SexLove
     "w-09", // Lipo 6
     "w-15", // نقط Connubial
+    "w-04", // Checoo Love - بديل آمن
   ];
 
   const PINNED_WOMEN_LAST = [
@@ -83,14 +84,22 @@ export const getProductsByCategory = (cat: ProductCategory) => {
   });
 };
 
-/** منتجات طلبت الإدارة عدم إظهارها في أي قسم من أقسام الصفحة الرئيسية. */
+/** منتجات طلبت الإدارة عدم إظهارها في أي قسم من أقسام الصفحة الرئيسية.
+ * تمت إضافة كل الأدوية المحظورة من Google Merchant (8 منتجات) + 3 منتجات إضافية
+ * لتقليل أثرها على SEO والـ Merchant Center - تبقى موجودة وقابلة للشراء برابط مباشر فقط
+ */
 export const HOMEPAGE_EXCLUDED_PRODUCT_IDS = new Set([
-  "m-34", // Hard-On
+  "m-34", // Hard-On (Sildenafil) - محظور
+  "m-36", // Vegal Extra (Sildenafil) - محظور
+  "m-37", // Cialis (Tadalafil) - محظور
+  "m-38", // Power 36 (Sildenafil) - محظور
+  "m-43", // Procomil Fort (Sildenafil) - محظور
+  "m-45", // Viagra Pfizer (Sildenafil) - محظور
+  "m-47", // Levitra (Vardenafil) - محظور
+  "w-17", // Viagra For Women - محظور
   "m-02", // Boost Up MAN
   "m-03", // Powerfully Up
   "m-49", // Power Fully Up Advanced
-  "m-45", // Viagra Pfizer للرجال
-  "w-17", // Viagra For Women
 ]);
 
 export const isHomepageProductEligible = (product: Pick<Product, "id">): boolean =>
@@ -149,17 +158,17 @@ export const getCrossSellsForProduct = (product: Product): Product[] => {
   const name = product.name.toLowerCase();
 
   if (product.category === "men") {
-    // لو المنتج حبوب/كبسولات -> اقترح تأخير (بخاخ/كريم) + عسل/طاقة
+    // لو المنتج حبوب/كبسولات -> اقترح تأخير (بخاخ/كريم) + عسل/طاقة (بدائل آمنة بدون أدوية محظورة)
     if (name.includes("حبوب") || name.includes("كبسول") || name.includes("قرص")) {
-      suggestedIds = ["m-44", "m-20"]; // ريمانز دووز + عسل جولدن هورس
+      suggestedIds = ["m-44", "m-20"]; // ريمانز دووز + عسل جولدن هورس (آمن)
     }
-    // لو المنتج تأخير (بخاخ/كريم/جل) -> اقترح صلابة (حبوب) + طاقة (عسل)
+    // لو المنتج تأخير (بخاخ/كريم/جل) -> اقترح صلابة (حبوب آمنة) + طاقة (عسل)
     else if (name.includes("بخاخ") || name.includes("كريم") || name.includes("جل")) {
-      suggestedIds = ["m-37", "m-52"]; // سياليس + عسل توب سيلرز
+      suggestedIds = ["m-01", "m-52"]; // هامر أوف ثور (آمن) + عسل توب سيلرز بدلاً من سياليس المحظور m-37
     }
-    // لو المنتج عسل/شوكولاتة -> اقترح صلابة + تأخير
+    // لو المنتج عسل/شوكولاتة -> اقترح صلابة + تأخير (آمن)
     else {
-      suggestedIds = ["m-01", "m-30"]; // هامر أوف ثور + كريم إملا
+      suggestedIds = ["m-01", "m-30"]; // هامر أوف ثور + كريم إملا (آمن)
     }
   } else if (product.category === "women") {
     // منتجات النساء
