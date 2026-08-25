@@ -186,19 +186,20 @@ function CartPage() {
       setSubmitting(false);
       navigate({ to: "/thank-you" });
     } else {
+      // 🚀 الطلب المباشر بقى سريع زي الواتساب - نسجل في الشيت في الخلفية ونفتح صفحة التأكيد فوراً
+      // قبل كنا بنستنى الشيت 10 ثواني (GOOGLE_SHEETS_TIMEOUT_MS) وده اللي كان بيخلي "جاري الإرسال" يطول
+      void submitToGoogleSheets(payload);
+
       try {
-        const result = await submitToGoogleSheets(payload);
-        if (!result.success) throw new Error(result.error || "تعذر إرسال الطلب");
-        toast.success("✅ تم استلام طلبك بنجاح!", { duration: 4000 });
-        clear();
-        navigate({ to: "/order-confirmed" });
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        toast.error(`تعذر إرسال الطلب المباشر: ${errorMsg}`);
-        console.error("Direct order error:", err);
-      } finally {
-        setSubmitting(false);
+        sessionStorage.setItem("elysr_last_order_id", orderId);
+      } catch {
+        // Ignore storage failures.
       }
+
+      toast.success("✅ تم استلام طلبك بنجاح!", { duration: 4000 });
+      clear();
+      setSubmitting(false);
+      navigate({ to: "/order-confirmed" });
     }
   };
 
