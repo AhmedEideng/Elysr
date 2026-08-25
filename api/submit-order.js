@@ -329,6 +329,9 @@ export default async function handler(req, res) {
         .json({ error: "تعذر إرسال الطلب إلى قاعدة البيانات السحابية. يرجى المحاولة مجدداً." });
     }
     const result = await response.json();
+    // Apps Script returns HTTP 200 for both logical success and logical failure.
+    // Convert a rejected write into an HTTP error so the client never mistakes it
+    // for a completed order. Only the safe public error string is forwarded.
     if (!result?.success) {
       return res.status(502).json({
         error:
@@ -337,36 +340,6 @@ export default async function handler(req, res) {
             : "تعذر تسجيل الطلب في قاعدة البيانات السحابية.",
       });
     }
-
-    // 🔒 إرسال بيانات العميل كاملة على واتسابك أنت (بيزنس) عبر Cloud API - بدون ما تظهر في رابط العميل
-    // العميل بيشوف رابط مشفر فقط في الـ wa.me، لكن انت بتشوف كل البيانات كاملة على واتسابك مباشرة
-    // والعميل كمان هيستلم رسالة تأكيد كاملة على واتسابه من السيرفر
-    try {
-      const {
-        sendWhatsAppCloudMessage,
-        buildFullOrderMessageForBusiness,
-        buildFullOrderMessageForCustomer,
-      } = await import("./lib/whatsapp-cloud.js");
-      const businessNumber = process.env.WHATSAPP_BUSINESS_NUMBER || "201098088206";
-      const fullMsgBusiness = buildFullOrderMessageForBusiness(safePayload);
-      void sendWhatsAppCloudMessage(businessNumber, fullMsgBusiness);
-
-      // إرسال رسالة تأكيد للعميل نفسه على واتسابه فيها كل بيانات طلبه
-      const customerPhoneForCloud = (() => {
-        const p = String(safePayload.customerPhone || "");
-        if (p.startsWith("+")) return p.slice(1);
-        if (p.startsWith("01")) return "2" + p;
-        return p.replace(/\D/g, "");
-      })();
-      // لا ترسل للعميل لو رقمه هو نفس رقم البيزنس (تجنب loop)
-      if (customerPhoneForCloud && customerPhoneForCloud !== businessNumber) {
-        const fullMsgCustomer = buildFullOrderMessageForCustomer(safePayload);
-        void sendWhatsAppCloudMessage(customerPhoneForCloud, fullMsgCustomer);
-      }
-    } catch (e) {
-      console.error("[submit-order] business whatsapp notify failed", e?.message || e);
-    }
-
     return res.status(200).json({
       success: true,
       orderId: typeof result?.orderId === "string" ? result.orderId : undefined,

@@ -34,7 +34,7 @@ import { CrossSellBundle } from "@/components/sections/CrossSellBundle";
 import { FAQ } from "@/components/FAQ";
 import { ProductReviews } from "@/features/product/components/ProductReviews";
 import { ProductImage } from "@/features/product/components/ProductImage";
-import { waLink } from "@/lib/whatsapp";
+import { buildOrderMessage, waLink } from "@/lib/whatsapp";
 import { getProductBySlug, getProductsByCategory, getCrossSellsForProduct } from "@/data/products";
 import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
 
@@ -280,36 +280,8 @@ function ProductPage() {
       // 🔒 Run Google Sheets submission as a non-blocking background fetch so the redirect is instant!
       void submitToGoogleSheets(payload);
 
-      // 🔒 أقوى حماية: PII كامل في Sheets فقط، واتساب فيه رابط مشفر AES-256-GCM فقط
-      let secureLink = "";
-      try {
-        const encRes = await fetch("/api/encrypt-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderId,
-            customerName: sc.name,
-            customerPhone: sc.phone,
-            governorate: sc.governorate,
-            address: sc.address,
-            notes: "طلب سريع من صفحة المنتج",
-            items: orderItems,
-            total: grandTotal,
-          }),
-        });
-        const encData = await encRes.json();
-        if (encData.encrypted) {
-          secureLink = `${window.location.origin}/order-view?d=${encData.encrypted}`;
-        }
-      } catch {
-        // ignore encryption failure
-      }
-
-      const waMessage = secureLink
-        ? `طلب سريع ${orderId} - ${product.name}\nالمحافظة: ${sc.governorate}\nالإجمالي: ${grandTotal} ج.م\n\nالتفاصيل الكاملة (مشفرة - 24 ساعة):\n${secureLink}`
-        : `طلب سريع ${orderId} - ${product.name} - المحافظة: ${sc.governorate}`;
-
-      const url = waLink(waMessage);
+      const msg = buildOrderMessage(orderItems, sc, orderId, shipping, shipping === 0);
+      const url = waLink(msg);
 
       const a = document.createElement("a");
       a.href = url;

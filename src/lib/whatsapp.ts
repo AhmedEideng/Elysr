@@ -26,39 +26,6 @@ export interface OrderItemMsg {
   originalPrice?: number;
 }
 
-// 🔒 نسخة مصغرة بدون PII حساس (للحماية من تسريب البيانات في رابط واتساب و history)
-// تحتوي فقط على رقم الطلب والمنتجات والمحافظة، التفاصيل الكاملة في Google Sheets
-export const buildMinimalOrderMessage = (
-  items: OrderItemMsg[],
-  customer?: {
-    name?: string;
-    governorate?: string;
-  },
-  orderId?: string,
-  shipping?: number,
-  _freeShipping = false,
-) => {
-  const lines: string[] = [];
-
-  lines.push("طلب جديد من اليسر ميديكال");
-  if (orderId) lines.push(`رقم الطلب: ${orderId}`);
-  if (customer?.name) lines.push(`الاسم: ${sanitizeForMsg(customer.name, 50)}`);
-  if (customer?.governorate) lines.push(`المحافظة: ${sanitizeForMsg(customer.governorate, 30)}`);
-  lines.push("");
-  lines.push("المنتجات:");
-  let subtotalBefore = 0;
-  items.forEach((it, i) => {
-    const unitPrice = it.originalPrice ?? it.price;
-    const lineTotal = unitPrice * it.qty;
-    subtotalBefore += lineTotal;
-    lines.push(`${i + 1}. ${sanitizeForMsg(it.name, 80)} × ${it.qty}`);
-  });
-  lines.push("");
-  lines.push(`الإجمالي: ${subtotalBefore + (shipping || 0)} ج.م`);
-  lines.push("التفاصيل الكاملة محفوظة في النظام وسيتم تأكيدها على واتساب");
-  return lines.join("\n");
-};
-
 export const buildOrderMessage = (
   items: OrderItemMsg[],
   customer?: {

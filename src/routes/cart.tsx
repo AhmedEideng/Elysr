@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/data/product-types";
-import { waLink } from "@/lib/whatsapp";
+import { waLink, buildOrderMessage } from "@/lib/whatsapp";
 import {
   generateOrderId,
   isValidEgyptianPhone,
@@ -157,46 +157,23 @@ function CartPage() {
     };
 
     if (method === "whatsapp") {
-      // 🔒 أقوى حماية على الإطلاق: PII كامل في Google Sheets فقط، رابط واتساب فيه تشفير AES-256-GCM فقط
+      const msg = buildOrderMessage(orderItems, sc, orderId, shipping, freeShippingApplied);
+      const url = waLink(msg);
+
+      // واتساب هو قناة التأكيد الأساسية. نسجل الطلب فوراً بدون مطالبة العميل بالعودة للموقع.
       void submitToGoogleSheets(payload);
 
-      let secureLink = "";
       try {
-        const encRes = await fetch("/api/encrypt-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderId,
-            customerName: sc.name,
-            customerPhone: sc.phone,
-            governorate: sc.governorate,
-            address: sc.address,
-            notes: sc.notes,
-            items: orderItems,
-            total: grandTotal,
-          }),
-        });
-        const encData = await encRes.json();
-        if (encData.encrypted) {
-          secureLink = `${window.location.origin}/order-view?d=${encData.encrypted}`;
-        }
-      } catch {
-        // ignore encryption failure
-      }
-
-      try {
+        // 🔒 لا نخزن رابط واتساب الكامل الذي يحتوي PII (اسم، هاتف، عنوان)
+        // نخزن فقط رقم الطلب للمراجعة، بدون أي بيانات عميل
         sessionStorage.setItem("elysr_last_order_id", orderId);
-        if (secureLink) sessionStorage.setItem("elysr_last_secure_link", secureLink);
-        sessionStorage.removeItem("elysr_last_whatsapp_url");
+        sessionStorage.removeItem("elysr_last_whatsapp_url"); // تنظيف أي بيانات قديمة تحتوي PII
       } catch {
-        // ignore encryption failure
+        // Ignore storage failures.
       }
 
-      const waMessage = secureLink
-        ? `طلب جديد ${orderId}\nالمحافظة: ${sc.governorate}\nالإجمالي: ${grandTotal} ج.م\n\nالتفاصيل الكاملة (مشفرة AES-256-GCM - تنتهي بعد 24 ساعة):\n${secureLink}`
-        : `طلب جديد ${orderId}\nالمحافظة: ${sc.governorate}\nالإجمالي: ${grandTotal} ج.م`;
-
-      const url = waLink(waMessage);
+      // 🔧 فتح موثوق للواتساب
+      // سنعود للطريقة البسيطة القديمة التي لا تستفز المتصفح
       const a = document.createElement("a");
       a.href = url;
       a.target = "_blank";
