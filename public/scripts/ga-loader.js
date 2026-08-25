@@ -29,7 +29,10 @@
 
     // Configure and fire initial Google Analytics configurations
     window.gtag("js", new Date());
-    window.gtag("config", "G-V3X7Q3D0RR", { transport_type: "beacon" });
+    window.gtag("config", "G-V3X7Q3D0RR", {
+      transport_type: "beacon",
+      send_page_view: false,
+    });
 
     // Instantly append GTM script to process the queue
     var s = document.createElement("script");
