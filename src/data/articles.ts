@@ -56,13 +56,13 @@ const defaultSources: ArticleSource[] = [
     publisher: "World Health Organization",
   },
   {
-    title: "Sexual and Reproductive Health — MedlinePlus",
-    url: "https://medlineplus.gov/sexualandreproductivehealth.html",
+    title: "Sexual Health — MedlinePlus",
+    url: "https://medlineplus.gov/sexualhealth.html",
     publisher: "MedlinePlus / U.S. National Library of Medicine",
   },
   {
-    title: "Sexual Health — Cleveland Clinic",
-    url: "https://my.clevelandclinic.org/health/articles/9119-sexual-health",
+    title: "Sexual Response Cycle — Cleveland Clinic",
+    url: "https://my.clevelandclinic.org/health/articles/9119-sexual-response-cycle",
     publisher: "Cleveland Clinic",
   },
   {
@@ -71,8 +71,8 @@ const defaultSources: ArticleSource[] = [
     publisher: "NHS (UK National Health Service)",
   },
   {
-    title: "Sexual & Reproductive Health — NIH",
-    url: "https://www.nichd.nih.gov/health/topics/sexual-health",
+    title: "NIH (NICHD) Health Topics",
+    url: "https://www.nichd.nih.gov/health",
     publisher: "National Institutes of Health (NICHD)",
   },
 ];
@@ -119,8 +119,8 @@ const categorySources: Record<string, ArticleSource[]> = {
   ],
   "صحة المرأة": [
     {
-      title: "Women's sexual health — Mayo Clinic",
-      url: "https://www.mayoclinic.org/healthy-lifestyle/womens-health/in-depth/womens-sexual-health/art-20046229",
+      title: "Women's sexual health: Talking about your sexual needs — Mayo Clinic",
+      url: "https://mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/art-20047771",
       publisher: "Mayo Clinic",
     },
     {
@@ -158,8 +158,8 @@ const categorySources: Record<string, ArticleSource[]> = {
   ],
   تغذية: [
     {
-      title: "Diet and nutrition — MedlinePlus",
-      url: "https://medlineplus.gov/dietandnutrition.html",
+      title: "Nutrition — MedlinePlus",
+      url: "https://medlineplus.gov/nutrition.html",
       publisher: "MedlinePlus / U.S. National Library of Medicine",
     },
     {
@@ -180,9 +180,9 @@ const categorySources: Record<string, ArticleSource[]> = {
       publisher: "National Institutes of Health",
     },
     {
-      title: "Herbal supplements — Mayo Clinic",
-      url: "https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/in-depth/herbal-supplements/art-20046714",
-      publisher: "Mayo Clinic",
+      title: "Dietary Supplements — MedlinePlus",
+      url: "https://medlineplus.gov/dietarysupplements.html",
+      publisher: "MedlinePlus / U.S. National Library of Medicine",
     },
     {
       title: "Ginseng — NIH NCCIH",
@@ -219,13 +219,13 @@ const categorySources: Record<string, ArticleSource[]> = {
       publisher: "American Psychological Association",
     },
     {
-      title: "Relationship problems — NHS",
-      url: "https://www.nhs.uk/mental-health/advice-for-life-situations-and-events/relationship-problems/",
+      title: "Mental health — NHS",
+      url: "https://www.nhs.uk/mental-health/",
       publisher: "NHS (UK National Health Service)",
     },
     {
-      title: "Healthy relationships — MedlinePlus",
-      url: "https://medlineplus.gov/healthyrelationships.html",
+      title: "Mental Health — MedlinePlus",
+      url: "https://medlineplus.gov/mentalhealth.html",
       publisher: "MedlinePlus / U.S. National Library of Medicine",
     },
   ],
@@ -263,8 +263,8 @@ const categorySources: Record<string, ArticleSource[]> = {
       publisher: "NHS (UK National Health Service)",
     },
     {
-      title: "Exercise and sexual health — Cleveland Clinic",
-      url: "https://my.clevelandclinic.org/health/articles/10036-exercise-and-sexual-health",
+      title: "Exercise — NHS",
+      url: "https://www.nhs.uk/live-well/exercise/",
       publisher: "Cleveland Clinic",
     },
   ],
@@ -275,9 +275,9 @@ const categorySources: Record<string, ArticleSource[]> = {
       publisher: "Mayo Clinic",
     },
     {
-      title: "Sexual performance anxiety — Cleveland Clinic",
-      url: "https://my.clevelandclinic.org/health/diseases/22994-performance-anxiety",
-      publisher: "Cleveland Clinic",
+      title: "Anxiety Disorders — NIMH",
+      url: "https://www.nimh.nih.gov/health/topics/anxiety-disorders",
+      publisher: "National Institute of Mental Health (NIMH)",
     },
     {
       title: "Mental health and sex — NHS",
@@ -292,8 +292,8 @@ const categorySources: Record<string, ArticleSource[]> = {
   ],
   عمر: [
     {
-      title: "Aging and sexual health — Mayo Clinic",
-      url: "https://www.mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/sexual-health/art-20043654",
+      title: "Senior sex: Tips for older men — Mayo Clinic",
+      url: "https://www.mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/senior-sex/art-20046465",
       publisher: "Mayo Clinic",
     },
     {
@@ -307,8 +307,8 @@ const categorySources: Record<string, ArticleSource[]> = {
       publisher: "MedlinePlus / U.S. National Library of Medicine",
     },
     {
-      title: "Testosterone therapy — Cleveland Clinic",
-      url: "https://my.clevelandclinic.org/health/treatments/trt-testosterone-replacement-therapy",
+      title: "Testosterone Replacement Therapy (TRT) — Cleveland Clinic",
+      url: "https://my.clevelandclinic.org/health/treatments/testosterone-replacement-therapy-trt",
       publisher: "Cleveland Clinic",
     },
   ],
