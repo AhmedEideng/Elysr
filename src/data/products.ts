@@ -103,6 +103,19 @@ export const HOMEPAGE_EXCLUDED_PRODUCT_IDS = new Set([
 export const isHomepageProductEligible = (product: Pick<Product, "id">): boolean =>
   !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(product.id);
 
+/**
+ * المرشحون لقسم "تسوق حسب الاحتياج" — مصدر واحد مشترك بين:
+ * ShopByConcern (العرض)، ProductsTabs (الاستبعاد لمنع التكرار)،
+ * وdata-integrity.test.mjs (التحقق). أي تعديل هنا ينتشر لكل المواضع
+ * تلقائياً بدل ثلاث نسخ مكررة كانت تبتعد عن بعضها صامتاً.
+ */
+export const HOMEPAGE_CONCERN_CANDIDATES = {
+  delay: ["m-44", "m-30", "m-14", "m-19", "m-55", "m-48"],
+  strength: ["m-11", "m-02", "m-01", "m-04", "m-03", "m-49", "m-52", "m-20", "m-32"],
+  devices: ["d-01", "d-02", "d-03", "d-04", "d-05"],
+  women: ["w-02", "w-15", "w-05", "w-11", "w-01", "w-03", "w-04"],
+} as const;
+
 const HOME_FEATURED_ORDER = [
   // 🎯 المنتجات الـ VIP التي ستباع فوراً بفضل قوة اسمها وشعبيتها:
   "m-11", //  1. 🔥 عسل فيتامكس دبل شوت للرجال (الأكثر طلباً ورواجاً بالشركة)

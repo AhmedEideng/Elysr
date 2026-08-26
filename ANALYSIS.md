@@ -401,3 +401,30 @@ Browser ──→ Vercel CDN (dist/ ثابتة مسبقاً)
 - **0 مخالفات CSP** (هوم + PDP + مقال) — بما فيها inline JSON-LD وخطوط GA والـ fonts الذاتية.
 - GA4 يتحمل (مؤجل: 2 ثوانٍ + أول تفاعل) — page_view تُرسل يدوياً من `RouteHeadSync`.
 - 404s الوحيدة: `/_vercel/insights` + `/_vercel/speed-insights` (متوقع محلياً — أنظر ملاحظة 9).
+
+## 15) التدقيق الثالث (Audit 3) — مرجعيات البيانات، الـ feeds، الأداء، والمكونات المتبقية
+
+### فحوصات آلية جديدة (سكربت مرجعيات + تزحلق dist + قياس أداء):
+
+- **مرجعيات البيانات**: crossSell لكل المنتجات ✓، كل IDs/slugs في محرك الترابط (internal-links) ✓، الصور ✓، أهداف الـ redirects ✓.
+- **تزحلق dist**: 2517 مرجع أصول عبر 247 ملف HTML — **0 مكسور** ✓
+- **سطح XSS**: لا `innerHTML`/`eval`/`document.write` في الكود ✓
+- **أداء حقيقي (Chromium على dist)**: هوم LCP 420ms · PDP 316ms · قسم الرجال 448ms — CLS = 0 في الكل — JS 40–132KB مضغوط — بعيد عن ميزانيات Lighthouse (3.5s/0.25) ✓
+
+### أُصلحت (commit "audit-3"):
+
+1. **redirect معطل (dead-end)**: `/products/viagra-for-women-20-tablets → /products/viagra-20-tablets` وكان الهدف slug قديماً للمحذوف w-17 لا يوجد له خروج (404). ✓ أصبح `→ /products/women` حسب سياسة "المحذوف → قسمه".
+2. **خصم باقة وهمي في CrossSellBundle**: كان يروّج "الإجمالي العادي X → سعر الباقة 0.9X (خصم 10%)" لكن **لا يوجد أي خصم باقة في السلة** (الخصم الوحيد المعتمد هو شرائح الماسة ويتحقق منه السيرفر رياضياً) → العميل كان يرى سعراً إعلانياً لا يطابق ما يدفعه + toast كاذب "تم تطبيق الخصم". ✓ أُزيلت المطالبة الوهمية وعُرض الإجمالي الفعلي مع بيان أن خصم الماسة يُطبق في السلة تلقائياً. (إضافة خصم باقة حقيقي تتطلب تعديل نموذج السلة + التحقق الخلفي في API/Apps Script — مشروع أكبر إن أردناه.)
+3. **قوائم "تسوق حسب الاحتياج" مكررة 3 مرات** (ShopByConcern + "محاكاة" في ProductsTabs + الاختبار) — أي تعديل على واحدة يبتعد صامتاً عن البواقي. ✓ أصبحت `HOMEPAGE_CONCERN_CANDIDATES` مصدر واحد في `products.ts` تستورده المواضع الثلاثة (الاختبار الآن يتحقق من القائمة الفعلية للمكونات).
+
+### نتيجة قراءة بقية المكونات (Footer، Hero، AnniversaryPromo، DailyAdvice، FeaturedProducts، RecentlyViewed، FAQ، PageHero، Accessibility، BackToTop، FloatingActions، SectionErrorBoundary، ProductImage، ProductCardImage، ProductReviews، wishlist، education، thank-you، order-confirmed، styles.css):
+
+- Hero: sr-only H1 + aspect-ratio ثابت (CLS 0) + fetchpriority high + srcset ✓
+- AnniversaryPromo: interval مع cleanup صحيح، العداد من promo.ts ✓
+- DailyAdvice: محتوى ثابت (لا random) ✓ · styles.css: لا استيراد خارجي ✓
+- thank-you/order-confirmed: يقرآن orderId فقط من sessionStorage (لا PII) ✓
+- Footer: روابط واتساب/فيسبوك فقط ✓
+
+### ملاحظة تصميم واحدة متبقية (مقصودة — لمسة أخيرة محتملة):
+
+- عدّاد "مبادرة الرعاية الماسية" يتجدد perpetually (دورة 3 أيام من epoch) — نمط "urgency متجددة" مقصود وموثق في promo.ts ("دون الادعاء بانتهاء العرض")، لكنه يبقى في منطقة الرمادي التسويقي؛ إن أردت أماناً أكبر: اعرض "دورة متجددة" صراحةً بدل عدّاد انتهاء.

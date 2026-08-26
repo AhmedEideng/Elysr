@@ -23,10 +23,6 @@ export function CrossSellBundle({
   const bundleItems = [mainProduct, ...suggestedProducts];
   const totalPrice = bundleItems.reduce((sum, item) => sum + item.price, 0);
 
-  // Calculate a 10% discount for the bundle to make it irresistible
-  const bundleDiscount = Math.round(totalPrice * 0.1);
-  const finalPrice = totalPrice - bundleDiscount;
-
   const handleAddBundle = () => {
     setIsAdding(true);
     bundleItems.forEach((item) => {
@@ -36,7 +32,10 @@ export function CrossSellBundle({
     setTimeout(() => {
       setIsAdding(false);
       setAdded(true);
-      toast.success("🛒 تم إضافة الباقة للسلة بنجاح! تم تطبيق الخصم التلقائي.");
+      // ملاحظة: لا يوجد خصم "باقة" حقيقي في نموذج السلة — الخصم الوحيد
+      // المعتمد هو شرائح "مبادرة الرعاية الماسية" على إجمالي السلة
+      // (يتحقق منه السيرفر رياضياً). لا نعلن عن خصم غير مطبق.
+      toast.success("🛒 تمت إضافة الباقة للسلة! أي خصم مستحق سيظهر في السلة تلقائياً.");
       setTimeout(() => setAdded(false), 3000);
     }, 600);
   };
@@ -50,7 +49,8 @@ export function CrossSellBundle({
         <div>
           <h3 className="text-lg font-black text-foreground">باقة التوفير والأداء المتكامل</h3>
           <p className="text-xs font-bold text-muted-foreground">
-            اشتري هذه المجموعة ووفر {formatPrice(bundleDiscount)}!
+            منتجات متكاملة تغطي احتياجك — أضفها دفعة واحدة وخصم مبادرة الرعاية الماسية يُطبَّق على
+            السلة تلقائياً.
           </p>
         </div>
       </div>
@@ -106,12 +106,11 @@ export function CrossSellBundle({
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl bg-muted/30 p-4 border border-border">
           <div className="text-center sm:text-right">
-            <div className="text-xs font-bold text-muted-foreground line-through">
-              الإجمالي العادي: {formatPrice(totalPrice)}
+            <div className="text-xs font-bold text-muted-foreground">
+              إجمالي الباقة ({bundleItems.length} منتجات)
             </div>
             <div className="text-lg font-black text-primary flex items-center gap-2 justify-center sm:justify-start">
-              <span>سعر الباقة:</span>
-              <span className="text-2xl">{formatPrice(finalPrice)}</span>
+              <span className="text-2xl">{formatPrice(totalPrice)}</span>
             </div>
           </div>
 

@@ -4,6 +4,7 @@ import { ProductCard } from "@/components/ProductCard";
 import {
   getProductsByCategory,
   getFeaturedProducts,
+  HOMEPAGE_CONCERN_CANDIDATES,
   HOMEPAGE_EXCLUDED_PRODUCT_IDS,
 } from "@/data/products";
 import { ArrowLeft } from "lucide-react";
@@ -16,13 +17,9 @@ export function ProductsTabs() {
     const featured = getFeaturedProducts();
     const displayedIds = new Set(featured.map((p) => p.id));
 
-    // 2. محاكاة واستبعاد المنتجات الـ 12 المعروضة بداخل قسم "أبرز فئات العناية والاهتمام" (ShopByConcern) لمنع تكرارها أيضاً
-    const concernCandidates = {
-      delay: ["m-44", "m-30", "m-14", "m-19", "m-55", "m-48"],
-      strength: ["m-11", "m-02", "m-01", "m-04", "m-03", "m-49", "m-52", "m-20", "m-32"],
-      devices: ["d-01", "d-02", "d-03", "d-04", "d-05"],
-      women: ["w-02", "w-15", "w-05", "w-11", "w-01", "w-03", "w-04"],
-    };
+    // 2. استبعاد المنتجات الـ 12 المعروضة بقسم (ShopByConcern) لمنع تكرارها
+    //    — نفس المصدر المشترك بالضبط (HOMEPAGE_CONCERN_CANDIDATES) فلا يبتعدا.
+    const concernCandidates = HOMEPAGE_CONCERN_CANDIDATES;
 
     const delayIds = concernCandidates.delay
       .filter((id) => !displayedIds.has(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id))

@@ -3,18 +3,14 @@ import { Zap, Clock, Activity, Heart } from "lucide-react";
 import {
   getProductById,
   getFeaturedProducts,
+  HOMEPAGE_CONCERN_CANDIDATES,
   HOMEPAGE_EXCLUDED_PRODUCT_IDS,
 } from "@/data/products";
 import { thumbUrl, assetUrl } from "@/lib/cache";
 
-// قوائم المعرفات المرشحة الأكثر طلباً ومبيعاً بكل فئة (مرتبة تنازلياً حسب الأكثر مبيعاً)
-// تم تفعيل آلية فلترة ديناميكية تستبعد فوراً أي منتج معروض بالفعل بقسم الأكثر طلباً العلوي
-const concernCandidates = {
-  delay: ["m-44", "m-30", "m-14", "m-19", "m-55", "m-48"],
-  strength: ["m-11", "m-02", "m-01", "m-04", "m-03", "m-49", "m-52", "m-20", "m-32"],
-  devices: ["d-01", "d-02", "d-03", "d-04", "d-05"],
-  women: ["w-02", "w-15", "w-05", "w-11", "w-01", "w-03", "w-04"],
-};
+// القوائم المرشحة (الأكثر مبيعاً بكل فئة) — مصدر واحد في src/data/products.ts
+// مع فلترة ديناميكية تستبعد فوراً أي منتج معروض بالفعل بقسم الأكثر طلباً العلوي
+const concernCandidates = HOMEPAGE_CONCERN_CANDIDATES;
 
 export function ShopByConcern() {
   // جلب معرفات منتجات مختارات الرئيسية الحالية لمنع التكرار

@@ -24,8 +24,13 @@ const vite = await createServer({
 });
 
 try {
-  const { products, getFeaturedProducts, getProductsByCategory, HOMEPAGE_EXCLUDED_PRODUCT_IDS } =
-    await vite.ssrLoadModule("/src/data/products.ts");
+  const {
+    products,
+    getFeaturedProducts,
+    getProductsByCategory,
+    HOMEPAGE_EXCLUDED_PRODUCT_IDS,
+    HOMEPAGE_CONCERN_CANDIDATES,
+  } = await vite.ssrLoadModule("/src/data/products.ts");
   const { articles } = await vite.ssrLoadModule("/src/data/articles.ts");
   const { seoLandingPages } = await vite.ssrLoadModule("/src/data/landing-pages.ts");
   const promo = await vite.ssrLoadModule("/src/lib/promo.ts");
@@ -110,12 +115,8 @@ try {
   const featuredProducts = getFeaturedProducts();
   assert.equal(featuredProducts.length, 6, "Homepage must show exactly 6 featured products");
   const featuredIds = new Set(featuredProducts.map((product) => product.id));
-  const concernCandidates = {
-    delay: ["m-44", "m-30", "m-14", "m-19", "m-55", "m-48"],
-    strength: ["m-11", "m-02", "m-01", "m-04", "m-03", "m-49", "m-52", "m-20", "m-32"],
-    devices: ["d-01", "d-02", "d-03", "d-04", "d-05"],
-    women: ["w-02", "w-15", "w-05", "w-11", "w-01", "w-03", "w-04"],
-  };
+  // المصدر المشترك نفسه الذي تستخدمه مكونات الهوم — يمنع انحراف نسخة الاختبار
+  const concernCandidates = HOMEPAGE_CONCERN_CANDIDATES;
   const concernIds = Object.values(concernCandidates).flatMap((ids) =>
     ids.filter((id) => !featuredIds.has(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id)).slice(0, 3),
   );
