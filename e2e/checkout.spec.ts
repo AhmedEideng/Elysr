@@ -82,6 +82,53 @@ test("unknown routes return a real HTTP 404", async ({ request }) => {
   expect(await response.text()).toContain("الصفحة غير موجودة");
 });
 
+test("failed direct order keeps the cart (no silent order loss)", async ({ page }) => {
+  let attempt = 0;
+  await page.route("**/api/submit-order", async (route) => {
+    attempt++;
+    if (attempt === 1) {
+      // First attempt: sheet is down (502)
+      await route.fulfill({
+        status: 502,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "sheet down" }),
+      });
+    } else {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true }),
+      });
+    }
+  });
+
+  await page.goto("/products/kreva-gel");
+  await page.getByRole("button", { name: "إضافة للسلة", exact: true }).click();
+  await page.goto("/cart");
+  await page.getByRole("button", { name: /طلب مباشر/ }).click();
+  await page.getByPlaceholder("اكتب اسمك هنا").fill("عميل فشل");
+  await page.getByPlaceholder("01xxxxxxxxx").fill("01012345678");
+  await page.locator("select").selectOption("القاهرة");
+  await page.getByPlaceholder("المدينة، الشارع، رقم العمارة").fill("اختبار الفشل 1");
+  await page.getByRole("button", { name: /تأكيد الطلب المباشر/ }).click();
+
+  // Visible error + fallback channel, and the cart must NOT be lost
+  await expect(page.getByText(/تعذر تسجيل طلبك/)).toBeVisible();
+  await page.goto("/cart");
+  await expect(page.getByText("جل كريفا", { exact: false })).toBeVisible();
+
+  // Second attempt succeeds -> cart is cleared
+  // (governorate is form state — it resets on navigation, so re-select it)
+  await page.getByRole("button", { name: /طلب مباشر/ }).click();
+  await page.getByPlaceholder("اكتب اسمك هنا").fill("عميل فشل");
+  await page.getByPlaceholder("01xxxxxxxxx").fill("01012345678");
+  await page.locator("select").selectOption("القاهرة");
+  await page.getByPlaceholder("المدينة، الشارع، رقم العمارة").fill("اختبار الفشل 2");
+  await page.getByRole("button", { name: /تأكيد الطلب المباشر/ }).click();
+  await page.waitForTimeout(1500);
+  expect(attempt).toBe(2);
+});
+
 test("complete bundle applies the real 10% bundle discount in cart and payload", async ({
   page,
 }) => {

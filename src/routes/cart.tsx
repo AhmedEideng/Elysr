@@ -197,9 +197,36 @@ function CartPage() {
       setSubmitting(false);
       navigate({ to: "/thank-you" });
     } else {
-      // 🚀 الطلب المباشر بقى سريع زي الواتساب - نسجل في الشيت في الخلفية ونفتح صفحة التأكيد فوراً
-      // قبل كنا بنستنى الشيت 10 ثواني (GOOGLE_SHEETS_TIMEOUT_MS) وده اللي كان بيخلي "جاري الإرسال" يطول
-      void submitToGoogleSheets(payload);
+      // 🚀 الطلب المباشر فوري زي الواتساب: التسجيل في الشيت في الخلفية وفتح
+      // صفحة التأكيد فوراً (بدون انتظار حتى 10 ثوانٍ للشيت).
+      // ⚠️ موثوقية: عند فشل التسجيل **لا نمسح السلة** — تبقى محفوظة ليتمكن
+      // العميل من إعادة المحاولة، مع قناة بديلة (واتساب) — لا فقدان صامت.
+      submitToGoogleSheets(payload).then((result) => {
+        if (result.success) {
+          // سُجل بنجاح → نطهر السلة (العميل في صفحة التأكيد الآن)
+          clear();
+        } else {
+          toast.error(
+            "⚠️ تعذر تسجيل طلبك آلياً. سلّتك محفوظة لإعادة المحاولة، أو أكمل طلبك الآن عبر واتساب.",
+            {
+              duration: 10000,
+              action: {
+                label: "الطلب عبر واتساب",
+                onClick: () => {
+                  const msg = buildOrderMessage(orderItems, sc, orderId, shipping, freeShippingApplied, bundleDiscount);
+                  const a = document.createElement("a");
+                  a.href = waLink(msg);
+                  a.target = "_blank";
+                  a.rel = "noopener noreferrer";
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                },
+              },
+            },
+          );
+        }
+      });
 
       try {
         sessionStorage.setItem("elysr_last_order_id", orderId);
@@ -207,8 +234,7 @@ function CartPage() {
         // Ignore storage failures.
       }
 
-      toast.success("✅ تم استلام طلبك بنجاح!", { duration: 4000 });
-      clear();
+      toast.success("✅ تم استلام طلبك بنجاح!", { duration: 2500 });
       setSubmitting(false);
       navigate({ to: "/order-confirmed" });
     }

@@ -387,7 +387,10 @@ ${catalogProducts
       const s = String(v ?? "");
       return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
+    // BOM UTF-8 في بداية الـ CSV حتى لا تتخرب العربية عند الفتح في Excel على
+    // ويندوز (Google Merchant يتعامل مع BOM بشكل قياسي)
     const csvContent =
+      "\uFEFF" +
       [
         FEED_COLUMNS.join(","),
         ...feedRows.map((row) => FEED_COLUMNS.map((c) => csvEscape(row[c])).join(",")),
