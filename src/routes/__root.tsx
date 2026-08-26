@@ -212,7 +212,7 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-      <CartProvider>
+    <CartProvider>
       <ScrollRestoration />
       <RouteHeadSync />
       <ToastCleanupOnVisible />
