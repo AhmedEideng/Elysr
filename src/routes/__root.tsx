@@ -182,6 +182,28 @@ function RouteHeadSync() {
   return null;
 }
 
+function ToastCleanupOnVisible() {
+  // 🧹 الموبايل يعلّق التبويب عند الانتقال لتطبيق آخر (واتساب) فتتوقف
+  // مؤقتات إغلاق التوستات — فيبقي توست "تم تجهيز رسالة واتساب" ظاهراً
+  // عند العودة للموقع. الحل: أي توست باقٍ عند عودة التبويب لمصالحه
+  // يعتبر قديماً ويُغلق فوراً. استيراد ديناميكي حتى يبقى sonner (33KB)
+  // خارج مسار التحميل الحرج (يُحمَّل أصلاً عند أول توست).
+  useEffect(() => {
+    let dismiss: (() => void) | undefined;
+    import("sonner").then((m) => {
+      dismiss = () => m.toast.dismiss();
+    });
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") dismiss?.();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
+  return null;
+}
+
 export const Route = createRootRoute({
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -190,9 +212,10 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <CartProvider>
+      <CartProvider>
       <ScrollRestoration />
       <RouteHeadSync />
+      <ToastCleanupOnVisible />
       <Layout>
         <Outlet />
       </Layout>

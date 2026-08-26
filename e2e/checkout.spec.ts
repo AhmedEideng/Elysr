@@ -139,6 +139,25 @@ test("failed direct order keeps the cart (no silent order loss)", async ({ page 
 
   // Visible error + fallback channel, and the cart must NOT be lost
   await expect(page.getByText(/تعذر تسجيل طلبك/)).toBeVisible();
+
+  // Simulate leaving to WhatsApp (tab hidden) and coming back (visible):
+  // any toast that survived the suspension is stale and must be dismissed
+  // immediately by ToastCleanupOnVisible (this toast lives 10s, so only
+  // the guard can make it disappear this fast).
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => "visible",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(page.getByText(/تعذر تسجيل طلبك/)).toBeHidden({ timeout: 2000 });
+
   await page.goto("/cart");
   await expect(page.getByText("جل كريفا", { exact: false })).toBeVisible();
 

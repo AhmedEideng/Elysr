@@ -294,7 +294,9 @@ function ProductPage() {
       a.remove();
 
       setQuickOrderOpen(false);
-      toast.success("تم تجهيز رسالة واتساب ببياناتك");
+      // مدة قصيرة مقصودة: العميل انتقل لواتساب فوراً، والتوست المؤقت
+      // يُغلق تلقائياً عند العودة للتبويب (انظر ToastCleanupOnVisible)
+      toast.success("تم تجهيز رسالة واتساب ببياناتك", { duration: 2500 });
     } catch (err) {
       console.error("Quick WhatsApp order error:", err);
       toast.error("حدث خطأ أثناء تجهيز الطلب، حاول مرة أخرى");
