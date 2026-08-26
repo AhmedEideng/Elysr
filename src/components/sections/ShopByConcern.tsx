@@ -122,7 +122,9 @@ export function ShopByConcern() {
                               : ""
                           }
                           sizes="(max-width: 640px) 180px, 240px"
-                          alt={prod.name}
+                          // الصورة زخرفية هنا — الاسم ظاهر في السطر التالي مباشرة
+                          // (alt مكرر = القراءة مرتين بمطالعي الشاشة + مخالفة Lighthouse)
+                          alt=""
                           loading="lazy"
                           decoding="async"
                           className="h-full w-full object-cover transition-transform group-hover/prod:scale-110"

@@ -264,6 +264,16 @@ mountApi("/api/submit-order", "../api/submit-order.js");
 mountApi("/api/csp-report", "../api/csp-report.js");
 app.use("/api", (_req, res) => res.status(404).json({ error: "API route not found" }));
 
+// ── Vercel platform stubs (self-hosted) ──
+// على Vercel يخدم `/insights/script.js` و`/speed-insights/script.js` منصة
+// Vercel نفسها (Web Analytics + Speed Insights). في النشر الذاتي لا توجد
+// المنصة، فيُخدَّم سكريبت فارغ سليم بدلاً من 404 + خطأ MIME في الـ console.
+app.get(/^\/_vercel\/(insights|speed-insights)\/script\.js$/, (req, res) => {
+  res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.send("// no-op: Vercel Analytics is a platform feature (unavailable self-hosted)\n");
+});
+
 // ── Main route handler: SSG first, then SPA fallback ──
 // ملاحظة: Express 5 (path-to-regexp v8) أزال دعم الباراميتر "*" العاري،
 // لذا نستخدم RegExp يطابق كل المسارات بدلاً من app.get("*") الذي كان ينهار.

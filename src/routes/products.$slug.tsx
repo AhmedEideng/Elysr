@@ -461,10 +461,10 @@ function ProductPage() {
           )}
 
           <div className="mt-5 rounded-[1.5rem] border border-primary/10 bg-card p-4 shadow-sm">
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-black">
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-black">
               <ShieldCheck className="h-4 w-4 text-primary" />
               لماذا تطلب من اليسر؟
-            </h3>
+            </h2>
             <div className="grid gap-2 sm:grid-cols-2">
               {[
                 "منتجات أصلية مختارة بعناية",
@@ -485,18 +485,18 @@ function ProductPage() {
           </div>
 
           <div className="mt-5 rounded-2xl bg-accent/25 p-4 border border-primary/10">
-            <h3 className="font-bold mb-2 flex items-center gap-2 text-sm">
+            <h2 className="font-bold mb-2 flex items-center gap-2 text-sm">
               <AlertCircle className="h-4 w-4 text-primary" />
               {safetyNotice.title}
-            </h3>
+            </h2>
             <p className="text-xs leading-7 text-muted-foreground">{safetyNotice.body}</p>
           </div>
 
           <div className="mt-5 rounded-2xl border border-sky-100 bg-sky-50/70 p-4">
-            <h3 className="mb-2 flex items-center gap-2 text-sm font-black text-sky-800">
+            <h2 className="mb-2 flex items-center gap-2 text-sm font-black text-sky-800">
               <Lock className="h-4 w-4" />
               كيف يتم الشحن بسرية؟
-            </h3>
+            </h2>
             <ul className="space-y-2 text-xs leading-7 text-sky-900/80">
               <li>• يتم تغليف الطلب في عبوة محايدة بدون ذكر اسم المنتج.</li>
               <li>• لا تظهر طبيعة المنتج على الشحنة أو من الخارج.</li>
@@ -878,7 +878,7 @@ function MiniFeature({ title, value }: { title: string; value: string }) {
 function InfoBox({ title, content }: { title: string; content: string }) {
   return (
     <div className="rounded-2xl border border-primary/10 bg-card p-4 shadow-sm">
-      <h3 className="mb-2 text-sm font-bold text-foreground">{title}</h3>
+      <h2 className="mb-2 text-sm font-bold text-foreground">{title}</h2>
       <p className="text-xs leading-relaxed text-muted-foreground">{content}</p>
     </div>
   );

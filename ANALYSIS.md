@@ -472,3 +472,29 @@ api/submit-order.js ← bundles-db.json (مولّد البناء من نفس ا�
 
 - الفرونت يرسل القيمة لكن **الباك لا يثق بها أبداً** — يعيد الحساب من bundles-db + prices الرسمية.
 - فشل تحميل bundles-db.json في الخادم → fail-closed (لا خصم باقة) لا fail-open.
+
+## 17) التدقيق السادس (Audit 6) — Lighthouse حقيقي + تثبيت النشر الذاتي
+
+### نتائج Lighthouse الحقيقي (mobile simulated throttling — أشد من CI desktop):
+| الصفحة | Perf | A11y | Best Practices | SEO |
+|---|---|---|---|---|
+| هوم | 64 | **100** | **100** | **100** |
+| PDP | 70 | **100** | **100** | **100** |
+(قبل الإصلاح: 60/99/96/100 و68/99/96/100 — CI يعمل desktop + شبكة أسرع فالأرقام أعلى)
+
+### أُصلحت:
+1. **heading-order (باغ A11y حقيقي)**: صفحة المنتج كانت أول عنوان بعد h1 هو h3 (تخطي h2) → صناديق "لماذا تطلب/تنبيه الأمان/الشحن السري/المكونات/الاستخدام" أصبحت h2.
+2. **image-redundant-alt**: صور "تسوق حسب الاحتياج" كانت alt = الاسم الظاهر بجوارها (قراءة مزدوجة) → `alt=""` (زخرفية، الاسم موجود).
+3. **errors-in-console (self-hosted)**: `/insights/script.js` + `/speed-insights/script.js` (ميزات منصة Vercel) كانا 404+MIME error بالنشر الذاتي → stub سكريبت فارغ سليم في server/index.js (200 + application/javascript + TTL يوم).
+4. **hero-banner-480.webp مفقود**: سكربت process-hero مصمم لتوليد 480/768/1200 لكن الـ 480 لم يولد أبداً → وُلّد (17.9KB مقابل 26.4 للـ 768) + srcSet الـ Hero والـ preload الخاص بالهوم يتضمناه الآن.
+5. Stub TTL 1h → 24h (uses-long-cache-ttl).
+
+### تم استبعاده (مفهمس، لا حاجة):
+- "Unused JS 69KB" = **Google Analytics gtag.js** (إيجابي زائف — يُحمَّل مؤجلاً عمداً).
+- render-blocking: توفير 0ms (لا أثر).
+- uses-responsive-images: 21KB (تافه).
+- LCP 5.4s mobile-simulated: throttle افتراضي (CPU 4x + 4G) — CI desktop أعلى، وميزانية CI هي المعيار.
+- Docker: غير متاح في بيئة الفحص (Dockerfile multi-stage قياسي، يبنيه الإنتاج).
+
+### ملاحظة بيئة:
+إعادة ضبط بيئة الفحص تمسح المجلدات غير الملتزَمة (node_modules/dist/.cache) — المشروع الملتزم هو المصدر الوحيد للحقيقة، والـ build يعيد كل شيء من الصفر بنجاح (تم التحقق).

@@ -209,7 +209,7 @@ function buildHtml(template, opts) {
   if (heroPreload) {
     html = html.replace(
       "</head>",
-      `  <link rel="preload" as="image" href="${assetUrl("/images/hero-banner.webp")}" imagesrcset="${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner.webp")} 1200w" imagesizes="100vw" fetchpriority="high" />
+      `  <link rel="preload" as="image" href="${assetUrl("/images/hero-banner-480.webp")}" imagesrcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner.webp")} 1200w" imagesizes="100vw" fetchpriority="high" />
 </head>`,
     );
   }

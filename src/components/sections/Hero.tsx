@@ -23,7 +23,7 @@ export function Hero() {
       >
         <img
           src={assetUrl("/images/hero-banner.webp")}
-          srcSet={`${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner.webp")} 1200w`}
+          srcSet={`${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner.webp")} 1200w`}
           sizes="100vw"
           alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري 100% — دفع عند الاستلام — شحن سريع لجميع المحافظات"
           className="block h-full w-full object-cover"
