@@ -1,6 +1,6 @@
 {
   "name": "elysr-health-hub",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -75,5 +75,8 @@
   "engines": {
     "node": "24.x"
   },
-  "trustedDependencies": ["esbuild", "sharp"]
+  "trustedDependencies": [
+    "esbuild",
+    "sharp"
+  ]
 }
