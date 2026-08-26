@@ -12,6 +12,7 @@
  *
  *   Request flow:
  *   ┌─ /api/*               → API handler (inline)
+ *   ├─ Legacy URL (vercel.json redirects) → 301/302 (Vercel parity)
  *   ├─ Static asset (.js,.css,.webp) → express.static (long cache)
  *   ├─ Prerendered HTML exists → serve static .html (SSG ⚡)
  *   └─ Otherwise            → serve 404.html with HTTP 404
@@ -25,7 +26,7 @@
 
 import express from "express";
 import compression from "compression";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -43,6 +44,53 @@ const NOINDEX_IMAGE_NAMES = new Set([
   "procomil-fort-tablet.webp",
   "viagra-pfizer-100mg.webp",
 ]);
+
+// ── Vercel parity redirects ──
+// On Vercel these live in vercel.json edge config; the self-hosted Express
+// server reproduces the same table so legacy URLs (old product IDs, deleted
+// pharma, old URL schemes) keep their SEO value with 301s instead of 404s.
+// Only internal destinations (starting with "/") are honored.
+function compileRedirectSource(source) {
+  const names = [];
+  let out = "";
+  let i = 0;
+  while (i < source.length) {
+    if (source[i] === ":" && /[A-Za-z_]/.test(source[i + 1] ?? "")) {
+      let j = i + 1;
+      while (j < source.length && /[A-Za-z0-9_]/.test(source[j])) j++;
+      names.push(source.slice(i + 1, j));
+      out += "([^/]+)";
+      i = j;
+    } else {
+      out += /[.+?^${}()|[\]\\]/.test(source[i]) ? `\\${source[i]}` : source[i];
+      i++;
+    }
+  }
+  return { re: new RegExp(`^${out}$`), names };
+}
+
+function applyRedirectDestination(destination, names, match) {
+  return destination.replace(/:([A-Za-z_][A-Za-z0-9_]*)/g, (whole, name) => {
+    const idx = names.indexOf(name) + 1;
+    return idx > 0 && match[idx] ? match[idx] : whole;
+  });
+}
+
+const redirectExact = new Map();
+const redirectPatterns = [];
+try {
+  const vercelConfig = JSON.parse(readFileSync(resolve(ROOT, "vercel.json"), "utf-8"));
+  for (const rule of vercelConfig.redirects ?? []) {
+    if (!rule?.source || !rule?.destination || !rule.destination.startsWith("/")) continue;
+    const status = rule.permanent === false ? 302 : 301;
+    const { re, names } = compileRedirectSource(rule.source);
+    if (names.length === 0)
+      redirectExact.set(rule.source, { destination: rule.destination, status });
+    else redirectPatterns.push({ re, names, destination: rule.destination, status });
+  }
+} catch (err) {
+  console.warn("[ssr] vercel.json unreadable — legacy redirects disabled:", err.message);
+}
 
 // ── Pattern matching for route-to-file mapping ──
 function fileForUrl(url) {
@@ -157,6 +205,23 @@ app.use((req, res, next) => {
     ].join("; "),
   );
 
+  next();
+});
+
+// ── Legacy URL redirects (Vercel parity) ──
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  const exact = redirectExact.get(req.path);
+  if (exact) return res.redirect(exact.status, exact.destination);
+  for (const rule of redirectPatterns) {
+    const match = rule.re.exec(req.path);
+    if (match) {
+      return res.redirect(
+        rule.status,
+        applyRedirectDestination(rule.destination, rule.names, match),
+      );
+    }
+  }
   next();
 });
 

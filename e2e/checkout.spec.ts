@@ -46,19 +46,34 @@ test("customer can add a product, update quantity, calculate shipping and submit
 });
 
 test("blocked medicine remains public but carries layered noindex protection", async ({ page }) => {
-  const path = "/products/hard-on-sildenafil-130mg-dapoxetine-60mg";
+  // m-34 (Hard-On) was deleted per Merchant report (now 301 → /products/men).
+  // The remaining blocked products are m-38/m-43/m-45 — power-36 is the canonical
+  // case: still purchasable on-site, but excluded from SEO with layered noindex.
+  const path = "/products/power-36-power-control-for-36-hours";
   const response = await page.goto(path);
   expect(response?.status()).toBe(200);
   expect(response?.headers()["x-robots-tag"]).toContain("noindex");
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   await expect(page.locator('meta[name="googlebot"]')).toHaveAttribute("content", /noindex/);
-  const imageResponse = await page.request.get(
-    "/images/hard-on-sildenafil-130mg-dapoxetine-60mg.webp",
-  );
+  const imageResponse = await page.request.get("/images/power-36-power-control-for-36-hours.webp");
   expect(imageResponse.headers()["x-robots-tag"]).toContain("noimageindex");
 
   await page.goto("/products/men");
   await expect(page.locator(`a[href="${path}"]`).first()).toBeAttached();
+});
+
+test("deleted product legacy URLs 301 to their category section", async ({ baseURL }) => {
+  // Deleted pharma (Merchant report) must never 404: m-34 → men, w-17 → women.
+  // Use fetch with redirect:"manual" — Playwright's request fixture follows
+  // redirects and would mask the 301.
+
+  const menResp = await fetch(`${baseURL}/products/m-34`, { redirect: "manual" });
+  expect(menResp.status).toBe(301);
+  expect(menResp.headers.get("location")).toBe("/products/men");
+
+  const womenResp = await fetch(`${baseURL}/products/w-17`, { redirect: "manual" });
+  expect(womenResp.status).toBe(301);
+  expect(womenResp.headers.get("location")).toBe("/products/women");
 });
 
 test("unknown routes return a real HTTP 404", async ({ request }) => {

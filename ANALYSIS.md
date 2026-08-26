@@ -1,0 +1,372 @@
+# تحليل فني كامل لمشروع Elysr Medical — خط بخط
+
+> تم استخراج المشروع وفحصه وتثبيته وتشغيله فعلياً:
+> `npm ci` ✓ · `npm test` (data-integrity) ✓ · `npm run test:unit` (119 اختبار) ✓ · `npm run build` (246 صفحة) ✓ · خادم الإنتاج (200/404/health/noindex) ✓
+
+---
+
+## 1) الصورة العامة
+
+متجر إلكتروني عربي (RTL) لمنتجات الصحة الزوجية في مصر (elysrmedical.store).
+النموذج المعماري: **SPA + SSG + Serverless بدون قاعدة بيانات تقليدية**:
+
+```
+Browser ──→ Vercel CDN (dist/ ثابتة مسبقاً)
+              ├─ index.html (SPA shell — React 19)
+              ├─ /products/[slug].html  (82 منتجاً مُسبقة)
+              ├─ /education/[slug].html (56 مقالاً)
+              ├─ /products/guides/[slug].html (92 صفحة SEO)
+              └─ /api/submit-order ──→ Google Apps Script ──→ Google Sheets
+```
+
+- البيانات كلها ملفات TypeScript تُبنى وقت الـ build (zero database).
+- الطلبات إما عبر واتساب (القناة الأساسية) أو "طلب مباشر" يُسجّل في شيت Google.
+- 82 منتجاً (52 رجال / 23 نساء / 7 أجهزة)، 56 مقالاً، 92 صفحة دليل، 152 إعادة توجيه.
+
+## 2) بنية الملفات
+
+| المجلد                                         | الدور                                                                                                                                     |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/routes/`                                  | 20 مسار TanStack Router (file-based)                                                                                                      |
+| `src/data/`                                    | المنتجات (men/women/devices)، المقالات، صفحات اللاندينج                                                                                   |
+| `src/lib/`                                     | seo، promo، governorates، whatsapp، utils، compliance، internal-links، reviews، error-tracking، cache، site-config                        |
+| `src/components/` + `src/components/sections/` | Header/Footer/ProductCard/SearchBar/11 قسم للهوم                                                                                          |
+| `src/contexts/cart.tsx`                        | حالة السلة (localStorage)                                                                                                                 |
+| `src/hooks/`                                   | use-cart، use-wishlist، use-recently-viewed، use-scroll-tracking، use-pwa-install                                                         |
+| `api/`                                         | submit-order + csp-report + delete-customer-data + rate-limiter                                                                           |
+| `api/lib/`                                     | products-db.json + config-db.json (مولّدان وقت البناء — Single Source of Truth)                                                           |
+| `server/index.js`                              | خادم Express 5 للـ SSG (Docker/Railway/تجربة محلية)                                                                                       |
+| `scripts/`                                     | prerender-seo، generate-sitemap، data-integrity، sync-vercel-redirects، release، health-check، validate-schemas، validate-article-sources |
+| `google-apps-script.gs`                        | Webhook الشيت (565 سطراً)                                                                                                                 |
+| `e2e/` + `src/__tests__/`                      | Playwright + Vitest (10 ملفات)                                                                                                            |
+
+## 3) تفاصيل الملف الرئيسي — سطراً بسطر
+
+### 3.1 `index.html` (261 سطراً)
+
+- `lang="ar" dir="rtl"`، 6 أحجام favicon + apple-touch + manifest.
+- Meta كاملة: description، robots (`index,follow,max-image-preview:large`)، Googlebot منفصل (مهم لأن `applySeo` يحدّث الاثنين)، canonical + hreflang (ar-eg/x-default)، Open Graph، Twitter card.
+- `facebook-domain-verification` لـ Meta Business.
+- **خط Cairo مُضيف ذاتياً** (woff2) مع `preload` و`unicode-range` منفصل للعربية/اللاتينية — لا round-trip لـ Google Fonts.
+- **Critical CSS** مضمّن: خلفية + font-face + `#root` يمنع FOUC.
+- JSON-LD `@graph`: `Organization+MedicalOrganization` (اسم، شعار، عنوان العاشر من رمضان، إحداثيات، ساعات 9ص–10م سبت–خميس، هاتف +201098088206، `isAcceptingNewPatients:false`) + `LocalBusiness` (OfferCatalog بعدد الأصناف).
+- GA يُحمّل عبر `/scripts/ga-loader.js` (defer) وليس سكريبت google مباشرة.
+- `noscript` يعرض رسالة واتساب بديلاً.
+
+### 3.2 `package.json`
+
+- React 19.2 + TypeScript 6 + Vite 8 + TanStack Router 1.170 + Tailwind 4 + sonner + fuse.js + lucide-react.
+- سكربتات مهمة: `prebuild` = generate-sitemap (توليد sitemaps + products-db.json + config-db.json)، `build` = vite build + prerender-seo، `test` = data-integrity، `test:unit` = vitest، `test:e2e` = playwright، `ci` = lint+typecheck+test:all.
+- `engines: node 24`، `trustedDependencies: [esbuild, sharp]`.
+
+### 3.3 `vite.config.ts`
+
+- TanStackRouterVite مع `autoCodeSplitting`.
+- alias `@ → src`، `dedupe` للراكت.
+- `manualChunks` مقصودة جداً:
+  - `data-catalog-men/women/devices` — كل فئة في تشانك مستقل فيُحمَّل قسم واحد فقط.
+  - `data-articles` (تحت الطية فقط)، `data-landing` (مُستبعد فعلياً من الباندل — يُجلب JSON فردي).
+  - vendor منفصل: react / router / icons / fuse / sonner.
+- `target: es2022`، minify esbuild، `cssCodeSplit: true`، dev/preview على 0.0.0.0:8080.
+
+### 3.4 `vercel.json` (992 سطراً)
+
+- 14 قاعدة headers:
+  - `/api/*`: noindex + no-store + nosniff.
+  - assets/fonts/images + favicons: `max-age=31536000, immutable` (كسر الكاش عبر `?v=`).
+  - sitemaps/robots/security.txt: content-type + cache قصير.
+  - **قاعدة noindex مخصصة لـ 3 منتجات محظورة** (power-36/procomil-fort/viagra-pfizer): `X-Robots-Tag: noindex, follow, noarchive, nosnippet, noimageindex`.
+  - قاعدة noimageindex لصورها (بما فيها thumbs).
+  - `/(.*)`: 13 ترويسة أمنية موحدة (HSTS preload، CSP صارمة، COOP same-origin، OAC، Report-To→/api/csp-report، NEL، Permissions-Policy…) مطابقة حرفياً لما في server/index.js.
+- 152 redirect: كل منتج `id→slug` (301) + legacy aliases (منتجات محذوفة → قسمها) + `/index.html`→`/` + `/product/:slug`→`/products/:slug`.
+- rewrite واحد: `/api/(.*)` → serverless.
+
+### 3.5 `src/main.tsx`
+
+- **SW force-clear (v28)**: يسجّل `elysr_sw_force_clear_v28`؛ عند أول زيارة: unregister كل service workers + حذف Cache Storage + حذف `elysr_fallback` (هجرة خصوصية: الإصدارات القديمة كانت تخزن بيانات طلبات — لم تعد).
+- mount React داخل try/catch يعرض خطأ مرئي بالعربية بدون حقن HTML.
+
+### 3.6 `src/router.tsx` + `src/routes/__root.tsx`
+
+- router: `scrollRestoration: true`، `defaultPreload: "intent"` (hover)، staleTime 30s، GC 5د.
+- `__root.tsx`:
+  - `installErrorTracking()` عند التحميل (listener عام error/unhandledrejection + breadcrumbs).
+  - `RouteHeadSync`: يقرأ `head()` من آخر route مطابق، يستخرج title/desc/og:image/og:type/robots ثم `applySeo(...)` + `trackPageView` (GA عبر gtag أو dataLayer).
+  - `CartProvider` → `ScrollRestoration` → `Layout` → `Outlet`، Toaster lazy (sonner 33KB خارج المسار الحرج)، `Analytics` + `SpeedInsights` (Vercel).
+  - NotFound (404 noindex) + Error (إعادة محاولة عبر invalidate).
+
+### 3.7 الصفحة الرئيسية `index.tsx`
+
+9 أقسام، كل واحد مغلف بـ `SectionErrorBoundary` (عزل الأعطال):
+
+1. Hero → 2. AnniversaryPromo (عدّاد دورة الخصم) → 3. RecentlyViewed → 4. FeaturedProducts (6 فقط) → 5. ShopByConcern → 6. WhyUs → 7. ProductsTabs (تبويبات الفئات) → 8. DailyAdvice → 9. ArticlesGrid.
+
+### 3.8 صفحة المنتج `products.$slug.tsx` (892 سطراً — قلب المتجر)
+
+- `loader`: جلب المنتج بالـ slug + crossSells + 4 منتجات مشابهة (مرتبة تقييم/ID).
+- `head`: title = اسم المنتج، description من `makeProductMetaDescription` (غني بالسعر/التقييم لمنع Google إعادة كتابته)، **`robots noindex` تلقائياً إذا المنتج في GOOGLE_SHOPPING_BLOCKED**، og:type=product + og:image مطلق.
+- في الـ component:
+  - `clearPrerenderJsonLd()` ثم `injectJsonLd("product", productSchema(product))` (يُتخطى للمحظور) + breadcrumb.
+  - تتبع recently-viewed، scroll tracking (`Product_slug`)، lazy import للمقالات المرتبطة.
+  - **نموذج طلب سريع (quick order)**: focus trap، تحقق `isValidEgyptianPhone`، sanitize + normalize، `generateOrderId()`، حساب كامل (subtotal→tier→discount→shipping→total)، `void submitToGoogleSheets(payload)` (غير محدد — الـ redirect فوري)، فتح `wa.me/201098088206` برابط `<a target=_blank rel=noopener>`.
+  - `getProductSafetyNotice`: كشف دوائي (sildenafil/tadalafil/… أو "130/60") → تنبيه طبي قوي، كشف موضعي (lidocaine/spray/تأخير) → تنبيه موضعي، وإلا تنبيه عام.
+  - عرض: breadcrumbs، صورة (ProductImage)، badges (متوفر/نفد)، السعر + شريط الخصم، تنبيه "باقي X فقط" (≤5)، الوصف + 4 مميزات، "لماذا تطلب من اليسر"، تنبيه الأمان، صندوق الشحن السري، المكونات/الاستخدام، كمية + زرا (واتساب/سلة)، Trust icons، CrossSellBundle، ProductReviews، FAQ، مشابهة، RecentlyViewed، مقالات مرتبطة، وشريط سفلي ثابت للموبايل.
+
+### 3.9 السلة والـ checkout `cart.tsx` (534 سطراً)
+
+- الشحن يُحسب حسب المحافظة (`getShippingCost`) مع **شحن مجاني ≥2000**.
+- محفزات: "أضف X لتحصل على خصم Y" (الشريحة التالية) و"أضف X للشحن المجاني".
+- `syncCatalog`: يعيد تسعير/إسقاط أي سلة قديمة مقابل الكتالوج الحي.
+- التحقق: الحقول، `isValidEgyptianPhone`، `qty ≤ stock` لكل عنصر.
+- **طريقتان**:
+  - واتساب: buildOrderMessage (PII كاملة في الرسالة) + `void submitToGoogleSheets` + حفظ **orderId فقط** في sessionStorage (تم حذف تخزين رابط الواتساب الذي يحتوي PII) + فتح واتساب + مسح السلة → `/thank-you`.
+  - مباشر: نفس التسجيل في الخلفية (فوري بدون انتظار 10 ثوانٍ) → `/order-confirmed`.
+
+### 3.10 `contexts/cart.tsx`
+
+- key `elysr_cart_v3`، 50 عنصراً كحد أقصى، qty مقصوص بحد المخزون.
+- **لا PII في الـ storage**: id/slug/name/price/emoji/image/qty فقط.
+- مزامنة تبويبات عبر `storage` event.
+- الخصم **basket-level** (وليس per-item): `getPromoTier(subtotal)` ثم round — متطابق رياضياً مع حساب السيرفر (نفس config-db.json).
+
+### 3.11 `src/lib/site-config.ts` — "الجسر"
+
+يستورد `api/lib/config-db.json` مباشرة: الواجهة والسيرفر يقرآن نفس القيم (شحن المحافظات، حد الشحن المجاني، شرائح الخصم) — أي تعديل في مكان واحد.
+
+### 3.12 `src/lib/promo.ts`
+
+- "مبادرة الرعاية الماسية": 1000→15% / 1500→20% / 2000→25%.
+- دورة 3 أيام من epoch `2026-01-01T00:00Z` (عدّاد "يتجدد" بدون ادعاء انتهاء).
+- `isPromoActive()` دائماً true؛ `getPromoTier` يبحث أول شريحة (مرتبة نزولياً)؛ `getNextTier` للترويج.
+
+### 3.13 `src/lib/utils.ts`
+
+- `isValidEgyptianPhone`: مصري (01[0125]XXXXXXXX محلياً أو +20/0020) أو أجنبي 7–15 رقماً يبدأ +/00.
+- `normalizeEgyptianPhone`: توحيد للصيغة المحلية أو E.164.
+- `generateOrderId`: `#EL-<base36 timestamp>-<8 random>` (يتطابق مع regex السيرفر `#?EL-[A-Z0-9-]{4,60}`).
+- `sanitizeInput`: قص + حذف `<>\"'&\`` + `javascript:`+`data:`+`on*=`+ **حماية Formula/CSV injection** ( بادئة`'`إذا بدأ بـ`=+-@\t\r` — يمنع تنفيذ معادلات في الشيت).
+- `sanitizeForMsg`: نفس الشيء + حذف `*~|#{}[]` (تنسيق واتساب).
+
+### 3.14 `src/lib/whatsapp.ts`
+
+- `buildOrderMessage`: رسالة منظمة (رقم الطلب، اسم/هاتف/محافظة/عنوان sanitized، كل منتج بسعره الفرعي + رابط منتج مطلق، المجموع/الخصم/الشحن/الإجمالي).
+
+### 3.15 `src/lib/seo.ts`
+
+- `applySeo`: يحدّث title/description/robots/**googlebot**/og/twitter/canonical (يخلق العناصر إن لم توجد).
+- noindex → `noindex,follow,noarchive,nosnippet,noimageindex` (follow ممتدة حتى لا تنقطع قيمة الروابط الداخلة).
+- `productSchema`: Product + aggregateRating (فقط إن reviews>0) + Offer (EGP، InStock، priceValidUntil سنة، 14 يوم إرجاع) + **`merchantShippingDetails()` مولّدة من نفس config الشحن** (باندات 50/70/80/100/120) + Brand.
+- `articleSchema`: Article + author (د. أحمد عيد) + reviewedBy (هيئة المراجعة) + **citation من sources** + publisher.
+- `itemListSchema`: **يستبعد المحظورين** من ItemList.
+- `clearPrerenderJsonLd`: يزيل `data-prerender` schemas قبل إعادة الحقن (يمنع التكرار بعد hydration).
+
+### 3.16 `src/lib/product-compliance.ts`
+
+- `GOOGLE_SHOPPING_BLOCKED = {m-38, m-43, m-45}` (Power 36 / Procomil Fort / Viagra Pfizer).
+- `isCatalogFeedEligible`: غير محظور وstock>0.
+- `RED_PRODUCT_IDS` فارغ (توافق قديم).
+
+### 3.17 `src/lib/product-reviews.ts`
+
+- توليد **حتمي** (deterministic) للتقييمات: `hashCode(slug)` → `mulberry32` → خلط Fisher-Yates.
+- 10 تقييمات رجال / 9 نساء / 8 أجهزة (نصوص واقعية: سرية التغليف، دعم واتساب…).
+- عدد المعروض = عدد الـ schema بالضبط، والمتوسط = متوسط المعروض — **تطابق دائم** بين الواجهة وJSON-LD (مطلوب سياسياً لنجوم Google).
+- حالة خاصة `kreva-gel`: 73 تقييماً تاريخياً → يعرض 5 شهادات 5★ فقط.
+
+### 3.18 `src/lib/internal-links.ts` (655 سطراً)
+
+- محرك ترابط ثلاثي الاتجاهات:
+  - منتج→مقال: 29 قاعدة regex (عربي/إنجليزي) + fallback حسب الفئة، يعيد مقالين.
+  - مقال→منتج: ~50 قاعدة hardcoded + **مسار ديناميكي** (فئة المقال ثم كلمات مفتاحية في النص) + fallback نهائي.
+  - مقال→مقالات: خريطة RELATED_CATS (نفس الفئة أولاً ثم 3).
+  - لاندينج→مقال: 28 قاعدة regex.
+
+### 3.19 `src/lib/error-tracking.ts`
+
+- <2KB بديل Sentry: correlation ID (sessionStorage)، breadcrumbs (clicks/نقلات history، أخيراً 20)، سياق المتصفح، POST إلى `VITE_ERROR_SINK_URL` (keepalive) أو console في dev.
+
+### 3.20 `src/lib/cache.ts` + `config/cache-version.json`
+
+- إصدار الكاش المركزي (v28): `assetUrl`/`thumbUrl` يبدلان أي `?v=` قديم بالتحديث — مصدره الوحيد `config/cache-version.json` (تتحقق منه data-integrity) ويرفعه `release.mjs`.
+
+### 3.21 بيانات المنتجات `src/data/`
+
+- `product-types.ts`: الواجهة (id/slug/name/nameEn/category/price/description/benefits/ingredients/usage/badge/emoji/image/rating/reviews/stock/featured/crossSell).
+- `products/men.ts` (52) · `women.ts` (23) · `devices.ts` (7) — بيانات كاملة (وصف ≥80 حرف، 5–7 فوائد، مكونات، طريقة استخدام، سعر، مخزون).
+- `products.ts` (المنسّق):
+  - ترتيب الفئات: مخزون أولاً → pinned-last (3 منتجات نساء) → pinned-top (6 رجال / 10 نساء) → featured/badge → popularity (`rating×reviews` بفارق سماحية 50) → سعر تصاعدي.
+  - `HOMEPAGE_EXCLUDED_PRODUCT_IDS = {m-02, m-03, m-49, m-45}`.
+  - `HOME_FEATURED_ORDER`: 6 منتجات VIP أعلى + pool ثانوي (m-11, m-01, m-44, m-60, w-15, w-02).
+  - `getCrossSellsForProduct`: crossSell محددة أو خوارزمية (حبوب→تأخير+عسل، تأخير→صلابة+عسل، عسل→صلابة+كريم، نساء→ثلاثي ثابت، أجهزة→ثابت).
+  - `productIdToSlug`: خريطة legacy ID→slug للـ redirects.
+- `articles.ts` (56): كاتش أب `a(...)`، **تاريخ نشر حتمي** (hash(slug) % 360 يوماً من 2025-07-01)، updatedAt ≥ 2026-08-15، مصادر per-category (Mayo/Cleveland/NHS/NIH)، مؤلف + مرشد ثابتان + 6 إشارات ثقة تحريرية.
+- `landing-pages.ts` (92): كل صفحة = slug/metaTitle/metaDescription/eyebrow/heroDescription/intro/sections/productIds/links/faqs/primaryKeyword/relatedKeywords/noindex.
+
+### 3.22 المكونات
+
+- `Header.tsx` (448): هيدر fixed يختفي عند النزول (بعد 60px)، Ctrl/Cmd+K لفتح البحث (lazy)، درج موبايل (يُحفظ scroll + قفل body + تعويض scrollbar)، عدادات السلة/المفضلة، زر تثبيت PWA، رابط "تتبع طلبك" واتساب، روابط دعم.
+- `SearchBar.tsx`: Fuse.js (threshold 0.4، وزن name=2/nameEn=1/description=0.5) — **الكتالوج 254KB لا يُحمّل حتى أول حرف**.
+- `ProductCard.tsx`: شارة "الاستخدام" مولّدة regex (تأخير/انتصاب/ترطيب/تكبير/طاقة…)، قلب مفضلة، شارات مخزون، `rel=nofollow` للمحظور، صورة lazy مع fallback إيموجي.
+- `Accessibility.tsx`: focus trap (Tab cycle + إعادة الفوكس عند الإغلاق).
+- `SectionErrorBoundary`: يعزل كل قسم في الهوم.
+- Sections: Hero (preload صورة hero فقط في الهوم)، AnniversaryPromo (عدّاد `getTimeLeft` كل ثانية)، CrossSellBundle (باقات ثلاثية)، ArticleContentWithAds (حقن منتجات داخل فقرات المقال)، DailyAdvice، ProductsTabs، ArticlesGrid، RecentlyViewed، WhyUs، ShopByConcern.
+- `ProductImage`/`ProductCardImage`: srcset (main + thumbs + thumbs-180) مع `assetUrl`.
+
+### 3.23 الـ hooks
+
+- `use-wishlist`: `elysr_wishlist_v1`، 100، أحداث custom + storage + focus.
+- `use-recently-viewed`: 12، إعادة ترتيب (الأحدث أولاً).
+- `use-scroll-tracking`: 50%/90% (rAF throttled).
+- `use-pwa-install`: beforeinstallprompt defer + standalone detection.
+
+## 4) طبقة الأمان (API)
+
+### 4.1 `api/submit-order.js` (359 سطراً)
+
+1. **CORS/Origin**: whitelist (store + www + VERCEL_URL + localhost في dev)؛ يقبل أيضاً same-origin/none عبر `sec-fetch-site` + host.
+2. **Rate limit**: 30/دقيقة/IP — المفتاح **hashed** (sha256 → 16 hex).
+3. **Body**: ≤64KB.
+4. `validateOrderPayload` (صرامة كاملة):
+   - رفض null/arrays/primitives + **حماية prototype pollution** (`__proto__`/constructor/prototype).
+   - orderId: `#?EL-[A-Z0-9-]{4,60}`.
+   - هاتف: مصري محلي أو دولي `+\d`.
+   - orderType ∈ {cart, شراء فوري}، paymentMethod ∈ {واتساب, طلب مباشر}.
+   - governorate يجب أن يوجد حرفياً في config-db.
+   - items: 1–50، qty صحيح 1–999، **كل منتج يجب أن يوجد في products-db.json** (مولّد من نفس الكود وقت البناء)، stock>0، qty≤stock.
+   - **اسم المنتج يُستبدل بالاسم الرسمي** (منع حقن أسماء).
+   - **السعر يُتحقق منه رياضياً** مقابل الكتالوج + subtotal + discount (بنفس دوال الخصم) + shipping (بنفس دوال الشحن) + total — أي تلاعب = رفض.
+5. **Whitelist حقول** (15 حقلاً) فقط ما يمر للشيت.
+6. IP العميل **يُرسل hash فقط** (آخر 16 hex) — مع ملاحظة في الكود أن hash لا يضمن كشف الاحتيال الكامل لكنه يحفظ الخصوصية.
+7. POST للشيت `x-www-form-urlencoded` بـ timeout 10s (AbortController)؛ خطأ Apps Script المنطقي (200 مع success:false) → **502** حتى لا يظن العميل أن الطلب اكتمل؛ رسائل الخطأ مقطوعة 200 حرف (منع log flooding/تسريب).
+
+### 4.2 `api/csp-report.js`
+
+- 50/دقيقة/IP (hashed)، body ≤4KB، يدعم formatين (csp-report و reporting-api array).
+- **sanitize حقول الـ log** (حذف \r\n\t\0 + قص 160) — منع Log Injection.
+- يتجاهل eval/inline (ضجيج إضافات المتصفح).
+
+### 4.3 `api/delete-customer-data.js`
+
+- حق النسيان (GDPR): 5/دقيقة/IP، هاتف مُتحقق، يسجل **phone hash** فقط، الحذف الفعلي يدوياً/عبر `deleteCustomerData(phone)` في Apps Script.
+
+### 4.4 `api/lib/rate-limiter.js`
+
+- Fixed-window في الذاكرة، cleanup كل 5 دقائق، مفاتيح hashed — "طبقة أولى سريعة" على كل instance.
+
+## 5) الخادم الذاتي `server/index.js` (240 سطراً)
+
+- Express 5 + compression + trust proxy.
+- **SSG-first**: أي مسار يوجد له `.html` في dist يُخدَّم (TTFB milisecondي)؛ غير الموجود → **404 حقيقي** (404.html + `no-store`).
+- ملاحظة موثقة: Express 5 أزال wildcard `*` → يستخدم `app.get(/.*/)` + `fileForUrl` (مع منع path traversal `..`).
+- ترويسات أمنية **مطابقة لـ vercel.json حرفياً** + noindex للمحظور + noimageindex لصورها.
+- Cache: HTML `max-age=3600, s-maxage=86400, SWR`؛ static `1yr immutable`.
+- `/health` → `{"status":"ok"}` فقط (لا يكشف معلومات تشغيلية).
+- يركّب الـ 3 API handlers inline (نفس الكود المستخدم في Vercel).
+
+## 6) محرك البناء
+
+### 6.1 `scripts/generate-sitemap.mjs` (prebuild)
+
+- عبر `vite.ssrLoadModule` (يقرأ TS بلا dev server):
+  - يكتب `api/lib/products-db.json` (نسخة الكتالوج للتحقق الخلفي) و`api/lib/config-db.json` (SSOT).
+  - `sitemap.xml`: 12 ثابت + 79 منتج (82−3 محظور) + 56 مقال + 92 guide = **239 URL** مع hreflang + image:image + lastmod **حقيقي من git log** (ليست "اليوم" دائماً — تجنب عقوبة lastmod).
+  - `sitemap-images.xml` (صور بـ title/caption) + `sitemap-index.xml`.
+  - `catalog-feed.xml` (Google Merchant): 79 مؤهل، وصف مدمج (description+ingredients+usage ≤5000).
+  - `robots.txt`: يسمح Bots AI (GPTBot, ChatGPT-User, Perplexity, Claude…) ويمنع CCBot/Bytespider؛ لا Disallow لصفحات noindex (لأن Disallow يمنع قراءة وسم noindex).
+  - **92 ملف JSON فردي** لصفحات اللاندينج (في public/landing-pages/) + **مسح ملفات قديمة** لم تعد في المصدر.
+
+### 6.2 `scripts/prerender-seo.mjs` (1073 سطراً)
+
+- يبني 246 صفحة من قالب dist/index.html:
+  - استبدال/إدراج: title (قص ذكي عند حدود كلمة + إغلاق أقواس مفتوحة ≤65)، description (≤155)، og/twitter، canonical، robots/googlebot.
+  - **Preload صورة الـ hero في الهوم فقط** (imagesrcset + fetchpriority high) — غير موجودة في الـ template العام لتجنب unused-preload.
+  - JSON-LD `data-prerender` (Product/Article/Breadcrumb/FAQ/ItemList/WebPage) — **المحظورون: breadcrumb فقط + noindex**.
+  - **محتوى crawler داخل `#root`** (div مخفي): H1 + وصف + مميزات + روابط منتجات/مقالات **ثابتة** (بدونها لا يجد الزاحف أي مسار لصفحات المنتجات لأن القوائم SPA).
+  - صفحات الفئات: روابط كل المنتجات + FAQ + ItemList (المحظورون `rel=nofollow`).
+  - صفحات المنتجات: related products بصور alt/title (لمنع لخبطة Google Images).
+
+### 6.3 `scripts/data-integrity.test.mjs` (332 سطراً) — "بوابة الجودة"
+
+يتحقق من: تطابق products-db/config-db مع الكود، **82 منتجاً بتقسيم 52/23/7**، بلا تكرار IDs/slugs، slugs `[a-z0-9-]+`، وصف ≥80، فوائد ≥3، ID prefix مطابق للفئة، **وجود الصورة والثمبنيل فعلياً**، Kreva ثابتة (300ج/5.0/73)، **الهوم بالضبط 6 featured + 12 concern + 12 tabs** بلا مستبعدين، الـ redirects تغطي كل المنتجات permanent، Apps Script يحمل بحث idempotency كامل + قبول أرقام دولية، **المحظورون خارج sitemap/image-sitemap/feed**، ترويسة noindex موجودة، cart/thank-you/order-confirmed خارج sitemap، حسابات الخصم (999→0, 1000→150, 1500→300, 2000→500)، وسلامة التوصيات الذكية.
+
+### 6.4 سكربتات أخرى
+
+- `sync-vercel-redirects.mjs`: يعيد توليد redirects الـ ID→slug من الكود + legacy aliases (المحذوف → قسمه).
+- `release.mjs`: semver bump + **رفع cache version** + commit + tag.
+- `health-check.mjs`: تدقيق أحجام bundles والصور.
+- `validate-schemas.mjs`: فحص JSON-LD في dist بعد البناء.
+- `validate-article-sources.mjs`: تحقق من حيوية روابط المصادر ودعم الادعاءات.
+- `optimize-images.mjs`/`process-hero.mjs`: معالجة sharp (WebP 700–800px q45–55).
+
+## 7) Google Apps Script (565 سطراً)
+
+- `doPost`: **ScriptLock** (waitLock 10s) → parse → `normalizeItems` (50 حداً، qty 1–999، price clamp) → تحقق هاتف (مصري/دولي) → **rate limit CacheService 15/دقيقة/هاتف** (المفتاح الهاتف، أو IP لرقم الاختبار) → **idempotency**: بحث `createTextFinder(orderId)` كامل (محدود بـ 50 صف؟ لا — كل العمود، داخل الـ lock) → appendRowByHeaders (يقرأ الهيدر الموجود ولا يفترض ترتيب الأعمدة) → تلوين صف → **إشعار إيميل** (اختياري) → `{success:true}`.
+- كل خطأ → رسالة عامة آمنة (لا تفاصيل داخلية).
+- `doGet` لا يكشف إحصاءات.
+- إنشاء/ترقية الشيت تلقائياً (أعمدة ناقصة، Data Validation لحالة الطلب من قائمة 7 حالات، تجميد هيدر، فلتر).
+- `autoCleanupOldOrders`: حذف تلقائي بعد 90 يوماً (تقليل الاحتفاظ بـ PII).
+- `deleteCustomerData(phone)`: حق النسيان.
+- `clean()`: حذف رموز + **بادئة `'` لحماية Formula injection**.
+
+## 8) الاختبارات
+
+- **Vitest: 10 ملفات / 119 اختباراً** — أهمها `submit-order-api.test.ts` (310 أسطر): قبول payload صحيح + normalizing المحافظة، رفض primitives/arrays، qty كسري/فوق المخزون، حقول غير صالحة، price mismatch، subtotal mismatch، shipping mismatch، CORS رفض، rate limit، timeout 504، Apps Script reject→502…
+- `compliance.test.ts`: المحظورون خارج كل القنوات.
+- `promo.test.ts`/`governorates.test.ts`/`utils.test.ts` (XSS + formula injection + phones) + `catalog-contradictions` (لا تعارض بيانات) + `csp-report-api`.
+- **Playwright e2e** (3 اختبارات):
+  1. تدفق كامل: إضافة للسلة → زيادة كمية (2×300) → طلب مباشر (القاهرة: 600+50=650) → `/order-confirmed` + payload مطابق.
+  2. منتج دوائي محظور: ظاهر + 200 + ترويسة noindex + meta robots + noimageindex للصورة + موجود في صفحة القسم.
+  3. HTTP 404 حقيقي لروابط مجهولة.
+
+## 9) CI (4 jobs)
+
+1. **static**: lint + typecheck + data-integrity + unit (fetch-depth: 0 لازمة لـ git log في sitemaps).
+2. **build**: vite build + prerender + **validate-schemas** + artifact dist (7 أيام).
+3. **lighthouse**: يخدم dist عبر server/index.js الحقيقي (clean URLs) + LHCI بميزانية: LCP ≤3.5s (error)، CLS ≤0.25 (error)، perf ≥0.6، a11y/seo ≥0.9 (warn).
+4. **e2e**: Playwright على Chromium.
+
+## 10) سياسة الامتثال الدوائي (القصة الكاملة)
+
+- **حُذفت نهائياً (5)**: m-34 Hard-On، m-36 Vegal، m-37 Cialis، m-47 Levitra، w-17 Viagra Women → من DB + من صورها، مع 301 → /products/men أو /women.
+- **محظورة من Google فقط (3 متبقية)**: m-38 Power 36، m-43 Procomil Fort، m-45 Viagra Pfizer:
+  - **داخل الموقع**: ظاهرة وقابلة للشراء (رابط مباشر + واتساب) — قرار تجاري موثق: الحذف الكامل يفقد مبيعات.
+  - **خارج**: homepage (م-45 أصلاً)، sitemap.xml، sitemap-images.xml، catalog-feed.xml، ItemList JSON-LD، Product JSON-LD.
+  - **حماية noindex متعددة الطبقات**: `X-Robots-Tag: noindex,follow,noarchive,nosnippet,noimageindex` (vercel.json + server)، `meta robots/googlebot noindex` (prerender + head runtime)، `rel=nofollow` على روابطها، و`noimageindex` على ملفات صورها.
+
+## 11) الأداء (قائمة التحسينات الموثقة)
+
+- Code-splitting لكل فئة + articles/landing خارج الباندل (JSON فردي عند الزيارة — 465KB لم تعد في أي bundle).
+- Toaster lazy، SearchBar lazy (Fuse + كتالوج 254KB يُحمّل عند أول حرف).
+- GA مؤجل (2 ثوانٍ + أول تفاعل، `send_page_view:false` + page_view يدوية في SPA + beacon).
+- خط Cairo ذاتي + critical CSS + preload hero (هوم فقط).
+- صور WebP 8–55KB (متوسط 26KB) + thumbs 16KB + srcset + immutable 1yr + `?v=28` مركزي.
+- `defaultPreload: intent` للراوتر (hover) + staleTime 30s.
+- خادم SSG: HTML ثابت (TTFB ms) + 404 حقيقي.
+- ميزانية Lighthouse في CI.
+
+## 12) ما تم التحقق منه عملياً (2026-08-26)
+
+| الفحص                       | النتيجة                                                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `npm ci`                    | ✓                                                                                                                  |
+| `npm test` (data-integrity) | ✓ data integrity tests passed                                                                                      |
+| `npm run test:unit`         | ✓ 10 ملفات / 119 اختباراً                                                                                          |
+| `npm run build`             | ✓ 246 صفحة (16 ثابت + 82 منتج + 56 مقال + 92 guide)                                                                |
+| `node server/index.js`      | ✓ `/` 200 · `/products/men` 200 · منتج 200 · غير موجود 404 · `/health` ok · power-36 يحمل `X-Robots-Tag: noindex…` |
+
+## 13) ملاحظات/تناقضات مكتشفة أثناء القراءة — وحالتها
+
+1. ✅ **تم الإصلاح (2026-08-26)**: e2e test 2 كان stale (يختبر hard-on المحذوف). الآن يختبر `power-36-power-control-for-36-hours` (المحظور المتبقي القياسي): ظاهر 200 + `X-Robots-Tag: noindex` + meta robots/googlebot noindex + `noimageindex` للصورة + موجود بروابط nofollow في صفحة القسم. واختبار 404 الحقيقي ما زال سليماً.
+2. ✅ **تم الإصلاح (2026-08-26)**: `server/index.js` الآن يحمّل جدول الـ 152 redirect من `vercel.json` وينفّذه بنفس السلوك (301 للثابتة و `:param` للباراميترية — `/product/:slug`، `/blog/:slug`، `/articles/:slug`، `/category/:slug`، `/products/category/:slug`) — النشر الذاتي أصبح مطابقاً لـ Vercel. اختبار e2e جديد يثبت 301 للمحذوفات (m-34→/products/men، w-17→/products/women) بـ `fetch` مع `redirect:"manual"` (لأن fixture الـ request لـ Playwright يتبع الـ redirects).
+3. ✅ **تم التنفيذ (2026-08-26)**: أُضيف m-38/m-43 إلى `HOMEPAGE_EXCLUDED_PRODUCT_IDS` لسياسة موحدة للأدوية المحظورة في الهوم (6 منتجات الآن). يعمل تلقائياً لأن `ProductsTabs` و`ShopByConcern` يفلتران بالمجموعة — المنتجات تبقى ظاهرة في صفحة القسم وصفحاتها المباشرة فقط. التحقق: data-integrity (6+12+12 بلا مستبعدين) + e2e 4/4. الإلغاء = حذف سطرين من المجموعة.
+4. ⏳ **بنيوي (موثق)**: `api/delete-customer-data.js` يسجل طلب الحذف فقط؛ الحذف الفعلي يدوي/مجدول في Apps Script (`deleteCustomerData(phone)` + `autoCleanupOldOrders` كل 90 يوم).
+5. ✓ **سليم**: e2e يتوقع `/products/kreva-gel` = 650 ج.م عند كميّتين (300×2+50) — مطابق لـ config الحالي (شحن القاهرة 50، لا خصم تحت 1000).
+
+### سجل الإصلاح (2026-08-26)
+
+| التغيير                                                                 | الملف                  | التحقق                                                                                                             |
+| ----------------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| e2e: noindex test → power-36 (المحظور المتبقي)                          | `e2e/checkout.spec.ts` | ✓ 4/4 e2e في متصفح حقيقي                                                                                           |
+| e2e: اختبار 301 جديد للمحذوفات                                          | `e2e/checkout.spec.ts` | ✓                                                                                                                  |
+| خادم ذاتي: تنفيذ جدول redirects من vercel.json (152 قاعدة + باراميترات) | `server/index.js`      | ✓ curl: m-01→slug، m-34→men، w-17→women، /blog/x→/education/x، /index.html→/                                       |
+|                                                                         |                        | `npm run ci` كاملة خضراء: lint + typecheck + integrity + 119 unit + build 246 صفحة + 1154 JSON-LD schema (0 أخطاء) |
