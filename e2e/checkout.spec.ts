@@ -88,6 +88,19 @@ test("education index serves 200 directly and slashed form 301s to it (Vercel pa
   expect(slashed.headers.get("location")).toBe("/education");
 });
 
+test("category URL search ?q filters products (SearchAction target)", async ({ page }) => {
+  // The home JSON-LD SearchAction targets /products/men?q={search_term_string}
+  await page.goto("/products/men?q=كريفا");
+  await expect(page.getByText("نتائج البحث عن: «كريفا»")).toBeVisible();
+  await expect(page.getByRole("link", { name: /جل كريفا/ }).first()).toBeVisible();
+  // a non-matching product must be filtered out of the grid
+  expect(await page.getByRole("link", { name: /هامر أوف ثور/ }).count()).toBe(0);
+  // clearing the search restores the full grid
+  await page.getByRole("link", { name: "مسح البحث" }).click();
+  await expect(page.getByRole("link", { name: /هامر أوف ثور/ }).first()).toBeVisible();
+  expect(await page.getByText(/نتائج البحث عن/).count()).toBe(0);
+});
+
 test("unknown routes return a real HTTP 404", async ({ request }) => {
   const response = await request.get("/this-route-does-not-exist");
   expect(response.status()).toBe(404);

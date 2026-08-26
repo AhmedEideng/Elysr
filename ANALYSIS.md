@@ -554,3 +554,29 @@ api/submit-order.js ← bundles-db.json (مولّد البناء من نفس ا�
 
 ### البوابات:
 lint/typecheck/integrity/124 وحدة/build 246/**e2e 7/7** ✓
+
+## 20) معالجة SearchAction — تفعيل ?q بحث حقيقي في /products/men
+
+المشكلة: `SearchAction` في JSON-LD الرئيسي يعلن `/products/men?q={search_term_string}`
+لكن الموقع لا يفلتر حسب `?q` → جوجل قد يعرض sitelinks search لا تعمل.
+
+### الحل (تفعيل الميزة لا إزالتها):
+- `validateSearch: (s): { q?: string }` — اختياري بنوع صريح (حتى لا يُطلَب
+  search من كل Link في الموقع) + تطبيع (trim/إهمال الفارغ).
+- `loader` يفلتر كتالوج الرجال (name/nameEn/slug/description/ingredients)
+  case-insensitive من `location.search.q`.
+- UI: بانر "نتائج البحث عن: «q» — X من Y منتج" + زر "مسح البحث"،
+  وحالة فارغة مع CTA عند عدم وجود نتائج.
+- ItemList JSON-LD يعكس النتائج المفلترة تلقائياً (يعمل من items).
+
+### باغ حقيقي اكتُشف أثناء التنفيذ (وثيق الصلة بالفهرسة):
+- **TanStack Router v1.170 لا يعيد تشغيل الـ loader عند تغيير search فقط**
+  (نفس المسار = match.cause "stay") — تم التأكد من ذلك بمقياس في الـ loader
+  وقراءة مصدر router (load-client.js:362: reload يتطلب cause "enter" أو
+  shouldReload). الإصلاح: `shouldReload: () => true` (الـ loader فلتر محلي
+  بلا شبكة → بلا تكلفة). بدون هذا كان مسح/تغيير البحث يعيد البيانات القديمة.
+
+### e2e #5 يثبّت: فلترة كريفا (2 روابط فقط) + اختفاء هامر + مسح البحث يعيد الشبكة كاملة.
+
+### البوابات:
+lint/typecheck/integrity/124 وحدة/build 246/**e2e 8/8** ✓
