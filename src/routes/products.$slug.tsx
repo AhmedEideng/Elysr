@@ -520,6 +520,7 @@ function ProductPage() {
                 <div className="flex items-center rounded-full border bg-muted/50 p-1 w-fit">
                   <button
                     onClick={() => setQty(Math.max(1, qty - 1))}
+                    aria-label={`تقليل كمية ${product.name}`}
                     className="h-10 w-10 inline-flex items-center justify-center rounded-full transition-smooth hover:bg-accent"
                   >
                     <Minus className="h-4 w-4" />
@@ -528,6 +529,7 @@ function ProductPage() {
                   <button
                     onClick={() => setQty(Math.min(qty + 1, maxStock))}
                     disabled={atStockLimit}
+                    aria-label={`زيادة كمية ${product.name}`}
                     className={`h-10 w-10 inline-flex items-center justify-center rounded-full transition-smooth ${
                       atStockLimit ? "opacity-30 cursor-not-allowed" : "hover:bg-accent"
                     }`}

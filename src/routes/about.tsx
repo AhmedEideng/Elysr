@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { products } from "@/data/products";
 import {
   Award,
   Globe,
@@ -66,8 +67,9 @@ function AboutPage() {
           </p>
           <p>
             اليوم، <strong className="text-foreground">أكثر من 50,000 عميل</strong> يثقون بنا عبر كل
-            محافظات مصر، ونقدم <strong className="text-foreground">87 منتج أصلي</strong> مع توصيل
-            سري لـ <strong className="text-foreground">27 محافظة</strong> والدفع عند الاستلام.
+            محافظات مصر، ونقدم{" "}
+            <strong className="text-foreground">{products.length} منتج أصلي</strong> مع توصيل سري لـ{" "}
+            <strong className="text-foreground">27 محافظة</strong> والدفع عند الاستلام.
           </p>
         </div>
       </section>
@@ -76,7 +78,7 @@ function AboutPage() {
       <section className="mt-8 grid gap-4 grid-cols-2 md:grid-cols-4">
         {[
           { n: "+50,000", label: "عميل يثق بنا", icon: Users },
-          { n: "87", label: "منتج أصلي", icon: Package },
+          { n: String(products.length), label: "منتج أصلي", icon: Package },
           { n: "27", label: "محافظة نغطيها", icon: MapPin },
           { n: "10+", label: "سنوات خبرة", icon: Clock },
         ].map((s) => (

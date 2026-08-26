@@ -1,10 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { ShieldCheck, Truck, Lock, CreditCard } from "lucide-react";
+import { products } from "@/data/products";
 
+// العدد ديناميكي من الكتالوج حتى لا يبتعد عن الحقيقة عند إضافة/حذف منتجات
+// (كان "87" hardcoded بينما الكتالوج 82 — أرقام قديمة كانت تظهر في الهوم)
 const stats = [
   { value: "50,000+", label: "عميل يثق بنا" },
   { value: "27", label: "محافظة نغطيها" },
-  { value: "87", label: "منتج أصلي" },
+  { value: String(products.length), label: "منتج أصلي" },
   { value: "10+", label: "سنوات خبرة" },
 ];
 
