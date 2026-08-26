@@ -97,7 +97,7 @@ Browser ──→ Vercel CDN (static dist/)
 │   │   ├── product-compliance.ts  # Merchant/sitemap - 3 blocked (m-38,m-43,m-45) noindex - w-17 deleted
 │   │   ├── promo.ts            # Tiered discount system
 │   │   ├── governorates.ts     # 27 Egyptian governorates + shipping + submitToGoogleSheets
-│   │   ├── cache.ts            # Centralized cache version (v28) + assetUrl/thumbUrl
+│   │   ├── cache.ts            # Centralized cache version (config/cache-version.json, bumped by `npm run release`) + assetUrl/thumbUrl
 │   │   └── whatsapp.ts         # Order message builder (full PII for WhatsApp + minimal for URL)
 │   ├── routes/                 # 20 route files (including order-view for encrypted links - now removed)
 │   ├── contexts/cart.tsx       # Cart state (localStorage IDs only, sessionStorage orderId only)

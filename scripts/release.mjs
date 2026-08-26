@@ -67,11 +67,28 @@ function bumpCacheVersion() {
   cacheConfig.version = String(currentV + 1);
   writeFileSync(cachePath, JSON.stringify(cacheConfig, null, 2) + "\n", "utf-8");
   console.log(`🗂️  رفع إصدار الكاش المركزي → ${cacheConfig.version}`);
+  return cacheConfig.version;
 }
-bumpCacheVersion();
+const newCacheVersion = bumpCacheVersion();
+
+// ──  مزامنة آخر رقم مبعثر يدوياً: ga-loader.js?v=XX في index.html ──
+// (باقي أرقام ?v= في الأصول ديناميكية من CACHE_VERSION وقت البناء — هذا هو
+// الرقم الوحيد الثابت، فيُزامَن هنا حتى يتحرك كل الأرقام معاً في كل release)
+function syncGaLoaderVersion(newVersion) {
+  const indexPath = new URL("../index.html", import.meta.url);
+  const html = readFileSync(indexPath, "utf-8");
+  const updated = html.replace(/(\/scripts\/ga-loader\.js\?v=)\d+/, `$1${newVersion}`);
+  if (updated !== html) {
+    writeFileSync(indexPath, updated, "utf-8");
+    console.log(`🔗 مزامنة ga-loader.js?v=${newVersion} في index.html`);
+  } else {
+    console.log("🔗 ga-loader.js ?v= بالفعل على الإصدار الحالي");
+  }
+}
+syncGaLoaderVersion(newCacheVersion);
 
 try {
-  execSync("git add package.json config/cache-version.json", { stdio: "inherit" });
+  execSync("git add package.json config/cache-version.json index.html", { stdio: "inherit" });
   execSync(`git commit -m "release: v${next}"`, { stdio: "inherit" });
   execSync(`git tag "v${next}"`, { stdio: "inherit" });
   console.log(`✅ تم إنشاء tag: v${next}`);
