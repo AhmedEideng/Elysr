@@ -580,3 +580,37 @@ lint/typecheck/integrity/124 وحدة/build 246/**e2e 7/7** ✓
 
 ### البوابات:
 lint/typecheck/integrity/124 وحدة/build 246/**e2e 8/8** ✓
+
+## 21) المسح الأخير الشامل — "هل يوجد أي شيء في أي مكان"
+
+### الفحوصات الجديدة ونتائجها:
+1. **`scripts/health-check.mjs`** (أداة المشروع الخاصة، لم تشغل من قبل): سليم —
+   247 HTML، 306 صورة (متوسط 19.3KB)، أكبر HTML = 53KB (men.html)، فيد 79 منتج.
+2. **`scripts/auto-generate-article.mjs`** (خط النشر التلقائي، 523 سطراً — قُرئ كاملاً):
+   سليم البنية: بنك 70 كلمة + Gemini (3 fallback) + dedup slug/title + stripper مارك داون
+   + صور Pollinations (G-rated) مع fallback غلاف + `.generated-article-slug`
+   + workflow يفعّل test:sources ثم ci الكاملة ثم commit+rebase+push.
+   **الفجوة الوحيدة الحقيقية**: التحقق من حيوية المصادر كان على **المقال الجديد فقط**
+   (انظر 3). ملاحظات تشغيلية (ليست أخطاء): الصور تولد وتُنشر بدون مراجعة بشرية،
+   و`readMin` غير مُتحقق من نوعه (احتمال نظري كسر timeRequired — يغطيه validate-schemas).
+3. **Lighthouse بـ CI نفسه (desktop + throttling دقيق من .lighthouserc.json)**:
+   | الصفحة | Perf | A11y | BP | SEO | LCP | CLS |
+   |---|---|---|---|---|---|---|
+   | هوم | 99 | 100 | 100 | 100 | 1.0s | 0 |
+   | /products/men | 99 | 100 | 100 | 100 | 0.9s | 0 |
+   | PDP | 99 | 100 | 100 | 100 | 1.0s | 0 |
+   → مهمة Lighthouse في CI ستمر بهامش واسع (الميزانية: LCP≤3.5s error، CLS≤0.25 error).
+4. **الموقع الحي**: ترويسات الأمان كلها موجودة ومطابقة للـ repo (CSP/HSTS-preload/COOP/
+   NEL/Report-To/XFO/XCTO/Referrer/Permissions) · `robots.txt` مطابق md5 ·
+   `security.txt` مطابق RFC 9116 (Contact/Expires 2027-08-25/Canonical/Policy).
+
+### أُصلح (الفجوة 3): فحص كوربوس المصادر
+- **`scripts/check-source-links.mjs`** جديد: يفحص **كل** الروابط الفريدة في **كل**
+  المقالات (54 URL حالياً) — 2xx/3xx سليم، 401/403 تحذير (فلتر روبوتات)،
+  404/5xx/timeout (مع إعادة محاولة) → فشل.
+- **`ci.yml`**: job `source-links` يعمل على كل push/PR + **أسبوعياً** (سبت 07:00 UTC،
+  قبل النشر التلقائي للمقالات) — أي رابط ميت يُسقط الـ CI ويُصلح قبل التراكم.
+- تشغيل محلي: 53 حياً + 1 bot-blocked (ScienceDirect) + 0 ميت ✓
+
+### الحالة النهائية:
+lint/typecheck/integrity/124 وحدة/build 246/**e2e 8/8**/فحص المصادر ✓

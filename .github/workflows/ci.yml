@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    # فحص دوري أسبوعي (سبت 07:00 UTC) لكل مصادر المقالات — يفشل الووركفلو
+    # إذا وجد روابط ميتة حتى تُصلح قبل تراكمها (انظر check-source-links.mjs).
+    - cron: "0 7 * * 6"
 
 # Cancel previous runs on the same branch to save CI minutes
 concurrency:
@@ -16,6 +20,29 @@ env:
   NODE_VERSION: 24
 
 jobs:
+  # ─────────────────────────────────────────────────────────
+  # 0) Corpus source liveness — كل روابط المصادر في كل المقالات
+  #    (خط النشر التلقائي يفحص الجديد فقط؛ هذا يغطي الكوربوس كاملاً)
+  # ─────────────────────────────────────────────────────────
+  source-links:
+    name: 🔗 Corpus Source Liveness (all articles)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --prefer-offline
+
+      - name: Check all article source URLs
+        run: node scripts/check-source-links.mjs
+
   # ─────────────────────────────────────────────────────────
   # 1) Static analysis — fast feedback before expensive jobs
   # ─────────────────────────────────────────────────────────
