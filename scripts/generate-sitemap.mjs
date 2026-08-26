@@ -106,7 +106,14 @@ async function generateSitemap() {
       day: "2-digit",
     }).format(new Date());
 
-    const productLastmod = freshLastmod("src/data/products.ts", today);
+    const productLastmod = [
+      freshLastmod("src/data/products.ts", today),
+      freshLastmod("src/data/products/men.ts", today),
+      freshLastmod("src/data/products/women.ts", today),
+      freshLastmod("src/data/products/devices.ts", today),
+    ]
+      .sort()
+      .pop(); // أحدث تعديل حقيقي لأي ملف من ملفات الكتالوج
     const landingLastmod = freshLastmod("src/data/landing-pages.ts", today);
 
     const staticRoutes = [
@@ -292,7 +299,34 @@ ${articleImageEntries}
 </sitemapindex>
 `;
 
-    // 4. بناء ملف الكتالوج لفيسبوك وجوجل (Facebook / Google Merchant Feed)
+    // 4. بناء ملفات الكتالوج (XML + CSV + TXT) للـ 79 منتجاً المؤهل فقط
+    // 🛒 Google Merchant Center يطلب المكونات داخل الوصف.
+    // معظم أوصاف المنتجات تنتهي أصلاً بـ "المكونات/طريقة الاستخدام" —
+    // نضيفها فقط إن لم تكن موجودة لمنع تكرار النص (كان يكرر في كل الأصناف).
+    const buildFeedDescription = (p) => {
+      let fullDesc = (p.description || "").trim();
+      if (p.ingredients && !fullDesc.includes(p.ingredients)) {
+        fullDesc += " المكونات: " + p.ingredients;
+      }
+      if (p.usage && !fullDesc.includes(p.usage)) {
+        fullDesc += " طريقة الاستخدام: " + p.usage;
+      }
+      // Google Merchant يقبل حتى 5000 حرف في الوصف
+      return fullDesc.slice(0, 5000);
+    };
+
+    const feedRow = (p) => ({
+      id: p.id,
+      title: p.name,
+      description: buildFeedDescription(p),
+      link: `${SITE_URL}/products/${p.slug}`,
+      image_link: `${SITE_URL}${assetUrl(p.image)}`,
+      brand: "اليسر ميديكال",
+      condition: "new",
+      availability: p.stock > 0 ? "in stock" : "out of stock",
+      price: `${p.price} EGP`,
+    });
+
     const catalogXml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
   <channel>
@@ -301,34 +335,54 @@ ${articleImageEntries}
     <description>كتالوج منتجات الصحة الزوجية الأصلية من اليسر ميديكال</description>
 ${catalogProducts
   .map((p) => {
-    // 🛒 Google Merchant Center يطلب المكونات داخل الوصف
-    // ندمج description + ingredients + usage لوصف شامل
-    let fullDesc = p.description || "";
-    if (p.ingredients) {
-      fullDesc += " المكونات: " + p.ingredients;
-    }
-    if (p.usage) {
-      fullDesc += " طريقة الاستخدام: " + p.usage;
-    }
-    // Google Merchant يقبل حتى 5000 حرف في الوصف
-    fullDesc = fullDesc.slice(0, 5000);
-
+    const row = feedRow(p);
     return `    <item>
-      <g:id>${esc(p.id)}</g:id>
-      <g:title>${esc(p.name)}</g:title>
-      <g:description>${esc(fullDesc)}</g:description>
-      <g:link>${SITE_URL}/products/${p.slug}</g:link>
-      <g:image_link>${SITE_URL}${assetUrl(p.image)}</g:image_link>
-      <g:brand>اليسر ميديكال</g:brand>
-      <g:condition>new</g:condition>
-      <g:availability>${p.stock > 0 ? "in stock" : "out of stock"}</g:availability>
-      <g:price>${p.price} EGP</g:price>
+      <g:id>${esc(row.id)}</g:id>
+      <g:title>${esc(row.title)}</g:title>
+      <g:description>${esc(row.description)}</g:description>
+      <g:link>${row.link}</g:link>
+      <g:image_link>${row.image_link}</g:image_link>
+      <g:brand>${esc(row.brand)}</g:brand>
+      <g:condition>${row.condition}</g:condition>
+      <g:availability>${row.availability}</g:availability>
+      <g:price>${row.price}</g:price>
     </item>`;
   })
   .join("\n")}
   </channel>
 </rss>
 `;
+
+    // CSV (متوافق مع Excel) وTXT (Tab-separated) — نفس المنتجات الوصف نفسه
+    // كانا يُولّدا يدوياً ويبتعدان عن الكتالوج؛ الآن جزء من البناء.
+    const FEED_COLUMNS = [
+      "id",
+      "title",
+      "description",
+      "link",
+      "image_link",
+      "brand",
+      "condition",
+      "availability",
+      "price",
+    ];
+    const feedRows = catalogProducts.map(feedRow);
+    const csvEscape = (v) => {
+      const s = String(v ?? "");
+      return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const csvContent =
+      [
+        FEED_COLUMNS.join(","),
+        ...feedRows.map((row) => FEED_COLUMNS.map((c) => csvEscape(row[c])).join(",")),
+      ].join("\r\n") + "\r\n";
+    const txtContent =
+      [
+        FEED_COLUMNS.join("\t"),
+        ...feedRows.map((row) =>
+          FEED_COLUMNS.map((c) => String(row[c] ?? "").replace(/[\t\r\n]+/g, " ")).join("\t"),
+        ),
+      ].join("\r\n") + "\r\n";
 
     const robots = `# robots.txt — Elysr Medical Group
 # ${SITE_URL}
@@ -376,6 +430,8 @@ Sitemap: ${SITE_URL}/catalog-feed.xml
     writeFileSync(resolve(outDir, "sitemap-images.xml"), imageXml, "utf-8");
     writeFileSync(resolve(outDir, "sitemap-index.xml"), indexXml, "utf-8");
     writeFileSync(resolve(outDir, "catalog-feed.xml"), catalogXml, "utf-8");
+    writeFileSync(resolve(outDir, "catalog-feed.csv"), csvContent, "utf-8");
+    writeFileSync(resolve(outDir, "catalog-feed.txt"), txtContent, "utf-8");
     writeFileSync(resolve(outDir, "robots.txt"), robots, "utf-8");
 
     // ⚡ تحسين الأداء: توليد ملفات JSON فردية لكل Landing Page

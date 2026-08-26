@@ -2,7 +2,7 @@ name: 💎 Auto Publish Weekly Medical Article
 
 on:
   schedule:
-    # Every Monday at 09:00 UTC (12:00 Cairo during daylight-saving time).
+    # Every Monday at 09:00 UTC (11:00 Cairo — Egypt is permanently UTC+2 since 2023, no DST).
     - cron: "0 9 * * 1"
   workflow_dispatch:
 

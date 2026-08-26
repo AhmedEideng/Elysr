@@ -370,3 +370,34 @@ Browser ──→ Vercel CDN (dist/ ثابتة مسبقاً)
 | e2e: اختبار 301 جديد للمحذوفات                                          | `e2e/checkout.spec.ts` | ✓                                                                                                                  |
 | خادم ذاتي: تنفيذ جدول redirects من vercel.json (152 قاعدة + باراميترات) | `server/index.js`      | ✓ curl: m-01→slug، m-34→men، w-17→women، /blog/x→/education/x، /index.html→/                                       |
 |                                                                         |                        | `npm run ci` كاملة خضراء: lint + typecheck + integrity + 119 unit + build 246 صفحة + 1154 JSON-LD schema (0 أخطاء) |
+
+## 14) التدقيق الثاني (Audit) — اكتشافات إضافية وإصلاحها
+
+أُجري فحص موسع للأجزاء المتبقية + **فحص تجريبي** (headless Chromium على dist: 0 مخالفات CSP على الهوم/PDP/مقال).
+
+### أُصلحت (commit "audit"):
+
+1. **`index.html` — JSON-LD قديم**: `OfferCatalog` كان `numberOfItems: 59` للرجال (الفعلي 52). ✓ أصبح 52/23/7.
+2. **تكرار النص في feeds**: `generate-sitemap.mjs` كان يضيف "المكونات/طريقة الاستخدام" مرة ثانية رغم أن `description` تنتهي بها أصلاً → النص مكرر في كل صنف بالـ XML/CSV/TXT. ✓ دالة `buildFeedDescription` تضيف فقط إن غابت.
+3. **CSV/TXT لا يُولّدان بالبناء**: كانا يُولّدان يدوياً فيبتعدان عن الكتالوج. ✓ أصبحا يُولّدان في `generate-sitemap.mjs` (نفس 79 منتجاً، CRLF، اقتباس CSV قياسي، TSV نظيف).
+4. **`use-scroll-tracking` كود ميت**: كان يحسب 50%/90% ولا يرسل أي حدث. ✓ أصبح يرسل حدث GA4 `scroll` (مع page_title/percent_scrolled) عبر gtag أو dataLayer، مرة لكل milestone لكل صفحة.
+5. **lastmod خاطئ للمنتجات**: sitemap كان يأخذ git-log لـ `products.ts` (المنسق) بينما البيانات في `men/women/devices.ts`. ✓ أصبح `max(git-log للملفات الأربعة)`.
+6. **`public/offline.html` ملف ميت** (لم يرد له ذكر في الكود — التطبيق network-only). ✓ حُذف.
+7. **تعليقات قديمة**: "87 منتج" في product-compliance.ts (الفعلي 82) · تعليق cron في auto-publish ("12:00 Cairo during daylight-saving" — مصر ألغت التوقيت الصيفي: 09:00 UTC = 11:00 دائماً). ✓ صُححتا.
+
+### ملاحظات تشغيلية (لا تحتاج كوداً — قرار نشر):
+
+8. **Vercel Hobby: timeout الدوال = 10 ثوانٍ** وهو يساوي `GOOGLE_SHEETS_TIMEOUT_MS` → إن تباطأ Apps Script قد تُقتل الدالة قبل إرجاع 504. Apps Script عادة <2 ثوانٍ (يعمل). إن ظهرت أعطال: حدّث الخطة أو أضف `functions: {"api/submit-order.js": {"maxDuration": 30}}` في vercel.json (متاح بـ Pro).
+9. **النشر الذاتي (Docker/Railway)**: Vercel Analytics + Speed Insights يعيدان 404 (نقاط نهاية خاصة بمنصة Vercel) — التحليلات لا تعمل بالنشر الذاتي + ضجيج console. الخيارات: تجاهل، أو stub مساري `/_vercel/insights/script.js` و`/_vercel/speed-insights/script.js` في server/index.js.
+10. **CORS في `delete-customer-data.js`** يتضمن localhost في الإنتاج (بريء عملياً — same-origin فقط والاستجابة بلا حساس) — يمكن ربطها بـ NODE_ENV كمواصلة.
+
+### ملاحظات تصميم/سياسة (مقصودة — للمراجعة فقط):
+
+11. **عرض التقييمات**: PDP تعرض "4.9 (48 تقييم)" في الهيدر + الـ schema نفسه 48، لكن قائمة التقييمات تعرض 5 عينات حتمية (من 10/9/8 نص). النمط شائع، لكن تعليق product-reviews.ts يبالغ ("عدد المعروض = عدد الـ schema بالضبط") — الرقم المعروض (48) مطابق للـ schema، أما العينة فـ 5. إن أردت مطابقة صارمة: اجعل `reviewsCount` = عدد العينة (يقلل المصداقية الظاهرة) — قرار تسويقي.
+12. **CSP `img-src https:`** أوسع من اللازم (كل الصور self-hosted) — يمكن التضييق لـ `'self' data: blob:` كتصعيدي أمان إضافي.
+
+### نتيجة الفحص التجريبي (headless Chromium على dist):
+
+- **0 مخالفات CSP** (هوم + PDP + مقال) — بما فيها inline JSON-LD وخطوط GA والـ fonts الذاتية.
+- GA4 يتحمل (مؤجل: 2 ثوانٍ + أول تفاعل) — page_view تُرسل يدوياً من `RouteHeadSync`.
+- 404s الوحيدة: `/_vercel/insights` + `/_vercel/speed-insights` (متوقع محلياً — أنظر ملاحظة 9).
