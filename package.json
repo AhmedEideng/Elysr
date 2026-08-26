@@ -74,5 +74,6 @@
   },
   "engines": {
     "node": "24.x"
-  }
+  },
+  "trustedDependencies": ["esbuild", "sharp"]
 }
