@@ -213,7 +213,14 @@ function CartPage() {
               action: {
                 label: "الطلب عبر واتساب",
                 onClick: () => {
-                  const msg = buildOrderMessage(orderItems, sc, orderId, shipping, freeShippingApplied, bundleDiscount);
+                  const msg = buildOrderMessage(
+                    orderItems,
+                    sc,
+                    orderId,
+                    shipping,
+                    freeShippingApplied,
+                    bundleDiscount,
+                  );
                   const a = document.createElement("a");
                   a.href = waLink(msg);
                   a.target = "_blank";

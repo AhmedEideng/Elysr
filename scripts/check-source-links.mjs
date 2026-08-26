@@ -44,7 +44,9 @@ try {
     }
   }
   const urls = [...byUrl.keys()];
-  console.log(`🔗 Checking ${urls.length} unique source URLs across ${articles.length} articles...`);
+  console.log(
+    `🔗 Checking ${urls.length} unique source URLs across ${articles.length} articles...`,
+  );
 
   const ok = [];
   const blocked = [];
@@ -83,7 +85,9 @@ try {
   };
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
-  console.log(`\n✅ live: ${ok.length} | ⚠️ bot-blocked (401/403, likely live): ${blocked.length} | ❌ dead: ${dead.length}`);
+  console.log(
+    `\n✅ live: ${ok.length} | ⚠️ bot-blocked (401/403, likely live): ${blocked.length} | ❌ dead: ${dead.length}`,
+  );
   for (const u of blocked) console.log(`   ⚠ 401/403  ${u}`);
   for (const [u, s] of dead) {
     const meta = byUrl.get(u);
@@ -91,7 +95,9 @@ try {
   }
 
   if (dead.length > 0) {
-    console.error(`\n❌ ${dead.length} dead source link(s) — fix in src/data/articles.ts (category source lists).`);
+    console.error(
+      `\n❌ ${dead.length} dead source link(s) — fix in src/data/articles.ts (category source lists).`,
+    );
     process.exit(1);
   }
   console.log("\n✅ All corpus sources are live (or bot-blocked).");

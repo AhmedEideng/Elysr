@@ -394,7 +394,8 @@ ${catalogProducts
       [
         FEED_COLUMNS.join(","),
         ...feedRows.map((row) => FEED_COLUMNS.map((c) => csvEscape(row[c])).join(",")),
-      ].join("\r\n") + "\r\n";
+      ].join("\r\n") +
+      "\r\n";
     const txtContent =
       [
         FEED_COLUMNS.join("\t"),

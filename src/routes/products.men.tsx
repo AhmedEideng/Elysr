@@ -64,8 +64,9 @@ export const Route = createFileRoute("/products/men")({
     const q = typeof qRaw === "string" ? qRaw.toLowerCase() : "";
     const items = q
       ? all.filter((p) =>
-          [p.name, p.nameEn, p.slug, p.description, p.ingredients ?? ""]
-            .some((field) => field.toLowerCase().includes(q)),
+          [p.name, p.nameEn, p.slug, p.description, p.ingredients ?? ""].some((field) =>
+            field.toLowerCase().includes(q),
+          ),
         )
       : all;
     return { items, query: typeof qRaw === "string" ? qRaw : "", total: all.length };

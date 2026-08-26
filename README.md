@@ -29,7 +29,7 @@ Elysr Medical is a production Arabic (RTL) e-commerce store serving Egypt. It ru
 | Products           | **82** (52 men · 23 women · 7 devices) - 5 pharma deleted per Merchant report (including w-17)              |
 | Articles           | **56** educational health articles                                                                          |
 | SEO Guides         | **92** long-form landing pages (79 unique products, diversified)                                            |
-| Pre-rendered Pages | **246** application pages (248 HTML incl. 404/offline)                                                      |
+| Pre-rendered Pages | **246** application pages (247 HTML incl. 404)                                                                         |
 | Sitemap URLs       | **239** (12 static + 79 products + 56 articles + 92 guides) - 79 eligible = 82 total - 3 blocked            |
 | Catalog Feed       | **79** eligible items (3 prescription products excluded - m-38,m-43,m-45) - w-17 deleted                    |
 | Redirects          | **152** unique (301 permanent) - includes 5 deleted pharma (m-34,m-36,m-37,m-47,w-17) → /products/men/women |

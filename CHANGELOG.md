@@ -22,7 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Removed deleted product references**: cleaned up dead references to `m-51`
   (Overtime) and `m-10` across pinned-order lists, category tabs, concern cards,
   internal-links, and compliance lists. Kept the **301 redirects** to protect SEO.
-- Current catalog: **87 products** (56 men · 24 women · 7 devices).
+- Current catalog: **82 products** (52 men · 23 women · 7 devices) after the five
+  pharma deletions (m-34, m-36, m-37, m-47, w-17); 3 remaining blocked
+  (m-38, m-43, m-45) stay on-site with layered noindex.
 - Articles count is **56** (51 via the `a()` helper + 5 authored as literal objects).
 
 ### 🔒 Security hardening
@@ -109,6 +111,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fixed duplicate `<h1>`** on every page (the template `<noscript>` `<h1>` → `<p>`);
   every page now has exactly one unique H1.
 - **`robots.txt`** now also disallows `/wishlist`.
+
+### 🔍 2026-08 deep audit (8 rounds) — findings and fixes
+
+**Compliance / Catalog**
+
+- **Unified blocked-pharma homepage policy**: `m-38`/`m-43` added to
+  `HOMEPAGE_EXCLUDED_PRODUCT_IDS` — no prescription product appears in any
+  homepage section (still visible and purchasable on category/direct pages
+  with the existing layered noindex).
+- **Real 10% bundle discount**: cross-sell bundles now apply an actual
+  discount, recalculated and enforced server-side from the build-generated
+  `bundles-db.json` (zero client trust; fail-closed if the map is missing).
+  Google Sheets gains a "خصم الباقة" column. The bundle UI no longer
+  advertises a discount that was never applied.
+
+**SEO / Indexation**
+
+- **12 dead medical source links replaced** with verified-live equivalents
+  (Cleveland Clinic renumbered IDs, NHS restructure, MedlinePlus/Mayo/NIH
+  renames). Re-audit: 54 unique sources, 0 dead.
+- **Corpus-wide source liveness CI job** (`scripts/check-source-links.mjs`):
+  checks every source of every article on each push/PR and weekly — the
+  auto-publish pipeline previously validated only the freshly generated
+  article, so dead links could accumulate silently.
+- **Real `?q` URL search on `/products/men`** (the SearchAction target) with
+  results banner, empty state, and filtered ItemList schema. Also fixed a
+  TanStack Router v1.170 behaviour where loaders do not re-run on search-only
+  navigations (`shouldReload: () => true`; verified against the router source).
+- **Self-hosted `/education` inverted 301 fixed** (Vercel parity: 200 direct +
+  trailing-slash normalisation) — it contradicted the canonical/indexed URL
+  structure. E2E-locked.
+- **Hero 480w variant generated** (designed by `process-hero.mjs` but never
+  produced) and wired into the Hero srcSet + home-only preload.
+- Full indexing audit (real crawl): 239/239 sitemap URLs 200, 82/82 product
+  pages 200, 0 noindex leaks, 0 canonical mismatches, 1154 JSON-LD schemas
+  valid.
+
+**Reliability**
+
+- **No silent order loss**: failed direct checkout now keeps the cart
+  (previously cleared with a success toast) and offers a WhatsApp fallback
+  with the full prebuilt order message. E2E covers 502 → retry → success.
+- **CSV feed UTF-8 BOM** so Arabic survives Excel on Windows (Google Merchant
+  handles the BOM natively).
+
+**Performance / Accessibility**
+
+- Lighthouse with the exact CI desktop throttling: **99/100/100/100** on
+  home/men/PDP, LCP ~1s, CLS 0 (budgets: LCP ≤ 3.5s error, CLS ≤ 0.25 error).
+- Fixed PDP heading order (h1→h3 skip) and redundant alt on concern tiles;
+  `aria-label`s on PDP quantity controls.
+- Self-hosted Vercel Analytics endpoints served as valid no-op stubs
+  (404/MIME console errors gone in Docker deployments).
+- Homepage "87 منتج أصلي" stat was stale → now dynamic from the catalog.
+
+**Docs / Hygiene**
+
+- CHANGELOG catalog-count line corrected (87→82 after the five pharma
+  deletions); README HTML counts updated (`offline.html` removed with the
+  network-only PWA policy).
+- Suite totals: **124 unit tests, 8 Playwright e2e, 246 prerendered pages**.
 
 ### ✨ Added
 
