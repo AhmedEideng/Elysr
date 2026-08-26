@@ -76,6 +76,18 @@ test("deleted product legacy URLs 301 to their category section", async ({ baseU
   expect(womenResp.headers.get("location")).toBe("/products/women");
 });
 
+test("education index serves 200 directly and slashed form 301s to it (Vercel parity)", async ({
+  baseURL,
+}) => {
+  // Vercel (trailingSlash:false) serves /education directly and 308s the
+  // slashed form. Self-hosted must match: no inverted slash redirect.
+  const direct = await fetch(`${baseURL}/education`, { redirect: "manual" });
+  expect(direct.status).toBe(200);
+  const slashed = await fetch(`${baseURL}/education/`, { redirect: "manual" });
+  expect(slashed.status).toBe(301);
+  expect(slashed.headers.get("location")).toBe("/education");
+});
+
 test("unknown routes return a real HTTP 404", async ({ request }) => {
   const response = await request.get("/this-route-does-not-exist");
   expect(response.status()).toBe(404);

@@ -211,6 +211,15 @@ app.use((req, res, next) => {
 // ── Legacy URL redirects (Vercel parity) ──
 app.use((req, res, next) => {
   if (req.method !== "GET" && req.method !== "HEAD") return next();
+
+  // Vercel parity (trailingSlash: false): الصيغة القانونية بلا شلطة —
+  // /education/ → 301 /education (Vercel يفعلها بـ 308، و301 هنا هو القياسي).
+  // بدون هذا كانت express.static تسبق المعالج الرئيسي وتحوّل /education
+  // (ملف .html + مجلد بنفس الاسم) إلى 301 بالشكل المعكوس — تناقض فهرسة.
+  if (req.path.length > 1 && req.path.endsWith("/")) {
+    return res.redirect(301, req.path.slice(0, -1));
+  }
+
   const exact = redirectExact.get(req.path);
   if (exact) return res.redirect(exact.status, exact.destination);
   for (const rule of redirectPatterns) {
@@ -226,10 +235,14 @@ app.use((req, res, next) => {
 });
 
 // ── Static assets (dist/) with long-term caching ──
+// redirect: false — لا نريد تحويل express.static لمجلدات dist (مثل
+// /education حيث الملف والمجلد بنفس الاسم) إلى 301/؛ المعالج الرئيسي
+// يقدم dist/education.html مباشرة، وتطبيع الشلطة أعلاه يتبع سلوك Vercel.
 app.use(
   express.static(DIST, {
     maxAge: "365d",
     immutable: true,
+    redirect: false,
     setHeaders(res, filePath) {
       if (filePath.endsWith(".html")) {
         res.setHeader("Cache-Control", HTML_MAX_AGE);

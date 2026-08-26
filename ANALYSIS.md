@@ -515,3 +515,42 @@ api/submit-order.js ← bundles-db.json (مولّد البناء من نفس ا�
 ### الحالة:
 - e2e: **6/6** (إضافة اختبار منع الفقدان الصامت).
 - كل البوابات خضراء (lint/typecheck/integrity/124 وحدة/build 246/e2e 6).
+
+## 19) التدقيق الثامن (Audit 8) — تدقيق فهرسة شامل (SEO/Indexing)
+
+### النتيجة الحاسمة: لا يوجد قاتل فهرسة — لكن اكتُشف وأُصلح باغ تحويل معكوس:
+
+**البلاغ (self-hosted فقط)**: `/education` كان يعيد **301 → /education/** (عكس سلوك Vercel
+الذي يخدم /education مباشرة ويعكس /education/ إليه 308). السبب: `dist/education.html` +
+مجلد `dist/education/` (للمقالات) بنفس الاسم — `express.static` سبقت المعالج الرئيسي
+بـ directory-redirect. النتيجة: URL الـ sitemap (`/education`) يُحوَّل، والقانينون
+`/education` (بلا شلطة) → تناقض URL/redirect/ canonical + اختلاف عن بنية الإنتاج
+المفهرسة (لو انتقل الموقع للنشر الذاتي سيحصل Google على إشارات متضاربة).
+
+**الإصلاح** (server/index.js):
+- `express.static(DIST, { redirect: false })` — لا تحويلات مجلدات.
+- تطبيع الشلطة مطابقاً لـ Vercel (trailingSlash:false): أي مسار بشلطة زائدة → 301 بلا شلطة.
+- e2e #4 يثبّت: `/education` → 200 مباشر، `/education/` → 301 → `/education`.
+
+### جرد الفهرسة الكامل (تزحلق حقيقي):
+| الفحص | النتيجة |
+|---|---|
+| 239 URL من sitemap.xml | **239/239 = 200** (قبل الإصلاح: 238 + 301) |
+| تسرب noindex في صفحات مفهرسة | **0** |
+| canonical غير مطابق لنفسه | **0** |
+| عناوين/أوصاف مفقودة أو ضعيفة | **0** |
+| 82 صفحة منتج (بما فيها 3 محظورة) | **82/82 = 200** |
+| المحظورون (m-38/43/45): ترويسة noindex + meta noindex + **بدون** Product schema | ✓ مطابق للتصميم (قابلة للشراء، غير مفهرسة) |
+| الـ 79 المفهرسة تحمل Product schema | ✓ الكل |
+| 404.html | noindex,nofollow ✓ |
+| robots.txt | يسمح Googlebot + AI bots، يمنع CCBot/Bytespider، Googlebot-Image مسموح ✓ |
+| hreflang (ar-eg + x-default) | ✓ في كل الصفحات |
+
+### ملاحظة صغيرة (قرار، ليست قاتلة):
+- `SearchAction` في JSON-LD الرئيسي يشير إلى `/products/men?q={search_term_string}`
+  لكن البحث في الـ SPA ليس URL-driven (Ctrl+K فقط) — جوجل قد يعرض خانة بحث
+  sitelinks لا تفلتر فعلياً. الخيارات: تفعيل `?q` في روتين الفئات (ميزة)،
+  أو إزالة SearchAction من الـ JSON-LD. غير حرج للفهرسة.
+
+### البوابات:
+lint/typecheck/integrity/124 وحدة/build 246/**e2e 7/7** ✓
