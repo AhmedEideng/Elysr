@@ -46,6 +46,10 @@ export interface CartCtx {
   discount: number;
   /** شريحة الخصم المُطبَّقة حالياً (null لو لا يوجد خصم) */
   tier: PromoTier | null;
+  /** قيمة خصم الباقة الحقيقي (0 لو لا توجد باقة مكتملة) */
+  bundleDiscount: number;
+  /** الباقة المكتملة المطبقة حالياً (null لو لا توجد) */
+  appliedBundle: { mainId: string; ids: string[] } | null;
   add: (p: Product, qty?: number) => void;
   remove: (id: string) => void;
   setQty: (id: string, qty: number) => void;
@@ -85,6 +89,42 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return [];
   });
   const [hydrated, setHydrated] = useState(false);
+
+  // 🎁 خصم الباقة الحقيقي — يُحسب من محرك الباقات (chunk منفصل يُحمَّل
+  // كسولاً فقط عندما تحتوي السلة على عنصرين أو أكثر — الباقة تحتاج ≥2).
+  // نفس القاعدة تماماً في السيرفر (bundles-db.json) فيُتحقق منه خلفياً.
+  // نمط القيمة المشتقة: الإعادة للوضع الأساسي أثناء الـ render (بدون effect)،
+  // ونتيجة الاستيراد المتزامن تُقبل فقط إذا لم تتغير العناصر (race guard).
+  const itemsKey = items.map((i) => `${i.id}:${i.qty}`).join("|");
+  const [bundleState, setBundleState] = useState<{
+    key: string;
+    discount: number;
+    bundle: { mainId: string; ids: string[] } | null;
+  }>({ key: "", discount: 0, bundle: null });
+
+  if (bundleState.key !== itemsKey) {
+    setBundleState({ key: itemsKey, discount: 0, bundle: null });
+  }
+
+  useEffect(() => {
+    if (items.length < 2) return; // لا يمكن اكتمال أي باقة
+    let cancelled = false;
+    import("@/lib/bundle-discount").then(({ calcBundleDiscountForItems }) => {
+      if (cancelled) return;
+      const { discount, bundle } = calcBundleDiscountForItems(
+        items.map((i) => ({ id: i.id, qty: i.qty, price: i.price })),
+      );
+      setBundleState((prev) =>
+        prev.key === itemsKey ? { key: itemsKey, discount, bundle } : prev,
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [items, itemsKey]);
+
+  const bundleDiscount = bundleState.discount;
+  const appliedBundle = bundleState.bundle;
 
   useEffect(() => {
     setTimeout(() => setHydrated(true), 0);
@@ -228,7 +268,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     // الخصم المتدرج يُحسب على إجمالي السلة (وليس على كل منتج)
     const tier = getPromoTier(subtotalBeforeDiscount);
     const discount = tier ? Math.round(subtotalBeforeDiscount * tier.discount) : 0;
-    const total = subtotalBeforeDiscount - discount;
+    // الإجمالي = قبل الخصم − خصم الشرائح − خصم الباقة (مطابق لحساب السيرفر)
+    const total = subtotalBeforeDiscount - discount - bundleDiscount;
     return {
       items: normalizedItems, // استخدم الـ normalized للـ consistency في الـ payload والـ UI
       count,
@@ -236,6 +277,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       subtotalBeforeDiscount,
       discount,
       tier,
+      bundleDiscount,
+      appliedBundle,
       add,
       remove,
       setQty,
@@ -243,7 +286,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
       syncCatalog,
       isStockLimitReached,
     };
-  }, [items, add, remove, setQty, clear, syncCatalog, isStockLimitReached]);
+  }, [
+    items,
+    bundleDiscount,
+    appliedBundle,
+    add,
+    remove,
+    setQty,
+    clear,
+    syncCatalog,
+    isStockLimitReached,
+  ]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

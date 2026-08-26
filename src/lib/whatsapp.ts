@@ -38,6 +38,7 @@ export const buildOrderMessage = (
   orderId?: string,
   shipping?: number,
   freeShipping = false,
+  bundleDiscount = 0,
 ) => {
   const lines: string[] = [];
   const origin =
@@ -73,11 +74,12 @@ export const buildOrderMessage = (
 
   const tier = isPromoActive() ? getPromoTier(subtotalBefore) : null;
   const discount = tier ? Math.round(subtotalBefore * tier.discount) : 0;
-  const subtotalAfter = subtotalBefore - discount;
+  const subtotalAfter = subtotalBefore - discount - (bundleDiscount || 0);
 
   lines.push("");
   lines.push(`المجموع: ${subtotalBefore} ج.م`);
   if (tier && discount > 0) lines.push(`خصم ${tier.label}: -${discount} ج.م`);
+  if (bundleDiscount && bundleDiscount > 0) lines.push(`خصم الباقة: -${bundleDiscount} ج.م`);
   if (freeShipping) lines.push("الشحن: مجاني");
   else if (shipping && shipping > 0) lines.push(`الشحن: ${shipping} ج.م`);
   lines.push(`الإجمالي: ${subtotalAfter + (shipping || 0)} ج.م`);

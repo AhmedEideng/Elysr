@@ -271,6 +271,8 @@ function ProductPage() {
         items: orderItems,
         subtotalBeforeDiscount: subtotal,
         discount,
+        // شراء فوري = منتج واحد فقط → لا يمكن أن تكتمل أي باقة
+        bundleDiscount: 0,
         subtotal: subtotalAfterDiscount,
         shipping,
         total: grandTotal,

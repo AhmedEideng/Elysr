@@ -48,6 +48,8 @@ function CartPage() {
     subtotalBeforeDiscount,
     discount,
     tier,
+    bundleDiscount,
+    appliedBundle,
     setQty,
     remove,
     clear,
@@ -150,6 +152,8 @@ function CartPage() {
       items: orderItems,
       subtotalBeforeDiscount,
       discount,
+      // قيمة إرشادية — السيرفر يعيد حسابها من bundles-db.json ولا يثق بها
+      bundleDiscount,
       subtotal: total,
       shipping,
       total: grandTotal,
@@ -157,7 +161,14 @@ function CartPage() {
     };
 
     if (method === "whatsapp") {
-      const msg = buildOrderMessage(orderItems, sc, orderId, shipping, freeShippingApplied);
+      const msg = buildOrderMessage(
+        orderItems,
+        sc,
+        orderId,
+        shipping,
+        freeShippingApplied,
+        bundleDiscount,
+      );
       const url = waLink(msg);
 
       // واتساب هو قناة التأكيد الأساسية. نسجل الطلب فوراً بدون مطالبة العميل بالعودة للموقع.
@@ -364,11 +375,19 @@ function CartPage() {
                   </span>
                   <span>-{formatPrice(discount) || "0 ج.م"}</span>
                 </div>
-                <div className="text-sm flex justify-between font-bold">
-                  <span>المجموع بعد الخصم</span>
-                  <span className="text-emerald-700">{formatPrice(total) || "0 ج.م"}</span>
-                </div>
               </>
+            )}
+            {bundleDiscount > 0 && appliedBundle && (
+              <div className="text-sm flex justify-between font-bold text-emerald-800 rounded-lg px-3 py-2 bg-emerald-50 border border-emerald-200">
+                <span>🎁 خصم الباقة المكتملة (10%)</span>
+                <span>-{formatPrice(bundleDiscount) || "0 ج.م"}</span>
+              </div>
+            )}
+            {(discount > 0 || bundleDiscount > 0) && (
+              <div className="text-sm flex justify-between font-bold">
+                <span>المجموع بعد الخصم</span>
+                <span className="text-emerald-700">{formatPrice(total) || "0 ج.م"}</span>
+              </div>
             )}
             {customer.governorate && (
               <div className="text-sm flex justify-between">

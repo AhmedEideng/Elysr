@@ -81,3 +81,45 @@ test("unknown routes return a real HTTP 404", async ({ request }) => {
   expect(response.status()).toBe(404);
   expect(await response.text()).toContain("الصفحة غير موجودة");
 });
+
+test("complete bundle applies the real 10% bundle discount in cart and payload", async ({
+  page,
+}) => {
+  let submittedPayload: Record<string, unknown> | undefined;
+  await page.route("**/api/submit-order", async (route) => {
+    submittedPayload = route.request().postDataJSON() as Record<string, unknown>;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ success: true, orderId: submittedPayload?.orderId }),
+    });
+  });
+
+  // باقة m-01 (هامر أوف ثور) = [m-01: 590, m-44: 580, m-20: 200] → 1370
+  // خصم الباقة = 137، وخصم شريحة الماسة 15% = 206 (1370 ≥ 1000)
+  await page.goto("/products/hammer-of-thor-capsules");
+  await page.getByRole("button", { name: /أضف الباقة للسلة/ }).click();
+  await page.waitForTimeout(1000);
+
+  await page.goto("/cart");
+  await expect(page.getByText("خصم الباقة المكتملة (10%)")).toBeVisible();
+  await expect(page.getByText("-137 ج.م")).toBeVisible();
+
+  await page.getByRole("button", { name: /طلب مباشر/ }).click();
+  await page.getByPlaceholder("اكتب اسمك هنا").fill("عميل باقة");
+  await page.getByPlaceholder("01xxxxxxxxx").fill("01012345678");
+  await page.locator("select").selectOption("القاهرة");
+  await page.getByPlaceholder("المدينة، الشارع، رقم العمارة").fill("اختبار الباقة 1");
+  await page.getByRole("button", { name: /تأكيد الطلب المباشر/ }).click();
+  await expect(page).toHaveURL(/\/order-confirmed$/);
+
+  expect(submittedPayload).toBeTruthy();
+  expect(submittedPayload).toMatchObject({
+    subtotalBeforeDiscount: 1370,
+    discount: 206, // شريحة 15%
+    bundleDiscount: 137, // خصم الباقة 10%
+    subtotal: 1027,
+    shipping: 50,
+    total: 1077,
+  });
+});

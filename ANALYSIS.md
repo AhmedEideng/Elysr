@@ -428,3 +428,47 @@ Browser ──→ Vercel CDN (dist/ ثابتة مسبقاً)
 ### ملاحظة تصميم واحدة متبقية (مقصودة — لمسة أخيرة محتملة):
 
 - عدّاد "مبادرة الرعاية الماسية" يتجدد perpetually (دورة 3 أيام من epoch) — نمط "urgency متجددة" مقصود وموثق في promo.ts ("دون الادعاء بانتهاء العرض")، لكنه يبقى في منطقة الرمادي التسويقي؛ إن أردت أماناً أكبر: اعرض "دورة متجددة" صراحةً بدل عدّاد انتهاء.
+
+## 16) ميزة: خصم الباقة الحقيقي (10%) — commit "bundle-discount"
+
+### القاعدة (موحّدة بين الفرونت والباك):
+
+- كل منتج P يكوّن باقة = [P + مقترحاته (cross-sell)] (82 باقة مولّدة).
+- اكتمال الباقة في السلة (كل الأعضاء بكمية ≥ 1) → **خصم 10%** من مجموع أسعار الوحدات (واحدة من كل عضو).
+- تُعتمد أفضل باقة واحدة فقط (الأعلى قيمة) — حتمي ومحصّن.
+- الخصم **يتراكب** مع شرائح الماسة (مثال: باقة 1370 → 15% = 206 + 10% = 137 → 1233).
+- إزالة "البيان" الوارد في طلب العميل: الاستبدال أعيد للعمل (خصم حقيقي الآن) وبيان الماسة أزيل.
+
+### المخطط (الأمان أولاً):
+
+```
+CrossSellBundle (PDP) → add ×N → cart state
+   ↓ (dynamic import — chunk منفصل، لا يدخل مسار الهوم للسلات <2)
+src/lib/bundle-discount.ts ← products + getCrossSellsForProduct
+   ↓ cart: total = قبل − tier − bundle  |  payload.bundleDiscount
+api/submit-order.js ← bundles-db.json (مولّد البناء من نفس المحرك)
+   يعيد الحساب من الكتالوج: mismatch = رفض (400)
+   → Apps Script (عمود "خصم الباقة" جديد — يضاف تلقائياً) → الشيت
+```
+
+### الملفات:
+
+| الملف                                         | التغيير                                                             |
+| --------------------------------------------- | ------------------------------------------------------------------- |
+| `src/lib/bundle-discount.ts`                  | جديد — محرك الباقات (BUNDLE_DISCOUNT_RATE = 0.1)                    |
+| `src/contexts/cart.tsx`                       | bundleDiscount/appliedBundle + total يخصمها                         |
+| `src/routes/cart.tsx`                         | سطر "🎁 خصم الباقة المكتملة (10%)" + payload + رسالة واتساب         |
+| `src/routes/products.$slug.tsx`               | payload.bundleDiscount = 0 (شراء فوري = منتج واحد)                  |
+| `src/lib/whatsapp.ts`                         | باراميتر bundleDiscount + سطر "خصم الباقة" في الرسالة               |
+| `api/submit-order.js`                         | getBundlesDb + calcBundleDiscount + تحقق mismatch + whitelist الحقل |
+| `scripts/generate-sitemap.mjs`                | توليد `api/lib/bundles-db.json` (82 باقة)                           |
+| `google-apps-script.gs`                       | عمود "خصم الباقة" (الترقية التلقائية للشيت تضيفه)                   |
+| `src/__tests__/submit-order-api.test.ts`      | +5 اختبارات (قبول/تضخيم/إخفاء/منتج واحد/غير رقمي)                   |
+| `scripts/data-integrity.test.mjs`             | سلامة أعضاء bundles-db                                              |
+| `e2e/checkout.spec.ts`                        | اختبار 6: تدفق الباقة الكامل (590+580+200 → 206+137 خصم → 1077)     |
+| `src/components/sections/CrossSellBundle.tsx` | استعادة العرض التسويقي (أصبح صادقاً)                                |
+
+### ملاحظة أمنية:
+
+- الفرونت يرسل القيمة لكن **الباك لا يثق بها أبداً** — يعيد الحساب من bundles-db + prices الرسمية.
+- فشل تحميل bundles-db.json في الخادم → fail-closed (لا خصم باقة) لا fail-open.

@@ -6,10 +6,15 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PRODUCTS_DB_PATH = join(__dirname, "lib", "products-db.json");
 const CONFIG_DB_PATH = join(__dirname, "lib", "config-db.json");
+const BUNDLES_DB_PATH = join(__dirname, "lib", "bundles-db.json");
+
+// نسبة خصم الباقة — نفس القيمة في src/lib/bundle-discount.ts
+const BUNDLE_DISCOUNT_RATE = 0.1;
 
 // مخازن ذاكرة مؤقتة (In-memory Caching) لتسريع أداء السيرفر السحابي وتجنب القراءة المتكررة من القرص الصلب
 let cachedProductsDb = null;
 let cachedConfigDb = null;
+let cachedBundlesDb = null;
 
 // جلب كتالوج المنتجات المعتمد المولد تلقائياً وقت البناء للتحقق الخلفي (Server-side Price Lookup)
 function getProductsDb() {
@@ -20,6 +25,20 @@ function getProductsDb() {
   } catch (err) {
     console.error("Failed to load products-db.json:", err);
     return [];
+  }
+}
+
+// جلب خريطة الباقات المعتمدة (مولّدة وقت البناء من نفس محرك cross-sell)
+// للتحقق الخلفي من خصم الباقة — لا نثق بقيمة العميل إطلاقاً.
+function getBundlesDb() {
+  if (cachedBundlesDb) return cachedBundlesDb;
+  try {
+    cachedBundlesDb = JSON.parse(readFileSync(BUNDLES_DB_PATH, "utf-8"));
+    return cachedBundlesDb;
+  } catch (err) {
+    // بدون خريطة باكات لا يوجد خصم باقة ممكن (fail-closed): الأمان قبل التوفير.
+    console.error("Failed to load bundles-db.json:", err);
+    return {};
   }
 }
 
@@ -130,6 +149,26 @@ function calcDiscount(subtotal) {
   return Math.round(subtotal * foundTier.discount);
 }
 
+// 🎁 إعادة حساب خصم الباقة من الكتالوج الرسمي (نفس خوارزمية الفرونت):
+// كل باقة = منتج رئيسي + مقترحاته؛ تكتمل إذا وُجد كل أعضائها بكمية ≥ 1.
+// يُعتمد أفضل باقة واحدة فقط (الأعلى قيمة) — حتمي ومحصّن ضد التلاعب.
+function calcBundleDiscount(items) {
+  const bundlesDb = getBundlesDb();
+  const productsDb = getProductsDb();
+  const qtyById = new Map(items.map((item) => [item.id, item.qty]));
+  let best = 0;
+  for (const [mainId, memberIds] of Object.entries(bundlesDb)) {
+    if (!memberIds.every((id) => (qtyById.get(id) ?? 0) >= 1)) continue;
+    const unitSum = memberIds.reduce((sum, id) => {
+      const official = productsDb.find((p) => p.id === id);
+      return sum + (official ? official.price : 0);
+    }, 0);
+    const value = Math.round(unitSum * BUNDLE_DISCOUNT_RATE);
+    if (value > best) best = value;
+  }
+  return best;
+}
+
 // 🔒 دالة التحقق الأمني والرياضي الصارم من سلامة الأسعار ومحتويات الطلب
 export function validateOrderPayload(payload) {
   // JSON primitives, null and arrays are never valid order objects.
@@ -162,6 +201,9 @@ export function validateOrderPayload(payload) {
   )
     return "Invalid notes";
   if (typeof payload.promoApplied !== "boolean") return "Invalid promoApplied";
+  if (typeof payload.bundleDiscount !== "number" || !Number.isFinite(payload.bundleDiscount)) {
+    return "Invalid bundleDiscount";
+  }
 
   if (!isNonEmptyString(payload.governorate, 80)) return "Invalid governorate";
   const normalizedGovernorate = payload.governorate.trim().replace(/\s+/g, " ");
@@ -219,7 +261,14 @@ export function validateOrderPayload(payload) {
     return "Discount mismatch";
   }
 
-  const calculatedSubtotalAfterDiscount = calculatedSubtotal - calculatedDiscount;
+  // 🎁 خصم الباقة يُعاد حسابه من خريطة الباقات المعتمدة (لا ثقة بقيمة العميل)
+  const calculatedBundleDiscount = calcBundleDiscount(payload.items);
+  if (Number(payload.bundleDiscount) !== calculatedBundleDiscount) {
+    return "Bundle discount mismatch";
+  }
+
+  const calculatedSubtotalAfterDiscount =
+    calculatedSubtotal - calculatedDiscount - calculatedBundleDiscount;
   if (Number(payload.subtotal) !== calculatedSubtotalAfterDiscount) {
     return "Subtotal after discount mismatch";
   }
@@ -290,6 +339,7 @@ export default async function handler(req, res) {
     "items",
     "subtotalBeforeDiscount",
     "discount",
+    "bundleDiscount",
     "subtotal",
     "shipping",
     "total",

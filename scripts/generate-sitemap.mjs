@@ -71,6 +71,22 @@ async function generateSitemap() {
       "utf-8",
     );
 
+    // 🎁 خريطة الباقات المعتمدة للتحقق الخلفي من خصم الباقة (10%) في الخادم:
+    // نفس محرك cross-sell المستخدم في الواجهة → لا ازدواجية منطق.
+    const { getCrossSellsForProduct } = await vite.ssrLoadModule("/src/data/products.ts");
+    const bundlesDb = {};
+    for (const product of products) {
+      const suggestions = getCrossSellsForProduct(product)
+        .map((s) => s.id)
+        .filter((id) => id !== product.id);
+      if (suggestions.length > 0) bundlesDb[product.id] = [product.id, ...suggestions];
+    }
+    writeFileSync(
+      resolve(apiLibDir, "bundles-db.json"),
+      JSON.stringify(bundlesDb, null, 2),
+      "utf-8",
+    );
+
     // حفظ إعدادات الشحن والعروض الترويجية المشتركة للسيرفر (Single Source of Truth)
     const { GOVERNORATE_SHIPPING, FREE_SHIPPING_THRESHOLD } = await vite.ssrLoadModule(
       "/src/lib/governorates.ts",

@@ -64,6 +64,7 @@ const COLUMNS = [
   { header: "عدد المنتجات", key: "itemCount", width: 90 },
   { header: "المجموع قبل الخصم", key: "subtotalBeforeDiscount", width: 120 },
   { header: "قيمة الخصم", key: "discount", width: 90 },
+  { header: "خصم الباقة", key: "bundleDiscount", width: 90 },
   { header: "المجموع بعد الخصم", key: "subtotal", width: 120 },
   { header: "الشحن", key: "shipping", width: 80 },
   { header: "الإجمالي النهائي", key: "total", width: 110 },
@@ -155,6 +156,7 @@ function doPost(e) {
 
     var subtotalBeforeDiscount = numberOrZero(data.subtotalBeforeDiscount);
     var discount = numberOrZero(data.discount);
+    var bundleDiscount = numberOrZero(data.bundleDiscount);
     var subtotal = numberOrZero(data.subtotal);
     var shipping = numberOrZero(data.shipping);
     var total = numberOrZero(data.total);
@@ -182,6 +184,7 @@ function doPost(e) {
       itemCount: itemCount,
       subtotalBeforeDiscount: subtotalBeforeDiscount,
       discount: discount,
+      bundleDiscount: bundleDiscount,
       subtotal: subtotal,
       shipping: shipping,
       total: total,

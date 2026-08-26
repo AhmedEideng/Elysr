@@ -5,6 +5,7 @@ import handler, {
   validateOrderPayload,
 } from "../../api/submit-order.js";
 import products from "../../api/lib/products-db.json";
+import bundlesDb from "../../api/lib/bundles-db.json";
 
 const product = products[0];
 
@@ -41,11 +42,59 @@ function validPayload(qty = 1, governorate = "القاهرة") {
     ],
     subtotalBeforeDiscount,
     discount,
+    // منتج واحد فقط → لا باقة مكتملة
+    bundleDiscount: 0,
     subtotal,
     shipping,
     total: subtotal + shipping,
     promoApplied: discount > 0,
   };
+}
+
+/** يكوّن طلباً حقيقياً من أول باقة مكتملة صالحة في bundles-db.json (3 أعضاء على الأقل). */
+function validBundlePayload(governorate = "القاهرة") {
+  const byId = new Map(products.map((p) => [p.id, p]));
+  for (const memberIds of Object.values(bundlesDb)) {
+    if (memberIds.length < 3) continue;
+    if (!memberIds.every((id) => byId.has(id) && (byId.get(id)!.stock ?? 0) > 0)) continue;
+
+    const items = memberIds.map((id) => {
+      const p = byId.get(id)!;
+      return { id, name: p.name, qty: 1, price: p.price };
+    });
+    const subtotalBeforeDiscount = items.reduce((s, i) => s + i.price * i.qty, 0);
+    const discount =
+      subtotalBeforeDiscount >= 2000
+        ? Math.round(subtotalBeforeDiscount * 0.25)
+        : subtotalBeforeDiscount >= 1500
+          ? Math.round(subtotalBeforeDiscount * 0.2)
+          : subtotalBeforeDiscount >= 1000
+            ? Math.round(subtotalBeforeDiscount * 0.15)
+            : 0;
+    const bundleDiscount = Math.round(subtotalBeforeDiscount * 0.1);
+    const subtotal = subtotalBeforeDiscount - discount - bundleDiscount;
+    const shipping =
+      subtotalBeforeDiscount >= 2000 ? 0 : getShippingCost(governorate, subtotalBeforeDiscount)!;
+    return {
+      orderId: "EL-TEST-BUNDLE",
+      orderType: "cart",
+      paymentMethod: "طلب مباشر",
+      customerName: "عميل اختبار",
+      customerPhone: "01012345678",
+      governorate,
+      address: "عنوان اختبار",
+      notes: "",
+      items,
+      subtotalBeforeDiscount,
+      discount,
+      bundleDiscount,
+      subtotal,
+      shipping,
+      total: subtotal + shipping,
+      promoApplied: discount > 0,
+    };
+  }
+  throw new Error("No valid 3-member bundle found in bundles-db.json");
 }
 
 function mockResponse() {
@@ -157,6 +206,7 @@ describe("submit-order payload validation", () => {
     for (const field of [
       "subtotalBeforeDiscount",
       "discount",
+      "bundleDiscount",
       "subtotal",
       "shipping",
       "total",
@@ -165,6 +215,41 @@ describe("submit-order payload validation", () => {
       tampered[field] += 1;
       expect(validateOrderPayload(tampered)).toMatch(/mismatch/i);
     }
+  });
+
+  describe("bundle discount (10% real bundle)", () => {
+    it("accepts a complete bundle with the server-recalculated 10% discount", () => {
+      const payload = validBundlePayload();
+      expect(payload.bundleDiscount).toBeGreaterThan(0);
+      expect(validateOrderPayload(payload)).toBeUndefined();
+      // الخصم = 10% بالضبط من مجموع الوحدات (قبل أي خصم شرائح)
+      const unitSum = payload.items.reduce((s, i) => s + i.price, 0);
+      expect(payload.bundleDiscount).toBe(Math.round(unitSum * 0.1));
+    });
+
+    it("rejects an inflated bundle discount", () => {
+      const payload = validBundlePayload();
+      payload.bundleDiscount += 5;
+      expect(validateOrderPayload(payload)).toBe("Bundle discount mismatch");
+    });
+
+    it("rejects a missing bundle discount when a bundle is complete", () => {
+      const payload = validBundlePayload();
+      payload.bundleDiscount = 0; // العميل يحاول إخفاء الخصم المستحق (أو عكسه: انتزاع خصم غير مستحق)
+      expect(validateOrderPayload(payload)).toBe("Bundle discount mismatch");
+    });
+
+    it("rejects a bundle discount on a single-item order (no bundle possible)", () => {
+      const payload = validPayload();
+      payload.bundleDiscount = 10; // لا توجد باقة من منتج واحد
+      expect(validateOrderPayload(payload)).toBe("Bundle discount mismatch");
+    });
+
+    it("rejects a non-numeric bundleDiscount", () => {
+      const payload = validPayload();
+      (payload as Record<string, unknown>).bundleDiscount = "10";
+      expect(validateOrderPayload(payload)).toBe("Invalid bundleDiscount");
+    });
   });
 
   it("uses all configured shipping bands and free shipping threshold", () => {

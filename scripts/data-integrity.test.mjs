@@ -173,6 +173,20 @@ try {
   }
 
   const productIds = new Set(products.map((p) => p.id));
+
+  // 🎁 خريطة الباقات (bundles-db.json) — مولّدة من نفس محرك cross-sell،
+  // ويجب أن تشير كل أعضائها لمنتجات موجودة (تُتحقق منها الخادم عند خصم الباقة)
+  const bundlesDb = JSON.parse(
+    readFileSync(resolve(ROOT, "api", "lib", "bundles-db.json"), "utf-8"),
+  );
+  assert.ok(Object.keys(bundlesDb).length > 0, "bundles-db.json is empty");
+  for (const [mainId, members] of Object.entries(bundlesDb)) {
+    assert.ok(productIds.has(mainId), `Bundle main missing: ${mainId}`);
+    for (const member of members) {
+      assert.ok(productIds.has(member), `Bundle member missing: ${member} (of ${mainId})`);
+    }
+  }
+
   for (const page of seoLandingPages) {
     assert.match(page.slug, /^[a-z0-9-]+$/, `Invalid landing page slug: ${page.slug}`);
     assert.ok(page.title.length >= 8, `Landing page title too short: ${page.slug}`);
