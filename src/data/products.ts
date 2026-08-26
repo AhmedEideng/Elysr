@@ -85,14 +85,19 @@ export const getProductsByCategory = (cat: ProductCategory) => {
 };
 
 /** منتجات طلبت الإدارة عدم إظهارها في أي قسم من أقسام الصفحة الرئيسية.
- * الأصلية كانت 6 منتجات، بعد حذف m-34 نهائياً أصبحت 5
- * باقي الأدوية المحظورة (m-38,m-43) ترجع ظاهرة كما كانت
+ * سياسة موحدة للأدوية المحظورة (تقرير Google Shopping):
+ * m-45 مستبعد أصلاً + m-38/m-43 أضيفا لسياسة موحدة —
+ * تبقى ظاهرة فقط في صفحة القسم /products/men وصفحاتها المباشرة
+ * (لا تزال قابلة للشراء) لكنها لا تظهر إطلاقاً في أقسام الهوم.
+ * (أصل المجموعة كان 6 منتجات، بعد حذف m-34 نهائياً أصبح 5، ثم أضيف الم-38 والم-43)
  */
 export const HOMEPAGE_EXCLUDED_PRODUCT_IDS = new Set([
   "m-02", // Boost Up MAN
   "m-03", // Powerfully Up
   "m-49", // Power Fully Up Advanced
   "m-45", // Viagra Pfizer للرجال - كان مستبعد أصلاً
+  "m-38", // Power 36 (Sildenafil) - سياسة موحدة للأدوية المحظورة
+  "m-43", // Procomil Fort (Sildenafil) - سياسة موحدة للأدوية المحظورة
 ]);
 
 export const isHomepageProductEligible = (product: Pick<Product, "id">): boolean =>
