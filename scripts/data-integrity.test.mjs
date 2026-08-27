@@ -201,6 +201,56 @@ try {
     }
   }
 
+  // 🚨 سياسة الامتثال الدوائية (مقفولة بالـ CI):
+  // أي دليل يستهدف اسم دواء مضبوط (براند أو مادة فعالة) يجب أن يكون
+  // (أ) noindex تماماً — الدوائ غير متوفر في الموقع فلا يُستهدف اسمه بمحتوى
+  //     مفهرس، أو (ب) يحوي لغة تحذير طبي واضحة في جسمه.
+  // الدرس: أدلة Cialis/Levitra كانت مُفهرسة رغم حذف الدوائين من الكتالوج
+  // بسبب سياسات Google — تناقض امتثالي يُراجع الآن دورياً.
+  const DRUG_TERMS = [
+    "sildenafil",
+    "tadalafil",
+    "vardenafil",
+    "dapoxetine",
+    "cialis",
+    "levitra",
+    "viagra",
+    "سيلدينافيل",
+    "تادالافيل",
+    "فاردينافيل",
+    "دابوكستين",
+    "سياليس",
+    "ليفيترا",
+    "فياجرا",
+  ];
+  const MEDICAL_WARNING_TERMS = ["طبيب", "وصفة", "استشار", "نترات", "توجيه طبي", "قرار طبي"];
+  for (const page of seoLandingPages) {
+    const targetingText = [
+      page.slug,
+      page.title,
+      page.metaTitle,
+      page.metaDescription,
+      page.primaryKeyword,
+      ...(page.relatedKeywords ?? []),
+    ]
+      .join(" ")
+      .toLowerCase();
+    const targetsDrug = DRUG_TERMS.some((t) => targetingText.includes(t.toLowerCase()));
+    if (!targetsDrug) continue;
+    if (page.noindex) continue; // (أ) noindex = سياسة سليمة
+    const body = [
+      page.heroDescription,
+      page.intro,
+      ...page.sections.map((s) => `${s.heading} ${s.body}`),
+      ...page.faqs.map((f) => `${f.question} ${f.answer}`),
+    ].join(" ");
+    const hasWarning = MEDICAL_WARNING_TERMS.some((t) => body.includes(t));
+    assert.ok(
+      hasWarning,
+      `Landing page ${page.slug} targets a drug name without medical warning language (or should be noindex)`,
+    );
+  }
+
   assert.deepEqual(
     duplicates(vercel.redirects.map((r) => r.source)),
     [],

@@ -28,14 +28,8 @@
     <meta name="facebook-domain-verification" content="zstcyw0san2v3f1vkhmg755t90flu6" />
 
     <link rel="canonical" href="https://elysrmedical.store/" />
-    <link rel="alternate" hreflang="ar-eg" href="https://elysrmedical.store/" />
-    <link rel="alternate" hreflang="x-default" href="https://elysrmedical.store/" />
-
     <!-- Open Graph -->
-    <meta
-      property="og:title"
-      content="اليسر — منتجات الصحة الزوجية الأصلية في مصر | شحن سري"
-    />
+    <meta property="og:title" content="اليسر — منتجات الصحة الزوجية الأصلية في مصر | شحن سري" />
     <meta
       property="og:description"
       content="اليسر أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. شحن سري وتغليف محايد ودفع عند الاستلام مع دعم متخصص عبر واتساب."
@@ -112,13 +106,18 @@
       }
     </style>
 
-    <!-- 🏢 Organization + MedicalOrganization + LocalBusiness + Store + WebSite schema -->
+    <!-- 🏢 Organization (brand) + LocalBusiness (physical store) schema.
+         Note: deliberately NOT classified as "MedicalOrganization" — this is a
+         retail e-commerce store selling health products, not a licensed medical
+         facility. Claiming the medical type would create an inaccurate
+         regulatory/expectation signal and contradict the site's own
+         "not a substitute for medical advice" disclaimers. -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@graph": [
           {
-            "@type": ["Organization", "MedicalOrganization"],
+            "@type": ["Organization"],
             "@id": "https://elysrmedical.store/#organization",
             "name": "اليسر ميديكال",
             "legalName": "مجموعة اليسر الطبية",
@@ -187,13 +186,11 @@
               "الأجهزة الطبية",
               "Sexual Health Products",
               "Dietary Supplements"
-            ],
-            "medicalSpecialty": "Sexual Health",
-            "isAcceptingNewPatients": false
+            ]
           },
           {
             "@type": "LocalBusiness",
-            "@id": "https://elysrmedical.store/#localbusiness",
+            "@id": "https://elysrmedical.store/#organization",
             "name": "اليسر ميديكال — شركة الصحة الزوجية",
             "image": "https://elysrmedical.store/logo.png",
             "url": "https://elysrmedical.store",
