@@ -7,12 +7,14 @@ import {
   ScrollRestoration,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { lazy, Suspense } from "react";
+import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-// 🚀 Lazy-load Toaster — it's only needed after a user action,
-// so deferring its 33 KiB bundle frees up the critical path.
-const Toaster = lazy(() => import("sonner").then((m) => ({ default: m.Toaster })));
+// ⚠️ Toaster imported STATICALLY (not lazy): sonner's Toaster starts with an
+// empty state and only subscribes to toasts emitted after mount — a lazy
+// Toaster creates a window where the first user interaction (e.g. add to
+// cart / submit order) can fire toasts that are silently LOST if the chunk
+// hasn't mounted yet. Reliability of core feedback > a few KB of deferral.
 
 import { CartProvider } from "@/contexts/cart";
 import { Layout } from "@/components/layout/Layout";
@@ -219,9 +221,7 @@ function RootComponent() {
       <Layout>
         <Outlet />
       </Layout>
-      <Suspense fallback={null}>
-        <Toaster position="top-center" richColors closeButton />
-      </Suspense>
+      <Toaster position="top-center" richColors closeButton />
       {/* 🚀 Vercel Web Analytics & Speed Insights Integration */}
       <Analytics />
       <SpeedInsights />
