@@ -777,7 +777,6 @@ function ProductPage() {
   );
 }
 
-
 function QuickInput({
   label,
   value,
