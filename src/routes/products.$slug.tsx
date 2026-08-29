@@ -201,7 +201,7 @@ function ProductPage() {
     }
     add(product, qty);
     toast.success("تمت الإضافة للسلة بنجاح!", {
-      duration: 2000,
+      duration: 1500,
       action: {
         label: "إتمام الطلب",
         onClick: () => navigate({ to: "/cart" }),

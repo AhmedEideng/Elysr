@@ -172,7 +172,7 @@ export function ProductCard({ product }: { product: Product }) {
               if (product.stock <= 0) return;
               add(product);
               toast.success(promoOn ? "تمت الإضافة للسلة ☀️" : "تمت الإضافة للسلة", {
-                duration: 2000,
+                duration: 1500,
                 icon: <ShoppingCart className="h-4 w-4 text-primary" />,
                 className: "rounded-2xl font-bold",
               });

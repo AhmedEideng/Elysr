@@ -54,7 +54,9 @@ export function CrossSellBundle({
       setIsAdding(false);
       // حالة "مضاف" دائمة — ما ترجعش لـ"أضف" تاني
       setAdded(true);
-      toast.success("🛒 تم إضافة الباقة للسلة بنجاح! تم تطبيق خصم الباقة (20%) تلقائياً.");
+      toast.success("🛒 تم إضافة الباقة للسلة بنجاح! تم تطبيق خصم الباقة (20%) تلقائياً.", {
+        duration: 1500,
+      });
     }, 600);
   };
 

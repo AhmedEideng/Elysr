@@ -96,7 +96,7 @@ function WishlistPage() {
         added++;
       }
     });
-    toast.success(`تمت إضافة ${added} منتج للسلة 🛒`);
+    toast.success(`تمت إضافة ${added} منتج للسلة 🛒`, { duration: 1500 });
   };
 
   return (
@@ -334,7 +334,7 @@ function WishlistPage() {
                           return;
                         }
                         addToCart(product);
-                        toast.success(`أضيف ${product.name} للسلة ✅`);
+                        toast.success(`أضيف ${product.name} للسلة ✅`, { duration: 1500 });
                       }}
                       disabled={!inStock}
                       className={`inline-flex items-center gap-1.5 rounded-2xl px-4 py-2.5 text-xs font-black shadow-md transition-all active:scale-95 ${
