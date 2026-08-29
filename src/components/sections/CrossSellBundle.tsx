@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Plus, ShoppingCart, Check, PackagePlus } from "lucide-react";
 import type { Product } from "@/data/product-types";
 import { formatPrice } from "@/data/product-types";
@@ -15,7 +15,8 @@ export function CrossSellBundle({
   mainProduct: Product;
   suggestedProducts: Product[];
 }) {
-  const { add } = useCart();
+  const { add, items: cartItems } = useCart();
+  const navigate = useNavigate();
   const [isAdding, setIsAdding] = useState(false);
   const [added, setAdded] = useState(false);
 
@@ -31,7 +32,19 @@ export function CrossSellBundle({
   const bundleDiscount = Math.round(totalPrice * BUNDLE_DISCOUNT_RATE);
   const finalPrice = totalPrice - bundleDiscount;
 
+  // 🔁 الزر يعمل مرة واحدة فقط: بعد الإضافة (أو لو الباقة موجودة بالفعل
+  // في السلة من قبل — حتى لو رجع المستخدم للصفحة)، أي ضغط ثانٍ ينقله
+  // مباشرة للسلة بدل إضافة نسخة ثانية.
+  const bundleAlreadyInCart = bundleItems.every((item) =>
+    cartItems.some((ci) => ci.id === item.id && ci.qty >= 1),
+  );
+  const alreadyAdded = added || bundleAlreadyInCart;
+
   const handleAddBundle = () => {
+    if (alreadyAdded) {
+      navigate({ to: "/cart" });
+      return;
+    }
     setIsAdding(true);
     bundleItems.forEach((item) => {
       add(item, 1);
@@ -39,9 +52,9 @@ export function CrossSellBundle({
 
     setTimeout(() => {
       setIsAdding(false);
+      // حالة "مضاف" دائمة — ما ترجعش لـ"أضف" تاني
       setAdded(true);
       toast.success("🛒 تم إضافة الباقة للسلة بنجاح! تم تطبيق خصم الباقة (20%) تلقائياً.");
-      setTimeout(() => setAdded(false), 3000);
     }, 600);
   };
 
@@ -121,18 +134,18 @@ export function CrossSellBundle({
 
           <button
             onClick={handleAddBundle}
-            disabled={isAdding || added}
+            disabled={isAdding}
             className={`
               relative inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-black text-white shadow-lg transition-all active:scale-95 w-full sm:w-auto
-              ${added ? "bg-emerald-500 hover:bg-emerald-600" : "bg-gradient-brand hover:scale-[1.02]"}
+              ${alreadyAdded ? "bg-emerald-500 hover:bg-emerald-600" : "bg-gradient-brand hover:scale-[1.02]"}
             `}
           >
             {isAdding ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-            ) : added ? (
+            ) : alreadyAdded ? (
               <>
                 <Check className="h-5 w-5" />
-                تم إضافة الباقة
+                تمت الإضافة — اطلع على السلة
               </>
             ) : (
               <>

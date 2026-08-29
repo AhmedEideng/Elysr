@@ -101,6 +101,38 @@ test("category URL search ?q filters products (SearchAction target)", async ({ p
   expect(await page.getByText(/نتائج البحث عن/).count()).toBe(0);
 });
 
+test("bundle button works once: second click goes to cart (no duplicate add)", async ({ page }) => {
+  await page.route("**/api/submit-order", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ success: true }),
+    });
+  });
+
+  await page.goto("/products/hammer-of-thor-capsules");
+  const addBtn = page.getByRole("button", { name: /أضف الباقة للسلة/ });
+  await expect(addBtn).toBeVisible();
+
+  // أول ضغط: إضافة واحدة فقط
+  await addBtn.click();
+  const addedBtn = page.getByRole("button", { name: /تمت الإضافة — اطلع على السلة/ });
+  await expect(addedBtn).toBeVisible();
+
+  // الزر لازم يفضل في حالة "مضاف" (ما يرجعش لـ"أضف" بعد 3 ثوانٍ زي ما كان)
+  await page.waitForTimeout(3500);
+  await expect(addedBtn).toBeVisible();
+  await expect(page.getByRole("button", { name: /أضف الباقة للسلة/ })).toHaveCount(0);
+
+  // الضغط التاني: ينتقل للسلة من غير ما يضيف نسخة ثانية
+  await addedBtn.click();
+  await expect(page).toHaveURL(/\/cart$/);
+
+  // كل منتجات الباقة بكمية 1 بالضبط: اسم هيمر أوف ثور يظهر مرة واحدة
+  // كبطاقة في السلة (لو الضغط التاني كان أضاف نسخة، هيبقى مرتين)
+  await expect(page.getByText("هامر أوف ثور", { exact: false })).toHaveCount(1);
+});
+
 test("unknown routes return a real HTTP 404", async ({ request }) => {
   const response = await request.get("/this-route-does-not-exist");
   expect(response.status()).toBe(404);
