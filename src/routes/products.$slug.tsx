@@ -357,7 +357,7 @@ function ProductPage() {
           <ProductImage key={product.id} product={product} categoryName={categoryName} />
 
           <div className="mt-3 grid grid-cols-3 gap-2">
-            <MiniFeature title="العبوة" value="بيانات واضحة" />
+            <MiniFeature title="الجودة" value="تستحق ثقتك" />
             <MiniFeature title="الشحن" value="سري وسريع" />
             <MiniFeature title="الطلب" value="دفع عند الاستلام" />
           </div>
