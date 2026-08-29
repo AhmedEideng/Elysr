@@ -320,7 +320,6 @@ function ProductPage() {
         ? "/products/women"
         : "/products/devices";
   const topBenefits = product.benefits?.slice(0, 4) ?? [];
-  const safetyNotice = getProductSafetyNotice(product);
 
   return (
     <div className="container mx-auto px-4 py-8 pb-16 md:py-10 md:pb-10">
@@ -484,14 +483,6 @@ function ProductPage() {
                 </div>
               ))}
             </div>
-          </div>
-
-          <div className="mt-5 rounded-2xl bg-accent/25 p-4 border border-primary/10">
-            <h2 className="font-bold mb-2 flex items-center gap-2 text-sm">
-              <AlertCircle className="h-4 w-4 text-primary" />
-              {safetyNotice.title}
-            </h2>
-            <p className="text-xs leading-7 text-muted-foreground">{safetyNotice.body}</p>
           </div>
 
           <div className="mt-5 rounded-2xl border border-sky-100 bg-sky-50/70 p-4">
@@ -786,51 +777,6 @@ function ProductPage() {
   );
 }
 
-function getProductSafetyNotice(product: {
-  name: string;
-  nameEn: string;
-  slug: string;
-  description: string;
-  ingredients?: string;
-  usage?: string;
-  benefits?: string[];
-}) {
-  const text = [
-    product.name,
-    product.nameEn,
-    product.slug,
-    product.description,
-    product.ingredients ?? "",
-    product.usage ?? "",
-    ...(product.benefits ?? []),
-  ]
-    .join(" ")
-    .toLowerCase();
-
-  const hasPrescriptionActive =
-    /(sildenafil|tadalafil|dapoxetine|vardenafil|viagra|cialis|levitra|130\s*[-/]\s*60|170\s*[-/]\s*60)/i.test(
-      text,
-    );
-
-  if (hasPrescriptionActive) {
-    return {
-      title: "تنبيه طبي مهم قبل الاستخدام",
-      body: "هذا المنتج قد يحتوي على مواد فعالة دوائية أو مكونات عالية الحساسية. لا تستخدمه من تلقاء نفسك ولا تجمعه مع منتجات مشابهة. استشر طبيباً أو صيدلياً قبل الاستخدام، خصوصاً إذا كنت تعاني من أمراض القلب أو الضغط أو الكبد أو الكلى أو تستخدم أدوية النترات أو أدوية مزمنة. توقف فوراً عند أي أعراض غير معتادة.",
-    };
-  }
-
-  if (/(lidocaine|prilocaine|benzocaine|emla|procomil|spray|delay|تأخير|بخاخ|مناديل)/i.test(text)) {
-    return {
-      title: "تنبيه استخدام موضعي",
-      body: "هذا المنتج للاستخدام الموضعي أو الداعم وفق التعليمات فقط. اختبر كمية صغيرة أولاً، ولا تستخدمه على جلد متهيج أو مجروح. توقف عند ظهور حرقان شديد أو طفح أو تنميل زائد، واستشر الطبيب إذا استمرت المشكلة أو كانت لديك حساسية معروفة.",
-    };
-  }
-
-  return {
-    title: "تنبيه مهم قبل الاستخدام",
-    body: "هذا المنتج منتج دعم أو عناية أو مكمل ولا يُعد بديلاً عن التشخيص أو العلاج الطبي. النتائج تختلف من شخص لآخر حسب الحالة الصحية والعمر وطريقة الاستخدام. استشر الطبيب إذا كنت تعاني من أمراض مزمنة أو تتناول أدوية أخرى.",
-  };
-}
 
 function QuickInput({
   label,
