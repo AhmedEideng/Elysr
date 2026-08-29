@@ -75,7 +75,8 @@ function CartPage() {
   const grandTotal = total + shipping;
 
   // ☀️ شريحة الخصم التالية لتحفيز العميل على زيادة المشتريات
-  const nextTier = getNextTier(subtotalBeforeDiscount);
+  // (يتوقف العرض عند اكتمال باقة — الخصم المطبق وقتها هو خصم الباقة فقط)
+  const nextTier = appliedBundle ? null : getNextTier(subtotalBeforeDiscount);
   const amountToNext = nextTier ? nextTier.threshold - subtotalBeforeDiscount : 0;
   const amountToFreeShipping = Math.max(FREE_SHIPPING_THRESHOLD - subtotalBeforeDiscount, 0);
   const promoLive = isPromoActive();
@@ -412,7 +413,7 @@ function CartPage() {
             )}
             {bundleDiscount > 0 && appliedBundle && (
               <div className="text-sm flex justify-between font-bold text-emerald-800 rounded-lg px-3 py-2 bg-emerald-50 border border-emerald-200">
-                <span>🎁 خصم الباقة المكتملة (10%)</span>
+                <span>🎁 خصم الباقة المكتملة (20%)</span>
                 <span>-{formatPrice(bundleDiscount) || "0 ج.م"}</span>
               </div>
             )}

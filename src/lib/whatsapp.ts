@@ -73,13 +73,16 @@ export const buildOrderMessage = (
   });
 
   const tier = isPromoActive() ? getPromoTier(subtotalBefore) : null;
-  const discount = tier ? Math.round(subtotalBefore * tier.discount) : 0;
+  // 🔀 الخصمان متبادلا الاستبعاد (نفس قاعدة السلة والسيرفر):
+  // عند اكتمال الباقة → خصم الباقة (20%) هو الخصم الوحيد المعروض
+  const bundleActive = !!bundleDiscount && bundleDiscount > 0;
+  const discount = bundleActive ? 0 : tier ? Math.round(subtotalBefore * tier.discount) : 0;
   const subtotalAfter = subtotalBefore - discount - (bundleDiscount || 0);
 
   lines.push("");
   lines.push(`المجموع: ${subtotalBefore} ج.م`);
-  if (tier && discount > 0) lines.push(`خصم ${tier.label}: -${discount} ج.م`);
-  if (bundleDiscount && bundleDiscount > 0) lines.push(`خصم الباقة: -${bundleDiscount} ج.م`);
+  if (bundleActive) lines.push(`خصم الباقة (20%): -${bundleDiscount} ج.م`);
+  else if (tier && discount > 0) lines.push(`خصم ${tier.label}: -${discount} ج.م`);
   if (freeShipping) lines.push("الشحن: مجاني");
   else if (shipping && shipping > 0) lines.push(`الشحن: ${shipping} ج.م`);
   lines.push(`الإجمالي: ${subtotalAfter + (shipping || 0)} ج.م`);

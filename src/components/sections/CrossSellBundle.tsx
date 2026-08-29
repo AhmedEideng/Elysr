@@ -6,6 +6,7 @@ import { formatPrice } from "@/data/product-types";
 import { useCart } from "@/hooks/use-cart";
 import { toast } from "sonner";
 import { thumbUrl, assetUrl } from "@/lib/cache";
+import { BUNDLE_DISCOUNT_RATE } from "@/lib/bundle-discount";
 
 export function CrossSellBundle({
   mainProduct,
@@ -23,9 +24,11 @@ export function CrossSellBundle({
   const bundleItems = [mainProduct, ...suggestedProducts];
   const totalPrice = bundleItems.reduce((sum, item) => sum + item.price, 0);
 
-  // 🎁 خصم الباقة الحقيقي (10%) — يُطبق فعلاً في السلة عندما تحتوي على
+  // 🎁 خصم الباقة الحقيقي (20%) — يُطبق فعلاً في السلة عندما تحتوي على
   // كل أعضاء الباقة (نفس القاعدة يتحقق منها السيرفر عبر bundles-db.json).
-  const bundleDiscount = Math.round(totalPrice * 0.1);
+  // ملاحظة: عند اكتمال الباقة هو الخصم الوحيد المطبق (يتوقف خصم الشرائح
+  // لهذا الطلب — الخصمان متبادلا الاستبعاد).
+  const bundleDiscount = Math.round(totalPrice * BUNDLE_DISCOUNT_RATE);
   const finalPrice = totalPrice - bundleDiscount;
 
   const handleAddBundle = () => {
@@ -37,7 +40,7 @@ export function CrossSellBundle({
     setTimeout(() => {
       setIsAdding(false);
       setAdded(true);
-      toast.success("🛒 تم إضافة الباقة للسلة بنجاح! تم تطبيق خصم الباقة (10%) تلقائياً.");
+      toast.success("🛒 تم إضافة الباقة للسلة بنجاح! تم تطبيق خصم الباقة (20%) تلقائياً.");
       setTimeout(() => setAdded(false), 3000);
     }, 600);
   };
@@ -51,8 +54,7 @@ export function CrossSellBundle({
         <div>
           <h3 className="text-lg font-black text-foreground">باقة التوفير والأداء المتكامل</h3>
           <p className="text-xs font-bold text-muted-foreground">
-            منتجات متكاملة تغطي احتياجك — أضفها دفعة واحدة وخصم مبادرة الرعاية الماسية يُطبَّق على
-            السلة تلقائياً.
+            منتجات متكاملة تغطي احتياجك — أضفها دفعة واحدة واحصل على خصم الباقة (20%) تلقائياً.
           </p>
         </div>
       </div>

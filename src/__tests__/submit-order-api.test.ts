@@ -63,15 +63,10 @@ function validBundlePayload(governorate = "القاهرة") {
       return { id, name: p.name, qty: 1, price: p.price };
     });
     const subtotalBeforeDiscount = items.reduce((s, i) => s + i.price * i.qty, 0);
-    const discount =
-      subtotalBeforeDiscount >= 2000
-        ? Math.round(subtotalBeforeDiscount * 0.25)
-        : subtotalBeforeDiscount >= 1500
-          ? Math.round(subtotalBeforeDiscount * 0.2)
-          : subtotalBeforeDiscount >= 1000
-            ? Math.round(subtotalBeforeDiscount * 0.15)
-            : 0;
-    const bundleDiscount = Math.round(subtotalBeforeDiscount * 0.1);
+    // 🔀 الخصمان متبادلا الاستبعاد: باقة مكتملة → خصم الباقة (20%) فقط
+    // وخصم الشرائح موقوف لهذا الطلب
+    const bundleDiscount = Math.round(subtotalBeforeDiscount * 0.2);
+    const discount = 0;
     const subtotal = subtotalBeforeDiscount - discount - bundleDiscount;
     const shipping =
       subtotalBeforeDiscount >= 2000 ? 0 : getShippingCost(governorate, subtotalBeforeDiscount)!;
@@ -217,14 +212,23 @@ describe("submit-order payload validation", () => {
     }
   });
 
-  describe("bundle discount (10% real bundle)", () => {
-    it("accepts a complete bundle with the server-recalculated 10% discount", () => {
+  describe("bundle discount (20% real bundle, exclusive with tier discount)", () => {
+    it("accepts a complete bundle with the server-recalculated 20% discount", () => {
       const payload = validBundlePayload();
       expect(payload.bundleDiscount).toBeGreaterThan(0);
       expect(validateOrderPayload(payload)).toBeUndefined();
-      // الخصم = 10% بالضبط من مجموع الوحدات (قبل أي خصم شرائح)
+      // الخصم = 20% بالضبط من مجموع الوحدات (قبل أي خصم شرائح)
       const unitSum = payload.items.reduce((s, i) => s + i.price, 0);
-      expect(payload.bundleDiscount).toBe(Math.round(unitSum * 0.1));
+      expect(payload.bundleDiscount).toBe(Math.round(unitSum * 0.2));
+      // قاعدة الاستبعاد: مع باقة مكتملة، خصم الشرائح يجب أن يكون صفراً
+      expect(payload.discount).toBe(0);
+    });
+
+    it("rejects a tier discount on a complete-bundle order (only one discount applies)", () => {
+      const payload = validBundlePayload();
+      // العميل يحاول إضافة خصم شرائح فوق خصم الباقة → مرفوض
+      payload.discount = Math.round(payload.subtotalBeforeDiscount * 0.15);
+      expect(validateOrderPayload(payload)).toBe("Discount mismatch");
     });
 
     it("rejects an inflated bundle discount", () => {

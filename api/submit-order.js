@@ -8,8 +8,8 @@ const PRODUCTS_DB_PATH = join(__dirname, "lib", "products-db.json");
 const CONFIG_DB_PATH = join(__dirname, "lib", "config-db.json");
 const BUNDLES_DB_PATH = join(__dirname, "lib", "bundles-db.json");
 
-// نسبة خصم الباقة — نفس القيمة في src/lib/bundle-discount.ts
-const BUNDLE_DISCOUNT_RATE = 0.1;
+// نسبة خصم الباقة (20%) — نفس القيمة في src/lib/bundle-discount.ts
+const BUNDLE_DISCOUNT_RATE = 0.2;
 
 // مخازن ذاكرة مؤقتة (In-memory Caching) لتسريع أداء السيرفر السحابي وتجنب القراءة المتكررة من القرص الصلب
 let cachedProductsDb = null;
@@ -256,15 +256,17 @@ export function validateOrderPayload(payload) {
     return "Subtotal before discount mismatch";
   }
 
-  const calculatedDiscount = calcDiscount(calculatedSubtotal);
-  if (Number(payload.discount) !== calculatedDiscount) {
-    return "Discount mismatch";
-  }
-
   // 🎁 خصم الباقة يُعاد حسابه من خريطة الباقات المعتمدة (لا ثقة بقيمة العميل)
   const calculatedBundleDiscount = calcBundleDiscount(payload.items);
   if (Number(payload.bundleDiscount) !== calculatedBundleDiscount) {
     return "Bundle discount mismatch";
+  }
+
+  // 🔀 الخصمان متبادلا الاستبعاد (نفس قاعدة الفرونت):
+  // عند اكتمال باقة → خصم الباقة هو الخصم الوحيد، وخصم الشرائح موقوف لهذا الطلب
+  const calculatedDiscount = calculatedBundleDiscount > 0 ? 0 : calcDiscount(calculatedSubtotal);
+  if (Number(payload.discount) !== calculatedDiscount) {
+    return "Discount mismatch";
   }
 
   const calculatedSubtotalAfterDiscount =

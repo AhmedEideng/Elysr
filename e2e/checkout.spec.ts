@@ -175,7 +175,7 @@ test("failed direct order keeps the cart (no silent order loss)", async ({ page 
   expect(attempt).toBe(2);
 });
 
-test("complete bundle applies the real 10% bundle discount in cart and payload", async ({
+test("complete bundle applies the real 20% bundle discount (exclusive with tier) in cart and payload", async ({
   page,
 }) => {
   let submittedPayload: Record<string, unknown> | undefined;
@@ -189,14 +189,17 @@ test("complete bundle applies the real 10% bundle discount in cart and payload",
   });
 
   // باقة m-01 (هامر أوف ثور) = [m-01: 590, m-44: 580, m-20: 200] → 1370
-  // خصم الباقة = 137، وخصم شريحة الماسة 15% = 206 (1370 ≥ 1000)
+  // خصم الباقة = 20% من 1370 = 274 — وخصم شريحة الماسة (15% = 206)
+  // موقوف لهذا الطلب: الخصمان متبادلا الاستبعاد، الباقة هي الخصم الوحيد
   await page.goto("/products/hammer-of-thor-capsules");
   await page.getByRole("button", { name: /أضف الباقة للسلة/ }).click();
   await page.waitForTimeout(1000);
 
   await page.goto("/cart");
-  await expect(page.getByText("خصم الباقة المكتملة (10%)")).toBeVisible();
-  await expect(page.getByText("-137 ج.م")).toBeVisible();
+  await expect(page.getByText("خصم الباقة المكتملة (20%)")).toBeVisible();
+  await expect(page.getByText("-274 ج.م")).toBeVisible();
+  // خصم الشرائح يجب ألا يظهر (موقوف بسبب الباقة)
+  await expect(page.getByText(/خصم 15%/)).toHaveCount(0);
 
   await page.getByRole("button", { name: /طلب مباشر/ }).click();
   await page.getByPlaceholder("اكتب اسمك هنا").fill("عميل باقة");
@@ -209,10 +212,10 @@ test("complete bundle applies the real 10% bundle discount in cart and payload",
   expect(submittedPayload).toBeTruthy();
   expect(submittedPayload).toMatchObject({
     subtotalBeforeDiscount: 1370,
-    discount: 206, // شريحة 15%
-    bundleDiscount: 137, // خصم الباقة 10%
-    subtotal: 1027,
+    discount: 0, // شريحة 15% موقوف — الباقة هي الخصم الوحيد
+    bundleDiscount: 274, // خصم الباقة 20%
+    subtotal: 1096,
     shipping: 50,
-    total: 1077,
+    total: 1146,
   });
 });

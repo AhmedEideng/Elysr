@@ -267,8 +267,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const subtotalBeforeDiscount = normalizedItems.reduce((s, i) => s + i.qty * i.originalPrice, 0);
     // الخصم المتدرج يُحسب على إجمالي السلة (وليس على كل منتج)
     const tier = getPromoTier(subtotalBeforeDiscount);
-    const discount = tier ? Math.round(subtotalBeforeDiscount * tier.discount) : 0;
-    // الإجمالي = قبل الخصم − خصم الشرائح − خصم الباقة (مطابق لحساب السيرفر)
+    // 🔀 الخصمان متبادلا الاستبعاد (مطابق لحساب السيرفر):
+    // عند اكتمال باقة → خصم الباقة (20%) هو الخصم الوحيد لهذا الطلب،
+    // وخصم الشرائح موقوف. من غير باقة → يعمل الخصم المتدرج كالمعتاد.
+    const tierDiscount = tier ? Math.round(subtotalBeforeDiscount * tier.discount) : 0;
+    const discount = bundleDiscount > 0 ? 0 : tierDiscount;
+    // الإجمالي = قبل الخصم − الخصم المطبق (واحد فقط)
     const total = subtotalBeforeDiscount - discount - bundleDiscount;
     return {
       items: normalizedItems, // استخدم الـ normalized للـ consistency في الـ payload والـ UI
