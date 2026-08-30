@@ -413,7 +413,6 @@ function ProductPage() {
                 </div>
               </div>
               <div className="text-left text-xs leading-6 text-muted-foreground">
-                <div>✅ بيانات المنتج موضحة على العبوة</div>
                 <div>✅ شحن سري وآمن</div>
                 <div>✅ دعم مباشر عبر واتساب</div>
               </div>
