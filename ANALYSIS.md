@@ -699,3 +699,46 @@ sildenafil-dapoxetine-combo كانت تحوي تحذيرات قوية أصلاً
 - التحقق: tsc نظيف، 132 وحدة، data-integrity، 12 e2e، schemas 249 ملف/1163
   JSON-LD (0 أخطاء)، build 248 صفحة (17 ثابت + 82 منتج + 56 مقال + 93 landing).
 - `/search?q=*` يقدَّم بـ 200 مع robots `noindex,follow,noarchive,nosnippet,noimageindex`.
+
+## 25) المراجعات الحقيقية من العملاء (moderated) + حذف dead code (2026-08-30)
+
+### أ) حذف الـ dead code
+- حُذف `productIdToSlug` (src/data/products.ts) و`getSeoLandingPageBySlug`
+  (src/data/landing-pages.ts) — تعريفان غير مستخدمين في أي مكان (تم التحقق
+  بأسكربت شامل لكل exports في src/ — بقية المرشحين 7 كانوا false positives
+  مستخدمين داخل ملفاتهم).
+- `RED_PRODUCT_IDS` **بقي** عمداً: ليس dead code — guard استراتيجي (مجموعة
+  فارغة مقصودة) تختبره compliance.test.ts.
+
+### ب) نظام المراجعات الحقيقية
+**التدفق:** العميل يقيم (1-5) + يكتب + اسم اختياري + هاتف اختياري للتحقق
+→ `POST /api/submit-review` (تحقق صارم + CORS + rate limit 3/د/IP) →
+Apps Script `action=review` → شيت **"المراجعات"** بحالة "قيد المراجعة"
+→ المالك يغيّر الحالة "معتمد" في الشيت → الموقع يسحب المعتمدة فقط.
+
+**"مشتري مؤكد" حقيقي:** لو العميل زوّد هاتفه، Apps Script يفحص شيت
+"الطلبات" عن طلب من نفس الهاتف يشمل اسم المنتج الكامل (غير ملغي) → شارة
+"مشتري مؤكد" حقيقية — لا زيف.
+
+| القطعة | التفاصيل |
+|---|---|
+| `google-apps-script.gs` | شيت "المراجعات" (9 أعمدة + Data Validation للحالة)، `handleReviewPost` (rate limit + تحقق شراء + إشعار إيميل)، `handleReviewsGet` (محمي بـ `REVIEW_READ_TOKEN`، fail-closed، كاش 5 د، حد 20، الأحدث أولاً، **الهاتف لا يُكشف أبداً**)، و`deleteCustomerData` يمسح المراجعات المرتبطة بالهاتف (GDPR). |
+| `api/submit-review.js` | تحقق صلب: منتج من catalog معتمد (الاسم من الـ server وليس العميل)، rating 1-5 صحيح، نص 10-600، هاتف مصري/E.164، IP hash فقط. 429 بعد 3/د/IP. |
+| `api/reviews.js` | قراءة معتمدة فقط، fail-soft (أي خطأ → 200 فارغ — الصفحة لا تنكسر)، كاش ذاكرة 5 د + Cache-Control 60 ث، rate limit 10/د/IP، التوكن لا يخرج من الخادم. |
+| `server/index.js` | mount الـ APIs الجديدة للنشر الذاتي. |
+| `CustomerReviews.tsx` | قسم "تجارب حقيقية من عملائنا" — قائمة المعتمدة + متوسط + نموذج (نجوم تفاعلية، عداد 600، حالة "قيد المراجعة" بعد الإرسال). |
+| اختبارات | +27 وحدة (submit-review 19 + reviews 8) = 159؛ +3 e2e (عرض معتمدة، إخفاء بلا معتمدة، تدفق إرسال كامل بتدقيق payload) = 15. |
+
+### النشر (خطوات المالك)
+1. انسخ `google-apps-script.gs` الجديد في Apps Script واختر **Deploy →
+   Manage deployments → Edit → New version** (الشيت "المراجعات" يتولد تلقائياً).
+2. اكتب توكن قراءة في `REVIEW_READ_TOKEN` أعلى السكريبت **ونفسه** في
+   Vercel: `GOOGLE_SHEETS_REVIEWS_TOKEN`. بدون التوكن الميزة معطلة بصمت
+   (fail-closed) والموقع يعمل عادي.
+3. كل مراجعة جديدة → إشعار (لو فعّل NOTIFICATION_EMAIL) → اعتماد من الشيت →
+   تظهر للعملاء خلال ≤5 دقائق (كاش).
+
+### التحقق النهائي (2026-08-30)
+tsc نظيف، 159 وحدة، data-integrity، 15 e2e، schemas 0 أخطاء، build 248 صفحة.
+الـ APIs حية: 400 بدون product، 200+فارغ بدون إعداد، 400 payload/منتج غريب،
+403 origin غريب، 429 rate limit.

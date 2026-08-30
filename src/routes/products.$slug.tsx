@@ -33,6 +33,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { CrossSellBundle } from "@/components/sections/CrossSellBundle";
 import { FAQ } from "@/components/FAQ";
 import { ProductReviews } from "@/features/product/components/ProductReviews";
+import { CustomerReviews } from "@/features/product/components/CustomerReviews";
 import { ProductImage } from "@/features/product/components/ProductImage";
 import { buildOrderMessage, waLink } from "@/lib/whatsapp";
 import { getProductBySlug, getProductsByCategory, getCrossSellsForProduct } from "@/data/products";
@@ -575,6 +576,9 @@ function ProductPage() {
         category={product.category}
         slug={product.slug}
       />
+
+      {/* 📝 المراجعات الحقيقية (معتمدة فقط) + نموذج المشاركة */}
+      <CustomerReviews productId={product.id} />
 
       {/* ── FAQ Section ── */}
       <FAQ />

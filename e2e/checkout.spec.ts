@@ -126,6 +126,96 @@ test("global search /search?q= shows empty state with category links", async ({ 
   await expect(page.getByRole("link", { name: "الأجهزة", exact: true })).toBeVisible();
 });
 
+test("live customer reviews section renders approved reviews from the API", async ({
+  page,
+}) => {
+  await page.route("**/api/reviews*", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        reviews: [
+          {
+            name: "محمد",
+            rating: 5,
+            date: "1/8/2026",
+            text: "تجربة ممتازة والتغليف سري تماماً وصلني خلال يومين.",
+            verified: true,
+          },
+        ],
+        count: 1,
+      }),
+    }),
+  );
+  await page.goto("/products/hammer-of-thor-capsules");
+  await expect(page.getByText("تجارب حقيقية من عملائنا")).toBeVisible();
+  await expect(page.getByText(/تجربة ممتازة والتغليف سري/)).toBeVisible();
+  // "مشتري مؤكد" موجود أيضاً في قسم التقييمات القديم → نحدد القسم الجديد بالاسم
+  const liveSection = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: "تجارب حقيقية من عملائنا" }) });
+  await expect(liveSection.getByText("مشتري مؤكد")).toBeVisible();
+  await expect(page.getByText(/بناءً على 1 مراجعة حقيقية معتمدة/)).toBeVisible();
+});
+
+test("reviews section hides the list when no approved reviews but keeps the form", async ({
+  page,
+}) => {
+  await page.route("**/api/reviews*", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ reviews: [], count: 0 }),
+    }),
+  );
+  await page.goto("/products/hammer-of-thor-capsules");
+  // النموذج متاح دائماً، لكن لا قائمة ولا متوسط بلا مراجعات معتمدة
+  // (نستخدم نص فريد لقسمنا — "بناءً على" يظهر أيضاً في قسم التقييمات القديم)
+  await expect(page.getByText("شارك تجربتك مع هذا المنتج")).toBeVisible();
+  await expect(page.getByText(/مراجعة حقيقية معتمدة/)).toHaveCount(0);
+});
+
+test("customer review submission shows the pending-moderation confirmation", async ({
+  page,
+}) => {
+  await page.route("**/api/reviews*", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ reviews: [], count: 0 }),
+    }),
+  );
+  const submittedBodies: string[] = [];
+  await page.route("**/api/submit-review", (route) => {
+    submittedBodies.push(route.request().postData() ?? "");
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ success: true, status: "pending" }),
+    });
+  });
+  await page.goto("/products/hammer-of-thor-capsules");
+  await page.getByText("شارك تجربتك مع هذا المنتج").scrollIntoViewIfNeeded();
+
+  await page.getByRole("radio", { name: "4 من 5 نجوم" }).click();
+  await page.getByPlaceholder("اسمك (اختياري — يظهر مع مراجعتك)").fill("عميل اختبار");
+  await page.getByPlaceholder("01xxxxxxxxx").fill("01012345678");
+  await page
+    .getByPlaceholder(/اكتب تجربتك الصادقة/)
+    .fill("منتج ممتاز، وصلتني النتيجة اللي كنت متوقعها والتغليف سري تماماً.");
+  await page.getByRole("button", { name: "إرسال مراجعتي" }).click();
+
+  await expect(page.getByText(/قيد المراجعة/)).toBeVisible();
+
+  // الـ payload: productId فقط — اسم المنتج يحدده السيرفر من الكتالوج المعتمد
+  const sent = JSON.parse(submittedBodies[0]);
+  expect(sent.productId).toBe("m-01");
+  expect(sent.rating).toBe(4);
+  expect(sent.reviewerName).toBe("عميل اختبار");
+  expect(sent.reviewerPhone).toBe("01012345678");
+  expect(sent).not.toHaveProperty("productName");
+});
+
 test("header live search links to the full /search results page", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "بحث (Ctrl+K)" }).click();

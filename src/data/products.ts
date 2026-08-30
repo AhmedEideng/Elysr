@@ -223,7 +223,3 @@ export const searchAllPublicProducts = (q: string): Product[] => {
   );
 };
 
-/** Map of legacy ID → slug — used for 301 redirects from old /products/m-01 URLs. */
-export const productIdToSlug: Record<string, string> = Object.fromEntries(
-  products.map((p) => [p.id, p.slug]),
-);

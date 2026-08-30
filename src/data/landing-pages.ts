@@ -6185,5 +6185,3 @@ export const seoLandingPages: SeoLandingPage[] = [
   },
 ];
 
-export const getSeoLandingPageBySlug = (slug: string) =>
-  seoLandingPages.find((page) => page.slug === slug);

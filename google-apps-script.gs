@@ -17,6 +17,44 @@
 const SHEET_NAME = "الطلبات";
 
 /**
+ * 📝 شيت المراجعات الحقيقية — كل مراجعة جديدة تسجل بحالة "قيد المراجعة"
+ * والمالك يعتمد أو يرفضها من عمود "الحالة" (نفس نموذج متابعة الطلبات).
+ * المراجعات المعتمدة فقط هي التي تظهر على الموقع عبر /api/reviews.
+ */
+const REVIEWS_SHEET_NAME = "المراجعات";
+
+const REVIEWS_COLUMNS = [
+  { header: "التاريخ", key: "date", width: 140 },
+  { header: "معرف المنتج", key: "productId", width: 90 },
+  { header: "اسم المنتج", key: "productName", width: 300 },
+  { header: "التقييم", key: "rating", width: 80 },
+  { header: "اسم المراجع", key: "reviewerName", width: 150 },
+  { header: "الهاتف (للتحقق)", key: "reviewerPhone", width: 120 },
+  { header: "المراجعة", key: "reviewText", width: 400 },
+  { header: "الحالة", key: "status", width: 110 },
+  { header: "شراء موثق", key: "verified", width: 100 },
+];
+
+const REVIEW_STATUS_PENDING = "قيد المراجعة";
+const REVIEW_STATUS_APPROVED = "معتمد";
+const REVIEW_STATUS_REJECTED = "مرفوض";
+
+const REVIEW_MAX_TEXT = 600;
+const REVIEW_MIN_TEXT = 10;
+const REVIEW_MAX_NAME = 60;
+const REVIEW_MAX_PRODUCT = 200;
+const REVIEW_LIST_LIMIT = 20;
+const REVIEW_CACHE_TTL_SEC = 300; // حماية حصة Apps Script (تخزين مؤقت لكل منتج)
+
+/**
+ * 🔒 توكن القراءة — اكتب نفس القيمة هنا وفي متغير البيئة
+ * GOOGLE_SHEETS_REVIEWS_TOKEN على الخادم.
+ * إن بقي فارغاً يبقى مسار قراءة المراجعات معطلاً تماماً (fail-closed)
+ * والواجهة تعمل عادية بدون قسم المراجعات الحية.
+ */
+const REVIEW_READ_TOKEN = "";
+
+/**
  * 🟢 معرف الشيت (Spreadsheet ID) - اختياري
  * إذا قمت بإنشاء هذا السكريبت كـ سكريبت مستقل (Standalone) مباشرة من script.google.com،
  * يجب عليك كتابة معرف الشيت الخاص بك هنا لكي يعمل الاتصال (تجد المعرف في رابط الشيت بين d/ و /edit).
@@ -107,6 +145,11 @@ function doPost(e) {
     var rawData = e.parameter.data;
     var data = JSON.parse(rawData);
 
+    // 📝 مسار مختلف: إرسال مراجعة منتج (نفس الـ webhook، action مختلف)
+    if (data.action === "review") {
+      return handleReviewPost(data);
+    }
+
     var items = normalizeItems(data.items);
     if (!items.length) throw new Error("No order items");
 
@@ -195,7 +238,7 @@ function doPost(e) {
       clientIp: clientIp,
     };
 
-    appendRowByHeaders(sheet, rowValues);
+    appendRowByHeaders(sheet, COLUMNS, rowValues);
 
     // إشعار إيميل
     sendOrderNotification(orderId, customerName, customerPhone, governorate, total, itemsText);
@@ -215,18 +258,215 @@ function doPost(e) {
   }
 }
 
-function doGet() {
+function doGet(e) {
+  // 📝 مسار قراءة المراجعات المعتمدة — محمي بتوكن (action=reviews&token=...)
+  // ولا يكشف أي بيانات إلا بعد التحقق.
+  if (e && e.parameter && e.parameter.action === "reviews") {
+    return handleReviewsGet(e.parameter);
+  }
+
   // 🔒 لا نكشف أي إحصاءات (عدد الطلبات/حالة الشيت) للزيارات العامة عبر GET.
   // هذا يمنع تسريب معلومات تشغيلية لأي شخص يمتلك رابط الـ webhook.
   return json({ status: "Elysr Webhook Active" });
 }
 
 // ============================================================
+// 📝 Real Customer Reviews (moderated)
+// ============================================================
+// تدفق المراجعة:
+//   1) العميل يرسل مراجعة (تقييم + نص + اسم اختياري + هاتف اختياري للتحقق).
+//   2) تُسجل في شيت "المراجعات" بحالة "قيد المراجعة" — لا تظهر على الموقع.
+//   3) المالك يفتح الشيت ويغيّر الحالة إلى "معتمد" (أو "مرفوض").
+//   4) الموقع يسحب المعتمدة فقط عبر doGet?action=reviews (بالتوكن).
+// "شراء موثق": لو العميل زوّد هاتفه، نفحص شيت "الطلبات" عن طلب منه
+// يشمل هذا المنتج بالاسم الكامل — إن وُجد: "نعم" (شارة "مشتري مؤكد").
+
+function handleReviewPost(data) {
+  try {
+    var productId = clean(data.productId, 40);
+    var productName = clean(data.productName, REVIEW_MAX_PRODUCT);
+    var ratingNum = parseInt(data.rating, 10);
+    if (!productId || !productName) throw new Error("Missing product");
+    if (!isFinite(ratingNum) || ratingNum < 1 || ratingNum > 5) throw new Error("Invalid rating");
+
+    var reviewerName = clean(data.reviewerName, REVIEW_MAX_NAME);
+    var rawPhone = String(data.reviewerPhone || "").trim();
+    var isLocalEgypt = /^01[0125][0-9]{8}$/.test(rawPhone);
+    var isInternational = /^\+[1-9][0-9]{6,14}$/.test(rawPhone);
+    if (rawPhone && !isLocalEgypt && !isInternational) throw new Error("Invalid phone");
+
+    var reviewText = clean(data.reviewText, REVIEW_MAX_TEXT);
+    if (reviewText.length < REVIEW_MIN_TEXT) throw new Error("Review too short");
+
+    // Rate limiting — بالهاتف إن وُجد وإلا بالـ IP
+    var clientIp = clean(data.clientIp, 64);
+    var rateKey = rawPhone || clientIp || "";
+    if (!rateKey || !checkRateLimit("review:" + rateKey)) {
+      throw new Error("Too many requests; please wait a moment");
+    }
+
+    var verified = rawPhone ? hasVerifiedPurchase(rawPhone, productName) : "لا";
+
+    var sheet = getOrCreateReviewsSheet();
+    appendRowByHeaders(sheet, REVIEWS_COLUMNS, {
+      date: now(),
+      productId: productId,
+      productName: productName,
+      rating: ratingNum,
+      reviewerName: reviewerName,
+      reviewerPhone: rawPhone,
+      reviewText: reviewText,
+      status: REVIEW_STATUS_PENDING,
+      verified: verified,
+    });
+
+    sendReviewNotification(productId, productName, reviewerName || "عميل", ratingNum, reviewText, verified);
+    return json({ success: true, status: REVIEW_STATUS_PENDING });
+  } catch (err) {
+    // 🔒 رسالة عامة آمنة — لا نكشف تفاصيل داخلية (نفس سياسة doPost)
+    console.error("Review webhook error:", err);
+    return json({ success: false, error: "تعذر تسجيل مراجعتك. يرجى المحاولة مرة أخرى." });
+  }
+}
+
+/** هل يوجد طلب موثق من هذا الهاتف يشمل المنتج؟ (بحث في شيت "الطلبات") */
+function hasVerifiedPurchase(phone, productName) {
+  try {
+    var ss = getSpreadsheet();
+    var ordersSheet = ss.getSheetByName(SHEET_NAME);
+    if (!ordersSheet || ordersSheet.getLastRow() <= 1) return "لا";
+
+    var headers = ordersSheet.getRange(1, 1, 1, ordersSheet.getLastColumn()).getValues()[0];
+    var phoneCol = -1;
+    var itemsCol = -1;
+    var statusCol = -1;
+    for (var i = 0; i < headers.length; i++) {
+      var h = String(headers[i]).trim();
+      if (h === "الهاتف") phoneCol = i + 1;
+      else if (h === "المنتجات") itemsCol = i + 1;
+      else if (h === "حالة الطلب") statusCol = i + 1;
+    }
+    if (phoneCol <= 0 || itemsCol <= 0) return "لا";
+
+    var lastRow = ordersSheet.getLastRow();
+    var phoneRange = ordersSheet.getRange(2, phoneCol, lastRow - 1, 1).getValues();
+    var itemsRange = ordersSheet.getRange(2, itemsCol, lastRow - 1, 1).getValues();
+    var statusRange =
+      statusCol > 0 ? ordersSheet.getRange(2, statusCol, lastRow - 1, 1).getValues() : [];
+
+    for (var r = 0; r < phoneRange.length; r++) {
+      if (String(phoneRange[r][0] || "").trim() !== phone) continue;
+      // الطلبات الملغاة لا تُعتبر شراءً موثقاً
+      if (statusCol > 0 && String(statusRange[r][0] || "").trim() === "ملغي") continue;
+      // الاسم الرسمي الكامل للمنتج داخل نص المنتجات (مثلاً "اسم × 1 = 590 ج.م | ...")
+      if (String(itemsRange[r][0] || "").indexOf(productName) !== -1) return "نعم";
+    }
+    return "لا";
+  } catch (err) {
+    console.error("hasVerifiedPurchase failed:", err);
+    return "لا";
+  }
+}
+
+/** إشعار إيميل عند وصول مراجعة جديدة (يُفعَّل بإعداد NOTIFICATION_EMAIL) */
+function sendReviewNotification(productId, productName, name, rating, text, verified) {
+  if (!NOTIFICATION_EMAIL) return;
+  try {
+    var body = [
+      "مراجعة جديدة من " + name + " (" + rating + "/5)",
+      "المنتج: " + productName + " (" + productId + ")",
+      "شراء موثق: " + (verified === "نعم" ? "نعم ✓" : "لا"),
+      "",
+      text,
+      "",
+      'اعتمد أو ارفض المراجعة من عمود "الحالة" في شيت "' + REVIEWS_SHEET_NAME + '".',
+      "افتح الشيت: " + getSpreadsheet().getUrl(),
+    ].join("\n");
+    MailApp.sendEmail(NOTIFICATION_EMAIL, "⭐ مراجعة جديدة — " + productName, body);
+  } catch (err) {
+    // لا توقف تسجيل المراجعة بسبب فشل الإيميل
+    console.error("Review notification failed:", err);
+  }
+}
+
+/** قراءة المراجعات المعتمدة فقط — محمي بتوكن، بدون هاتف، بحد 20 وأسرعها أولاً */
+function handleReviewsGet(params) {
+  // 🔒 fail-closed: بدون توكن مُعيَّن أو بمطابقة فاشلة → رفض (لا بيانات)
+  if (!REVIEW_READ_TOKEN || String(params.token || "") !== REVIEW_READ_TOKEN) {
+    return json({ success: false, error: "Forbidden" });
+  }
+
+  try {
+    var productId = String(params.product || "").trim().slice(0, 40);
+    var result = { success: true, reviews: [] };
+    if (productId) {
+      // تخزين مؤقت 5 دقائق لكل منتج — يحمي حصة Apps Script من الطلبات المتكررة
+      var cacheKey = "rev_" + productId;
+      var cached = CacheService.getScriptCache().get(cacheKey);
+      if (cached) {
+        try {
+          return json(JSON.parse(cached));
+        } catch (err) {
+          /* كاش تالف — نعيد الحساب */
+        }
+      }
+
+      var sheet = getSpreadsheet().getSheetByName(REVIEWS_SHEET_NAME);
+      if (sheet && sheet.getLastRow() > 1) {
+        var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+        var colIdx = { productId: -1, status: -1, date: -1, rating: -1, name: -1, text: -1, verified: -1 };
+        for (var i = 0; i < headers.length; i++) {
+          var h = String(headers[i]).trim();
+          if (h === "معرف المنتج") colIdx.productId = i + 1;
+          else if (h === "الحالة") colIdx.status = i + 1;
+          else if (h === "التاريخ") colIdx.date = i + 1;
+          else if (h === "التقييم") colIdx.rating = i + 1;
+          else if (h === "اسم المراجع") colIdx.name = i + 1;
+          else if (h === "المراجعة") colIdx.text = i + 1;
+          else if (h === "شراء موثق") colIdx.verified = i + 1;
+        }
+
+        if (colIdx.productId > 0 && colIdx.status > 0 && colIdx.text > 0) {
+          var rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
+          // الأحدث أولاً (الصفوف تُضاف زمنياً)
+          for (var r = rows.length - 1; r >= 0; r--) {
+            if (String(rows[r][colIdx.productId - 1] || "").trim() !== productId) continue;
+            if (String(rows[r][colIdx.status - 1] || "").trim() !== REVIEW_STATUS_APPROVED) continue;
+            var text = String(rows[r][colIdx.text - 1] || "").trim();
+            if (!text) continue;
+            result.reviews.push({
+              // 🔒 الهاتف لا يُكشف أبداً في المخرجات
+              name: String(rows[r][colIdx.name - 1] || "").trim() || "عميل",
+              rating: clampInt(rows[r][colIdx.rating - 1], 1, 5),
+              date: String(rows[r][colIdx.date - 1] || "").trim(),
+              text: text.slice(0, REVIEW_MAX_TEXT),
+              verified: String(rows[r][colIdx.verified - 1] || "").trim() === "نعم",
+            });
+            if (result.reviews.length >= REVIEW_LIST_LIMIT) break;
+          }
+        }
+      }
+
+      try {
+        CacheService.getScriptCache().put(cacheKey, JSON.stringify(result), REVIEW_CACHE_TTL_SEC);
+      } catch (err) {
+        /* الكاش تحسين وليس شرطاً */
+      }
+    }
+    return json(result);
+  } catch (err) {
+    // fail-soft: أي خطأ داخلي لا يكسر صفحة المنتج — نرجع قائمة فارغة
+    console.error("Reviews GET error:", err);
+    return json({ success: true, reviews: [] });
+  }
+}
+
+// ============================================================
 // Sheet Management
 // ============================================================
 
-function appendRowByHeaders(sheet, valuesByKey) {
-  var lastCol = sheet.getLastColumn();
+function appendRowByHeaders(sheet, columns, valuesByKey) {
+  var lastCol = Math.max(sheet.getLastColumn(), columns.length);
   var existingHeaders = sheet
     .getRange(1, 1, 1, lastCol)
     .getValues()[0]
@@ -240,8 +480,8 @@ function appendRowByHeaders(sheet, valuesByKey) {
   }
 
   var row = new Array(lastCol).fill("");
-  for (var i = 0; i < COLUMNS.length; i++) {
-    var col = COLUMNS[i];
+  for (var i = 0; i < columns.length; i++) {
+    var col = columns[i];
     var idx = headerToIndex[col.header];
     if (idx) {
       row[idx - 1] = valuesByKey[col.key] !== undefined ? valuesByKey[col.key] : "";
@@ -258,14 +498,35 @@ function appendRowByHeaders(sheet, valuesByKey) {
 }
 
 function getOrCreateSheet(name) {
+  return getOrCreateSheetWithColumns(name, COLUMNS, "orderStatus", [
+    "جديد",
+    "تم التأكيد",
+    "جاري التجهيز",
+    "تم الشحن",
+    "مكتمل",
+    "ملغي",
+    "مرتجع",
+  ]);
+}
+
+/** شيت المراجعات — أعمدة مختلفة عن شيت الطلبات */
+function getOrCreateReviewsSheet() {
+  return getOrCreateSheetWithColumns(REVIEWS_SHEET_NAME, REVIEWS_COLUMNS, "status", [
+    REVIEW_STATUS_PENDING,
+    REVIEW_STATUS_APPROVED,
+    REVIEW_STATUS_REJECTED,
+  ]);
+}
+
+function getOrCreateSheetWithColumns(name, columns, statusKey, statusOptions) {
   var ss = getSpreadsheet();
   var sheet = ss.getSheetByName(name);
-  var expectedHeaders = COLUMNS.map(function (c) {
+  var expectedHeaders = columns.map(function (c) {
     return c.header;
   });
 
   if (!sheet) {
-    return createFreshSheet(ss, name, expectedHeaders);
+    return createFreshSheet(ss, name, expectedHeaders, columns, statusKey, statusOptions);
   }
 
   // تأكد من وجود كل الأعمدة المطلوبة
@@ -299,7 +560,7 @@ function getOrCreateSheet(name) {
   return sheet;
 }
 
-function createFreshSheet(ss, name, headers) {
+function createFreshSheet(ss, name, headers, columns, statusKey, statusOptions) {
   var sheet = ss.insertSheet(name);
   sheet.appendRow(headers);
   sheet.setFrozenRows(1);
@@ -313,36 +574,30 @@ function createFreshSheet(ss, name, headers) {
     .setVerticalAlignment("middle");
 
   // ضبط عرض كل عمود
-  for (var i = 0; i < COLUMNS.length; i++) {
-    if (COLUMNS[i].width) {
-      sheet.setColumnWidth(i + 1, COLUMNS[i].width);
+  for (var i = 0; i < columns.length; i++) {
+    if (columns[i].width) {
+      sheet.setColumnWidth(i + 1, columns[i].width);
     }
   }
 
-  // إضافة Data Validation لعمود "حالة الطلب"
-  var statusColIdx = -1;
-  for (var i = 0; i < COLUMNS.length; i++) {
-    if (COLUMNS[i].key === "orderStatus") {
-      statusColIdx = i + 1;
-      break;
+  // إضافة Data Validation لعمود الحالة (حالة الطلب / حالة المراجعة)
+  if (statusKey && Array.isArray(statusOptions) && statusOptions.length > 0) {
+    var statusColIdx = -1;
+    for (var i = 0; i < columns.length; i++) {
+      if (columns[i].key === statusKey) {
+        statusColIdx = i + 1;
+        break;
+      }
     }
-  }
 
-  if (statusColIdx > 0) {
-    var statusValidation = SpreadsheetApp.newDataValidation()
-      .requireValueInList([
-        "جديد",
-        "تم التأكيد",
-        "جاري التجهيز",
-        "تم الشحن",
-        "مكتمل",
-        "ملغي",
-        "مرتجع",
-      ])
-      .setAllowInvalid(false)
-      .build();
-    // Apply to rows 2-1000
-    sheet.getRange(2, statusColIdx, 999, 1).setDataValidation(statusValidation);
+    if (statusColIdx > 0) {
+      var statusValidation = SpreadsheetApp.newDataValidation()
+        .requireValueInList(statusOptions)
+        .setAllowInvalid(false)
+        .build();
+      // Apply to rows 2-1000
+      sheet.getRange(2, statusColIdx, 999, 1).setDataValidation(statusValidation);
+    }
   }
 
   // تجميد الصف الأول
@@ -553,6 +808,29 @@ function deleteCustomerData(phone) {
         deleted++;
       }
     }
+
+    // 📝 حذف صفوف المراجعات المرتبطة بنفس الهاتف أيضاً (حق النسيان يشملها)
+    try {
+      var reviewsSheet = getSpreadsheet().getSheetByName(REVIEWS_SHEET_NAME);
+      if (reviewsSheet && reviewsSheet.getLastRow() > 1) {
+        var rHeaders = reviewsSheet.getRange(1, 1, 1, reviewsSheet.getLastColumn()).getValues()[0];
+        var rPhoneColIdx = -1;
+        for (var i2 = 0; i2 < rHeaders.length; i2++) {
+          if (String(rHeaders[i2]).trim() === "الهاتف (للتحقق)") rPhoneColIdx = i2 + 1;
+        }
+        if (rPhoneColIdx > 0) {
+          var rLastRow = reviewsSheet.getLastRow();
+          for (var r2 = rLastRow; r2 >= 2; r2--) {
+            if (String(reviewsSheet.getRange(r2, rPhoneColIdx).getValue() || "").trim() === cleanedPhone) {
+              reviewsSheet.deleteRow(r2);
+            }
+          }
+        }
+      }
+    } catch (err2) {
+      console.error("deleteCustomerData (reviews) failed:", err2);
+    }
+
     return deleted;
   } catch (err) {
     console.error("deleteCustomerData failed:", err);
