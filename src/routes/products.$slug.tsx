@@ -552,12 +552,6 @@ function ProductPage() {
               <p className="mt-3 rounded-2xl bg-accent/30 px-4 py-3 text-center text-xs font-bold leading-6 text-muted-foreground">
                 لطلب أكثر من منتج، استخدم إضافة للسلة ثم أتم الطلب مرة واحدة.
               </p>
-
-              <div className="mt-4 grid grid-cols-3 gap-3">
-                <Trust icon={<ShieldCheck className="h-5 w-5" />} label="عبوة موضحة البيانات" />
-                <Trust icon={<Truck className="h-5 w-5" />} label="توصيل سريع" />
-                <Trust icon={<Lock className="h-5 w-5" />} label="سرية تامة" />
-              </div>
             </div>
           )}
         </div>
@@ -830,17 +824,6 @@ function InfoBox({ title, content }: { title: string; content: string }) {
     <div className="rounded-2xl border border-primary/10 bg-card p-4 shadow-sm">
       <h2 className="mb-2 text-sm font-bold text-foreground">{title}</h2>
       <p className="text-xs leading-relaxed text-muted-foreground">{content}</p>
-    </div>
-  );
-}
-
-function Trust({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <div className="flex flex-col items-center gap-1.5 rounded-2xl border bg-background p-3 text-center">
-      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-accent text-primary">
-        {icon}
-      </span>
-      <span className="text-[10px] md:text-xs font-bold">{label}</span>
     </div>
   );
 }
