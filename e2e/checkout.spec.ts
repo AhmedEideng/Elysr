@@ -198,7 +198,7 @@ test("customer review submission shows the pending-moderation confirmation", asy
   await page.getByText("شارك تجربتك مع هذا المنتج").scrollIntoViewIfNeeded();
 
   await page.getByRole("radio", { name: "4 من 5 نجوم" }).click();
-  await page.getByPlaceholder("اسمك (اختياري — يظهر مع مراجعتك)").fill("عميل اختبار");
+  await page.getByPlaceholder("اسمك (اختياري)").fill("عميل اختبار");
   await page.getByPlaceholder("01xxxxxxxxx").fill("01012345678");
   await page
     .getByPlaceholder(/اكتب تجربتك الصادقة/)

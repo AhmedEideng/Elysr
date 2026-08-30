@@ -192,7 +192,7 @@ export function CustomerReviews({ productId }: { productId: string }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={60}
-                placeholder="اسمك (اختياري — يظهر مع مراجعتك)"
+                placeholder="اسمك (اختياري)"
                 className="w-full rounded-xl border bg-card px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
               <input
