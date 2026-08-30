@@ -138,6 +138,11 @@ async function generateSitemap() {
         priority: "1.0",
         changefreq: "daily",
         lastmod: freshLastmod("src/routes/index.tsx", today),
+        // قالب البحث الشامل ببرتوكول الـ sitemap الرسمي من جوجل:
+        // <search><context targetName=...><link href="...{search_term_string}"/>.
+        // نفس القالب المُعلَن في SearchAction بـ JSON-LD — نتائج بحث
+        // Google/Shopping تصل العميل على /search?q=... مباشرة.
+        searchTemplate: `${SITE_URL}/search?q={search_term_string}`,
       },
       {
         path: "/products/men",
@@ -250,12 +255,21 @@ ${urls
       <image:title>${esc(u.imageTitle)}</image:title>
     </image:image>`
       : "";
+    // قالب البحث (جوجل): يُصدر فقط على الصفحة الرئيسية
+    const searchBlock = u.searchTemplate
+      ? `
+    <search>
+      <context targetName="search_term_string">
+        <link targetName="search_term_string" href="${u.searchTemplate}"/>
+      </context>
+    </search>`
+      : "";
     return `  <url>
     <loc>${SITE_URL}${u.path}</loc>
     <lastmod>${u.lastmod}</lastmod>
     <changefreq>${u.changefreq}</changefreq>
     <priority>${u.priority}</priority>
-${imageBlock}
+${searchBlock}${imageBlock}
   </url>`;
   })
   .join("\n")}

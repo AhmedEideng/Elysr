@@ -332,7 +332,8 @@ async function prerender() {
               "@type": "SearchAction",
               target: {
                 "@type": "EntryPoint",
-                urlTemplate: `${SITE_URL}/products/men?q={search_term_string}`,
+                // البحث الشامل (كل الفئات) — نفس القالب المُعلَن في الـ sitemap
+                urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
               },
               "query-input": "required name=search_term_string",
             },
@@ -580,6 +581,17 @@ async function prerender() {
         title: "المفضلة ❤️ — اليسر ميديكال",
         desc: "قائمة المنتجات المفضلة في مكان واحد. اضغط على أيقونة القلب على أي بطاقة منتج لحفظه، ثم أكمل الطلب بسهولة.",
         h1: "المفضلة",
+        noindex: true,
+      },
+      // Global search results page — target of the home SearchAction.
+      // noindex like the cart: dynamic query content, crawler-visible via
+      // SearchAction/sitemap template only (individual /search?q= URLs stay
+      // unindexed to avoid thin duplicate content of product pages).
+      {
+        path: "/search",
+        title: "نتائج البحث — اليسر ميديكال",
+        desc: "نتائج البحث في منتجات اليسر ميديكال — كل المنتجات رجالي ونساء وأجهزة في مكان واحد، بالاسم العربي أو الإنجليزي.",
+        h1: "نتائج البحث",
         noindex: true,
       },
     ];

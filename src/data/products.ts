@@ -207,6 +207,22 @@ export const getCrossSellsForProduct = (product: Product): Product[] => {
 /** Look up a product by its URL slug (e.g. "hammer-of-thor-capsules"). */
 export const getProductBySlug = (slug: string) => products.find((p) => p.slug === slug);
 
+/**
+ * بحث شامل في كل المنتجات (رجالي/نساء/أجهزة) — محرك صفحة /search?q={search_term_string}.
+ * مطابق لنمط فلترة ?q في صفحات الفئات (includes على نفس الحقول المعروضة)،
+ * بحيث تكون نتيجة صندوق البحث الفوري (Fuse) ونتيجة صفحة البحث متسقة (نفس الحقول ونفس الفلتر):
+ * نفس الفلتر الحتمي على نفس الحقول، بدون شبكة، قابل للاختبار.
+ */
+export const searchAllPublicProducts = (q: string): Product[] => {
+  const term = q.trim().toLowerCase();
+  if (!term) return products;
+  return products.filter((p) =>
+    [p.name, p.nameEn, p.slug, p.description, p.ingredients ?? ""].some((field) =>
+      field.toLowerCase().includes(term),
+    ),
+  );
+};
+
 /** Map of legacy ID → slug — used for 301 redirects from old /products/m-01 URLs. */
 export const productIdToSlug: Record<string, string> = Object.fromEntries(
   products.map((p) => [p.id, p.slug]),

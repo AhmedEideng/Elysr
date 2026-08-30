@@ -88,8 +88,7 @@ test("education index serves 200 directly and slashed form 301s to it (Vercel pa
   expect(slashed.headers.get("location")).toBe("/education");
 });
 
-test("category URL search ?q filters products (SearchAction target)", async ({ page }) => {
-  // The home JSON-LD SearchAction targets /products/men?q={search_term_string}
+test("category URL search ?q filters products", async ({ page }) => {
   await page.goto("/products/men?q=كريفا");
   await expect(page.getByText("نتائج البحث عن: «كريفا»")).toBeVisible();
   await expect(page.getByRole("link", { name: /جل كريفا/ }).first()).toBeVisible();
@@ -99,6 +98,45 @@ test("category URL search ?q filters products (SearchAction target)", async ({ p
   await page.getByRole("link", { name: "مسح البحث" }).click();
   await expect(page.getByRole("link", { name: /هامر أوف ثور/ }).first()).toBeVisible();
   expect(await page.getByText(/نتائج البحث عن/).count()).toBe(0);
+});
+
+test("global search /search?q= filters products across all categories (SearchAction target)", async ({
+  page,
+}) => {
+  // The home JSON-LD SearchAction + sitemap search template target
+  // /search?q={search_term_string}
+  await page.goto("/search?q=هامر");
+  await expect(page.getByRole("heading", { name: "نتائج البحث عن: «هامر»" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /هامر أوف ثور/ }).first()).toBeVisible();
+  // a women's product must not appear in the results
+  expect(await page.getByRole("link", { name: /ليدي إيرا/ }).count()).toBe(0);
+  // clearing the search restores the full catalog grid
+  await page.getByRole("link", { name: "مسح البحث" }).click();
+  await expect(page.getByRole("link", { name: /هامر أوف ثور/ }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /ليدي إيرا/ }).first()).toBeVisible();
+  expect(await page.getByText(/نتائج البحث عن/).count()).toBe(0);
+});
+
+test("global search /search?q= shows empty state with category links", async ({ page }) => {
+  await page.goto("/search?q=zzzz-not-a-real-product-12345");
+  await expect(page.getByText(/لا توجد منتجات مطابقة/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "منتجات رجالي" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "منتجات نساء" })).toBeVisible();
+  // exact: الهيدر/الفوتر فيه روابط "الأجهزة الطبية" لمسار /products/devices
+  await expect(page.getByRole("link", { name: "الأجهزة", exact: true })).toBeVisible();
+});
+
+test("header live search links to the full /search results page", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "بحث (Ctrl+K)" }).click();
+  const input = page.getByLabel("بحث في المنتجات");
+  await input.fill("عسل");
+  // dropdown يعرض اقتراحات + زر "عرض كل النتائج" بعداد حقيقي
+  const allBtn = page.getByRole("button", { name: /عرض كل النتائج في صفحة البحث \(\d+\)/ });
+  await expect(allBtn).toBeVisible();
+  await allBtn.click();
+  await expect(page).toHaveURL(/\/search\?q=/);
+  await expect(page.getByRole("heading", { name: "نتائج البحث عن: «عسل»" })).toBeVisible();
 });
 
 test("bundle button works once: second click goes to cart (no duplicate add)", async ({ page }) => {

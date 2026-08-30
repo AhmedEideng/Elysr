@@ -18,6 +18,7 @@ import { Route as MedicalReviewBoardRouteImport } from './routes/medical-review-
 import { Route as OrderConfirmedRouteImport } from './routes/order-confirmed'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReturnsRouteImport } from './routes/returns'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShippingRouteImport } from './routes/shipping'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ThankYouRouteImport } from './routes/thank-you'
@@ -72,6 +73,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const ReturnsRoute = ReturnsRouteImport.update({
   id: '/returns',
   path: '/returns',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShippingRoute = ShippingRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/order-confirmed': typeof OrderConfirmedRoute
   '/privacy': typeof PrivacyRoute
   '/returns': typeof ReturnsRoute
+  '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
   '/terms': typeof TermsRoute
   '/thank-you': typeof ThankYouRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/order-confirmed': typeof OrderConfirmedRoute
   '/privacy': typeof PrivacyRoute
   '/returns': typeof ReturnsRoute
+  '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
   '/terms': typeof TermsRoute
   '/thank-you': typeof ThankYouRoute
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/order-confirmed': typeof OrderConfirmedRoute
   '/privacy': typeof PrivacyRoute
   '/returns': typeof ReturnsRoute
+  '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
   '/terms': typeof TermsRoute
   '/thank-you': typeof ThankYouRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/order-confirmed'
     | '/privacy'
     | '/returns'
+    | '/search'
     | '/shipping'
     | '/terms'
     | '/thank-you'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/order-confirmed'
     | '/privacy'
     | '/returns'
+    | '/search'
     | '/shipping'
     | '/terms'
     | '/thank-you'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/order-confirmed'
     | '/privacy'
     | '/returns'
+    | '/search'
     | '/shipping'
     | '/terms'
     | '/thank-you'
@@ -265,6 +277,7 @@ export interface RootRouteChildren {
   OrderConfirmedRoute: typeof OrderConfirmedRoute
   PrivacyRoute: typeof PrivacyRoute
   ReturnsRoute: typeof ReturnsRoute
+  SearchRoute: typeof SearchRoute
   ShippingRoute: typeof ShippingRoute
   TermsRoute: typeof TermsRoute
   ThankYouRoute: typeof ThankYouRoute
@@ -340,6 +353,13 @@ declare module '@tanstack/react-router' {
       path: '/returns'
       fullPath: '/returns'
       preLoaderRoute: typeof ReturnsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/shipping': {
@@ -425,6 +445,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrderConfirmedRoute: OrderConfirmedRoute,
   PrivacyRoute: PrivacyRoute,
   ReturnsRoute: ReturnsRoute,
+  SearchRoute: SearchRoute,
   ShippingRoute: ShippingRoute,
   TermsRoute: TermsRoute,
   ThankYouRoute: ThankYouRoute,

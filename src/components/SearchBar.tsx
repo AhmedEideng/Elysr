@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Search, X } from "lucide-react";
+import { ArrowLeft, Search, X } from "lucide-react";
 import { formatPrice, type Product } from "@/data/product-types";
 import Fuse from "fuse.js";
 
@@ -45,15 +45,15 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
     }
   }, [q, products]);
 
-  const results = useMemo(() => {
+  const allResults = useMemo(() => {
     const term = q.trim();
     if (!term || !fuse) return [];
     // Fuse يُرجع مصفوفة من الكائنات بالشكل { item, refIndex }
-    return fuse
-      .search(term)
-      .map((result) => result.item)
-      .slice(0, 8);
+    return fuse.search(term).map((result) => result.item);
   }, [q, fuse]);
+
+  // أعلى 8 اقتراحات في الـ dropdown؛ بقية النتائج في صفحة /search?q=
+  const results = allResults.slice(0, 8);
 
   const go = (slug: string) => {
     navigate({ to: "/products/$slug", params: { slug } });
@@ -151,6 +151,20 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
                 </li>
               ))}
             </ul>
+          )}
+
+          {/* بقية النتائج في صفحة /search?q= — لينك قابل للمشاركة/الفهرسة */}
+          {allResults.length > 0 && (
+            <button
+              onClick={() => {
+                navigate({ to: "/search", search: { q: q.trim() } });
+                onClose?.();
+              }}
+              className="w-full flex items-center justify-between gap-2 border-t px-3 py-2.5 text-sm font-bold text-primary transition hover:bg-accent"
+            >
+              <span>عرض كل النتائج في صفحة البحث ({allResults.length})</span>
+              <ArrowLeft className="h-4 w-4 shrink-0" />
+            </button>
           )}
         </div>
       )}

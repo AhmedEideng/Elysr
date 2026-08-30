@@ -7,6 +7,11 @@
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
 
+    <search>
+      <context targetName="search_term_string">
+        <link targetName="search_term_string" href="https://elysrmedical.store/search?q={search_term_string}"/>
+      </context>
+    </search>
   </url>
   <url>
     <loc>https://elysrmedical.store/products/men</loc>

@@ -671,3 +671,31 @@ sildenafil-dapoxetine-combo كانت تحوي تحذيرات قوية أصلاً
 | اختبارات | وحدة: 125 (اختبار جديد: رفض خصم شرائح فوق باقة مكتملة) + e2e: باقة 1370 → 274 خصم، discount=0، total 1146 |
 
 مثال: باقة هيمر أوف ثور [590+580+200=1370] → خصم 274 (كان 137) → الإجمالي مع شحن القاهرة: **1146** (كان 1077).
+
+## 24) تفعيل البحث الشامل ?q (صفحة /search + SearchAction + sitemap) (2026-08-30)
+
+المطلوب: تحويل البحث من dropdown فوري فقط إلى **مزايا كاملة** فيها صفحة نتائج
+ممكن تشارك وتترصد في جوجل.
+
+### ما كان موجوداً
+- SearchBar (Fuse.js) فوري في الهيدر — اقتراحات فقط، والنتيجة تنقلك لأقرب منتج.
+- `?q` محلي في صفحة /products/men (فلتر ضمن الفئة).
+
+### ما أُضيف
+| القطعة | التغيير |
+|---|---|
+| `src/data/products.ts` | `searchAllPublicProducts(q)` — بحث شامل حتمي (includes) في name/nameEn/slug/description/ingredients لكل الفئات، نفس نمط فلترة ?q في الفئات (بدون شبكة، قابل للاختبار). |
+| `src/routes/search.tsx` | صفحة `/search?q=` جديدة: validaterSearch + loader محلي + noindex,follow (صفحات نتائج لا تُفهرس لكن روابطها تُزحف) + حالة "لا نتائج" بروابط الفئات + بانر "مسح البحث". |
+| `src/components/SearchBar.tsx` | سطر "عرض كل النتائج في صفحة البحث (N)" أسفل الـ dropdown — ينقل لـ /search?q= بالعدّاد الحقيقي (results لم تعد slice بل allResults.slice(0,8)). |
+| `scripts/prerender-seo.mjs` | SearchAction في JSON-LD الرئيسي: `/products/men?q=` → `/search?q={search_term_string}` + `/search` ضمن الـ static routes (noindex) — 16→17 ثابت = 248 صفحة. |
+| `scripts/generate-sitemap.mjs` | قالب `<search><context targetName="search_term_string">` على الصفحة الرئيسية (برتوكول sitemap الرسمي لجوجل) — نفس القالب في JSON-LD. |
+| اختبارات | وحدة: +7 (search.test.ts: 132 إجمالي)؛ e2e: +4 (فلترة شاملة عبر الفئات، حالة الفراغ، تدفق الهيدر كامل: افتح واكتب "عسل" → "عرض كل النتائج" → /search?q=عسل) = 12 إجمالي. |
+
+### النتيجة النهائية (2026-08-30)
+- بحث عميل في جوجل/Google Shopping على أي كلمة → يهبط مباشرة على
+  `elysrmedical.store/search?q=...` بنتائج فعلية (SearchAction + sitemap template).
+- عميل في الموقع: dropdown فوري + "عرض كل النتائج" = لينك قابل للمشاركة
+  (واتساب) على نفس الكلمة.
+- التحقق: tsc نظيف، 132 وحدة، data-integrity، 12 e2e، schemas 249 ملف/1163
+  JSON-LD (0 أخطاء)، build 248 صفحة (17 ثابت + 82 منتج + 56 مقال + 93 landing).
+- `/search?q=*` يقدَّم بـ 200 مع robots `noindex,follow,noarchive,nosnippet,noimageindex`.
