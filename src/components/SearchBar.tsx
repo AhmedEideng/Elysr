@@ -87,7 +87,7 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
             setActiveIdx(0);
           }}
           onKeyDown={onKey}
-          placeholder="ابحث عن منتج (مثلاً: تستو ماكس)…"
+          placeholder="ابحث عن منتج (مثلاً: هامر أوف ثور)…"
           className="w-full rounded-full border bg-background pr-10 pl-10 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
           aria-label="بحث في المنتجات"
         />
