@@ -70,3 +70,27 @@ export async function submitToGoogleSheets(
     };
   }
 }
+
+/**
+ * إرسال الطلب "مع مغادرة الصفحة فوراً" (fire-and-forget مضمون الأمانة).
+ *
+ * لو العميل بيتحرك لواتساب مباشرةً (window.location) الـ fetch العادي ممكن
+ * يتقطع قبل ما يخلص فالطلب يفوت تسجيله في الشيت. navigator.sendBeacon
+ * مصمم خصيصاً للموقف ده: المتصفح نفسه بيكفل إرسال البيانات بعد التحميل
+ * (best-effort) بدون ما يبلّغنا برد.
+ *
+ * نفس نقطة النهاية /api/submit-order — مفيش منطق جديد، ومفيش رد بيتقرأ.
+ * @returns true لو المتصفح استقبل الإرسال، false لو مش متاح (fallback للـ fetch).
+ */
+export function beaconOrderToSheets(data: Record<string, unknown>): boolean {
+  try {
+    if (typeof navigator === "undefined" || typeof navigator.sendBeacon !== "function") {
+      return false;
+    }
+    const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+    return navigator.sendBeacon("/api/submit-order", blob);
+  } catch (err) {
+    console.error("Order beacon failed:", err);
+    return false;
+  }
+}

@@ -53,7 +53,12 @@ import {
   sanitizeInput,
   normalizeEgyptianPhone,
 } from "@/lib/utils";
-import { EGYPT_GOVERNORATES, getShippingCost, submitToGoogleSheets } from "@/lib/governorates";
+import {
+  EGYPT_GOVERNORATES,
+  getShippingCost,
+  submitToGoogleSheets,
+  beaconOrderToSheets,
+} from "@/lib/governorates";
 
 export const Route = createFileRoute("/products/$slug")({
   component: ProductPage,
@@ -280,24 +285,25 @@ function ProductPage() {
         promoApplied: discount > 0,
       };
 
-      // 🔒 Run Google Sheets submission as a non-blocking background fetch so the redirect is instant!
-      void submitToGoogleSheets(payload);
+      // 🚀 العميل يدخل واتساب مباشرةً (نفس التبويب) — بدون تبويب جديد
+      // وبدون انتظار. الطلب يُسجل بـ sendBeacon فيكمل حتى بعد مغادرة
+      // الصفحة (fetch عادي كان هيتقطع وقت التحميل). fallback نادر: fetch.
+      if (!beaconOrderToSheets(payload)) {
+        void submitToGoogleSheets(payload);
+      }
 
-      const msg = buildOrderMessage(orderItems, sc, orderId, shipping, shipping === 0);
-      const url = waLink(msg);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      try {
+        // 🔒 لا نخزن رابط واتساب الكامل الذي يحتوي PII — رقم الطلب فقط
+        sessionStorage.setItem("elysr_last_order_id", orderId);
+        sessionStorage.removeItem("elysr_last_whatsapp_url");
+      } catch {
+        // Ignore storage failures.
+      }
 
       setQuickOrderOpen(false);
-      // مدة قصيرة مقصودة: العميل انتقل لواتساب فوراً، والتوست المؤقت
-      // يُغلق تلقائياً عند العودة للتبويب (انظر ToastCleanupOnVisible)
-      toast.success("تم تجهيز رسالة واتساب ببياناتك", { duration: 2500 });
+      window.location.href = waLink(
+        buildOrderMessage(orderItems, sc, orderId, shipping, shipping === 0),
+      );
     } catch (err) {
       console.error("Quick WhatsApp order error:", err);
       toast.error("حدث خطأ أثناء تجهيز الطلب، حاول مرة أخرى");

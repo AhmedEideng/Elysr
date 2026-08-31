@@ -24,6 +24,7 @@ import {
 import {
   EGYPT_GOVERNORATES,
   submitToGoogleSheets,
+  beaconOrderToSheets,
   getShippingCost,
   getShippingLabel,
   FREE_SHIPPING_THRESHOLD,
@@ -172,9 +173,6 @@ function CartPage() {
       );
       const url = waLink(msg);
 
-      // واتساب هو قناة التأكيد الأساسية. نسجل الطلب فوراً بدون مطالبة العميل بالعودة للموقع.
-      void submitToGoogleSheets(payload);
-
       try {
         // 🔒 لا نخزن رابط واتساب الكامل الذي يحتوي PII (اسم، هاتف، عنوان)
         // نخزن فقط رقم الطلب للمراجعة، بدون أي بيانات عميل
@@ -184,19 +182,17 @@ function CartPage() {
         // Ignore storage failures.
       }
 
-      // 🔧 فتح موثوق للواتساب
-      // سنعود للطريقة البسيطة القديمة التي لا تستفز المتصفح
-      const a = document.createElement("a");
-      a.href = url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      // 🚀 العميل يدخل واتساب مباشرةً (نفس التبويب) — بدون صفحة وسيطة
+      // وبدون زر تاني. الطلب يُسجل بـ sendBeacon فيكمل حتى بعد مغادرة
+      // الصفحة (fetch عادي كان هيتقطع وقت التحميل). fallback نادر: fetch.
+      if (!beaconOrderToSheets(payload)) {
+        void submitToGoogleSheets(payload);
+      }
 
       clear();
       setSubmitting(false);
-      navigate({ to: "/thank-you" });
+      window.location.href = url;
+      return;
     } else {
       // 🚀 الطلب المباشر فوري زي الواتساب: التسجيل في الشيت في الخلفية وفتح
       // صفحة التأكيد فوراً (بدون انتظار حتى 10 ثوانٍ للشيت).

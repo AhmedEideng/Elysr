@@ -335,6 +335,69 @@ test("failed direct order keeps the cart (no silent order loss)", async ({ page 
   expect(attempt).toBe(2);
 });
 
+test("whatsapp cart order takes the customer straight to WhatsApp (same tab, no thank-you)", async ({
+  page,
+}) => {
+  let orderCalls = 0;
+  await page.route("**/api/submit-order", (route) => {
+    orderCalls++;
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ success: true }),
+    });
+  });
+  // hermetic: نحتجز wa.me محلياً عشان ما نعتمدش على الشبكة الخارجية
+  await page.route("**/wa.me/**", (route) =>
+    route.fulfill({ status: 200, contentType: "text/html", body: "<html></html>" }),
+  );
+
+  await page.goto("/products/kreva-gel");
+  await page.getByRole("button", { name: "إضافة للسلة", exact: true }).click();
+  await page.goto("/cart");
+  await page.getByPlaceholder("اكتب اسمك هنا").fill("عميل واتساب");
+  await page.getByPlaceholder("01xxxxxxxxx").fill("01012345678");
+  await page.locator("select").selectOption("القاهرة");
+  // واتساب هو الطريقة الافتراضية — الزر يدخل العميل واتساب مباشرة
+  await page.getByRole("button", { name: /تأكيد عبر واتساب/ }).click();
+
+  // نفس التبويب ينتقل لـ wa.me مباشرة — بدون /thank-you وبدون زر تاني
+  await page.waitForURL(/wa\.me\/201098088206/, { timeout: 10_000 });
+  expect(page.url()).not.toContain("/thank-you");
+
+  // الطلب سُجّل فعلاً (sendBeacon وصل للـ API)
+  await page.waitForTimeout(100);
+  expect(orderCalls).toBe(1);
+});
+
+test("PDP quick WhatsApp order goes straight to WhatsApp in the same tab", async ({ page }) => {
+  let orderCalls = 0;
+  await page.route("**/api/submit-order", (route) => {
+    orderCalls++;
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ success: true }),
+    });
+  });
+  await page.route("**/wa.me/**", (route) =>
+    route.fulfill({ status: 200, contentType: "text/html", body: "<html></html>" }),
+  );
+
+  await page.goto("/products/kreva-gel");
+  await page.getByRole("button", { name: /اطلب عبر واتساب/ }).click();
+  // الصفحة فيها حقل هاتف تاني (بار الطلب العائم) — نحدّد الحقل داخل المودال
+  const modal = page.getByRole("dialog", { name: "طلب سريع عبر واتساب" });
+  await modal.getByPlaceholder("اكتب اسمك").fill("عميل سريع");
+  await modal.getByPlaceholder("01xxxxxxxxx").fill("01012345678");
+  await modal.locator("select").selectOption("القاهرة");
+  await modal.getByRole("button", { name: /تسجيل وفتح واتساب/ }).click();
+
+  await page.waitForURL(/wa\.me\/201098088206/, { timeout: 10_000 });
+  await page.waitForTimeout(100);
+  expect(orderCalls).toBe(1);
+});
+
 test("complete bundle applies the real 20% bundle discount (exclusive with tier) in cart and payload", async ({
   page,
 }) => {
