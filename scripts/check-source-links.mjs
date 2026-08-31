@@ -56,7 +56,7 @@ try {
   const worker = async () => {
     while (queue.length) {
       const url = queue.shift();
-      const probe = async (attempt) => {
+      const probe = async () => {
         const ctrl = new AbortController();
         const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
         try {
@@ -66,16 +66,20 @@ try {
             headers: { "user-agent": UA, accept: "text/html" },
           });
           return res.status;
+        } catch {
+          // انتهاء مهلة (AbortError) أو خطأ شبكة (DNS/reset) — يُعاد "ERR"
+          // فتعالجه منطق إعادة المحاولة أدناه بدل أن ينهار التنفيذ كله.
+          return "ERR";
         } finally {
           clearTimeout(timer);
         }
       };
 
-      let status = await probe(1);
-      if (status >= 500 || Number.isNaN(status)) {
-        // إعادة محاولة واحدة للخطأ العابر قبل إعلان الموت
+      let status = await probe();
+      if (status === "ERR" || status >= 500) {
+        // إعادة محاولة واحدة للخطأ العابر (مهلة/وميض شبكة) قبل إعلان الموت
         await new Promise((r) => setTimeout(r, 1500));
-        status = await probe(2);
+        status = await probe();
       }
 
       if (status >= 200 && status < 400) ok.push(url);
