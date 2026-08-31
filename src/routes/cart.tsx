@@ -191,7 +191,7 @@ function CartPage() {
 
       clear();
       setSubmitting(false);
-      window.location.href = url;
+      window.location.assign(url);
       return;
     } else {
       // 🚀 الطلب المباشر فوري زي الواتساب: التسجيل في الشيت في الخلفية وفتح

@@ -301,8 +301,8 @@ function ProductPage() {
       }
 
       setQuickOrderOpen(false);
-      window.location.href = waLink(
-        buildOrderMessage(orderItems, sc, orderId, shipping, shipping === 0),
+      window.location.assign(
+        waLink(buildOrderMessage(orderItems, sc, orderId, shipping, shipping === 0)),
       );
     } catch (err) {
       console.error("Quick WhatsApp order error:", err);

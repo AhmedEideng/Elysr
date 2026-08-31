@@ -93,9 +93,9 @@ function isAllowedOrigin(req) {
   const host = req.headers.host ? `https://${req.headers.host}` : undefined;
   return Boolean(
     !origin &&
-      host &&
-      ALLOWED_ORIGINS.has(host) &&
-      (secFetchSite === "same-origin" || secFetchSite === "none"),
+    host &&
+    ALLOWED_ORIGINS.has(host) &&
+    (secFetchSite === "same-origin" || secFetchSite === "none"),
   );
 }
 

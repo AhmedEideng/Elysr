@@ -222,4 +222,3 @@ export const searchAllPublicProducts = (q: string): Product[] => {
     ),
   );
 };
-

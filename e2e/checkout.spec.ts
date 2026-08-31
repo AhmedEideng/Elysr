@@ -126,9 +126,7 @@ test("global search /search?q= shows empty state with category links", async ({ 
   await expect(page.getByRole("link", { name: "الأجهزة", exact: true })).toBeVisible();
 });
 
-test("live customer reviews section renders approved reviews from the API", async ({
-  page,
-}) => {
+test("live customer reviews section renders approved reviews from the API", async ({ page }) => {
   await page.route("**/api/reviews*", (route) =>
     route.fulfill({
       status: 200,
@@ -175,9 +173,7 @@ test("reviews section hides the list when no approved reviews but keeps the form
   await expect(page.getByText(/مراجعة حقيقية معتمدة/)).toHaveCount(0);
 });
 
-test("customer review submission shows the pending-moderation confirmation", async ({
-  page,
-}) => {
+test("customer review submission shows the pending-moderation confirmation", async ({ page }) => {
   await page.route("**/api/reviews*", (route) =>
     route.fulfill({
       status: 200,

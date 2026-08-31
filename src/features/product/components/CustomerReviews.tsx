@@ -91,8 +91,8 @@ export function CustomerReviews({ productId }: { productId: string }) {
     <section className="mt-8 mb-8 rounded-[2rem] border border-border/50 bg-card p-6 md:p-8 shadow-sm">
       <h2 className="text-2xl md:text-3xl font-bold">تجارب حقيقية من عملائنا</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        مراجعات حقيقية بعد اعتمادها — بدون أي تقييمات وهمية. مشاركة تجربتك تساعد عملاءنا
-        على اتخاذ القرار بثقة.
+        مراجعات حقيقية بعد اعتمادها — بدون أي تقييمات وهمية. مشاركة تجربتك تساعد عملاءنا على اتخاذ
+        القرار بثقة.
       </p>
 
       {/* ── المراجعات المعتمدة (تظهر فقط إن وُجدت فعلاً) ── */}
@@ -131,9 +131,7 @@ export function CustomerReviews({ productId }: { productId: string }) {
                       )}
                     </div>
                     {review.date ? (
-                      <div className="text-[11px] text-muted-foreground mt-1.5">
-                        {review.date}
-                      </div>
+                      <div className="text-[11px] text-muted-foreground mt-1.5">{review.date}</div>
                     ) : null}
                   </div>
                   <div className="flex text-amber-500">

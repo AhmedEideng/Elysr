@@ -135,7 +135,9 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: "Too many requests" });
   }
 
-  const productId = String((req.query && req.query.product) || "").trim().slice(0, 40);
+  const productId = String((req.query && req.query.product) || "")
+    .trim()
+    .slice(0, 40);
   if (!productId) {
     return res.status(400).json({ error: "Missing product parameter" });
   }

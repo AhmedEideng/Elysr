@@ -69,18 +69,19 @@ describe("submit-review payload validation", () => {
   });
 
   it("rejects unknown products (not in the official catalog)", () => {
-    expect(validateReviewPayload({ productId: "nope-123", rating: 5, reviewText: "نص طويل كفاية للاختبار" })).toBe(
-      "Product not found in official catalog",
-    );
+    expect(
+      validateReviewPayload({
+        productId: "nope-123",
+        rating: 5,
+        reviewText: "نص طويل كفاية للاختبار",
+      }),
+    ).toBe("Product not found in official catalog");
   });
 
-  it.each([0, 6, 2.5, "5"])(
-    "rejects invalid rating: %p",
-    (rating) => {
-      const { body } = validPayload();
-      expect(validateReviewPayload({ ...body, rating: rating as never })).toBe("Invalid rating");
-    },
-  );
+  it.each([0, 6, 2.5, "5"])("rejects invalid rating: %p", (rating) => {
+    const { body } = validPayload();
+    expect(validateReviewPayload({ ...body, rating: rating as never })).toBe("Invalid rating");
+  });
 
   it("rejects review text that is too short or too long", () => {
     const { body } = validPayload();
@@ -96,11 +97,15 @@ describe("submit-review payload validation", () => {
 
   it("rejects invalid phone numbers but accepts Egyptian local and E.164", () => {
     const { body } = validPayload();
-    expect(validateReviewPayload({ ...body, reviewerPhone: "12345" })).toBe("Invalid reviewerPhone");
+    expect(validateReviewPayload({ ...body, reviewerPhone: "12345" })).toBe(
+      "Invalid reviewerPhone",
+    );
     expect(validateReviewPayload({ ...body, reviewerPhone: "01012345678" })).toBeUndefined();
     expect(validateReviewPayload({ ...body, reviewerPhone: "+201012345678" })).toBeUndefined();
     // الهاتف والاسم اختياريان
-    expect(validateReviewPayload({ ...body, reviewerPhone: undefined, reviewerName: undefined })).toBeUndefined();
+    expect(
+      validateReviewPayload({ ...body, reviewerPhone: undefined, reviewerName: undefined }),
+    ).toBeUndefined();
   });
 
   it("accepts a fully valid review", () => {

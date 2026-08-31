@@ -6184,4 +6184,3 @@ export const seoLandingPages: SeoLandingPage[] = [
     ],
   },
 ];
-

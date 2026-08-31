@@ -41,8 +41,6 @@ describe("searchAllPublicProducts (global /search?q=)", () => {
   });
 
   it("trims surrounding whitespace from the query", () => {
-    expect(searchAllPublicProducts("  هامر  ").length).toBe(
-      searchAllPublicProducts("هامر").length,
-    );
+    expect(searchAllPublicProducts("  هامر  ").length).toBe(searchAllPublicProducts("هامر").length);
   });
 });
