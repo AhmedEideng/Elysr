@@ -174,10 +174,10 @@ export function CustomerReviews({ productId }: { productId: string }) {
                     aria-checked={rating === value}
                     aria-label={`${value} من 5 نجوم`}
                     onClick={() => setRating(value)}
-                    className="p-0.5 transition-transform hover:scale-110"
+                    className="p-1.5 transition-transform hover:scale-110"
                   >
                     <Star
-                      className={`h-7 w-7 transition-colors ${
+                      className={`h-9 w-9 transition-colors ${
                         value <= rating ? "fill-amber-500 text-amber-500" : "text-border"
                       }`}
                     />
@@ -227,6 +227,17 @@ export function CustomerReviews({ productId }: { productId: string }) {
             {error && (
               <p className="mt-3 rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 text-xs font-bold text-red-700">
                 {error}
+              </p>
+            )}
+
+            {/* 💡 الزر بيتعطل لحد ما الشروط تتنفذ — نوبي العميل يعرف السبب بالظبط */}
+            {!submitting && (rating < 1 || textLength < MIN_TEXT || textLength > MAX_TEXT) && (
+              <p className="mt-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-xs font-bold text-amber-800">
+                {rating < 1
+                  ? "اضغطي النجوم بالأول عشان تختاري تقييمك"
+                  : textLength > MAX_TEXT
+                    ? "المراجعة أطول من الحد المسموح"
+                    : `اكتبي ${MIN_TEXT} حروف على الأقل في المراجعة (دلوقتي ${textLength})`}
               </p>
             )}
 
