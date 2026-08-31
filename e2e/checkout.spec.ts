@@ -146,14 +146,14 @@ test("live customer reviews section renders approved reviews from the API", asyn
     }),
   );
   await page.goto("/products/hammer-of-thor-capsules");
-  await expect(page.getByText("تجارب حقيقية من عملائنا")).toBeVisible();
+  await expect(page.getByText("تجارب عملاء حقيقية")).toBeVisible();
   await expect(page.getByText(/تجربة ممتازة والتغليف سري/)).toBeVisible();
   // "مشتري مؤكد" موجود أيضاً في قسم التقييمات القديم → نحدد القسم الجديد بالاسم
   const liveSection = page
     .locator("section")
-    .filter({ has: page.getByRole("heading", { name: "تجارب حقيقية من عملائنا" }) });
-  await expect(liveSection.getByText("مشتري مؤكد")).toBeVisible();
-  await expect(page.getByText(/بناءً على 1 مراجعة حقيقية معتمدة/)).toBeVisible();
+    .filter({ has: page.getByRole("heading", { name: "تجارب عملاء حقيقية" }) });
+  await expect(liveSection.getByText("شراء موثق")).toBeVisible();
+  await expect(page.getByText(/متوسط 1 مراجعة موثقة/)).toBeVisible();
 });
 
 test("reviews section hides the list when no approved reviews but keeps the form", async ({
@@ -169,8 +169,8 @@ test("reviews section hides the list when no approved reviews but keeps the form
   await page.goto("/products/hammer-of-thor-capsules");
   // النموذج متاح دائماً، لكن لا قائمة ولا متوسط بلا مراجعات معتمدة
   // (نستخدم نص فريد لقسمنا — "بناءً على" يظهر أيضاً في قسم التقييمات القديم)
-  await expect(page.getByText("شارك تجربتك مع هذا المنتج")).toBeVisible();
-  await expect(page.getByText(/مراجعة حقيقية معتمدة/)).toHaveCount(0);
+  await expect(page.getByText("شاركنا تجربتك")).toBeVisible();
+  await expect(page.getByText(/مراجعة موثقة/)).toHaveCount(0);
 });
 
 test("customer review submission shows the pending-moderation confirmation", async ({ page }) => {
@@ -191,7 +191,7 @@ test("customer review submission shows the pending-moderation confirmation", asy
     });
   });
   await page.goto("/products/hammer-of-thor-capsules");
-  await page.getByText("شارك تجربتك مع هذا المنتج").scrollIntoViewIfNeeded();
+  await page.getByText("شاركنا تجربتك").scrollIntoViewIfNeeded();
 
   await page.getByRole("radio", { name: "4 من 5 نجوم" }).click();
   await page.getByPlaceholder("اسمك (اختياري)").fill("عميل اختبار");
@@ -199,7 +199,7 @@ test("customer review submission shows the pending-moderation confirmation", asy
   await page
     .getByPlaceholder(/اكتب تجربتك الصادقة/)
     .fill("منتج ممتاز، وصلتني النتيجة اللي كنت متوقعها والتغليف سري تماماً.");
-  await page.getByRole("button", { name: "إرسال مراجعتي" }).click();
+  await page.getByRole("button", { name: "إرسال المراجعة" }).click();
 
   await expect(page.getByText(/قيد المراجعة/)).toBeVisible();
 

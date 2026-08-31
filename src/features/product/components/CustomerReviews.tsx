@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle, Clock, Loader2, Send, Star } from "lucide-react";
+import { BadgeCheck, Clock, Loader2, Send, ShieldCheck, Star } from "lucide-react";
 
 interface LiveReview {
   name: string;
@@ -12,11 +12,31 @@ interface LiveReview {
 const MAX_TEXT = 600;
 const MIN_TEXT = 10;
 
+/** تسميات التقييم المعروضة بجانب النجوم (صيغة مذكر رسمية) */
+const RATING_LABELS: Record<number, string> = {
+  1: "ضعيف",
+  2: "مقبول",
+  3: "جيد",
+  4: "جيد جدًا",
+  5: "ممتاز",
+};
+
+function Stars({ value, size = "md" }: { value: number; size?: "sm" | "md" }) {
+  const cls = size === "sm" ? "h-3.5 w-3.5" : "h-5 w-5";
+  return (
+    <div className="flex items-center gap-0.5 text-amber-500">
+      {[...Array(5)].map((_, i) => (
+        <Star key={i} className={`${cls} ${i < value ? "fill-current" : "opacity-25"}`} />
+      ))}
+    </div>
+  );
+}
+
 /**
  * المراجعات الحقيقية من العملاء (المعتمدة فقط) —
  * قسم مستقل عن التقييمات المعروضة أعلاه:
  * - يُجلب من /api/reviews (Apps Script ← شيت "المراجعات" المعتمدة).
- * - بدون مراجعات معتمدة → لا يظهر قسم العرض (لا نعرض أي محتوى بلا مصدر).
+ * - بدون مراجعات معتمدة → لا قائمة (لا نعرض أي محتوى بلا مصدر).
  * - النموذج متاح دائماً: المراجعة الجديدة تُسجل "قيد المراجعة"
  *   ولا تظهر إلا بعد اعتماد المالك — لا مراجعات وهمية.
  */
@@ -58,11 +78,12 @@ export function CustomerReviews({ productId }: { productId: string }) {
   }, [reviews]);
 
   const textLength = text.trim().length;
+  const textValid = textLength >= MIN_TEXT && textLength <= MAX_TEXT;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (submitting || submitted) return;
-    if (rating < 1 || textLength < MIN_TEXT || textLength > MAX_TEXT) return;
+    if (rating < 1 || !textValid) return;
 
     setSubmitting(true);
     setError(null);
@@ -81,7 +102,7 @@ export function CustomerReviews({ productId }: { productId: string }) {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setSubmitted(true);
     } catch {
-      setError("حدث خطأ أثناء إرسال مراجعتك. حاول مرة أخرى من فضلك.");
+      setError("تعذر إرسال المراجعة. يرجى المحاولة مرة أخرى.");
     } finally {
       setSubmitting(false);
     }
@@ -89,61 +110,66 @@ export function CustomerReviews({ productId }: { productId: string }) {
 
   return (
     <section className="mt-8 mb-8 rounded-[2rem] border border-border/50 bg-card p-6 md:p-8 shadow-sm">
-      <h2 className="text-2xl md:text-3xl font-bold">تجارب حقيقية من عملائنا</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        مراجعات حقيقية بعد اعتمادها — بدون أي تقييمات وهمية. مشاركة تجربتك تساعد عملاءنا على اتخاذ
-        القرار بثقة.
-      </p>
+      {/* ── ترويسة القسم ── */}
+      <div className="flex items-center gap-3">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-brand text-primary-foreground shadow-sm">
+          <Star className="h-5 w-5 fill-current" />
+        </span>
+        <div>
+          <h2 className="text-xl font-extrabold tracking-tight md:text-2xl">تجارب عملاء حقيقية</h2>
+          <p className="mt-0.5 text-xs leading-5 text-muted-foreground md:text-sm">
+            مراجعات موثقة تُعرض بعد مراجعتها واعتمادها — دون أي تقييمات وهمية.
+          </p>
+        </div>
+      </div>
 
       {/* ── المراجعات المعتمدة (تظهر فقط إن وُجدت فعلاً) ── */}
       {reviews !== null && reviews.length > 0 && (
         <div className="mt-6">
-          <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 px-4 py-3">
-            <div className="flex items-center gap-1.5 text-amber-500">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-5 w-5 ${i < Math.round(average) ? "fill-current" : "opacity-30"}`}
-                />
-              ))}
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl font-black text-foreground">{average}</span>
+              <Stars value={Math.round(average)} size="md" />
             </div>
-            <span className="text-lg font-black">{average}</span>
             <span className="text-xs font-bold text-emerald-800">
-              بناءً على {reviews.length} مراجعة حقيقية معتمدة
+              متوسط {reviews.length} مراجعة موثقة
             </span>
           </div>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             {reviews.map((review, i) => (
-              <div
+              <article
                 key={`${review.date}-${i}`}
-                className="rounded-2xl border border-primary/5 bg-background p-5 shadow-sm transition-smooth hover:shadow-md"
+                className="rounded-2xl border border-border/60 bg-background p-5 shadow-sm transition-smooth hover:shadow-md"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <div className="flex items-center gap-2 font-bold text-foreground">
-                      <span>{review.name}</span>
-                      {review.verified && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-700">
-                          <CheckCircle className="h-3 w-3 text-emerald-600" />
-                          مشتري مؤكد
-                        </span>
-                      )}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-brand text-sm font-black text-primary-foreground">
+                      {review.name.trim().charAt(0) || "ع"}
+                    </span>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2 text-sm font-bold">
+                        {review.name}
+                        {review.verified && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-700 ring-1 ring-emerald-200">
+                            <BadgeCheck className="h-3 w-3" />
+                            شراء موثق
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <Stars value={review.rating} size="sm" />
+                        {review.date && (
+                          <span className="text-[11px] text-muted-foreground">{review.date}</span>
+                        )}
+                      </div>
                     </div>
-                    {review.date ? (
-                      <div className="text-[11px] text-muted-foreground mt-1.5">{review.date}</div>
-                    ) : null}
-                  </div>
-                  <div className="flex text-amber-500">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} className="h-3.5 w-3.5 fill-current" />
-                    ))}
                   </div>
                 </div>
-                <p className="text-sm font-medium leading-relaxed text-foreground/90">
-                  “{review.text}”
+                <p className="mt-3 text-sm font-medium leading-relaxed text-foreground/90">
+                  {review.text}
                 </p>
-              </div>
+              </article>
             ))}
           </div>
         </div>
@@ -151,19 +177,23 @@ export function CustomerReviews({ productId }: { productId: string }) {
 
       {/* ── نموذج المشاركة ── */}
       <div className="mt-6 rounded-2xl border border-border/60 bg-background p-5 md:p-6">
+        <h3 className="text-base font-extrabold">شاركنا تجربتك</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          تجربتك الصادقة تساعد عملاءنا على اتخاذ قرارهم بثقة.
+        </p>
+
         {submitted ? (
-          <div className="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-4">
-            <Clock className="h-5 w-5 text-emerald-600 shrink-0" />
-            <p className="text-sm font-bold text-emerald-800">
-              شكراً لك! وصلت مراجعتك وهي الآن قيد المراجعة — ستظهر للعملاء فور اعتمادها.
+          <div className="mt-4 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
+            <Clock className="h-5 w-5 shrink-0 text-emerald-600" />
+            <p className="text-sm font-bold leading-6 text-emerald-800">
+              شكرًا لك! تم استلام مراجعتك وهي الآن قيد المراجعة — ستظهر للعملاء فور اعتمادها.
             </p>
           </div>
         ) : (
           <form onSubmit={onSubmit} noValidate>
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <h3 className="font-bold">شارك تجربتك مع هذا المنتج</h3>
-              {/* نجوم التقييم */}
-              <div className="flex items-center gap-1" role="radiogroup" aria-label="التقييم">
+            {/* التقييم */}
+            <div className="mt-4 flex flex-col items-center gap-1.5 rounded-2xl border border-border/50 bg-card px-4 py-4">
+              <div className="flex items-center gap-1.5" role="radiogroup" aria-label="التقييم">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <button
                     key={value}
@@ -172,7 +202,7 @@ export function CustomerReviews({ productId }: { productId: string }) {
                     aria-checked={rating === value}
                     aria-label={`${value} من 5 نجوم`}
                     onClick={() => setRating(value)}
-                    className="p-1.5 transition-transform hover:scale-110"
+                    className="p-1 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
                   >
                     <Star
                       className={`h-9 w-9 transition-colors ${
@@ -182,80 +212,106 @@ export function CustomerReviews({ productId }: { productId: string }) {
                   </button>
                 ))}
               </div>
+              <p
+                aria-live="polite"
+                className={`text-xs font-bold ${rating > 0 ? "text-amber-600" : "text-muted-foreground"}`}
+              >
+                {rating > 0 ? `تقييمك: ${RATING_LABELS[rating]}` : "اختر تقييمك بالنجوم"}
+              </p>
             </div>
 
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={60}
-                placeholder="اسمك (اختياري)"
-                className="w-full rounded-xl border bg-card px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
-              />
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                maxLength={16}
-                dir="ltr"
-                placeholder="01xxxxxxxxx"
-                className="w-full rounded-xl border bg-card px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition text-right"
-              />
+            {/* الحقول */}
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-muted-foreground">
+                  الاسم <span className="font-normal">(اختياري)</span>
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  maxLength={60}
+                  placeholder="اسمك (اختياري)"
+                  className="w-full rounded-xl border bg-card px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-muted-foreground">
+                  رقم الهاتف <span className="font-normal">(اختياري — للتحقق من الشراء فقط)</span>
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  maxLength={16}
+                  dir="ltr"
+                  placeholder="01xxxxxxxxx"
+                  className="w-full rounded-xl border bg-card px-4 py-2.5 text-right text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
             </div>
-            <p className="mt-1.5 text-[11px] text-muted-foreground">
-              رقم هاتفك (اختياري) يُستخدم فقط للتحقق من أنك مشترٍ فعلي — لا يُنشر أبداً.
-            </p>
 
-            <div className="relative mt-3">
+            <div className="mt-4">
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="text-xs font-bold text-muted-foreground">تجربتك مع المنتج</label>
+                <span
+                  className={`text-[11px] font-bold ${
+                    textValid ? "text-emerald-600" : "text-muted-foreground"
+                  }`}
+                >
+                  {textLength}/{MAX_TEXT}
+                </span>
+              </div>
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 rows={4}
                 maxLength={MAX_TEXT}
                 required
-                placeholder="اكتب تجربتك الصادقة مع المنتج (10 حروف على الأقل)…"
-                className="w-full rounded-xl border bg-card px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition resize-none"
+                placeholder="اكتب تجربتك الصادقة مع المنتج (10 أحرف على الأقل)…"
+                className="w-full resize-none rounded-xl border bg-card px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
-              <span className="absolute bottom-3 left-3 text-[10px] font-bold text-muted-foreground">
-                {textLength}/{MAX_TEXT}
-              </span>
             </div>
 
             {error && (
-              <p className="mt-3 rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 text-xs font-bold text-red-700">
+              <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-bold text-red-700">
                 {error}
               </p>
             )}
 
-            {/* 💡 الزر بيتعطل لحد ما الشروط تتنفذ — نوبي العميل يعرف السبب بالظبط */}
-            {!submitting && (rating < 1 || textLength < MIN_TEXT || textLength > MAX_TEXT) && (
-              <p className="mt-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-xs font-bold text-amber-800">
+            {/* سبب تعطيل الزر — واضح ودائم */}
+            {!submitting && (rating < 1 || !textValid) && (
+              <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-bold text-amber-800">
                 {rating < 1
-                  ? "اضغطي النجوم بالأول عشان تختاري تقييمك"
+                  ? "اختر تقييمك بالنجوم أولًا."
                   : textLength > MAX_TEXT
-                    ? "المراجعة أطول من الحد المسموح"
-                    : `اكتبي ${MIN_TEXT} حروف على الأقل في المراجعة (دلوقتي ${textLength})`}
+                    ? "المراجعة أطول من الحد المسموح (600 حرف)."
+                    : `اكتب ${MIN_TEXT} أحرف على الأقل في المراجعة (حتى الآن: ${textLength}).`}
               </p>
             )}
 
             <button
               type="submit"
-              disabled={submitting || rating < 1 || textLength < MIN_TEXT || textLength > MAX_TEXT}
-              className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-brand px-6 py-3 text-sm font-bold text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition"
+              disabled={submitting || rating < 1 || !textValid}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-brand px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-elegant transition-smooth hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
             >
               {submitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  جاري الإرسال…
+                  جارٍ إرسال المراجعة…
                 </>
               ) : (
                 <>
                   <Send className="h-4 w-4" />
-                  إرسال مراجعتي
+                  إرسال المراجعة
                 </>
               )}
             </button>
+
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+              نحافظ على خصوصيتك: رقم هاتفك لا يُنشر ويُستخدم للتحقق من الشراء فقط.
+            </p>
           </form>
         )}
       </div>
