@@ -22,7 +22,7 @@ describe("تم إلغاء نظام RED — لا يُستثنى أي منتج م�
 
 describe("GOOGLE_SHOPPING_BLOCKED — يستبعد الأدوية المرفوضة من الخلاصة فقط", () => {
   it("تحوي منتجات الأدوية المرفوضة من Google Shopping", () => {
-    // تم حذف m-34,m-36,m-37,m-47 نهائياً، المتبقي 4 فقط
+    // تم حذف 5 أدوية نهائياً (m-34,m-36,m-37,m-47,w-17) — المتبقي 3 محظورة معروضة (m-38,m-43,m-45)
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-38")).toBe(true); // Power 36
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-43")).toBe(true); // Procomil Fort
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-45")).toBe(true); // Viagra Pfizer

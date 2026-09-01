@@ -160,8 +160,9 @@ export const getFeaturedProducts = (): Product[] =>
 export const getProductById = (id: string) => products.find((p) => p.id === id);
 
 /**
- * منتجات ظاهرة للعامة في صفحات الفئات - بعد حذف 4 منتجات محظورة نهائياً (m-34,m-36,m-37,m-47)
- * باقي الأدوية المحظورة (m-38,m-43,m-45,w-17) ترجع ظاهرة في الفئات كما كانت مع حماية noindex
+ * منتجات ظاهرة للعامة في صفحات الفئات — بعد حذف 5 أدوية نهائياً
+ * (m-34,m-36,m-37,m-47,w-17)؛ الأدوية المحظورة المتبقية (m-38,m-43,m-45)
+ * تظهر في الفئات كما كانت مع حماية noindex، وتُستبعد من feed/sitemap جوجل.
  */
 export const getPublicProductsByCategory = (cat: ProductCategory) => {
   return getProductsByCategory(cat);

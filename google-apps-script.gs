@@ -98,6 +98,9 @@ const COLUMNS = [
   { header: "المحافظة", key: "governorate", width: 110 },
   { header: "العنوان", key: "address", width: 200 },
   { header: "المنتجات", key: "itemsText", width: 350 },
+  // معرفات المنتجات (ids) — للتحقق الآمن من "مشتري مؤكد" بمعرّف ثابت
+  // لا يتغير بتغيير الاسم التسويقي (البحث بالاسم يبقى fallback للطلبات القديمة)
+  { header: "معرفات المنتجات", key: "productIds", width: 120 },
   { header: "عدد المنتجات", key: "itemCount", width: 90 },
   { header: "المجموع قبل الخصم", key: "subtotalBeforeDiscount", width: 120 },
   { header: "قيمة الخصم", key: "discount", width: 90 },
@@ -223,6 +226,7 @@ function doPost(e) {
       governorate: governorate,
       address: address || "سيتم تأكيده على واتساب",
       itemsText: itemsText,
+      productIds: items.map(function (it) { return it.id; }).filter(Boolean).join(", "),
       itemCount: itemCount,
       subtotalBeforeDiscount: subtotalBeforeDiscount,
       discount: discount,
@@ -304,7 +308,7 @@ function handleReviewPost(data) {
       throw new Error("Too many requests; please wait a moment");
     }
 
-    var verified = rawPhone ? hasVerifiedPurchase(rawPhone, productName) : "لا";
+    var verified = rawPhone ? hasVerifiedPurchase(rawPhone, productId, productName) : "لا";
 
     var sheet = getOrCreateReviewsSheet();
     appendRowByHeaders(sheet, REVIEWS_COLUMNS, {
@@ -329,7 +333,7 @@ function handleReviewPost(data) {
 }
 
 /** هل يوجد طلب موثق من هذا الهاتف يشمل المنتج؟ (بحث في شيت "الطلبات") */
-function hasVerifiedPurchase(phone, productName) {
+function hasVerifiedPurchase(phone, productId, productName) {
   try {
     var ss = getSpreadsheet();
     var ordersSheet = ss.getSheetByName(SHEET_NAME);
@@ -339,17 +343,22 @@ function hasVerifiedPurchase(phone, productName) {
     var phoneCol = -1;
     var itemsCol = -1;
     var statusCol = -1;
+    var idsCol = -1;
     for (var i = 0; i < headers.length; i++) {
       var h = String(headers[i]).trim();
       if (h === "الهاتف") phoneCol = i + 1;
       else if (h === "المنتجات") itemsCol = i + 1;
       else if (h === "حالة الطلب") statusCol = i + 1;
+      else if (h === "معرفات المنتجات") idsCol = i + 1;
     }
-    if (phoneCol <= 0 || itemsCol <= 0) return "لا";
+    if (phoneCol <= 0) return "لا";
+    // لا يمكن التحقق بدون أي مصدر مطابقة (طلب من قبل إضافة العمودين معاً)
+    if (itemsCol <= 0 && idsCol <= 0) return "لا";
 
     var lastRow = ordersSheet.getLastRow();
     var phoneRange = ordersSheet.getRange(2, phoneCol, lastRow - 1, 1).getValues();
-    var itemsRange = ordersSheet.getRange(2, itemsCol, lastRow - 1, 1).getValues();
+    var itemsRange = itemsCol > 0 ? ordersSheet.getRange(2, itemsCol, lastRow - 1, 1).getValues() : [];
+    var idsRange = idsCol > 0 ? ordersSheet.getRange(2, idsCol, lastRow - 1, 1).getValues() : [];
     var statusRange =
       statusCol > 0 ? ordersSheet.getRange(2, statusCol, lastRow - 1, 1).getValues() : [];
 
@@ -357,8 +366,16 @@ function hasVerifiedPurchase(phone, productName) {
       if (String(phoneRange[r][0] || "").trim() !== phone) continue;
       // الطلبات الملغاة لا تُعتبر شراءً موثقاً
       if (statusCol > 0 && String(statusRange[r][0] || "").trim() === "ملغي") continue;
-      // الاسم الرسمي الكامل للمنتج داخل نص المنتجات (مثلاً "اسم × 1 = 590 ج.م | ...")
-      if (String(itemsRange[r][0] || "").indexOf(productName) !== -1) return "نعم";
+
+      var idsCell = idsRange.length ? String(idsRange[r][0] || "").trim() : "";
+      if (idsCell) {
+        // ✅ المسار المفضل: مطابقة معرف ثابت لا يتأثر بتغيير الاسم التسويقي
+        var idTokens = idsCell.split(",").map(function (t) { return t.trim(); });
+        if (idTokens.indexOf(productId) !== -1) return "نعم";
+      } else if (itemsRange.length) {
+        // fallback للطلبات القديمة (قبل عمود المعرفات): مطابقة بالاسم الرسمي
+        if (String(itemsRange[r][0] || "").indexOf(productName) !== -1) return "نعم";
+      }
     }
     return "لا";
   } catch (err) {
@@ -705,6 +722,7 @@ function normalizeItems(rawItems) {
     .slice(0, MAX_ITEMS)
     .map(function (it) {
       return {
+        id: clean(it && it.id, 40),
         name: clean(it && it.name, MAX_TEXT.itemName),
         qty: clampInt(it && it.qty, 1, 999),
         price: clampNumber(it && it.price, 0, 1000000),
