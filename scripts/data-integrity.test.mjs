@@ -279,9 +279,22 @@ try {
   // أي destination هي source لقاعدة تانية = فشل فوري في CI)
   const isLiteralPath = (p) => !p.includes(":") && !p.includes("*") && !p.includes("(");
   const knownStaticRoutes = new Set([
-    "/", "/products/men", "/products/women", "/products/devices", "/search",
-    "/education", "/about", "/contact", "/medical-review-board", "/shipping",
-    "/returns", "/terms", "/privacy", "/cart", "/order-confirmed", "/thank-you",
+    "/",
+    "/products/men",
+    "/products/women",
+    "/products/devices",
+    "/search",
+    "/education",
+    "/about",
+    "/contact",
+    "/medical-review-board",
+    "/shipping",
+    "/returns",
+    "/terms",
+    "/privacy",
+    "/cart",
+    "/order-confirmed",
+    "/thank-you",
     "/wishlist",
   ]);
   const productSlugs = new Set(products.map((p) => p.slug));
@@ -310,10 +323,10 @@ try {
   // 2) لا سلاسل/حلقات: destination قاعدة لا يجوز أن تكون source لقاعدة تانية
   // (الحلقة حالة خاصة من السلسلة — لو A->B->A فالقيد ده يمسكها من أول خطوة)
   const literalGraph = new Map(
-        vercel.redirects
-          .filter((r) => isLiteralPath(r.source) && isLiteralPath(r.destination))
-          .map((r) => [r.source, r.destination]),
-      );
+    vercel.redirects
+      .filter((r) => isLiteralPath(r.source) && isLiteralPath(r.destination))
+      .map((r) => [r.source, r.destination]),
+  );
   for (const [source, destination] of literalGraph) {
     assert.ok(
       !literalGraph.has(destination),

@@ -461,8 +461,14 @@ JSON Schema:
           // ✅ تحقق قبل الـ sharp: الاستجابة صورة فعلية بحجم معقول
           // (يمنع تمرير صفحات خطأ HTML أو ملفات فاسدة للمعالج)
           const ctype = String(imgResponse.headers.get("content-type") || "");
-          if (!ctype.startsWith("image/") || imgBuffer.length < 1000 || imgBuffer.length > 8_000_000) {
-            throw new Error(`invalid image response (type: ${ctype || "unknown"}, bytes: ${imgBuffer.length})`);
+          if (
+            !ctype.startsWith("image/") ||
+            imgBuffer.length < 1000 ||
+            imgBuffer.length > 8_000_000
+          ) {
+            throw new Error(
+              `invalid image response (type: ${ctype || "unknown"}, bytes: ${imgBuffer.length})`,
+            );
           }
         }
       } finally {
