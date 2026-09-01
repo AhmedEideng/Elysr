@@ -33,6 +33,8 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
         { name: "name", weight: 2 },
         { name: "nameEn", weight: 1 },
         { name: "description", weight: 0.5 },
+        // ألقاب البحثية (عامية) — "سبراي" يجد منتج "بخاخ" في الاقتراحات
+        { name: "searchAliases", weight: 0.8 },
       ],
       threshold: 0.4, // قيمة التسامح مع الأخطاء الإملائية (0 دقيق جداً، 1 غير دقيق)
       ignoreLocation: true,

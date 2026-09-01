@@ -211,15 +211,36 @@ export const getCrossSellsForProduct = (product: Product): Product[] => {
 export const getProductBySlug = (slug: string) => products.find((p) => p.slug === slug);
 
 /**
- * هل يطابق المنتج مصطلح البحث (بما في ذلك المرادفات المصرية)؟
- * نفس الحقول المعروضة في الفلاتر: name/nameEn/slug/description/ingredients.
+ * هل يطابق المنتج مصطلح البحث؟
+ * 1) مطابقة مباشرة في الحقول المعروضة (بما فيها توسيع المرادفات العامة: نقط/قطرات).
+ * 2) مطابقة بألقاب المنتج البحثية (searchAliases) — مثال: "سبراي" يطابق
+ *    منتج "بخاخ ..." حتى لو الكلمة غير مكتوبة في أي حقل من حقوله.
  */
-export const matchesProductQuery = (p: Product, q: string): boolean =>
-  expandSearchTerm(q).some((t) =>
-    [p.name, p.nameEn, p.slug, p.description, p.ingredients ?? ""].some((field) =>
-      field.toLowerCase().includes(t.toLowerCase()),
-    ),
-  );
+export const matchesProductQuery = (p: Product, q: string): boolean => {
+  const term = q.trim();
+  if (!term) return false;
+  const t = term.toLowerCase();
+
+  if (
+    expandSearchTerm(term).some((w) =>
+      [p.name, p.nameEn, p.slug, p.description, p.ingredients ?? ""].some((field) =>
+        field.toLowerCase().includes(w.toLowerCase()),
+      ),
+    )
+  ) {
+    return true;
+  }
+
+  return (p.searchAliases ?? []).some((a) => {
+    const al = a.toLowerCase();
+    // مطابقة كاملة، أو المصطلح جزء من اللقب ("سبراي" ← "سبراي تأخير")،
+    // أو اللقب جزء من المصطلح ("سبراي ريمانز" ← "سبراي") — بلا ضوضاء للكلمات القصيرة
+    if (al === t) return true;
+    if (t.length >= 3 && al.includes(t)) return true;
+    if (al.length >= 3 && t.includes(al)) return true;
+    return false;
+  });
+};
 
 /**
  * بحث شامل في كل المنتجات (رجالي/نساء/أجهزة) — محرك صفحة /search?q={search_term_string}.

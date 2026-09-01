@@ -69,6 +69,38 @@ describe("searchAllPublicProducts (global /search?q=)", () => {
     });
   });
 
+  describe("product searchAliases (dialect product-type words)", () => {
+    it("'سبراي' finds the spray products (named بخاخ ...)", () => {
+      const ids = new Set(searchAllPublicProducts("سبراي").map((p) => p.id));
+      for (const id of ["m-41", "m-44", "m-55", "w-01"]) expect(ids.has(id)).toBe(true);
+    });
+
+    it("'جيل' finds the gel products (named جل ...)", () => {
+      const ids = new Set(searchAllPublicProducts("جيل").map((p) => p.id));
+      for (const id of ["m-06", "m-32", "m-48", "m-60", "w-14"]) expect(ids.has(id)).toBe(true);
+    });
+
+    it("'حبوب' finds the capsule products (named كبسولات ...)", () => {
+      const ids = new Set(searchAllPublicProducts("حبوب").map((p) => p.id));
+      for (const id of ["m-01", "m-02", "m-04", "w-10"]) expect(ids.has(id)).toBe(true);
+    });
+
+    it("'الصلابة' finds the strength products whose text only says الانتصاب", () => {
+      const ids = new Set(searchAllPublicProducts("الصلابة").map((p) => p.id));
+      for (const id of ["m-02", "m-03", "m-04"]) expect(ids.has(id)).toBe(true);
+    });
+
+    it("'غذاء ملكات النحل' finds the royal honey product w-07", () => {
+      const ids = new Set(searchAllPublicProducts("غذاء ملكات النحل").map((p) => p.id));
+      expect(ids.has("w-07")).toBe(true);
+    });
+
+    it("a longer query containing the alias also matches", () => {
+      const ids = new Set(searchAllPublicProducts("سبراي تأخير").map((p) => p.id));
+      expect(ids.has("m-44")).toBe(true);
+    });
+  });
+
   it("trims surrounding whitespace from the query", () => {
     expect(searchAllPublicProducts("  هامر  ").length).toBe(searchAllPublicProducts("هامر").length);
   });
