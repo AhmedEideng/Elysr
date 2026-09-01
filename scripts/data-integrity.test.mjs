@@ -90,6 +90,32 @@ try {
       assert.ok(source.title && source.publisher, `Incomplete source: ${article.slug}`);
     }
   }
+  // ── وعود مطلقة في المحتوى الطبي: ممنوعة (سلامة + التزام "لا وعود علاجية") ──
+  // القائمة مقصودة بدقة: لا تشمل "يعالج"/"100%" لأنهما يظهران سياقات
+  // تفنيد مشروعة (خرافة: "الطبيعي آمن 100%" / "ادعاءات أنه يعالج... لا يدعمها دليل")
+  const FORBIDDEN_CLAIM_TERMS = [
+    "يضمن",
+    "مضمون",
+    "آمن تماماً",
+    "آمنة تماماً",
+    "فعالية أكيدة",
+    "نتائج ملموسة",
+    "نتائج مضمونة",
+    "أطباؤنا",
+    "فريقنا الطبي",
+  ];
+  for (const article of articles) {
+    const body = [article.title, article.excerpt, article.content]
+      .concat((article.faqs ?? []).map((f) => `${f.question} ${f.answer}`))
+      .join(" ");
+    for (const term of FORBIDDEN_CLAIM_TERMS) {
+      assert.ok(
+        !body.includes(term),
+        `Article "${article.slug}" contains forbidden absolute claim "${term}" — health content must not guarantee outcomes or imply a medical team`,
+      );
+    }
+  }
+
   assert.deepEqual(
     duplicates(seoLandingPages.map((page) => page.slug)),
     [],

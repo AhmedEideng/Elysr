@@ -99,7 +99,27 @@ describe("reviews read handler", () => {
     const url = String(fetchMock.mock.calls[0][0]);
     expect(url).toContain("action=reviews");
     expect(url).toContain("product=m-01");
-    expect(url).toContain("token=test-token");
+    // توقيع HMAC قصير العمر — السر نفسه لا يظهر في الـ URL
+    expect(url).not.toContain("token=");
+    expect(url).toContain("ts=");
+    expect(url).toContain("nonce=");
+    expect(url).toMatch(/sig=[0-9a-f]{64}/);
+  });
+
+  it("unknown product id: no Sheets call, no cache pollution, empty list", async () => {
+    vi.stubEnv("GOOGLE_SHEETS_WEBHOOK_URL", "https://script.google.com/test");
+    vi.stubEnv("GOOGLE_SHEETS_REVIEWS_TOKEN", "test-token");
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true, reviews: [sampleApproved] }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const res = mockResponse();
+    await handler(mockGetRequest("zz-not-a-real-product", "203.0.113.126") as never, res as never);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ reviews: [], count: 0 });
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("fails soft: a webhook error returns 200 with an empty list", async () => {

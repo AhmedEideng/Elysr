@@ -88,9 +88,11 @@ export default async function handler(req, res) {
       String(s ?? "")
         .replace(/[\r\n\t\0]/g, " ")
         .slice(0, 160);
-    const blockedUri = sanitize(report["blocked-uri"]);
+    // نُسقط query string من URIs قبل التسجيل: قد يحمل معاملات تتبع
+    // أو بيانات لا حاجة لحفظها في السجلات
+    const blockedUri = sanitize(report["blocked-uri"]).split("?")[0];
     const directive = sanitize(report["violated-directive"]);
-    const documentUri = sanitize(report["document-uri"]);
+    const documentUri = sanitize(report["document-uri"]).split("?")[0];
     const scriptSample = sanitize(report["script-sample"]).slice(0, 100);
 
     // Ignore noise (extensions injecting eval/inline)

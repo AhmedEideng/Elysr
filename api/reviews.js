@@ -4,19 +4,44 @@
  * ============================================================
  * GET /api/reviews?product=<productId>
  *
- * يقرأ من Google Apps Script (action=reviews&token=...) المراجعات
- * المعتمدة فقط للمنتج (الحد 20، الأحدث أولاً) ويعيدها كـ JSON.
+ * يقرأ من Google Apps Script (action=reviews) المراجعات المعتمدة فقط
+ * للمنتج (الحد 20، الأحدث أولاً) ويعيدها كـ JSON.
  *
- * سلوك متسامح (fail-soft): أي خطأ (توكن غير مُعيَّن، webhook خارج
+ * سلوك متسامح (fail-soft): أي خطأ (سر غير مُعيَّن، webhook خارج
  * الخدمة، شبكة) → 200 بقائمة فارغة — صفحة المنتج لا تنكسر أبداً
  * والقسم يظهر فقط عندما توجد مراجعات حقيقية معتمدة فعلاً.
  *
- * 🔒 التوكن (GOOGLE_SHEETS_REVIEWS_TOKEN) لا يخرج من الخادم أبداً.
+ * 🔒 الحماية: توقيع HMAC-SHA256 قصير العمر (5 دقائق) بدل توكن ثابت
+ * في الـ URL — السر (GOOGLE_SHEETS_REVIEWS_TOKEN) نفسه لا يظهر في أي
+ * URL أو سجل وسيط، ويحمي من إعادة تشغيل طلب محجوب.
  * الهاتف لا يُكشف (Apps Script يستبعده من المخرجات).
  * ============================================================
  */
 
+import { createHmac, randomBytes } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createRateLimiter } from "./lib/rate-limiter.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PRODUCTS_DB_PATH = join(__dirname, "lib", "products-db.json");
+
+// معرفات المنتجات المعتمدة — للتحقق قبل أي اتصال بـ Sheets أو كاش
+// (يمنع استخدام الـ endpoint لضخ معرِّفات عشوائية تملأ الكاش
+// وتستهلك حصة Apps Script بلا فائدة)
+let knownProductIds = null;
+function knownProducts() {
+  if (!knownProductIds) {
+    try {
+      const db = JSON.parse(readFileSync(PRODUCTS_DB_PATH, "utf-8"));
+      knownProductIds = new Set(db.map((p) => p.id));
+    } catch {
+      knownProductIds = new Set();
+    }
+  }
+  return knownProductIds;
+}
 
 const ALLOWED_ORIGINS = new Set(
   [
@@ -77,10 +102,10 @@ export async function fetchApprovedReviews(productId) {
   if (cachedEntry && now - cachedEntry.at < CACHE_TTL_MS) return cachedEntry.reviews;
 
   const SHEET_URL = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
-  const TOKEN = process.env.GOOGLE_SHEETS_REVIEWS_TOKEN;
+  const SECRET = process.env.GOOGLE_SHEETS_REVIEWS_TOKEN;
 
-  // fail-closed → بدون إعداد (توكن/webhook) الميزة معطلة بصمت (قائمة فارغة)
-  if (!SHEET_URL || !TOKEN) {
+  // fail-closed → بدون إعداد (سر/webhook) الميزة معطلة بصمت (قائمة فارغة)
+  if (!SHEET_URL || !SECRET) {
     cache.set(productId, { at: now, reviews: [] });
     return [];
   }
@@ -89,9 +114,15 @@ export async function fetchApprovedReviews(productId) {
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   let reviews = [];
   try {
+    // توقيع HMAC قصير العمر: (ts, nonce, sig) — السر نفسه لا يُرسل
+    const ts = Math.floor(Date.now() / 1000);
+    const nonce = randomBytes(8).toString("hex");
+    const sig = createHmac("sha256", SECRET)
+      .update(`reviews|${productId}|${ts}|${nonce}`)
+      .digest("hex");
     const url = `${SHEET_URL}?action=reviews&product=${encodeURIComponent(
       productId,
-    )}&token=${encodeURIComponent(TOKEN)}`;
+    )}&ts=${ts}&nonce=${nonce}&sig=${sig}`;
     const response = await fetch(url, { signal: controller.signal });
     if (response.ok) {
       const data = await response.json();
@@ -140,6 +171,12 @@ export default async function handler(req, res) {
     .slice(0, 40);
   if (!productId) {
     return res.status(400).json({ error: "Missing product parameter" });
+  }
+
+  // تحقق من وجود المنتج في الكتالوج المعتمد قبل أي اتصال/كاش
+  // (معرّف عشوائي = قائمة فارغة فوراً، بلا استهلاك لحصة Sheets)
+  if (!knownProducts().has(productId)) {
+    return res.status(200).json({ reviews: [], count: 0 });
   }
 
   const reviews = await fetchApprovedReviews(productId);

@@ -371,7 +371,16 @@ export default async function handler(req, res) {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
-        data: JSON.stringify({ ...safePayload, clientIp: hashedIp, clientIpHash: hashedIp }),
+        // 🔒 سر الكتابة (اختياري — يفعَّل بمتغير GOOGLE_SHEETS_WEBHOOK_SECRET):
+        // يحمي webhook من الكتابة المباشرة لو تسرّب الرابط
+        data: JSON.stringify({
+          ...safePayload,
+          clientIp: hashedIp,
+          clientIpHash: hashedIp,
+          ...(process.env.GOOGLE_SHEETS_WEBHOOK_SECRET
+            ? { secret: process.env.GOOGLE_SHEETS_WEBHOOK_SECRET }
+            : {}),
+        }),
       }),
       signal: sheetsController.signal,
     });

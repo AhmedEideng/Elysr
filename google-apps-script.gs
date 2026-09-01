@@ -4,6 +4,11 @@
  * يستقبل الطلبات من الموقع ويسجلها في شيت "الطلبات"
  * مع دعم حقول الخصم والعمود المتدرج.
  *
+ * ⏰ مهم بعد النشر: شغّلي setupAutoCleanupTrigger() مرة واحدة من المحرر (Run)
+ * لإنشاء الـ trigger اليومي — مجرد وجود الدالة لا يجعلها تعمل تلقائياً.
+ * 🔒 موصى به: عبّئي WEBHOOK_SECRET هنا + GOOGLE_SHEETS_WEBHOOK_SECRET في
+ * Vercel لحماية مسار الكتابة حتى لو تسرّب رابط الـ webhook.
+ *
  * التحسينات عن النسخة السابقة:
  *   1. ✅ عمود "حالة الطلب" — لتتبع (جديد / تم التأكيد / تم الشحن / مكتمل / ملغي)
  *   2. ✅ عمود "مصدر الطلب" — لتتبع من أين جاء (موقع / واتساب)
@@ -52,6 +57,15 @@ const REVIEW_CACHE_TTL_SEC = 300; // حماية حصة Apps Script (تخزين �
  * إن بقي فارغاً تبقى قراءة المراجعات معطلة تماماً (fail-closed).
  */
 const REVIEW_READ_TOKEN = "";
+
+/**
+ * 🔒 سر الـ webhook (حماية كتابة إضافية): اكتب نفس القيمة هنا وفي متغير البيئة
+ * GOOGLE_SHEETS_WEBHOOK_SECRET على Vercel.
+ * - فارغ = الوضع القديم (التحقق + rate limit فقط) — فترة الانتقال.
+ * - معبأ = كل كتابة (طلب/مراجعة) يجب أن تحمل السر الصحيح، وقراءة
+ *   المراجعات تتطلب توقيع HMAC صالحاً (السر نفسه لا يُرسل إطلاقاً).
+ */
+const WEBHOOK_SECRET = "";
 
 /**
  * 🟢 معرف الشيت (Spreadsheet ID) - اختياري
@@ -146,6 +160,12 @@ function doPost(e) {
 
     var rawData = e.parameter.data;
     var data = JSON.parse(rawData);
+
+    // 🔒 حماية الكتابة: لو السر مضبوط في هذه النسخة فالطلب يجب أن يحمله
+    // (يفعَّل تلقائياً فور تعبئة WEBHOOK_SECRET هنا وفي Vercel معاً)
+    if (WEBHOOK_SECRET && data.secret !== WEBHOOK_SECRET) {
+      return json({ success: false, error: "Forbidden" });
+    }
 
     // 📝 مسار مختلف: إرسال مراجعة منتج (نفس ال- webhook، action مختلف)
     if (data.action === "review") {
@@ -406,14 +426,40 @@ function sendReviewNotification(productId, productName, name, rating, text, veri
 }
 
 /** قراءة المراجعات المعتمدة فقط — محمي بتوكن، بدون هاتف، بحد 20 وأسرعها أولاً */
+/** توقيع HMAC-SHA256 (hex) — السر نفسه لا يسافر عبر الشبكة أبداً */
+function hmacHex(data, key) {
+  var bytes = Utilities.computeHmacSha256Signature(data, key).getBytes();
+  var hex = "";
+  for (var i = 0; i < bytes.length; i++) {
+    hex += ("0" + bytes[i].toString(16)).slice(-2);
+  }
+  return hex;
+}
+
 function handleReviewsGet(params) {
-  // 🔒 fail-closed: بدون توكن مُعيَّن أو بمطابقة فاشلة → رفض (لا بيانات)
-  if (!REVIEW_READ_TOKEN || String(params.token || "") !== REVIEW_READ_TOKEN) {
+  // 🔒 توقيع HMAC قصير العمر بدل توكن ثابت في الـ URL:
+  // الخادم يحسب sig = HMAC(secret, "reviews|product|ts|nonce") ويرسل
+  // (ts, nonce, sig) فقط — السر لا يظهر في أي URL أو سجل وسيط، والتوقيع
+  // صالح 5 دقائق فقط (منع إعادة تشغيل طلب محجوب).
+  if (!REVIEW_READ_TOKEN) return json({ success: false, error: "Forbidden" });
+  var product = String(params.product || "").trim();
+  var ts = String(params.ts || "").trim();
+  var nonce = String(params.nonce || "").trim();
+  var sig = String(params.sig || "").trim().toLowerCase();
+  if (!product || !ts || !nonce || !sig) {
+    return json({ success: false, error: "Forbidden" });
+  }
+  var reqSec = parseInt(ts, 10);
+  var nowSec = Math.floor(Date.now() / 1000);
+  if (!isFinite(reqSec) || Math.abs(nowSec - reqSec) > 300) {
+    return json({ success: false, error: "Forbidden" });
+  }
+  if (hmacHex("reviews|" + product + "|" + ts + "|" + nonce, REVIEW_READ_TOKEN) !== sig) {
     return json({ success: false, error: "Forbidden" });
   }
 
   try {
-    var productId = String(params.product || "").trim().slice(0, 40);
+    var productId = product.slice(0, 40);
     var result = { success: true, reviews: [] };
     if (productId) {
       // تخزين مؤقت 5 دقائق لكل منتج — يحمي حصة Apps Script من الطلبات المتكررة
@@ -802,6 +848,25 @@ function autoCleanupOldOrders() {
   } catch (err) {
     console.error("autoCleanupOldOrders failed:", err);
   }
+}
+
+/**
+ * ⏰ شغّلي هذه الدالة مرة واحدة من محرر Apps Script (Run) لإنشاء trigger
+ * يومي ينفذ autoCleanupOldOrders() (حذف طلبات أقدم من 90 يوم).
+ * إعادة التشغيل آمنة: يحذف أولاً أي triggers قديمة لنفس الدالة.
+ */
+function setupAutoCleanupTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === "autoCleanupOldOrders") {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+  ScriptApp.newTrigger("autoCleanupOldOrders")
+    .timeBased()
+    .everyDays(1)
+    .atHour(3)
+    .create();
+  console.log("Daily trigger for autoCleanupOldOrders created.");
 }
 
 function json(obj) {

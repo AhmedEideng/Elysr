@@ -229,6 +229,10 @@ export default async function handler(req, res) {
           reviewerPhone: payload.reviewerPhone ? String(payload.reviewerPhone).trim() : "",
           reviewText: String(payload.reviewText).trim(),
           clientIp: hashedIp,
+          // 🔒 سر الكتابة (اختياري — يفعَّل بمتغير GOOGLE_SHEETS_WEBHOOK_SECRET)
+          ...(process.env.GOOGLE_SHEETS_WEBHOOK_SECRET
+            ? { secret: process.env.GOOGLE_SHEETS_WEBHOOK_SECRET }
+            : {}),
         }),
       }),
       signal: sheetsController.signal,
