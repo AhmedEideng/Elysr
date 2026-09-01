@@ -1,22 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-test("delete-customer-data validates input and fails closed when unconfigured", async ({
-  page,
-}) => {
-  // هاتف غير صالح → 400
-  const bad = await page.request.post("/api/delete-customer-data", {
-    data: { phone: "123" },
-  });
-  expect(bad.status()).toBe(400);
-
-  // السيرفر الاختباري بدون webhook/token → فشل صريح (503)
-  // وليس "success" وهمي كما كان سابقاً
-  const unconfigured = await page.request.post("/api/delete-customer-data", {
-    data: { phone: "01012345678" },
-  });
-  expect(unconfigured.status()).toBe(503);
-});
-
 test("customer can add a product, update quantity, calculate shipping and submit", async ({
   page,
 }) => {

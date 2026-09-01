@@ -47,11 +47,9 @@ const REVIEW_LIST_LIMIT = 20;
 const REVIEW_CACHE_TTL_SEC = 300; // حماية حصة Apps Script (تخزين مؤقت لكل منتج)
 
 /**
- * 🔒 توكن إدارة الـ webhook — اكتب نفس القيمة هنا وفي متغير البيئة
- * GOOGLE_SHEETS_REVIEWS_TOKEN على الخادم. يحمي عمليتين:
- *   1) قراءة المراجعات المعتمدة (action=reviews)
- *   2) حذف بيانات العميل (action=delete) — حق النسيان
- * إن بقي فارغاً تبقى العمليتان معطلتين تماماً (fail-closed).
+ * 🔒 توكن قراءة المراجعات — اكتب نفس القيمة هنا وفي متغير البيئة
+ * GOOGLE_SHEETS_REVIEWS_TOKEN على الخادم.
+ * إن بقي فارغاً تبقى قراءة المراجعات معطلة تماماً (fail-closed).
  */
 const REVIEW_READ_TOKEN = "";
 
@@ -149,11 +147,6 @@ function doPost(e) {
     // 📝 مسار مختلف: إرسال مراجعة منتج (نفس ال- webhook، action مختلف)
     if (data.action === "review") {
       return handleReviewPost(data);
-    }
-
-    // 🧹 مسار حذف بيانات العميل (GDPR) — محمي بالتوكن وليس مفتوحاً للجمهور
-    if (data.action === "delete") {
-      return handleDeleteRequest(data);
     }
 
     var items = normalizeItems(data.items);
@@ -790,83 +783,6 @@ function autoCleanupOldOrders() {
     }
   } catch (err) {
     console.error("autoCleanupOldOrders failed:", err);
-  }
-}
-
-// حذف كل بيانات عميل حسب رقم الهاتف (حق النسيان)
-function deleteCustomerData(phone) {
-  try {
-    var sheet = getOrCreateSheet(SHEET_NAME);
-    var lastRow = sheet.getLastRow();
-    if (lastRow <= 1) return 0;
-    var phoneColIdx = -1;
-    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    for (var i = 0; i < headers.length; i++) {
-      if (String(headers[i]).trim() === "الهاتف") { phoneColIdx = i + 1; break; }
-    }
-    if (phoneColIdx <= 0) return 0;
-    var cleanedPhone = String(phone || "").trim();
-    var deleted = 0;
-    for (var r = lastRow; r >= 2; r--) {
-      var cell = String(sheet.getRange(r, phoneColIdx).getValue() || "").trim();
-      if (cell === cleanedPhone) {
-        sheet.deleteRow(r);
-        deleted++;
-      }
-    }
-
-    // 📝 حذف صفوف المراجعات المرتبطة بنفس الهاتف أيضاً (حق النسيان يشملها)
-    var reviewsDeleted = 0;
-    try {
-      var reviewsSheet = getSpreadsheet().getSheetByName(REVIEWS_SHEET_NAME);
-      if (reviewsSheet && reviewsSheet.getLastRow() > 1) {
-        var rHeaders = reviewsSheet.getRange(1, 1, 1, reviewsSheet.getLastColumn()).getValues()[0];
-        var rPhoneColIdx = -1;
-        for (var i2 = 0; i2 < rHeaders.length; i2++) {
-          if (String(rHeaders[i2]).trim() === "الهاتف (للتحقق)") rPhoneColIdx = i2 + 1;
-        }
-        if (rPhoneColIdx > 0) {
-          var rLastRow = reviewsSheet.getLastRow();
-          for (var r2 = rLastRow; r2 >= 2; r2--) {
-            if (String(reviewsSheet.getRange(r2, rPhoneColIdx).getValue() || "").trim() === cleanedPhone) {
-              reviewsSheet.deleteRow(r2);
-              reviewsDeleted++;
-            }
-          }
-        }
-      }
-    } catch (err2) {
-      console.error("deleteCustomerData (reviews) failed:", err2);
-    }
-
-    return { orders: deleted, reviews: reviewsDeleted };
-  } catch (err) {
-    console.error("deleteCustomerData failed:", err);
-    return 0;
-  }
-}
-
-/**
- * 🧹 حذف بيانات العميل حسب الهاتف (حق النسيان) — محمي بالتوكن.
- * يحذف صفوف الطلبات + المراجعات المرتبطة بالهاتف، ويعيد الأعداد.
- */
-function handleDeleteRequest(data) {
-  try {
-    // 🔒 نفس توكن إدارة الـ webhook — الـ endpoint ليس مفتوحاً للجمهور
-    if (!REVIEW_READ_TOKEN || String(data.token || "") !== REVIEW_READ_TOKEN) {
-      return json({ success: false, error: "Forbidden" });
-    }
-    var phone = String(data.phone || "").trim();
-    var isLocalEgypt = /^01[0125][0-9]{8}$/.test(phone);
-    var isInternational = /^\+[1-9][0-9]{6,14}$/.test(phone);
-    if (!isLocalEgypt && !isInternational) {
-      return json({ success: false, error: "Invalid phone" });
-    }
-    var deleted = deleteCustomerData(phone);
-    return json({ success: true, deleted: deleted });
-  } catch (err) {
-    console.error("Delete request error:", err);
-    return json({ success: false, error: "تعذر تنفيذ الحذف. حاول مرة أخرى." });
   }
 }
 
