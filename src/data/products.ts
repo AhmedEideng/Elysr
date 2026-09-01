@@ -2,6 +2,9 @@ import { men } from "./products/men";
 import { women } from "./products/women";
 import { devices } from "./products/devices";
 import type { Product, ProductCategory } from "@/data/product-types";
+import { expandSearchTerm } from "@/lib/search-terms";
+
+export { expandSearchTerm };
 
 // ✅ إزالة نظام التقييمات التلقائي (Dynamic Review Growth).
 // كان يزيد عدد المراجعات تلقائيًا كل بضعة أيام بدون مراجعات حقيقية من
@@ -208,17 +211,22 @@ export const getCrossSellsForProduct = (product: Product): Product[] => {
 export const getProductBySlug = (slug: string) => products.find((p) => p.slug === slug);
 
 /**
- * بحث شامل في كل المنتجات (رجالي/نساء/أجهزة) — محرك صفحة /search?q={search_term_string}.
- * مطابق لنمط فلترة ?q في صفحات الفئات (includes على نفس الحقول المعروضة)،
- * بحيث تكون نتيجة صندوق البحث الفوري (Fuse) ونتيجة صفحة البحث متسقة (نفس الحقول ونفس الفلتر):
- * نفس الفلتر الحتمي على نفس الحقول، بدون شبكة، قابل للاختبار.
+ * هل يطابق المنتج مصطلح البحث (بما في ذلك المرادفات المصرية)؟
+ * نفس الحقول المعروضة في الفلاتر: name/nameEn/slug/description/ingredients.
  */
-export const searchAllPublicProducts = (q: string): Product[] => {
-  const term = q.trim().toLowerCase();
-  if (!term) return products;
-  return products.filter((p) =>
+export const matchesProductQuery = (p: Product, q: string): boolean =>
+  expandSearchTerm(q).some((t) =>
     [p.name, p.nameEn, p.slug, p.description, p.ingredients ?? ""].some((field) =>
-      field.toLowerCase().includes(term),
+      field.toLowerCase().includes(t.toLowerCase()),
     ),
   );
+
+/**
+ * بحث شامل في كل المنتجات (رجالي/نساء/أجهزة) — محرك صفحة /search?q={search_term_string}.
+ * مطابق لنمط فلترة ?q في صفحات الفئات، ويدعم المرادفات المصرية
+ * (مثال: "نقط" ← منتجات "قطرات" والعكس)، بدون شبكة، قابل للاختبار.
+ */
+export const searchAllPublicProducts = (q: string): Product[] => {
+  if (!q.trim()) return products;
+  return products.filter((p) => matchesProductQuery(p, q));
 };

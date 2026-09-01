@@ -58,17 +58,14 @@ export const Route = createFileRoute("/products/men")({
   // والبحث يُقرأ من location.search (نوعه {} — نحقق من النوع وقت التشغيل؛
   // validateSearch أعلاه يضمن أن القيمة نص منسّق أو غائب).
   loader: async ({ location }) => {
-    const { getPublicProductsByCategory } = await import("@/data/products");
+    const { getPublicProductsByCategory, matchesProductQuery } = await import(
+      "@/data/products"
+    );
     const all = getPublicProductsByCategory("men");
     const qRaw = (location.search as Record<string, unknown>).q;
-    const q = typeof qRaw === "string" ? qRaw.toLowerCase() : "";
-    const items = q
-      ? all.filter((p) =>
-          [p.name, p.nameEn, p.slug, p.description, p.ingredients ?? ""].some((field) =>
-            field.toLowerCase().includes(q),
-          ),
-        )
-      : all;
+    const q = typeof qRaw === "string" ? qRaw : "";
+    // فلترة موحدة تشمل المرادفات المصرية (نقط/قطرات)
+    const items = q ? all.filter((p) => matchesProductQuery(p, q)) : all;
     return { items, query: typeof qRaw === "string" ? qRaw : "", total: all.length };
   },
   head: () => ({

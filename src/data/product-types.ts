@@ -23,6 +23,12 @@ export interface Product {
   featured?: boolean;
   /** مصفوفة بمعرفات المنتجات المقترحة للبيع المتقاطع (Cross-Sell) - اختياري */
   crossSell?: string[];
+  /**
+   * ألقاب بحثية بديلة (عامية/شعبية) — تدخل في:
+   * meta description، Product JSON-LD (alternativeName)، سطر ظاهر أسفل
+   * عنوان المنتج، وبحث الموقع. مثال: منتجات "قطرات" لها "نقط" المصري.
+   */
+  searchAliases?: string[];
 }
 
 export const formatPrice = (price?: number) => (price ? `${price} ج.م` : "");

@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Search, X } from "lucide-react";
 import { formatPrice, type Product } from "@/data/product-types";
+import { expandSearchTerm } from "@/lib/search-terms";
 import Fuse from "fuse.js";
 
 /**
@@ -48,8 +49,18 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
   const allResults = useMemo(() => {
     const term = q.trim();
     if (!term || !fuse) return [];
-    // Fuse يُرجع مصفوفة من الكائنات بالشكل { item, refIndex }
-    return fuse.search(term).map((result) => result.item);
+    // نبحث بالمصطلح وبتوسيعه المرادفي (نقط/قطرات) وندمج النتائج بدون تكرار
+    const seen = new Set<string>();
+    const merged: Product[] = [];
+    for (const t of expandSearchTerm(term)) {
+      for (const result of fuse.search(t)) {
+        if (!seen.has(result.item.id)) {
+          seen.add(result.item.id);
+          merged.push(result.item);
+        }
+      }
+    }
+    return merged;
   }, [q, fuse]);
 
   // أعلى 8 اقتراحات في الـ dropdown؛ بقية النتائج في صفحة /search?q=

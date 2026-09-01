@@ -69,10 +69,12 @@ function makeProductMetaDescription(p, maxLength = 155) {
   const firstBenefit = p.benefits?.[0] ? ` - ${String(p.benefits[0]).slice(0, 50)}` : "";
   const ratingPart = p.reviews > 0 ? ` ⭐${p.rating}/5 (${p.reviews} تقييم)` : "";
   const pricePart = ` - ${p.price} ج.م - شحن سري، دفع عند الاستلام`;
-  const candidate = `${p.name}${firstBenefit}${ratingPart}${pricePart} - اليسر ميديكال`;
+  // لقب البحثي البديل (عامي/شعبي) — يعرض الكلمة المصرية اللي بيبحثوا بيها (نقط)
+  const aliasPart = p.searchAliases?.length ? ` «${p.searchAliases[0]}»` : "";
+  const candidate = `${p.name}${aliasPart}${firstBenefit}${ratingPart}${pricePart} - اليسر ميديكال`;
   if (candidate.length <= maxLength) return candidate;
   const baseDesc = String(p.description).split("。")[0].split(".")[0].slice(0, 80);
-  const short = `${p.name} - ${baseDesc}${ratingPart} - ${p.price} ج.م - شحن سري - اليسر ميديكال`;
+  const short = `${p.name}${aliasPart} - ${baseDesc}${ratingPart} - ${p.price} ج.م - شحن سري - اليسر ميديكال`;
   return makeMetaDescription(short, maxLength);
 }
 
@@ -724,6 +726,8 @@ async function prerender() {
         "@context": "https://schema.org",
         "@type": "Product",
         name: product.name,
+        // ألقاب بحثية بديلة (عامية) — إشارة مهيكلة لجوجل بنفس كلمة البحث المصرية
+        ...(product.searchAliases?.length ? { alternativeName: product.searchAliases } : {}),
         description: product.description,
         sku: product.id,
         mpn: product.id,

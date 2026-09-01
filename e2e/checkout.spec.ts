@@ -126,6 +126,14 @@ test("global search /search?q= shows empty state with category links", async ({ 
   await expect(page.getByRole("link", { name: "الأجهزة", exact: true })).toBeVisible();
 });
 
+test("global search matches the Egyptian dialect 'نقط' to drops products", async ({ page }) => {
+  await page.goto("/search?q=نقط");
+  await expect(page.getByRole("heading", { name: "نتائج البحث عن: «نقط»" })).toBeVisible();
+  // منتجات القطرات (اسمها الرسمي «قطرات ...») تظهر للبحث المصري «نقط»
+  await expect(page.getByRole("link", { name: /قطرات ليدي إيرا/ }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /قطرات كونيبال/ }).first()).toBeVisible();
+});
+
 test("live customer reviews section renders approved reviews from the API", async ({ page }) => {
   await page.route("**/api/reviews*", (route) =>
     route.fulfill({
