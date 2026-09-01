@@ -273,6 +273,53 @@ try {
     "Missing /index.html redirect",
   );
   assert.equal(redirectBySource.get("/index")?.destination, "/", "Missing /index redirect");
+
+  // ── سلامة شبكة الـ redirects: لا loops، لا chains، ولا destinations ميتة ──
+  // (حماية تلقائية مع كل تغيير في الكتالوج — أي destination غير موجودة أو
+  // أي destination هي source لقاعدة تانية = فشل فوري في CI)
+  const isLiteralPath = (p) => !p.includes(":") && !p.includes("*") && !p.includes("(");
+  const knownStaticRoutes = new Set([
+    "/", "/products/men", "/products/women", "/products/devices", "/search",
+    "/education", "/about", "/contact", "/medical-review-board", "/shipping",
+    "/returns", "/terms", "/privacy", "/cart", "/order-confirmed", "/thank-you",
+    "/wishlist",
+  ]);
+  const productSlugs = new Set(products.map((p) => p.slug));
+  const articleSlugs = new Set(articles.map((a) => a.slug));
+  const guideSlugs = new Set(seoLandingPages.map((g) => g.slug));
+  const destinationIsLive = (dest) => {
+    if (knownStaticRoutes.has(dest)) return true;
+    const parts = dest.split("/").filter(Boolean);
+    if (parts[0] === "products" && parts.length === 2) return productSlugs.has(parts[1]);
+    if (parts[0] === "products" && parts[1] === "guides" && parts.length === 3) {
+      return guideSlugs.has(parts[2]);
+    }
+    if (parts[0] === "education" && parts.length === 2) return articleSlugs.has(parts[1]);
+    return false;
+  };
+
+  // 1) كل destination حرفية (غير باراميترية) يجب أن تفسر لـ route حقيقية
+  for (const r of vercel.redirects) {
+    if (!isLiteralPath(r.destination)) continue; // destinations الباراميترية تخص التطبيق
+    assert.ok(
+      destinationIsLive(r.destination),
+      `Redirect ${r.source} -> ${r.destination} points to a route that does not exist`,
+    );
+  }
+
+  // 2) لا سلاسل/حلقات: destination قاعدة لا يجوز أن تكون source لقاعدة تانية
+  // (الحلقة حالة خاصة من السلسلة — لو A->B->A فالقيد ده يمسكها من أول خطوة)
+  const literalGraph = new Map(
+        vercel.redirects
+          .filter((r) => isLiteralPath(r.source) && isLiteralPath(r.destination))
+          .map((r) => [r.source, r.destination]),
+      );
+  for (const [source, destination] of literalGraph) {
+    assert.ok(
+      !literalGraph.has(destination),
+      `Redirect chain/loop: ${source} -> ${destination} (destination must not be another rule's source)`,
+    );
+  }
   const appsScript = readFileSync(resolve(ROOT, "google-apps-script.gs"), "utf-8");
   assert.match(
     appsScript,
