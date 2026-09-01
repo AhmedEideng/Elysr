@@ -276,6 +276,7 @@ const mountApi = (path, modPath) => {
 mountApi("/api/submit-order", "../api/submit-order.js");
 mountApi("/api/submit-review", "../api/submit-review.js");
 mountApi("/api/reviews", "../api/reviews.js");
+mountApi("/api/delete-customer-data", "../api/delete-customer-data.js");
 mountApi("/api/csp-report", "../api/csp-report.js");
 app.use("/api", (_req, res) => res.status(404).json({ error: "API route not found" }));
 

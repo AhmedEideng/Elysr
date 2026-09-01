@@ -269,6 +269,10 @@ export function validateOrderPayload(payload) {
     return "Discount mismatch";
   }
 
+  // 🔒 promoApplied يُعاد حسابه من القيم الموثقة — لا نثق بقيمة العميل
+  // (باقة مكتملة = خصم باقة → true حتى لو discount الصريح = 0)
+  payload.promoApplied = calculatedDiscount > 0 || calculatedBundleDiscount > 0;
+
   const calculatedSubtotalAfterDiscount =
     calculatedSubtotal - calculatedDiscount - calculatedBundleDiscount;
   if (Number(payload.subtotal) !== calculatedSubtotalAfterDiscount) {

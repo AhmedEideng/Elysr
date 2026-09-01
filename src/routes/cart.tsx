@@ -82,6 +82,9 @@ function CartPage() {
   const amountToFreeShipping = Math.max(FREE_SHIPPING_THRESHOLD - subtotalBeforeDiscount, 0);
   const promoLive = isPromoActive();
 
+  // مزامنة السلة بالكتالوج المعتمد (اسم/سعر/مخزون/صورة):
+  // عند mount وعلى أي تغيير في العناصر (إضافة/حذف/تغيير كمية) —
+  // items.length وحده لا يغطي تغيير الكمية في عنصر قائم.
   useEffect(() => {
     if (!items.length) return;
     let cancelled = false;
@@ -91,7 +94,7 @@ function CartPage() {
     return () => {
       cancelled = true;
     };
-  }, [items.length, syncCatalog]);
+  }, [items, syncCatalog]);
 
   const checkout = async () => {
     if (items.length === 0) {
@@ -159,7 +162,8 @@ function CartPage() {
       subtotal: total,
       shipping,
       total: grandTotal,
-      promoApplied: discount > 0,
+      // الخصم الفعلي = شريحة أو باقة — promoApplied يعكس أي خصم تم تطبيقه
+      promoApplied: discount > 0 || bundleDiscount > 0,
     };
 
     if (method === "whatsapp") {

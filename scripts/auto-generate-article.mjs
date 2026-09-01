@@ -180,12 +180,20 @@ JSON Schema:
 
   for (const model of models) {
     console.log(`🎁 Trying Google Gemini API model: "${model}"...`);
+    // 🔒 المفتاح في الـ header وليس في الـ URL (روابط الطلبات قد تسجل
+    // في logs/proxies/traces، والمفتاح في URL يظهر فيها نصياً)
+    // ⏱️ مهلة 120 ثانية لكل محاولة + fallback على الموديل التالي (retry موجود أصلاً)
+    const geminiController = new AbortController();
+    const geminiTimeout = setTimeout(() => geminiController.abort(), 120_000);
     try {
       response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": GEMINI_API_KEY,
+          },
           body: JSON.stringify({
             contents: [
               {
@@ -196,6 +204,7 @@ JSON Schema:
               responseMimeType: "application/json",
             },
           }),
+          signal: geminiController.signal,
         },
       );
 
@@ -214,6 +223,8 @@ JSON Schema:
       }
     } catch (err) {
       console.warn(`   ⚠️ Request for model "${model}" threw error: ${err.message}`);
+    } finally {
+      clearTimeout(geminiTimeout);
     }
   }
 
@@ -437,9 +448,27 @@ JSON Schema:
       );
       const imgUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&private=true&seed=${randomSeed}`;
 
-      const imgResponse = await fetch(imgUrl);
-      if (imgResponse.ok) {
-        const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
+      // ⏱️ مهلة 90 ثانية للخدمة الخارجية (بدل الاعتماد على timeout الـ GitHub job)
+      const imgController = new AbortController();
+      const imgTimeout = setTimeout(() => imgController.abort(), 90_000);
+      let imgBuffer;
+      let imgStatus = 0;
+      try {
+        const imgResponse = await fetch(imgUrl, { signal: imgController.signal });
+        imgStatus = imgResponse.status;
+        if (imgResponse.ok) {
+          imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
+          // ✅ تحقق قبل الـ sharp: الاستجابة صورة فعلية بحجم معقول
+          // (يمنع تمرير صفحات خطأ HTML أو ملفات فاسدة للمعالج)
+          const ctype = String(imgResponse.headers.get("content-type") || "");
+          if (!ctype.startsWith("image/") || imgBuffer.length < 1000 || imgBuffer.length > 8_000_000) {
+            throw new Error(`invalid image response (type: ${ctype || "unknown"}, bytes: ${imgBuffer.length})`);
+          }
+        }
+      } finally {
+        clearTimeout(imgTimeout);
+      }
+      if (imgBuffer) {
         console.log(`   ✅ Image generated successfully! Processing WebP compression...`);
 
         const imageFilename = `article-${articleData.slug}`;
@@ -467,7 +496,7 @@ JSON Schema:
         );
       } else {
         console.warn(
-          `   ⚠️ Pollinations AI failed (status ${imgResponse.status}). Falling back to default banners.`,
+          `   ⚠️ Pollinations AI failed (status ${imgStatus}). Falling back to default banners.`,
         );
       }
     } catch (err) {

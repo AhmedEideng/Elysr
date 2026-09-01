@@ -47,10 +47,11 @@ const REVIEW_LIST_LIMIT = 20;
 const REVIEW_CACHE_TTL_SEC = 300; // حماية حصة Apps Script (تخزين مؤقت لكل منتج)
 
 /**
- * 🔒 توكن القراءة — اكتب نفس القيمة هنا وفي متغير البيئة
- * GOOGLE_SHEETS_REVIEWS_TOKEN على الخادم.
- * إن بقي فارغاً يبقى مسار قراءة المراجعات معطلاً تماماً (fail-closed)
- * والواجهة تعمل عادية بدون قسم المراجعات الحية.
+ * 🔒 توكن إدارة الـ webhook — اكتب نفس القيمة هنا وفي متغير البيئة
+ * GOOGLE_SHEETS_REVIEWS_TOKEN على الخادم. يحمي عمليتين:
+ *   1) قراءة المراجعات المعتمدة (action=reviews)
+ *   2) حذف بيانات العميل (action=delete) — حق النسيان
+ * إن بقي فارغاً تبقى العمليتان معطلتين تماماً (fail-closed).
  */
 const REVIEW_READ_TOKEN = "";
 
@@ -145,9 +146,14 @@ function doPost(e) {
     var rawData = e.parameter.data;
     var data = JSON.parse(rawData);
 
-    // 📝 مسار مختلف: إرسال مراجعة منتج (نفس الـ webhook، action مختلف)
+    // 📝 مسار مختلف: إرسال مراجعة منتج (نفس ال- webhook، action مختلف)
     if (data.action === "review") {
       return handleReviewPost(data);
+    }
+
+    // 🧹 مسار حذف بيانات العميل (GDPR) — محمي بالتوكن وليس مفتوحاً للجمهور
+    if (data.action === "delete") {
+      return handleDeleteRequest(data);
     }
 
     var items = normalizeItems(data.items);
@@ -810,6 +816,7 @@ function deleteCustomerData(phone) {
     }
 
     // 📝 حذف صفوف المراجعات المرتبطة بنفس الهاتف أيضاً (حق النسيان يشملها)
+    var reviewsDeleted = 0;
     try {
       var reviewsSheet = getSpreadsheet().getSheetByName(REVIEWS_SHEET_NAME);
       if (reviewsSheet && reviewsSheet.getLastRow() > 1) {
@@ -823,6 +830,7 @@ function deleteCustomerData(phone) {
           for (var r2 = rLastRow; r2 >= 2; r2--) {
             if (String(reviewsSheet.getRange(r2, rPhoneColIdx).getValue() || "").trim() === cleanedPhone) {
               reviewsSheet.deleteRow(r2);
+              reviewsDeleted++;
             }
           }
         }
@@ -831,10 +839,34 @@ function deleteCustomerData(phone) {
       console.error("deleteCustomerData (reviews) failed:", err2);
     }
 
-    return deleted;
+    return { orders: deleted, reviews: reviewsDeleted };
   } catch (err) {
     console.error("deleteCustomerData failed:", err);
     return 0;
+  }
+}
+
+/**
+ * 🧹 حذف بيانات العميل حسب الهاتف (حق النسيان) — محمي بالتوكن.
+ * يحذف صفوف الطلبات + المراجعات المرتبطة بالهاتف، ويعيد الأعداد.
+ */
+function handleDeleteRequest(data) {
+  try {
+    // 🔒 نفس توكن إدارة الـ webhook — الـ endpoint ليس مفتوحاً للجمهور
+    if (!REVIEW_READ_TOKEN || String(data.token || "") !== REVIEW_READ_TOKEN) {
+      return json({ success: false, error: "Forbidden" });
+    }
+    var phone = String(data.phone || "").trim();
+    var isLocalEgypt = /^01[0125][0-9]{8}$/.test(phone);
+    var isInternational = /^\+[1-9][0-9]{6,14}$/.test(phone);
+    if (!isLocalEgypt && !isInternational) {
+      return json({ success: false, error: "Invalid phone" });
+    }
+    var deleted = deleteCustomerData(phone);
+    return json({ success: true, deleted: deleted });
+  } catch (err) {
+    console.error("Delete request error:", err);
+    return json({ success: false, error: "تعذر تنفيذ الحذف. حاول مرة أخرى." });
   }
 }
 

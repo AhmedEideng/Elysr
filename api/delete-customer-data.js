@@ -3,9 +3,9 @@
  * Customer Data Deletion API - GDPR Right to be Forgotten
  * ============================================================
  * Allows customers to request deletion of their data by phone.
- * Validates phone, rate limits, and logs deletion request.
- * Actual deletion from Google Sheets must be done via
- * deleteCustomerData() function in Apps Script or manually.
+ * Validates phone, rate limits, logs the request (hashed phone only),
+ * then performs the ACTUAL deletion through the Apps Script webhook
+ * (action=delete, token-protected): orders + review rows for the phone.
  * ============================================================
  */
 
@@ -71,11 +71,47 @@ export default async function handler(req, res) {
     phoneHash: hashedPhone,
   });
 
-  // In production, you would trigger Apps Script deleteCustomerData(phone)
-  // For now, we return success and instruct manual deletion via Sheet or Apps Script
-  return res.status(200).json({
-    success: true,
-    message: "تم استلام طلب حذف البيانات. سيتم حذفه خلال 72 ساعة.",
-    phoneHash: hashedPhone,
-  });
+  // 🧹 الحذف الفعلي عبر الـ webhook (action=delete) — محمي بالتوكن نفسه
+  // المستخدم لقراءة المراجعات. لا نعيد "success" وهمي: النتيجة حقيقية.
+  const SHEET_URL = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+  const TOKEN = process.env.GOOGLE_SHEETS_REVIEWS_TOKEN;
+  if (!SHEET_URL || !TOKEN) {
+    // fail-closed: الإعداد ناقص → لا نَعِد بنجاح لم يحدث
+    console.error("Delete endpoint not configured (webhook url / token missing).");
+    return res.status(503).json({
+      error:
+        "خدمة الحذف الآلي غير متاحة حالياً. تواصل معنا عبر واتساب وسننفي طلب الحذف يدوياً.",
+    });
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20_000);
+  try {
+    const response = await fetch(SHEET_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        data: JSON.stringify({ action: "delete", phone, token: TOKEN }),
+      }),
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`webhook HTTP ${response.status}`);
+    const result = await response.json();
+    if (!result?.success) throw new Error(result?.error || "webhook rejected the delete");
+    return res.status(200).json({
+      success: true,
+      message: "تم حذف بياناتك المرتبطة برقم الهاتف (الطلبات والمراجعات).",
+      deleted: result.deleted ?? { orders: 0, reviews: 0 },
+      phoneHash: hashedPhone,
+    });
+  } catch (err) {
+    // لا نكذب للعميل: فشل الحذف يُبلَّغ بوضوح مع قناة بديلة
+    console.error("Delete request failed:", err);
+    return res.status(502).json({
+      error:
+        "تعذر تنفيذ الحذف آلياً الآن. حاول مرة أخرى، أو تواصل عبر واتساب وسننفي الطلب يدوياً.",
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
