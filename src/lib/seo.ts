@@ -294,7 +294,7 @@ export const articleSchema = (a: {
   },
   reviewedBy: {
     "@type": "Organization",
-    name: a.reviewer?.name ?? "هيئة المراجعة الطبية — اليسر ميديكال",
+    name: a.reviewer?.name ?? "المراجعة الداخلية — اليسر ميديكال",
     description: a.reviewer?.credentials,
     url: `${SITE_URL}/medical-review-board`,
   },

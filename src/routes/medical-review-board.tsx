@@ -124,9 +124,7 @@ function MedicalReviewBoardPage() {
           <h2 className="text-xl font-black mb-3">من يراجع المحتوى؟</h2>
           <div className="space-y-3 text-sm leading-7 text-muted-foreground">
             <p>
-              <strong className="text-foreground">
-                فريق المراجعة الطبية والصيدلانية — اليسر ميديكال
-              </strong>
+              <strong className="text-foreground">فريق المراجعة الداخلية — اليسر ميديكال</strong>
             </p>
             <p>
               مسؤول عن مراجعة السلامة والتحذيرات وطريقة عرض المعلومات. يتأكد من عدم وجود وعود علاجية
