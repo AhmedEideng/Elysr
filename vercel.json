@@ -924,6 +924,21 @@
       "permanent": true
     },
     {
+      "source": "/products/viga-1-million-delay-spray",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/maxman-ii-capsules-mmc-2-10-tablets",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/ginseng-48-hours-gold-chocolate",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
       "source": "/products/viagra-for-women-20-tablets",
       "destination": "/products/women",
       "permanent": true
