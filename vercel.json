@@ -889,6 +889,41 @@
       "permanent": true
     },
     {
+      "source": "/products/coffemix-caviar-original-for-men",
+      "destination": "/products/coffemix-caviar-original",
+      "permanent": true
+    },
+    {
+      "source": "/products/max-man-extra-power-premium-cream",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/60-minutes-delay-men-delay-gel",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/hilti-wonderful-honey-for-men",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/viagra-1-2-3-2-10-tablets",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/overlord-rhino-power-mmc",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/tiger-power-tablets",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
       "source": "/products/viagra-for-women-20-tablets",
       "destination": "/products/women",
       "permanent": true
