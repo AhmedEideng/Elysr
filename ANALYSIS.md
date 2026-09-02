@@ -742,3 +742,29 @@ Apps Script `action=review` → شيت **"المراجعات"** بحالة "قي
 tsc نظيف، 159 وحدة، data-integrity، 15 e2e، schemas 0 أخطاء، build 248 صفحة.
 الـ APIs حية: 400 بدون product، 200+فارغ بدون إعداد، 400 payload/منتج غريب،
 403 origin غريب، 429 rate limit.
+
+## 26) تفعيل البحث الشامل ?q — صفحة /search + SearchAction + sitemap (2026-09-01)
+
+المطلوب: تفعيل ?q search — من اقتراحات الأدوار السابقة (الميزة اللي كانت
+مقترحة كـ "higher-value work").
+
+### الوضع قبل (تحقق)
+- `SearchBar` (Fuse.js) شغال في الهيدر (اقتراحات فورية + Ctrl/Cmd+K).
+- `/products/men` ليه فلترة `?q` (من section 20).
+- **لكن**: مفيش صفحة نتائج شاملة `/search?q=`، والـ SearchAction في
+  JSON-LD الرئيسي كان بيعرف `/products/men?q=` بس (بحث في فئة واحدة).
+
+### الحل
+- `src/routes/search.tsx`: صفحة نتائج شاملة `/search?q=` (كل الفئات،
+  noindex,follow، حالة "لا نتائج" بروابط الفئات، بانر "مسح البحث").
+- `scripts/prerender-seo.mjs`: `search` في الـ SPA routes (noindex) +
+  SearchAction الرئيسي اتعدل لـ `/search?q={search_term_string}`.
+- `scripts/generate-sitemap.mjs`: قالب بحث في الـ sitemap (targetName=
+  search_term_string) — جوجل/Shopping بتوصل العميل على /search?q= مباشرة.
+- e2e: +3 (فلترة شاملة، حالة الفراغ، دياكت المصري "نقط"→قطرات) +
+  "header live search links to the full /search results page".
+
+### التحقق (2026-09-01)
+tsc نظيف · 171 وحدة (13 ملف) · data-integrity · 18 e2e (منها 4 search) ·
+schemas 0 أخطاء · build 248 صفحة (17 static) · الموقع الحي: /search 200 +
+الـ SearchAction الحي بيتأكد منه بالـ curl على الـ CDN.
