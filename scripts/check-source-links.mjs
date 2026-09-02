@@ -50,7 +50,22 @@ try {
 
   const ok = [];
   const blocked = [];
+  const unverifiable = [];
   const dead = [];
+
+  // مؤسسات مرجعية أولى CDN-ها يقطع/يمهل عملاء مراكز البيانات أحياناً
+  // (503/timeout حتى مع browser UA) — في هذه الحالات:
+  //   5xx/timeout ≠ صفحة محذوفة (تُصنّف "غير قابلة للتحقق — غالباً حية")
+  //   أما 404 حقيقي فـ dead كعادته (الصفحة فعلاً مش موجودة)
+  const FLAKY_AUTHORITY_HOSTS = ["who.int"];
+  const isFlakyAuthority = (u) => {
+    try {
+      const host = new URL(u).host;
+      return FLAKY_AUTHORITY_HOSTS.some((h) => host === h || host.endsWith("." + h));
+    } catch {
+      return false;
+    }
+  };
 
   const queue = [...urls];
   const worker = async () => {
@@ -76,23 +91,34 @@ try {
       };
 
       let status = await probe();
-      if (status === "ERR" || status >= 500) {
-        // إعادة محاولة واحدة للخطأ العابر (مهلة/وميض شبكة) قبل إعلان الموت
-        await new Promise((r) => setTimeout(r, 1500));
+      let attempts = 1;
+      // أخطاء عابرة (مهلة/وميض شبكة/5xx): إجمالي 3 محاولات بتراجع تصاعدي
+      // (2ث ثم 5ث) — مواقع مثل WHO/NIH بطيئة من بعض مراكز البيانات،
+      // ومحاولة واحدة كانت تكفي لتحويل رابط حقيقي إلى "ميت" زائف
+      while (attempts < 3 && (status === "ERR" || status >= 500)) {
+        await new Promise((r) => setTimeout(r, attempts === 1 ? 2000 : 5000));
+        attempts++;
         status = await probe();
       }
 
       if (status >= 200 && status < 400) ok.push(url);
       else if (status === 401 || status === 403) blocked.push(url);
-      else dead.push([url, status]);
+      else if ((status === "ERR" || status >= 500) && isFlakyAuthority(url)) {
+        // مرجع أولي + فشل خادم/شبكة بعد 3 محاولات — ليس دليلاً على حذف
+        unverifiable.push([url, status]);
+      } else dead.push([url, status]);
     }
   };
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
   console.log(
-    `\n✅ live: ${ok.length} | ⚠️ bot-blocked (401/403, likely live): ${blocked.length} | ❌ dead: ${dead.length}`,
+    `\n✅ live: ${ok.length} | ⚠️ bot-blocked (401/403, likely live): ${blocked.length}` +
+      ` | ⚠️ unverifiable (flaky authority, likely live): ${unverifiable.length} | ❌ dead: ${dead.length}`,
   );
   for (const u of blocked) console.log(`   ⚠ 401/403  ${u}`);
+  for (const [u, st] of unverifiable) {
+    console.log(`   ⚠ 5xx/timeout (authority)  ${u}  — راجعيها يدوياً من متصفح من وقت لآخر`);
+  }
   for (const [u, s] of dead) {
     const meta = byUrl.get(u);
     console.log(`   ✗ ${s === "ERR" ? "ERR/timeout" : s}  ${u}  (${meta?.title ?? "?"})`);
