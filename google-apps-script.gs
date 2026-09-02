@@ -426,12 +426,26 @@ function sendReviewNotification(productId, productName, name, rating, text, veri
 }
 
 /** قراءة المراجعات المعتمدة فقط — محمي بتوكن، بدون هاتف، بحد 20 وأسرعها أولاً */
-/** توقيع HMAC-SHA256 (hex) — السر نفسه لا يسافر عبر الشبكة أبداً */
+/**
+ * توقيع HMAC-SHA256 (hex) — السر نفسه لا يسافر عبر الشبكة أبداً.
+ *
+ * ⚠️ القيم العائدة من getBytes() في Apps Script قد تكون SIGNED (-128..127):
+ * بدون التطبيع أدناه، أي بايت ≥ 0x80 ينتج نصاً خاطئاً ("-88" بدل "78")،
+ * فيفشل المطابقة مع digest الـ Node.js دائماً. التطبيع b<0 ? b+256 : b
+ * يجعل النتيجة مطابقة لـ digest hex القياسي في Node/أي runtime.
+ *
+ * متجه تحقق عبر الـ runtimes (يُتحقق مرة واحدة من المحرر بعد النشر):
+ *   hmacHex("reviews|m-01|1760000000|abc123", "test-secret")
+ * يجب أن يعيد حرفياً:
+ *   fdcd4ebe7a579b4cfebe2c2726c33bc2e0e0a37d455132bc13fa595575c5a205
+ * (نفس القيمة المثبتة في src/__tests__/reviews-api.test.ts)
+ */
 function hmacHex(data, key) {
   var bytes = Utilities.computeHmacSha256Signature(data, key).getBytes();
   var hex = "";
   for (var i = 0; i < bytes.length; i++) {
-    hex += ("0" + bytes[i].toString(16)).slice(-2);
+    var b = bytes[i] < 0 ? bytes[i] + 256 : bytes[i];
+    hex += ("0" + b.toString(16)).slice(-2);
   }
   return hex;
 }
@@ -439,8 +453,10 @@ function hmacHex(data, key) {
 function handleReviewsGet(params) {
   // 🔒 توقيع HMAC قصير العمر بدل توكن ثابت في الـ URL:
   // الخادم يحسب sig = HMAC(secret, "reviews|product|ts|nonce") ويرسل
-  // (ts, nonce, sig) فقط — السر لا يظهر في أي URL أو سجل وسيط، والتوقيع
-  // صالح 5 دقائق فقط (منع إعادة تشغيل طلب محجوب).
+  // (ts, nonce, sig) فقط — السر لا يظهر في أي URL أو سجل وسيط.
+  // الحماية من إعادة التشغيل على مستويين:
+  //   1) Freshness: التوقيع صالح 5 دقائق فقط (نافذة ts).
+  //   2) Single-use nonce: أي nonce استُخدم مرة يرفض (CacheService, 10 دقائق).
   if (!REVIEW_READ_TOKEN) return json({ success: false, error: "Forbidden" });
   var product = String(params.product || "").trim();
   var ts = String(params.ts || "").trim();
@@ -457,6 +473,12 @@ function handleReviewsGet(params) {
   if (hmacHex("reviews|" + product + "|" + ts + "|" + nonce, REVIEW_READ_TOKEN) !== sig) {
     return json({ success: false, error: "Forbidden" });
   }
+  // Single-use: طلب محجوب لا يعاد تشغيله حتى لو ضمن نافذة الـ 5 دقائق
+  var nonceKey = "revnonce_" + nonce;
+  if (CacheService.getScriptCache().get(nonceKey) === "1") {
+    return json({ success: false, error: "Forbidden" });
+  }
+  CacheService.getScriptCache().put(nonceKey, "1", 600);
 
   try {
     var productId = product.slice(0, 40);
@@ -855,6 +877,9 @@ function autoCleanupOldOrders() {
  * يومي ينفذ autoCleanupOldOrders() (حذف طلبات أقدم من 90 يوم).
  * إعادة التشغيل آمنة: يحذف أولاً أي triggers قديمة لنفس الدالة.
  */
+// ملاحظة: atHour(3) يعتمد على timezone مشروع Apps Script نفسه
+// (Settings → All project settings → Time zone) — تأكد أنه Africa/Cairo
+// أو اضبط الساعة على ما يناسب توقيت المشروع.
 function setupAutoCleanupTrigger() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
     if (t.getHandlerFunction() === "autoCleanupOldOrders") {

@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import handler, { fetchApprovedReviews } from "../../api/reviews.js";
 
@@ -104,6 +105,16 @@ describe("reviews read handler", () => {
     expect(url).toContain("ts=");
     expect(url).toContain("nonce=");
     expect(url).toMatch(/sig=[0-9a-f]{64}/);
+  });
+
+  // متجه ثابت عبر الـ runtimes: يثبت أن جانب Node ينتج digest قياسي.
+  // نفس المتجه موثق في hmacHex بـ google-apps-script.gs ويُتحقق منه
+  // مرة واحدة من محرر Apps Script بعد النشر (يجب التطابق الحرفي).
+  it("fixed HMAC vector matches the documented cross-runtime constant", () => {
+    const sig = createHmac("sha256", "test-secret")
+      .update("reviews|m-01|1760000000|abc123")
+      .digest("hex");
+    expect(sig).toBe("fdcd4ebe7a579b4cfebe2c2726c33bc2e0e0a37d455132bc13fa595575c5a205");
   });
 
   it("unknown product id: no Sheets call, no cache pollution, empty list", async () => {

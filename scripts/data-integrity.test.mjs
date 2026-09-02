@@ -94,26 +94,110 @@ try {
   // القائمة مقصودة بدقة: لا تشمل "يعالج"/"100%" لأنهما يظهران سياقات
   // تفنيد مشروعة (خرافة: "الطبيعي آمن 100%" / "ادعاءات أنه يعالج... لا يدعمها دليل")
   const FORBIDDEN_CLAIM_TERMS = [
+    // ضمانات مطلقة (سلامة/فعالية/رضا)
+    // ملاحظة: "مضمون" وحده غير ممنوع — "منتجات أصلية ومضمونة" ضمان تجاري مشروع
+    // (أصالة + ضمان استبدال)، بينما "نتائج مضمونة"/"تضمن الرضا" ضمانات علاجية مطلقة
     "يضمن",
-    "مضمون",
-    "آمن تماماً",
-    "آمنة تماماً",
-    "فعالية أكيدة",
     "نتائج ملموسة",
     "نتائج مضمونة",
+    "تضمن الرضا",
+    "آمن تماماً",
+    "آمنة تماماً",
+    "آمن كلياً",
+    "آمنة كلياً",
+    "أمان كامل",
+    "أمان تام",
+    "فعالية أكيدة",
+    "فعالية كاملة",
+    "بدون أي أعراض جانبية",
+    "بدون أعراض جانبية",
+    "يقضي تماماً",
+    "مضاعفة الإحساس",
+    "طبيعي 100%",
+    "طبيعية 100%",
+    // ادعاءات فريق طبي (المراجعة حالياً داخلية — راجعي صفحة الفريق)
     "أطباؤنا",
     "فريقنا الطبي",
+    "بمراجعة طبية",
   ];
-  for (const article of articles) {
-    const body = [article.title, article.excerpt, article.content]
-      .concat((article.faqs ?? []).map((f) => `${f.question} ${f.answer}`))
-      .join(" ");
+  const scanForClaims = (label, text) => {
     for (const term of FORBIDDEN_CLAIM_TERMS) {
       assert.ok(
-        !body.includes(term),
-        `Article "${article.slug}" contains forbidden absolute claim "${term}" — health content must not guarantee outcomes or imply a medical team`,
+        !text.includes(term),
+        `${label} contains forbidden absolute claim "${term}" — health content must not guarantee outcomes or imply a medical team`,
       );
     }
+  };
+
+  // "100%" مطلقاً في محتوى المنتجات/الدليل — المسموح الوحيد: "أصلية 100%"
+  // (ضمان تجاري للأصالة). المقالات مستثناة: تنطوي اقتباسات تفنيد مشروعة.
+  const scanNoAbsolute100 = (label, text) => {
+    const withoutAuthenticity = text.replace(/أصلية 100%/g, "");
+    assert.ok(
+      !withoutAuthenticity.includes("100%"),
+      `${label} contains an absolute "100%" claim (only "أصلية 100%" authenticity warranty is allowed)`,
+    );
+  };
+
+  for (const article of articles) {
+    scanForClaims(
+      `Article "${article.slug}"`,
+      [article.title, article.excerpt, article.content]
+        .concat((article.faqs ?? []).map((f) => `${f.question} ${f.answer}`))
+        .join(" "),
+    );
+  }
+  // المنتجات: نفس القاعدة على كل الحقول النصية (الوصف/المكونات/الفوائد)
+  for (const product of products) {
+    scanForClaims(
+      `Product "${product.slug}"`,
+      [
+        product.name,
+        product.description,
+        product.ingredients ?? "",
+        product.usage ?? "",
+        (product.benefits ?? []).join(" "),
+      ].join(" "),
+    );
+    scanNoAbsolute100(
+      `Product "${product.slug}"`,
+      [
+        product.name,
+        product.description,
+        product.ingredients ?? "",
+        product.usage ?? "",
+        (product.benefits ?? []).join(" "),
+      ].join(" "),
+    );
+  }
+  // صفحات الدليل: نفس القاعدة على كل النصوص
+  for (const page of seoLandingPages) {
+    scanForClaims(
+      `Landing page "${page.slug}"`,
+      [
+        page.title,
+        page.metaTitle,
+        page.metaDescription,
+        page.heroDescription,
+        page.intro,
+        page.sections.map((sec) => `${sec.heading} ${sec.body}`).join(" "),
+        page.faqs.map((f) => `${f.question} ${f.answer}`).join(" "),
+        page.links.map((l) => `${l.label} ${l.description}`).join(" "),
+      ].join(" "),
+    );
+    scanNoAbsolute100(
+      `Landing page "${page.slug}"`,
+      [
+        page.title,
+        page.metaTitle,
+        page.metaDescription,
+        page.heroDescription,
+        page.intro,
+        page.sections.map((sec) => `${sec.heading} ${sec.body}`).join(" "),
+        page.faqs.map((f) => `${f.question} ${f.answer}`).join(" "),
+        page.links.map((l) => `${l.label} ${l.description}`).join(" "),
+      ].join(" "),
+    );
   }
 
   assert.deepEqual(
