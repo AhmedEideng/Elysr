@@ -76,6 +76,29 @@ jobs:
         run: npm run test:unit
 
   # ─────────────────────────────────────────────────────────
+  # Security audit — يفشل الـ run على أي ثغرة high/critical
+  # (يعتمد على الـ lockfile فقط: npm ci + npm audit)
+  # ─────────────────────────────────────────────────────────
+  audit:
+    name: 🛡 Security Audit (high+)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --prefer-offline
+
+      - name: Audit (fail on high/critical)
+        run: npm audit --audit-level=high
+
+  # ─────────────────────────────────────────────────────────
   # 2) Build — generates prerendered HTML, sitemaps, feeds
   # ─────────────────────────────────────────────────────────
   build:

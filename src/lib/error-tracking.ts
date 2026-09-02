@@ -18,11 +18,21 @@
 
 import { APP_VERSION } from "./version";
 
+/**
+ * PII-safe error context — explicit allowlist, no open index signature:
+ * a future developer CANNOT attach phone/name/address/userId to an error
+ * report without a deliberate change to this type. Session correlation
+ * uses the pseudonymous correlationId, not any customer identifier.
+ */
 interface ErrorContext {
   feature?: string;
   route?: string;
-  userId?: string;
-  [key: string]: unknown;
+  section?: string;
+  componentStack?: string;
+  /** اسم ملف السكربت الذي حدث فيه الخطأ (تقني — ليس PII) */
+  source?: string;
+  lineno?: number;
+  colno?: number;
 }
 
 interface Breadcrumb {
