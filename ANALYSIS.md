@@ -860,3 +860,40 @@ endpoint الحي: 200 {reviews:[],count:0} (fail-soft شغال — الميزة
    دخول/خطأ → السبب في (2) أو (1).
 6. تأكد إن `GOOGLE_SHEETS_REVIEWS_TOKEN` في Vercel = قيمة
    `REVIEW_READ_TOKEN` في السكربت نفسها.
+
+### 28-أ) التصحيح النهائي: السبب الحقيقي — Bug في `hmacHex` (2026-09-03)
+
+**فرضيات القسم 28 (رابط deployment قديم/صلاحية Anyone) كانت خاطئة** —
+والسبب الحقيقي اكتُشف وتحقق منه:
+
+`Utilities.computeHmacSha256Signature(value, key)` في Apps Script **ترجع
+`Byte[]` مباشرة** (حسب الوثائق الرسمية: "Return: Byte[] — A byte[]
+representing the output signature"). الكود كان بيستدعي `.getBytes()` على
+المصفوفة → **`TypeError: ...getBytes is not a function`** — وادى الاستدعاء
+ده كان **خارج أي try/catch** في `handleReviewsGet` → الاستثناء مامش
+`doGet` → **uncaught** → جوجل راجعة صفحة خطأ HTML (بحالة 2xx — اللوج
+بيؤكد ده: فرع "Unexpected token '<'" بيشتغل بس مع response.ok).
+
+التسلسل بيشرح الأعراض كلها:
+- `doPost` (طلبات/إرسال مراجعات) شغال — مش بيستدعي `hmacHex`.
+- كل قراءة `doGet?action=reviews` بتفشل 100% — بتوصل لـ `hmacHex` دايماً.
+- الاختبارات ما مسكتش الباج — جانب Apps Script مش بيتنفذ في بيئة الاختبار،
+  ومتجه التحقق كان مطلوب "من المحرر" (خطوة اتفوتت).
+
+**الإصلاح (مطبق في `google-apps-script.gs`):**
+1. `hmacHex`: شطب `.getBytes()` — المصفوفة نفسها هي البايتات.
+2. موقع الاستدعاء: try/catch حوالين التحقق من التوقيع — أي Crash
+   مستقبلي في المسار ده يرجع JSON (`Forbidden`) مش صفحة HTML (الموقع
+   fail-soft بيتعامل معاه بقائمة فارغة).
+3. تعليق الدالة اتعدل: كان بيصف سلوك غلط ("القيم العائدة من getBytes()").
+
+**التحقق (محاكاة runtime):**
+- النسخه القديمة في محاكاة Node لبيئة Apps Script: `TypeError: ...getBytes
+  is not a function` (نفس الـ crash).
+- النسخه الجديدة: بتطابق المتجه المثبت حرفياً
+  `fdcd4ebe7a579b4cfebe2c2726c33bc2e0e0a37d455132bc13fa595575c5a205`
+  — ومع محاكاة بايتات signed (-128..127) كمان التطبيع بيدي نفس النتيجة.
+
+**ملاحظة عملياتية:** التعديل لازم يتنشر من محرر Apps Script
+(Deploy → Manage deployments → Edit → New version) — النشر في الـ repo
+محدش لوحده. قبل النشر: شغّل متجه التحقق من المحرر وتأكد من التطابق.

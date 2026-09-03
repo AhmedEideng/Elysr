@@ -429,7 +429,12 @@ function sendReviewNotification(productId, productName, name, rating, text, veri
 /**
  * توقيع HMAC-SHA256 (hex) — السر نفسه لا يسافر عبر الشبكة أبداً.
  *
- * ⚠️ القيم العائدة من getBytes() في Apps Script قد تكون SIGNED (-128..127):
+ * ⚠️ computeHmacSha256Signature ترجع Byte[] مباشرة (حسب وثائق Google الرسمية
+ * — ليس كائناً يحتاج .getBytes()، وليس نصاً base64). استدعاء .getBytes()
+ * على المصفوفة كان يفجّر TypeError داخل doGet → صفحة خطأ HTML من جوجل
+ * (سبب "Unexpected token '<'" في لوغات Vercel على /api/reviews).
+ *
+ * ⚠️ القيم داخل Byte[] قد تظهر SIGNED (-128..127) في بعض السياقات:
  * بدون التطبيع أدناه، أي بايت ≥ 0x80 ينتج نصاً خاطئاً ("-88" بدل "78")،
  * فيفشل المطابقة مع digest الـ Node.js دائماً. التطبيع b<0 ? b+256 : b
  * يجعل النتيجة مطابقة لـ digest hex القياسي في Node/أي runtime.
@@ -441,7 +446,7 @@ function sendReviewNotification(productId, productName, name, rating, text, veri
  * (نفس القيمة المثبتة في src/__tests__/reviews-api.test.ts)
  */
 function hmacHex(data, key) {
-  var bytes = Utilities.computeHmacSha256Signature(data, key).getBytes();
+  var bytes = Utilities.computeHmacSha256Signature(data, key);
   var hex = "";
   for (var i = 0; i < bytes.length; i++) {
     var b = bytes[i] < 0 ? bytes[i] + 256 : bytes[i];
@@ -470,7 +475,16 @@ function handleReviewsGet(params) {
   if (!isFinite(reqSec) || Math.abs(nowSec - reqSec) > 300) {
     return json({ success: false, error: "Forbidden" });
   }
-  if (hmacHex("reviews|" + product + "|" + ts + "|" + nonce, REVIEW_READ_TOKEN) !== sig) {
+  // 🔒 أي Crash غير متوقع هنا يجب ألا يخرج كصفحة HTML من جوجل —
+  // نلتقطه ونرجع JSON دائماً (الموقع fail-soft يتعامل معه بقائمة فارغة).
+  var computedSig;
+  try {
+    computedSig = hmacHex("reviews|" + product + "|" + ts + "|" + nonce, REVIEW_READ_TOKEN);
+  } catch (err) {
+    console.error("HMAC verification crashed:", err);
+    return json({ success: false, error: "Forbidden" });
+  }
+  if (computedSig !== sig) {
     return json({ success: false, error: "Forbidden" });
   }
   // Single-use: طلب محجوب لا يعاد تشغيله حتى لو ضمن نافذة الـ 5 دقائق
