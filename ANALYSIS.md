@@ -802,3 +802,61 @@ schemas 0 أخطاء · build 248 صفحة (17 static) · الموقع الحي:
 tsc نظيف · lint نظيف · 171 وحدة (13 ملف) · data-integrity (بما فيها
 assertions القالب الجديدة) · 18 e2e · schemas 0 أخطاء · build 248 صفحة ·
 تحليل XML حقيقي (ElementTree): 239 URL، القالب داخل مدخلته فقط.
+
+## 28) تشخيص أخطاء /api/reviews في Vercel — HTML بدل JSON + DEP0169 (2026-09-03)
+
+### العرَض (من لوغات Vercel على GET /api/reviews?product=w-06)
+1. `[DEP0169] DeprecationWarning: url.parse()...` — **محا** (غير ضار).
+   المصدر: runtime الـ serverless بتاع Vercel نفسه (Node 24) اللي بيتحلل
+   request — مش كودنا (تحقق: مفيش `url.parse` في `api/` ولا في أي
+   dependency في الـ package.json). مفيش حاجة تتعمل من جهة التطبيق؛
+   بيتعرض كـ "error" بس عشان Node بيكتب الـ warnings على stderr.
+2. `Reviews fetch failed: Unexpected token '<', "<!DOCTYPE "... is not
+   valid JSON` — **ده الباج الحقيقي**.
+
+### تحليل الباج (سطر بسطر)
+`api/reviews.js` بيستقبل من Apps Script. الكود في `google-apps-script.gs`
+**مستحيل** يرجع HTML من أي فرع: `doGet` بيرجع `json({status:...})` لأي GET
+عادي، و`handleReviewsGet` بيرجع JSON في كل الفروع (Forbidden/توقيع فاشل/
+نجاح/خطأ داخلي). فـ `<!DOCTYPE` بحالة 200 معناها إن الطلب **خبط صفحة ويب
+بدل السكربت** — الأسباب الثلاثة الكلاسيكية:
+1. `GOOGLE_SHEETS_WEBHOOK_URL` في بيئة Vercel مش /exec الحالي (ديبلوي
+   اتحذف/اتعدل، أو لينك قديم من deployment تاني).
+2. صلاحية الـ deployment مش "Anyone" (Execute as: Me) — فالطلب بدون
+   auth بيتحوّل (302 → redirect متبع) لصفحة دخول جوجل HTML بحالة 200.
+3. آخر نسخة من الكود غير منشورة — تعديل الكود في المحرر لوحده **مش**
+   بيتطبّق على /exec الحالي (مطلوب Deploy → Manage deployments →
+   Edit → New version).
+
+### الإصلاح (كود)
+`api/reviews.js`: بدل ما أي 200 يتبعت لـ `response.json()` مباشرة،
+دلوقتي بيتفحص `content-type` (أي رد سليم من السكربت دايم
+application/json — helper json() بيضبط MimeType.JSON):
+- لو مش JSON → نقرأ أول 160 حرف من البدن وسجل **رسالة تشخيصية قابلة
+  للتنفيذ** (status + content-type + بداية البدن + الخطوات الثلاثة فوق) —
+  فالـ log الجاي في Vercel بيحدد السبب بالظبط بدل رسالة "Unexpected token".
+- fail-soft زي ما هو: 200 بقائمة فارغة، صفحة المنتج ما تتكسرش.
+
+### الحماية
+`src/__tests__/reviews-api.test.ts`: +1 اختبار (استجابة HTML 200 →
+قائمة فارغة + رسالة "non-JSON ... deployment" في السجلات) + إضافة
+`headers: jsonHeaders` لكل mocks الموجودة (السلوك الجديد بيقرا
+content-type).
+
+### التحقق
+tsc نظيف · lint نظيف · 172 وحدة (13 ملف) · data-integrity ✓ ·
+endpoint الحي: 200 {reviews:[],count:0} (fail-soft شغال — الميزة
+معدلة لحد ما يتصلح الـ deployment).
+
+### خطوات الإصلاح (لديك — في حسابك على جوجل)
+1. افتح مشروع Apps Script → Deploy → Manage deployments.
+2. تأكد إن الـ Web app: Execute as **Me** + Who has access **Anyone**.
+3. لو الكود اتعدل: Edit → Version: **New version** → Deploy (والـ /exec
+   القديم يفضل ساري؛ لو اتعمل deployment جديد خد اللينك الجديد).
+4. انسخ الـ URL (ينتهي بـ /exec) → Vercel → Settings → Environment
+   Variables → `GOOGLE_SHEETS_WEBHOOK_URL` → Redeploy.
+5. فحص 10 ثواني: افتح URL الـ /exec في المتصفح — المفروض يظهر
+   `{"status":"Elysr Webhook Active"}` (JSON). لو ظاهرلك صفحة
+   دخول/خطأ → السبب في (2) أو (1).
+6. تأكد إن `GOOGLE_SHEETS_REVIEWS_TOKEN` في Vercel = قيمة
+   `REVIEW_READ_TOKEN` في السكربت نفسها.

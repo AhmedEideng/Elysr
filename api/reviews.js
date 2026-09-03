@@ -124,16 +124,38 @@ export async function fetchApprovedReviews(productId) {
       productId,
     )}&ts=${ts}&nonce=${nonce}&sig=${sig}`;
     const response = await fetch(url, { signal: controller.signal });
-    if (response.ok) {
-      const data = await response.json();
-      if (data && Array.isArray(data.reviews)) {
-        reviews = data.reviews
-          .map((r) => normalizeReview(r))
-          .filter((r) => r !== null)
-          .slice(0, MAX_REVIEWS);
-      }
-    } else {
+    if (!response.ok) {
       console.error(`Reviews webhook returned ${response.status}`);
+    } else {
+      // أي استجابة سليمة من Apps Script هي JSON دائماً (helper json() يعين
+      // MimeType.JSON). وصول HTML (<!DOCTYPE...) معناها إننا وصلنا صفحة
+      // ويب بدل السكربت — الأسباب الثلاثة الكلاسيكية:
+      //   1) رابط /exec في GOOGLE_SHEETS_WEBHOOK_URL قديم/غير صحيح.
+      //   2) صلاحية الـ deployment ليست "Anyone" (فالطلب يتحول لصفحة دخول).
+      //   3) آخر نسخة من الكود غير منشورة (Deploy → Manage deployments →
+      //      New version) — تعديل الكود لوحده لا يطبّق على الـ /exec القديم.
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.toLowerCase().includes("json")) {
+        const snippet = (await response.text().catch(() => ""))
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 160);
+        console.error(
+          `Reviews webhook returned non-JSON (status ${response.status}, ` +
+            `content-type: ${contentType || "unknown"}, body starts with: ${snippet}). ` +
+            "Check the Apps Script deployment: GOOGLE_SHEETS_WEBHOOK_URL must point to the " +
+            "current /exec URL, the deployment access must be 'Anyone', and the latest code " +
+            "version must be deployed (Deploy → Manage deployments → New version).",
+        );
+      } else {
+        const data = await response.json();
+        if (data && Array.isArray(data.reviews)) {
+          reviews = data.reviews
+            .map((r) => normalizeReview(r))
+            .filter((r) => r !== null)
+            .slice(0, MAX_REVIEWS);
+        }
+      }
     }
   } catch (err) {
     // fail-soft: شبكة/توكن رافض/أي خطأ → قائمة فارغة بدون كسر الصفحة

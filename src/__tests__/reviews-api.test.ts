@@ -43,6 +43,13 @@ const sampleApproved = {
   verified: true,
 };
 
+// أي استجابة JSON سليمة من Apps Script حاملة content-type: application/json
+// (helper json() في السكربت يعين MimeType.JSON) — المحاكاة لازم تعكس ده.
+const jsonHeaders = {
+  get: (k: string) =>
+    k.toLowerCase() === "content-type" ? "application/json; charset=utf-8" : null,
+};
+
 describe("reviews read handler", () => {
   beforeEach(() => {
     vi.unstubAllEnvs();
@@ -78,6 +85,7 @@ describe("reviews read handler", () => {
     vi.stubEnv("GOOGLE_SHEETS_REVIEWS_TOKEN", "test-token");
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
+      headers: jsonHeaders,
       json: async () => ({
         success: true,
         reviews: [
@@ -122,6 +130,7 @@ describe("reviews read handler", () => {
     vi.stubEnv("GOOGLE_SHEETS_REVIEWS_TOKEN", "test-token");
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
+      headers: jsonHeaders,
       json: async () => ({ success: true, reviews: [sampleApproved] }),
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -144,6 +153,35 @@ describe("reviews read handler", () => {
     expect(res.body).toEqual({ reviews: [], count: 0 });
   });
 
+  it("fails soft with diagnostics when Apps Script returns HTML instead of JSON (broken deployment)", async () => {
+    vi.stubEnv("GOOGLE_SHEETS_WEBHOOK_URL", "https://script.google.com/test");
+    vi.stubEnv("GOOGLE_SHEETS_REVIEWS_TOKEN", "test-token");
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: {
+          get: (k: string) =>
+            k.toLowerCase() === "content-type" ? "text/html; charset=utf-8" : null,
+        },
+        text: async () => "<!DOCTYPE html><html><head><title>Sign in - Google Accounts</title>",
+      }),
+    );
+
+    const res = mockResponse();
+    // w-06: منتج معروف حقيقي غير مستخدم في اختبارات سابقة (الكاش بالمعرف)
+    await handler(mockGetRequest("w-06", "203.0.113.128") as never, res as never);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ reviews: [], count: 0 });
+    const logged = errorLog.mock.calls.map((c) => String(c[0])).join(" ");
+    expect(logged).toMatch(/non-JSON/);
+    expect(logged).toMatch(/deployment/);
+    errorLog.mockRestore();
+  });
+
   it("fails soft: a network error returns 200 with an empty list", async () => {
     vi.stubEnv("GOOGLE_SHEETS_WEBHOOK_URL", "https://script.google.com/test");
     vi.stubEnv("GOOGLE_SHEETS_REVIEWS_TOKEN", "test-token");
@@ -160,6 +198,7 @@ describe("reviews read handler", () => {
     vi.stubEnv("GOOGLE_SHEETS_REVIEWS_TOKEN", "test-token");
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
+      headers: jsonHeaders,
       json: async () => ({ success: true, reviews: [sampleApproved] }),
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -172,7 +211,9 @@ describe("reviews read handler", () => {
   });
 
   it("rate limits repeated reads (10/minute per IP)", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ reviews: [] }) });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue({ ok: true, headers: jsonHeaders, json: async () => ({ reviews: [] }) });
     vi.stubGlobal("fetch", fetchMock);
     const statuses: number[] = [];
     for (let i = 0; i < 11; i++) {
