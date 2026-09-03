@@ -768,3 +768,37 @@ tsc نظيف، 159 وحدة، data-integrity، 15 e2e، schemas 0 أخطاء، b
 tsc نظيف · 171 وحدة (13 ملف) · data-integrity · 18 e2e (منها 4 search) ·
 schemas 0 أخطاء · build 248 صفحة (17 static) · الموقع الحي: /search 200 +
 الـ SearchAction الحي بيتأكد منه بالـ curl على الـ CDN.
+
+## 27) إصلاح قالب البحث في الـ sitemap — امتداد Yandex الصيغة الرسمية (2026-09-03)
+
+### المشكلة (اكتشاف عند التدقيق السطر-بسطر)
+قالب البحث الشامل في `sitemap.xml` كان **مكتوباً بصيغة خطأ**:
+1. العنصر `<search>` كان مضاف **داخل `<url>` الصفحة الرئيسية** (بدون
+   `{search_term_string}` في `<loc>`).
+2. **لم يكن مُعلناً `xmlns:search`** على `<urlset>`.
+3. التعليق كان يسميه "بروتوكول جوجل" — والصيغة الفعلية (search/context/link)
+   هي صيغة **Yandex**؛ جوجل الحالية لا تدعم search templates في الـ sitemaps
+   (امتداداتها المدعومة: image/news/video/xhtml فقط) وتعتمد على SearchAction
+   (واللي موجود في JSON-LD الرئيسي — نفس القالب).
+
+نتيجة: القالب ما كان بيتشغل أصلاً — أي متصفح/robot مش ريعرف يربطه بصفحة
+البحث، و`<search>` كان عنصر غير معروف في namespace الـ sitemap العادي.
+
+### الإصلاح (`scripts/generate-sitemap.mjs`)
+- إضافة `xmlns:search="http://yandex.ru/schemas/sitemap/search/1.1"` على `<urlset>`.
+- إصدار القالب كـ `<url>` **مستقل**:
+  `<loc>https://elysrmedical.store/search?q={search_term_string}</loc>` +
+  `<search><context targetName="search_term_string"><link targetName=...
+  href=.../></context></search>` داخله — الصيغة الرسمية حسب مواصفة Yandex.
+- شطب التعليق الخاطئ (جوجل) وتوثيق اللي بيتشافه فعلاً (Yandex + SearchAction
+  لجوجل).
+
+### حماية من التراجع
+`scripts/data-integrity.test.mjs`: 4 assertions جديدة — إعلان الـ namespace،
+وجود `<url>` مستقل بالـ placeholder، وجود الـ `<search>` **داخله**، وعدم
+تعلقه بأي `<url>` تانية (الرئيسية تحديداً).
+
+### التحقق (2026-09-03)
+tsc نظيف · lint نظيف · 171 وحدة (13 ملف) · data-integrity (بما فيها
+assertions القالب الجديدة) · 18 e2e · schemas 0 أخطاء · build 248 صفحة ·
+تحليل XML حقيقي (ElementTree): 239 URL، القالب داخل مدخلته فقط.

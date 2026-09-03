@@ -138,11 +138,6 @@ async function generateSitemap() {
         priority: "1.0",
         changefreq: "daily",
         lastmod: freshLastmod("src/routes/index.tsx", today),
-        // قالب البحث الشامل ببرتوكول الـ sitemap الرسمي من جوجل:
-        // <search><context targetName=...><link href="...{search_term_string}"/>.
-        // نفس القالب المُعلَن في SearchAction بـ JSON-LD — نتائج بحث
-        // Google/Shopping تصل العميل على /search?q=... مباشرة.
-        searchTemplate: `${SITE_URL}/search?q={search_term_string}`,
       },
       {
         path: "/products/men",
@@ -243,9 +238,26 @@ async function generateSitemap() {
     ];
 
     // 2. بناء ملفات الـ XML
+    // قالب البحث الشامل: يُصدر كـ <url> مستقل ببنية امتداد Yandex الرسمي
+    // (xmlns:search) — الـ <loc> هو صفحة البحث بالـ placeholder نفسه، وهذا
+    // المطلوب حسب مواصفة Yandex للـ search templates.
+    // ملاحظة: جوجل لم تعد تدعم search templates في الـ sitemaps (امتدادات
+    // الـ sitemap المدعومة عندها: image/news/video/xhtml فقط) — جوجل تكتشف
+    // البحث الشامل عبر SearchAction في الـ JSON-LD الرئيسي (الصفحة
+    // الرئيسية)، وهو نفس القالب /search?q={search_term_string}.
+    const searchTemplateUrl = `${SITE_URL}/search?q={search_term_string}`;
+    const searchTemplateUrlEntry = `  <url>
+    <loc>${searchTemplateUrl}</loc>
+    <search>
+      <context targetName="search_term_string">
+        <link targetName="search_term_string" href="${searchTemplateUrl}"/>
+      </context>
+    </search>
+  </url>`;
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:search="http://yandex.ru/schemas/sitemap/search/1.1">
 ${urls
   .map((u) => {
     const imageBlock = u.image
@@ -255,24 +267,16 @@ ${urls
       <image:title>${esc(u.imageTitle)}</image:title>
     </image:image>`
       : "";
-    // قالب البحث (جوجل): يُصدر فقط على الصفحة الرئيسية
-    const searchBlock = u.searchTemplate
-      ? `
-    <search>
-      <context targetName="search_term_string">
-        <link targetName="search_term_string" href="${u.searchTemplate}"/>
-      </context>
-    </search>`
-      : "";
     return `  <url>
     <loc>${SITE_URL}${u.path}</loc>
     <lastmod>${u.lastmod}</lastmod>
     <changefreq>${u.changefreq}</changefreq>
     <priority>${u.priority}</priority>
-${searchBlock}${imageBlock}
+${imageBlock}
   </url>`;
   })
   .join("\n")}
+${searchTemplateUrlEntry}
 </urlset>
 `;
 
