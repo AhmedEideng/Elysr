@@ -507,34 +507,21 @@ try {
     );
   }
 
-  // 🧭 قالب البحث الشامل في الـ sitemap — بنية امتداد Yandex الرسمية:
-  // (1) xmlns:search مُعلَن على <urlset>، (2) <url> مستقل <loc> فيه
-  // placeholder {search_term_string}، (3) <search> داخل هذا الـ <url> نفسه.
-  const SEARCH_TEMPLATE_LOC = `<loc>https://elysrmedical.store/search?q={search_term_string}</loc>`;
+  // 🧭 قرار موثق: sitemap "نظيف لجوجل" — بدون أي search template.
+  // امتداد Yandex <search> بيعلّمه Google Search Console كـ "علامة XML غير
+  // صالحة" (error دائم في تقرير الـ sitemap). بحث جوجل الشامل شغال عبر
+  // SearchAction في JSON-LD الصفحة الرئيسية — مش عبر sitemap.
   assert.ok(
-    sitemap.includes('xmlns:search="http://yandex.ru/schemas/sitemap/search/1.1"'),
-    "Sitemap must declare the Yandex search namespace on <urlset>",
-  );
-  assert.ok(
-    sitemap.includes(SEARCH_TEMPLATE_LOC),
-    "Sitemap must contain a dedicated search template <url> with {search_term_string} in <loc>",
-  );
-  const templateEntry = sitemap.slice(sitemap.indexOf(SEARCH_TEMPLATE_LOC));
-  const templateEntryEnd = templateEntry.indexOf("</url>");
-  assert.ok(templateEntryEnd > -1, "Search template <url> entry must be closed");
-  assert.match(
-    templateEntry.slice(0, templateEntryEnd),
-    /<search>\s*<context targetName="search_term_string">\s*<link targetName="search_term_string" href="https:\/\/elysrmedical\.store\/search\?q=\{search_term_string\}"\/>\s*<\/context>\s*<\/search>/,
-    "Search template <search> block must live inside the template <url> entry",
-  );
-  // القالب يجب ألا يكون معلقاً على أي <url> آخر (مثل الرئيسية)
-  const homepageEntry = sitemap.slice(
-    sitemap.indexOf("<loc>https://elysrmedical.store/</loc>"),
-    sitemap.indexOf("</url>", sitemap.indexOf("<loc>https://elysrmedical.store/</loc>")),
+    !sitemap.includes("xmlns:search"),
+    "Sitemap must NOT declare the Yandex search namespace (GSC reports it as an invalid tag)",
   );
   assert.ok(
-    !homepageEntry.includes("<search>"),
-    "Search template must not be attached to the homepage <url> entry",
+    !sitemap.includes("<search>"),
+    "Sitemap must NOT contain a <search> extension element (GSC reports it as an invalid tag)",
+  );
+  assert.ok(
+    !sitemap.includes("{search_term_string}"),
+    "Sitemap must NOT contain search template placeholder URLs",
   );
 
   assert.equal(promo.calcDiscount(999, new Date("2026-06-01T12:00:00Z")), 0);

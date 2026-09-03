@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
-        xmlns:search="http://yandex.ru/schemas/sitemap/search/1.1">
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://elysrmedical.store/</loc>
     <lastmod>2026-08-20</lastmod>
@@ -2207,13 +2206,5 @@
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
 
-  </url>
-  <url>
-    <loc>https://elysrmedical.store/search?q={search_term_string}</loc>
-    <search>
-      <context targetName="search_term_string">
-        <link targetName="search_term_string" href="https://elysrmedical.store/search?q={search_term_string}"/>
-      </context>
-    </search>
   </url>
 </urlset>

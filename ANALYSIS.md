@@ -943,3 +943,39 @@ Apps Script → تبويب **Executions**:
 لو اتبعت JSON body مباشر. مفيش تأثير على السلوك الحالي
 (الفالباك بيشتغل بس لو `e.parameter.data` غائب)، ويبقى الـ webhook
 مرن مع أي عميل مستقبلي أو فحص يدوي.
+
+## 30) إزالة امتداد Yandex <search> من الـ sitemap — خطأ حقيقي في GSC (2026-09-03)
+
+### الاكتشاف (من Google Search Console — لقطة المستخدم)
+GSC قرأ الـ sitemap (239 صفحة مكتشفة) بس طلّع خطأ:
+**"علامة XML غير صالحة" — السطر 2213 — العلامه الرئيسية: url — الفئة: search**
+= بالظبط وسم `<search>` (امتداد Yandex) اللي اتضاف في `585173d`.
+
+### التحليل
+- Google **مبيدعمش** امتداد `<search>` ده (ده بتاعة Yandex)، و**بيعلّمه
+  كـ error** في تقرير الـ sitemap — مش بيعمله ignore.
+- النتيجة: علامة "أخطاء" دائمة في GSC على sitemap شغال كويس في بقية.
+- "بحث الموقع" عند جوجل شغال أصلاً عبر **SearchAction في JSON-LD
+  الصفحة الرئيسية** (موجود ومتحقق منه حيًا) — مش عبر sitemap.
+- قيمة امتداد Yandex لموقع مصري (جوجل-محوره) ≈ صفر مقابل ضرر = error دائم.
+
+### القرار والإصلاح
+- `scripts/generate-sitemap.mjs`: شطب `xmlns:search` من الـ `<urlset>`
+  وشطب مدخل `<url>` القالب بالكامل — مع تعليق موثق للقرار.
+- `scripts/data-integrity.test.mjs`: عكست الـ assertions — دلوقتي
+  **تقفل القرار**: sitemap لازم ما يكونش فيه `xmlns:search` ولا
+  `<search>` ولا `{search_term_string}` (منع أي تراجع مستقبلي).
+- ما اتلمستش: SearchAction (آلية جوجل الفعلية) + صفحة /search +
+  كل تلاتة (SearchBar، الفلترة، noindex).
+
+### التحقق
+build 248 صفحة · sitemap: 238 URL · فحص XML حقيقي: مفيش أي وسم في
+namespace الافتراضي غير {loc,lastmod,changefreq,priority} ولا أي
+namespace غير مدعوم · data-integrity (بما فيها الـ 3 assertions
+الجديدة) ✓ · 172 وحدة ✓ · lint ✓.
+
+### بعد النشر
+GSC هيعيد قراءة الـ sitemap تلقائيًا (أو "طلب إعادة قراءة") — والخطأ
+هيختفي (238 صفحة، 0 أخطاء). مفيش أي حاجة تتغير في SEO: صفحات
+النتائج /search?q= مش مفهرسة أصلاً (noindex) والقالب مش محتاج
+يكون في الـ sitemap.
