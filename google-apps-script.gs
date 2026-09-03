@@ -154,11 +154,19 @@ function doPost(e) {
   try {
     lock.waitLock(10000);
 
-    if (!e || !e.parameter || !e.parameter.data) {
+    // payload: بارامتر form "data" (العقد الحالي مع Vercel —
+    // submit-order.js و submit-review.js بيبعتوا
+    // application/x-www-form-urlencoded + data=JSON.stringify(...)).
+    // fallback: البدن الخام لو اتبعت JSON body مباشر (e.postData.contents)
+    // — يجعل الـ webhook مرن مع أي عميل مستقبل أو فحص يدوي بـ curl.
+    var rawData =
+      (e && e.parameter && e.parameter.data) ||
+      (e && e.postData && e.postData.contents) ||
+      "";
+    if (!rawData) {
       throw new Error("Missing payload");
     }
 
-    var rawData = e.parameter.data;
     var data = JSON.parse(rawData);
 
     // 🔒 حماية الكتابة: لو السر مضبوط في هذه النسخة فالطلب يجب أن يحمله

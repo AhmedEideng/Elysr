@@ -897,3 +897,49 @@ representing the output signature"). الكود كان بيستدعي `.getBytes
 **ملاحظة عملياتية:** التعديل لازم يتنشر من محرر Apps Script
 (Deploy → Manage deployments → Edit → New version) — النشر في الـ repo
 محدش لوحده. قبل النشر: شغّل متجه التحقق من المحرر وتأكد من التطابق.
+
+## 29) "الشيت الجديد مش بيستقبل" — تحليل فرضية doPost + الأسباب الحقيقية (2026-09-03)
+
+### الفرضية المقدمة (وردها الاحترافي)
+الفرضية: "Vercel بيبعت JSON body مباشر و`e.parameter.data` مش
+بيقرأه" — **غير صحيحة في حالة المشروع دي**، بالأدلة:
+- `api/submit-order.js`: `Content-Type: application/x-www-form-urlencoded`
+  + `URLSearchParams({ data: JSON.stringify(...) })`.
+- `api/submit-review.js`: نفس العقد حرفياً.
+- `doPost` بيقرا `e.parameter.data` — والـ form-urlencoded ده بالظبط
+  اللي بيتحلل في `e.parameter`. العقدان متطابقان، وكانوا شغالين
+  (الطلبات والمراجعات كانت بتوصل للشيت القديم).
+
+يعني مشكلة "الشيت الجديد" **مش مشكلة parsing** — دي مشكلة
+ربط/اتصال في الجانب جوجل.
+
+### الأسباب الحقيقية بالترتيب الاحتمالي
+1. **`GOOGLE_SHEETS_WEBHOOK_URL` في Vercel لسه على /exec القديم** —
+   مشروع Apps Script جديد = /exec جديد. لو البيئة محدثتش + Redeploy،
+   كل حاجة لسه بتروح للشيت القديم واللي "جديد" يفضل فاضي.
+2. **الديبلوي الجديد**: صلاحية مش "Anyone" (redirect لدخول) أو آخر
+   نسخة غير منشورة.
+3. **`SPREADSHEET_ID` فاضي في السكريبت الجديد المستقل** —
+   `getSpreadsheet()` في web app بيقع على `getActiveSpreadsheet()`
+   اللي بيرجع null → كل doPost بيغلط بـ "خطأ فني: السكريبت
+   مستقل..." (وكتابات الطلبات/المراجعات بـ `getOrCreateSheet`/
+   `getOrCreateReviewsSheet` بتعمل التبويب لوحدها — فاسم التبويب
+   مش سبب محتمل للكتابة).
+4. **`WEBHOOK_SECRET`** مضبوط في نسخة من الجهتين ومش متطابق →
+   `json({success:false, error:"Forbidden"})`.
+
+### التشخيص في 10 ثواني
+Apps Script → تبويب **Executions**:
+- **مفيش doPost خالص** → الطلبات مش بتوصل المشروع الجديد → (1) أو (2).
+- **doPost بـ خطأ** → رسالة الخطا بتحدد السبب: "سكريبت مستقل" → (3)،
+  "Forbidden" → (4).
+- **doPost نجاح والشيت فاضي** → اتفتح شيت تاني (راجع SPREADSHEET_ID).
+اختبار معزول من الموقع:
+`curl -X POST --data-urlencode 'data={"customerName":"test","items":[]}' https://<الـ /exec الجديد>`
+
+### تحسين مطبق (من الطلب نفسه)
+`doPost` دلوقتي يقبل payload من مصدرين: بارامتر form `data`
+(العقد الحالي) أو — fallback — البدن الخام `e.postData.contents`
+لو اتبعت JSON body مباشر. مفيش تأثير على السلوك الحالي
+(الفالباك بيشتغل بس لو `e.parameter.data` غائب)، ويبقى الـ webhook
+مرن مع أي عميل مستقبلي أو فحص يدوي.
