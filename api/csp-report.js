@@ -68,7 +68,11 @@ export default async function handler(req, res) {
   const vercelIp = req.headers["x-vercel-ip"];
   const clientIp =
     (typeof vercelIp === "string" && vercelIp.trim()) ||
-    req.headers["x-forwarded-for"]?.split(",").map((p) => p.trim()).filter(Boolean).pop() ||
+    req.headers["x-forwarded-for"]
+      ?.split(",")
+      .map((p) => p.trim())
+      .filter(Boolean)
+      .pop() ||
     "unknown";
 
   if (!checkRateLimit(clientIp)) {

@@ -80,7 +80,10 @@ function getClientIp(req) {
   if (typeof vercelIp === "string" && vercelIp.trim()) return vercelIp.trim();
   const forwardedFor = req.headers["x-forwarded-for"];
   if (typeof forwardedFor === "string") {
-    const parts = forwardedFor.split(",").map((p) => p.trim()).filter(Boolean);
+    const parts = forwardedFor
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
     if (parts.length) return parts[parts.length - 1];
   }
   return req.socket?.remoteAddress || "unknown";
