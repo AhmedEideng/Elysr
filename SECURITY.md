@@ -65,7 +65,7 @@ responsibly:
 
 1. **تقليل التخزين**: `elysr_last_whatsapp_url` اللي كان فيه PII كامل (اسم، هاتف، عنوان) اتلغى، بقى `elysr_last_order_id` فقط
 2. **تشفير IP**: في `submit-order.js` بنخزن `SHA256(IP).slice(0,16)` فقط في Google Sheets بدلاً من IP خام
-3. **حق النسيان**: API جديد `/api/delete-customer-data` + دالة `deleteCustomerData(phone)` في Apps Script
+3. **حق النسيان**: حذف يدوي عند الطلب (التواصل عبر صفحة الخصوصية) + `autoCleanupOldOrders()` في Apps Script. (الـ endpoint الآلي `/api/delete-customer-data` اتبنى وبعدين اتنزل بقرار المالك — `1abe95f`)
 4. **الاحتفاظ**: دالة `autoCleanupOldOrders()` بتحذف تلقائياً طلبات أقدم من 90 يوم
 5. **CSP + NEL**: `Report-To` و `NEL` headers لمراقبة أي انتهاك أمني فورياً
 

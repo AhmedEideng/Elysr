@@ -191,7 +191,7 @@ app.use((req, res, next) => {
       "script-src-attr 'none'",
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self' data:",
-      "img-src 'self' data: https: blob:",
+      "img-src 'self' data: blob:",
       "connect-src 'self' https://script.google.com https://script.googleusercontent.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com",
       "worker-src 'self'",
       "frame-ancestors 'self'",

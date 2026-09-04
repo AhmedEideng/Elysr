@@ -64,7 +64,12 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).end();
 
-  const clientIp = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || "unknown";
+  // IP موثوق: x-vercel-ip (Vercel) ثم آخر قيمة XFF (self-hosted)
+  const vercelIp = req.headers["x-vercel-ip"];
+  const clientIp =
+    (typeof vercelIp === "string" && vercelIp.trim()) ||
+    req.headers["x-forwarded-for"]?.split(",").map((p) => p.trim()).filter(Boolean).pop() ||
+    "unknown";
 
   if (!checkRateLimit(clientIp)) {
     return res.status(429).end();

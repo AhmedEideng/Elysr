@@ -6,8 +6,12 @@
  *
  * ⏰ مهم بعد النشر: شغّلي setupAutoCleanupTrigger() مرة واحدة من المحرر (Run)
  * لإنشاء الـ trigger اليومي — مجرد وجود الدالة لا يجعلها تعمل تلقائياً.
- * 🔒 موصى به: عبّئي WEBHOOK_SECRET هنا + GOOGLE_SHEETS_WEBHOOK_SECRET في
- * Vercel لحماية مسار الكتابة حتى لو تسرّب رابط الـ webhook.
+ * 🔒 إلزامي دلوقتي (Fail Closed): عبّئي WEBHOOK_SECRET هنا +
+ * GOOGLE_SHEETS_WEBHOOK_SECRET في Vercel بنفس القيمة — بدون كده
+ * doPost بيرفض كل الكتابة (الحماية مش اختيارية تاني).
+ * التفعيل الآمن بالترتيب: (1) ضعي المتغير في Vercel + Redeploy،
+ * (2) بعدين حطي السر هنا وانشري New version — عشان الـ API يبلّغ
+ * بالسر قبل ما السكربت يطلبه.
  *
  * التحسينات عن النسخة السابقة:
  *   1. ✅ عمود "حالة الطلب" — لتتبع (جديد / تم التأكيد / تم الشحن / مكتمل / ملغي)
@@ -169,9 +173,12 @@ function doPost(e) {
 
     var data = JSON.parse(rawData);
 
-    // 🔒 حماية الكتابة: لو السر مضبوط في هذه النسخة فالطلب يجب أن يحمله
-    // (يفعَّل تلقائياً فور تعبئة WEBHOOK_SECRET هنا وفي Vercel معاً)
-    if (WEBHOOK_SECRET && data.secret !== WEBHOOK_SECRET) {
+    // 🔒 حماية الكتابة — Fail Closed: لو السر غير مضبوط أو ناقص أو غلط
+    // → نرفض. ده يقفل ثغرة "الوصول المباشر لـ /exec" اللي كانت بتتجاوز
+    // كل تحقق طبقة Vercel (منتج/سعر/مخزون/خصم/شحن/إجمالي).
+    // التفعيل: عبّئي WEBHOOK_SECRET هنا + GOOGLE_SHEETS_WEBHOOK_SECRET في
+    // Vercel بنفس القيمة (Vercel بيبعت السر جوه الـ payload تلقائيًا).
+    if (!WEBHOOK_SECRET || data.secret !== WEBHOOK_SECRET) {
       return json({ success: false, error: "Forbidden" });
     }
 

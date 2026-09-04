@@ -33,7 +33,7 @@ Browser ──→ Vercel CDN (dist/ ثابتة مسبقاً)
 | `src/components/` + `src/components/sections/` | Header/Footer/ProductCard/SearchBar/11 قسم للهوم                                                                                          |
 | `src/contexts/cart.tsx`                        | حالة السلة (localStorage)                                                                                                                 |
 | `src/hooks/`                                   | use-cart، use-wishlist، use-recently-viewed، use-scroll-tracking، use-pwa-install                                                         |
-| `api/`                                         | submit-order + csp-report + delete-customer-data + rate-limiter                                                                           |
+| `api/`                                         | submit-order + csp-report + rate-limiter                                                                           |
 | `api/lib/`                                     | products-db.json + config-db.json (مولّدان وقت البناء — Single Source of Truth)                                                           |
 | `server/index.js`                              | خادم Express 5 للـ SSG (Docker/Railway/تجربة محلية)                                                                                       |
 | `scripts/`                                     | prerender-seo، generate-sitemap، data-integrity، sync-vercel-redirects، release، health-check، validate-schemas، validate-article-sources |
@@ -245,9 +245,10 @@ Browser ──→ Vercel CDN (dist/ ثابتة مسبقاً)
 - **sanitize حقول الـ log** (حذف \r\n\t\0 + قص 160) — منع Log Injection.
 - يتجاهل eval/inline (ضجيج إضافات المتصفح).
 
-### 4.3 `api/delete-customer-data.js`
+### 4.3 حق النسيان (GDPR) — الوضع الفعلي
 
-- حق النسيان (GDPR): 5/دقيقة/IP، هاتف مُتحقق، يسجل **phone hash** فقط، الحذف الفعلي يدوياً/عبر `deleteCustomerData(phone)` في Apps Script.
+- الـ endpoint الآلي `api/delete-customer-data.js` كان موجود واتبنى بالكامل (5/دقيقة/IP، هاتف مُتحقق، phone hash فقط) وبعدين **اتنزل بقرار المالك** (commit `1abe95f` — revert(privacy)).
+- الوضع الحالي: الحذف **يدوي** عند الطلب (صفحة الخصوصية تعد بالطلب عبر التواصل) + `autoCleanupOldOrders()` في Apps Script بتحذف تلقائياً الطلبات الأقدم من 90 يوم (daily trigger).
 
 ### 4.4 `api/lib/rate-limiter.js`
 
@@ -359,7 +360,7 @@ Browser ──→ Vercel CDN (dist/ ثابتة مسبقاً)
 1. ✅ **تم الإصلاح (2026-08-26)**: e2e test 2 كان stale (يختبر hard-on المحذوف). الآن يختبر `power-36-power-control-for-36-hours` (المحظور المتبقي القياسي): ظاهر 200 + `X-Robots-Tag: noindex` + meta robots/googlebot noindex + `noimageindex` للصورة + موجود بروابط nofollow في صفحة القسم. واختبار 404 الحقيقي ما زال سليماً.
 2. ✅ **تم الإصلاح (2026-08-26)**: `server/index.js` الآن يحمّل جدول الـ 152 redirect من `vercel.json` وينفّذه بنفس السلوك (301 للثابتة و `:param` للباراميترية — `/product/:slug`، `/blog/:slug`، `/articles/:slug`، `/category/:slug`، `/products/category/:slug`) — النشر الذاتي أصبح مطابقاً لـ Vercel. اختبار e2e جديد يثبت 301 للمحذوفات (m-34→/products/men، w-17→/products/women) بـ `fetch` مع `redirect:"manual"` (لأن fixture الـ request لـ Playwright يتبع الـ redirects).
 3. ✅ **تم التنفيذ (2026-08-26)**: أُضيف m-38/m-43 إلى `HOMEPAGE_EXCLUDED_PRODUCT_IDS` لسياسة موحدة للأدوية المحظورة في الهوم (6 منتجات الآن). يعمل تلقائياً لأن `ProductsTabs` و`ShopByConcern` يفلتران بالمجموعة — المنتجات تبقى ظاهرة في صفحة القسم وصفحاتها المباشرة فقط. التحقق: data-integrity (6+12+12 بلا مستبعدين) + e2e 4/4. الإلغاء = حذف سطرين من المجموعة.
-4. ⏳ **بنيوي (موثق)**: `api/delete-customer-data.js` يسجل طلب الحذف فقط؛ الحذف الفعلي يدوي/مجدول في Apps Script (`deleteCustomerData(phone)` + `autoCleanupOldOrders` كل 90 يوم).
+4. ⏳ **بنيوي (موثق)**: حق النسيان يدوي عند الطلب (الـ endpoint الآلي اتنزل بقرار المالك — `1abe95f`) + `autoCleanupOldOrders()` في Apps Script (طلبات أقدم من 90 يوم، daily trigger).
 5. ✓ **سليم**: e2e يتوقع `/products/kreva-gel` = 650 ج.م عند كميّتين (300×2+50) — مطابق لـ config الحالي (شحن القاهرة 50، لا خصم تحت 1000).
 
 ### سجل الإصلاح (2026-08-26)
@@ -389,8 +390,6 @@ Browser ──→ Vercel CDN (dist/ ثابتة مسبقاً)
 
 8. **Vercel Hobby: timeout الدوال = 10 ثوانٍ** وهو يساوي `GOOGLE_SHEETS_TIMEOUT_MS` → إن تباطأ Apps Script قد تُقتل الدالة قبل إرجاع 504. Apps Script عادة <2 ثوانٍ (يعمل). إن ظهرت أعطال: حدّث الخطة أو أضف `functions: {"api/submit-order.js": {"maxDuration": 30}}` في vercel.json (متاح بـ Pro).
 9. **النشر الذاتي (Docker/Railway)**: Vercel Analytics + Speed Insights يعيدان 404 (نقاط نهاية خاصة بمنصة Vercel) — التحليلات لا تعمل بالنشر الذاتي + ضجيج console. الخيارات: تجاهل، أو stub مساري `/_vercel/insights/script.js` و`/_vercel/speed-insights/script.js` في server/index.js.
-10. **CORS في `delete-customer-data.js`** يتضمن localhost في الإنتاج (بريء عملياً — same-origin فقط والاستجابة بلا حساس) — يمكن ربطها بـ NODE_ENV كمواصلة.
-
 ### ملاحظات تصميم/سياسة (مقصودة — للمراجعة فقط):
 
 11. **عرض التقييمات**: PDP تعرض "4.9 (48 تقييم)" في الهيدر + الـ schema نفسه 48، لكن قائمة التقييمات تعرض 5 عينات حتمية (من 10/9/8 نص). النمط شائع، لكن تعليق product-reviews.ts يبالغ ("عدد المعروض = عدد الـ schema بالضبط") — الرقم المعروض (48) مطابق للـ schema، أما العينة فـ 5. إن أردت مطابقة صارمة: اجعل `reviewsCount` = عدد العينة (يقلل المصداقية الظاهرة) — قرار تسويقي.
@@ -979,3 +978,62 @@ GSC هيعيد قراءة الـ sitemap تلقائيًا (أو "طلب إعاد
 هيختفي (238 صفحة، 0 أخطاء). مفيش أي حاجة تتغير في SEO: صفحات
 النتائج /search?q= مش مفهرسة أصلاً (noindex) والقالب مش محتاج
 يكون في الـ sitemap.
+
+## 31) رد على المراجعة الأمنية الشاملة — ما اتطبّق وما اتطبّقش وليه (2026-09-03)
+
+### ✅ اتطبّق دلوقتي (آمن وبدون تبعيات تشغيلية)
+1. **IP موثوق في الـ 4 APIs** (`reviews`, `submit-order`, `submit-review`,
+   `csp-report`): الأولوية لـ `x-vercel-ip` (IP العميل الحقيقي من edge
+   Vercel — مش قابل للتزوير)، fallback: **آخر** قيمة في X-Forwarded-For
+   (اللي ضافها الـ proxy الموثوق) مش الأولى (كانت قابلة للتزوير)، ثم
+   `remoteAddress`.
+2. **CSP stricture**: `img-src` اتشال منها `https:` العام (كل الصور
+   self-hosted — تم التحقق grep على src/scripts/public) → `'self' data:
+   blob:`. في vercel.json + server/index.js (الاتنين على بعض). أي خرق
+   بيظهر في /api/csp-report.
+3. **Lighthouse budgets**: accessibility + seo + performance (0.8) بقت
+   **error** (deterministic gates)؛ best-practices فضل warn (فحوصاته
+   معتمدة على البيئة). ملاحظة: الـ script لسه بيلتهم الفشل (`|| echo`) —
+   تفعيل الـ hard gate الفعلي خطوة منفصلة مقصودة بعد runs خضرا مستقرة
+   (+ تثبيت @lhci/cli في devDeps).
+4. **مزامنة الوثائق مع الكود**: `delete-customer-data.js` كان موجود
+   واتنزل **بقرار المالك** (`1abe95f`) — الوثائق كانت لسه بتوصفه كأنه
+   موجود. صححت 4 مواضع (ANALYSIS ×3 + SECURITY ×1) + شفت الـ item
+   القديم. مفيش أي تغيير وظيفي.
+
+### ✅ اتطبّق لكنه **يتطلب خطوة تشغيلية منك** (بترتيب محدد)
+5. **WEBHOOK_SECRET Fail Closed** في `doPost`: قبل كده لو السر فاضي كان
+   السكربت بيقبل أي كتابة من أي حد عنده /exec URL (تجاوز كل تحقق
+   Vercel: منتج/سعر/مخزون/خصم/شحن/إجمالي). دلوقتي:
+   `if (!WEBHOOK_SECRET || data.secret !== WEBHOOK_SECRET) reject`.
+   **خطوات التفعيل الآمن بالترتيب:**
+   (1) ولّد سر قوي (32+ حرف عشوائي)
+   (2) ضعيه `GOOGLE_SHEETS_WEBHOOK_SECRET` في Vercel → Redeploy
+       (الـ APIs هتبدأ تبعت السر — السكربت القديم بيتجاهله: harmless)
+   (3) في محرر Apps Script: حطي نفس القيمة في `WEBHOOK_SECRET` +
+       انشري New version
+   لو عملت (3) قبل (2): كل الطلبات هتتحجب لحد ما (2) يتعمل.
+
+### ❌ مفيش يتطبق دلوقتي — وليه (بصدق)
+6. **Distributed rate limiting (Upstash/Redis)**: غير مبرر حالياً —
+   مسارات **الكتابة** ليها أصلاً طبقة ثانية **موزعة** في Apps Script
+   (`checkRateLimit` بـ CacheService — مشتركة بين كل الـ instances)
+   + حد للهاتف. مسار **القراءة** (/api/reviews) محدود أصلاً (كاش 5 دقايق
+   + nonce single-use في السكربت). إضافة Upstash = dependency + كلفة +
+   failure mode جديدة لمشغل صغير. نراجعه لو الكسكيول ضاعف.
+7. **Transactional stock (overselling race)**: ده تغيير معماري (backend
+   حقيقي + database + atomic reservation) مش patch. في الـ flow الحالي
+   (طلب → شيت → تأكيد يدوي واتساب — عمود العنوان نفسه مكتوب فيه
+   "سيتم تأكيده على واتساب") المخاطر محصورة: المالك بياكد طلب وبيقول
+   التاني "خلص". لو stock رقم حقيقي بتفرد آلي — ده بيبقى P1.
+8. **Prerender "hidden content" → SSG حقيقي**: الملاحظة صحيحة
+   (position:absolute; left:-9999px) بس التحقق أظهر إن المحتوى اللي
+   وراه **HTML دلالي كامل** (h1/h2/7 فقرة/4 صور/قوائم — ~3.8KB لكل
+   صفحة منتج) و`main.tsx` بيستخدم `createRoot().render()` (مش
+   hydration — مفيش mismatch risk). جوجل بي-rندر JS + الـ JSON-LD
+   كامل (1163 schema 0 أخطاء) — فالـ SEO الحالي سليم (GSC: 238 صفحة
+   بدون مشاكل فهرسة). الـ rewrite لـ renderToString SSG = مشروع
+   هندسي مستقل مش تعديل.
+9. **`style-src 'unsafe-inline'**: مقبول عمليًا لـ React/Tailwind
+   (إزالتها بتحتاج hashes/nonce لكل style injection — جهد عالي مقابل
+   مكسب أمني محدود في الـ stack ده).
