@@ -1037,3 +1037,20 @@ GSC هيعيد قراءة الـ sitemap تلقائيًا (أو "طلب إعاد
 9. **`style-src 'unsafe-inline'**: مقبول عمليًا لـ React/Tailwind
    (إزالتها بتحتاج hashes/nonce لكل style injection — جهد عالي مقابل
    مكسب أمني محدود في الـ stack ده).
+
+## 32) رد على المراجعة الثانية (SEO/Bundle/SW/Node) + اكتشاف redirect معلّق (2026-09-04)
+
+### الحكم على نقاط المراجعة
+1. **Compliance فصل (GOOGLE_SHOPPING_BLOCKED vs HOMEPAGE_EXCLUDED + noindex + استبعاد structured data)**: تصميم صحيح — اتأكد عمليًا (1163 schema / 0 أخطاء + e2e + data-integrity). مفيش تعديل.
+2. **NOINDEX_PRODUCT_FILES أوسع من GOOGLE_SHOPPING_BLOCKED (maintenance risk)**: صحيح جزئيًا — التحليل الدقيق: القائمة = 3 منتجات محظورة-محتجزة (تداخل فعلي مع GOOGLE_SHOPPING_BLOCKED) + 5 محذوفة (اهتمام مختلف: صفحات محذوفة لازم تفضل noindex لو عادت). اتطبق:
+   - Anti-drift assertions في data-integrity: كل slug محظور لازم يكون في قائمة noindex، وكل slug في القائمة لازم يكون محظور أو 301-redirected (bidirectional).
+   - اكتشاف حقيقي طلع من الـ guard: `/products/viagra-20-tablets` كان redirect destination معلّق (صفحة مش موجودة → 404) في sync-vercel-redirects.mjs بينما vercel.json كان مضبوط (→ /products/women) — أي رشة sync كانت هتعيد الكسر. صلحنا السكربت + شطبنا المدخل القديم من validate-schemas (الملف مش موجود أصلاً).
+3. **Bundle rate SSOT**: صحيح — BUNDLE_DISCOUNT_RATE = 0.2 كان constant منفصل في api/submit-order.js. اتطبق: النسبة دلوقتي بتتولد من src/lib/bundle-discount.ts → config-db.json → الـ API يقراها من هناك (fallback 0.2 + warning لو الـ config قديم — نذر الطلبات). data-integrity بتقفل الدرفت (deepEqual على config-db كامل).
+4. **Service Worker force-clear في main.tsx**: ملاحظة صحيحة — guard مقصود لمعالجة بقايا caching قديمة (elysr_fallback) مرة واحدة. مفيش تعديل.
+5. **Node version (22.16 reviewer vs 24.x declared)**: تقييم المراجع نزيه وصحيح — فشل البيئة عنده (dependencies) مش فشل tests. الواقع: CI مثبّتة Node 24 (env.NODE_VERSION) وشغالة، وsandboxنا Node 20.20.2 وشغال كامل (كل الـ suites) — المشروع فعليًا متثبت على 20 و 24. engines: 24.x هي runtime الموصى به للإنتاج.
+
+### إصلاح أمني إضافي طلع من الشغل (sync:redirects)
+السكربت كان بيحذف 19 redirect حية عند التشغيل (منهم كل redirects المنتجات الدوائية المحذوفة m-34/m-36/m-37/m-47/w-17) — لأنه كان بيبني القائمة من المنتجات الحالية + legacyAliases قديم، وبيستبدل الـ array كامل. مع الـ auto-deploy من الـ repo، أي رشة npm run sync:redirects كانت هتكسر الإنتاج. اتصلح:
+- الـ 19 redirect الناقصة اتضافت للـ legacyAliases (المصدر الكامل).
+- Safety guard: لو أي redirect موجود في vercel.json مش في السكربت → الـ sync يرفض الكتابة ويطبع القائمة (exit 1).
+- Order-preserving merge: بيفضل الترتيب الحالي ويحدّث في المكان + يضيف الجديد آخر — idempotent (تجربة: تشغيل على ملف الإنتاج = صفر diff).

@@ -8,8 +8,26 @@ const PRODUCTS_DB_PATH = join(__dirname, "lib", "products-db.json");
 const CONFIG_DB_PATH = join(__dirname, "lib", "config-db.json");
 const BUNDLES_DB_PATH = join(__dirname, "lib", "bundles-db.json");
 
-// نسبة خصم الباقة (20%) — نفس القيمة في src/lib/bundle-discount.ts
-const BUNDLE_DISCOUNT_RATE = 0.2;
+// نسبة خصم الباقة — Single Source of Truth: src/lib/bundle-discount.ts،
+// وتصل للـ API عبر config-db.json (مولّد وقت البناء).
+// هذا الـ fallback للأمان فقط لو الـ config قديم/ناقص المفتاح (نذر الطلبات).
+const FALLBACK_BUNDLE_DISCOUNT_RATE = 0.2;
+let bundleRateWarned = false;
+function getBundleDiscountRate() {
+  const configDb = getConfigDb();
+  if (typeof configDb.BUNDLE_DISCOUNT_RATE === "number") {
+    return configDb.BUNDLE_DISCOUNT_RATE;
+  }
+  if (!bundleRateWarned) {
+    bundleRateWarned = true;
+    console.warn(
+      "config-db.json missing BUNDLE_DISCOUNT_RATE — using fallback " +
+        FALLBACK_BUNDLE_DISCOUNT_RATE +
+        " (run npm run build to regenerate)",
+    );
+  }
+  return FALLBACK_BUNDLE_DISCOUNT_RATE;
+}
 
 // مخازن ذاكرة مؤقتة (In-memory Caching) لتسريع أداء السيرفر السحابي وتجنب القراءة المتكررة من القرص الصلب
 let cachedProductsDb = null;
@@ -167,6 +185,7 @@ function calcBundleDiscount(items) {
   const bundlesDb = getBundlesDb();
   const productsDb = getProductsDb();
   const qtyById = new Map(items.map((item) => [item.id, item.qty]));
+  const bundleRate = getBundleDiscountRate();
   let best = 0;
   for (const [mainId, memberIds] of Object.entries(bundlesDb)) {
     if (!memberIds.every((id) => (qtyById.get(id) ?? 0) >= 1)) continue;
@@ -174,7 +193,7 @@ function calcBundleDiscount(items) {
       const official = productsDb.find((p) => p.id === id);
       return sum + (official ? official.price : 0);
     }, 0);
-    const value = Math.round(unitSum * BUNDLE_DISCOUNT_RATE);
+    const value = Math.round(unitSum * bundleRate);
     if (value > best) best = value;
   }
   return best;

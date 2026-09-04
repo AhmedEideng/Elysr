@@ -92,10 +92,13 @@ async function generateSitemap() {
       "/src/lib/governorates.ts",
     );
     const { PROMO_TIERS } = await vite.ssrLoadModule("/src/lib/promo.ts");
+    const { BUNDLE_DISCOUNT_RATE } = await vite.ssrLoadModule("/src/lib/bundle-discount.ts");
     const configDb = {
       GOVERNORATE_SHIPPING,
       FREE_SHIPPING_THRESHOLD,
       PROMO_TIERS,
+      // نسبة خصم الباقة — تصل للـ API عشان يقيس من نفس مصدر الفرونت (SSOT)
+      BUNDLE_DISCOUNT_RATE,
     };
     writeFileSync(resolve(apiLibDir, "config-db.json"), JSON.stringify(configDb, null, 2), "utf-8");
     const { isCatalogFeedEligible, GOOGLE_SHOPPING_BLOCKED } = await vite.ssrLoadModule(

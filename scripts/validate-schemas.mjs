@@ -38,7 +38,6 @@ const NOINDEX_PRODUCT_FILES = new Set([
   "products/procomil-fort-tablet.html",
   "products/viagra-pfizer-100mg.html",
   "products/levitra-100mg.html",
-  "products/viagra-20-tablets.html",
 ]);
 const NOINDEX_PRODUCT_URLS = new Set(
   [...NOINDEX_PRODUCT_FILES].map((file) => `${SITE_URL}/${file.replace(/\.html$/, "")}`),

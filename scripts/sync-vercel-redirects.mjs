@@ -154,7 +154,9 @@ async function syncRedirects() {
       },
       {
         source: "/products/viagra-for-women-20-tablets",
-        destination: "/products/viagra-20-tablets",
+        // المنتج (w-17) محذوف — الوجهة لازم تكون الفئة زي بقية المحذوفات
+        // (الوجهة القديمة كانت /products/viagra-20-tablets = صفحة مش موجودة → 404)
+        destination: "/products/women",
         permanent: true,
       },
       {
@@ -233,6 +235,79 @@ async function syncRedirects() {
         destination: "/products/guides/how-to-order-from-elysr",
         permanent: true,
       },
+      // ── منتجات دوائية محذوفة → فئتها (سياسة الالتزام) ──
+      { source: "/products/m-34", destination: "/products/men", permanent: true },
+      { source: "/products/m-36", destination: "/products/men", permanent: true },
+      { source: "/products/m-37", destination: "/products/men", permanent: true },
+      { source: "/products/m-47", destination: "/products/men", permanent: true },
+      { source: "/products/w-17", destination: "/products/women", permanent: true },
+      {
+        source: "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/vegal-extra-sildenafil-130mg-cobra",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/cialis-tadalafil-20mg-30-tablets",
+        destination: "/products/men",
+        permanent: true,
+      },
+      { source: "/products/levitra-100mg", destination: "/products/men", permanent: true },
+      {
+        source: "/products/viagra-1-2-3-2-10-tablets",
+        destination: "/products/men",
+        permanent: true,
+      },
+      // ── aliases قديمة لمنتجات اتغيرت أسماؤها → المنتج الحالي/فئته ──
+      {
+        source: "/products/coffemix-caviar-original-for-men",
+        destination: "/products/coffemix-caviar-original",
+        permanent: true,
+      },
+      {
+        source: "/products/max-man-extra-power-premium-cream",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/60-minutes-delay-men-delay-gel",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/hilti-wonderful-honey-for-men",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/overlord-rhino-power-mmc",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/tiger-power-tablets",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/viga-1-million-delay-spray",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/maxman-ii-capsules-mmc-2-10-tablets",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/ginseng-48-hours-gold-chocolate",
+        destination: "/products/men",
+        permanent: true,
+      },
     ];
 
     for (const redirect of legacyAliases) {
@@ -242,7 +317,29 @@ async function syncRedirects() {
       }
     }
 
-    vercel.redirects = productRedirects;
+    // 🛡️ حماية من الحذف الصامت: أي redirect موجود في vercel.json الحالية
+    // ومش في قائمة السكربت = السكربت مش المصدر الكامل → نرفض الكتابة
+    // (الـ redirects الجديدة تتضاف للسكربت الأول، مش للـ JSON مباشرة).
+    const newBySource = new Map(productRedirects.map((r) => [r.source, r]));
+    const dropped = (vercel.redirects || []).filter((r) => !newBySource.has(r.source));
+    if (dropped.length > 0) {
+      console.error("✗ Sync refused — these existing redirects are missing from the script list:");
+      for (const r of dropped) {
+        console.error(`  ${r.source} → ${r.destination}`);
+      }
+      console.error("Add them to this script's legacyAliases first, then re-run.");
+      process.exit(1);
+    }
+
+    // نقدر الترتيب الحالي: نحدّث كل entry في مكانه (لو اتغيرت الوجهة)،
+    // ونضيف الجديد في الآخر — idempotent (نفس الملف → صفر diff).
+    const merged = (vercel.redirects || []).map((r) => newBySource.get(r.source) || r);
+    const existingSources = new Set((vercel.redirects || []).map((r) => r.source));
+    for (const r of productRedirects) {
+      if (!existingSources.has(r.source)) merged.push(r);
+    }
+
+    vercel.redirects = merged;
     writeFileSync(vercelPath, `${JSON.stringify(vercel, null, 2)}\n`, "utf-8");
 
     console.log(`✓ vercel.json redirects synced (${productRedirects.length} redirects)`);

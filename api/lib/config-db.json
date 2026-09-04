@@ -162,5 +162,6 @@
       "name": "شريحة الرعاية الأساسية المتميزة",
       "color": "from-sky-500 to-sky-700"
     }
-  ]
+  ],
+  "BUNDLE_DISCOUNT_RATE": 0.2
 }

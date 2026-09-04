@@ -52,15 +52,47 @@ try {
   }
 
   assert.deepEqual(productsDb, products, "products-db.json is stale; run npm run build");
+  const bundleModule = await vite.ssrLoadModule("/src/lib/bundle-discount.ts");
   assert.deepEqual(
     configDb,
     {
       GOVERNORATE_SHIPPING: siteConfig.GOVERNORATE_SHIPPING,
       FREE_SHIPPING_THRESHOLD: siteConfig.FREE_SHIPPING_THRESHOLD,
       PROMO_TIERS: promo.PROMO_TIERS,
+      BUNDLE_DISCOUNT_RATE: bundleModule.BUNDLE_DISCOUNT_RATE,
     },
     "config-db.json is stale; run npm run build",
   );
+
+  // 🛡️ Anti-drift: قائمة noindex في validate-schemas.mjs لازم تتزامن مع
+  // GOOGLE_SHOPPING_BLOCKED + منتجات المحذوفة (301 redirects في vercel.json).
+  // كل طبقة تعريف للمنتجات الدوائية المفروض مصدرها واحد — ده يمنع
+  // "منتج محظور جديد بدون noindex" أو العكس.
+  const validatorSource = readFileSync(resolve(ROOT, "scripts/validate-schemas.mjs"), "utf-8");
+  const noindexSlugs = new Set(
+    [...validatorSource.matchAll(/"products\/(.+?)\.html"/g)].map((m) => m[1]),
+  );
+  const redirectSources = new Set();
+  for (const r of vercel.redirects || []) {
+    const isPermanent = r.status === 301 || r.permanent === true;
+    if (isPermanent && typeof r.source === "string" && r.source.startsWith("/products/")) {
+      redirectSources.add(r.source.replace(/^\/?products\//, "").replace(/\/?$/, ""));
+    }
+  }
+  for (const p of products.filter((item) => GOOGLE_SHOPPING_BLOCKED.has(item.id))) {
+    assert.ok(
+      noindexSlugs.has(p.slug),
+      `Blocked product missing from validate-schemas NOINDEX list: ${p.id} (${p.slug})`,
+    );
+  }
+  for (const slug of noindexSlugs) {
+    const isBlocked = products.some((p) => p.slug === slug && GOOGLE_SHOPPING_BLOCKED.has(p.id));
+    const isDeleted = redirectSources.has(slug);
+    assert.ok(
+      isBlocked || isDeleted,
+      `NOINDEX list contains slug with no policy source (not blocked, not 301-redirected): ${slug}`,
+    );
+  }
 
   assert.equal(
     products.length,
