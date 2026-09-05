@@ -282,7 +282,7 @@ export const articleSchema = (a: {
   dateModified: a.updatedAt ?? new Date().toISOString().slice(0, 10),
   author: {
     "@type": "Person",
-    name: a.author?.name ?? "د. أحمد عيد",
+    name: a.author?.name ?? "د. أحمد عابد",
     description: a.author?.credentials,
     jobTitle: a.author?.role ?? "إعداد ومراجعة المحتوى",
     url: `${SITE_URL}/medical-review-board`,
