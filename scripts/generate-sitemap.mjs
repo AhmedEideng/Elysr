@@ -93,17 +93,22 @@ async function generateSitemap() {
     );
     const { PROMO_TIERS } = await vite.ssrLoadModule("/src/lib/promo.ts");
     const { BUNDLE_DISCOUNT_RATE } = await vite.ssrLoadModule("/src/lib/bundle-discount.ts");
+    const { isCatalogFeedEligible, GOOGLE_SHOPPING_BLOCKED } = await vite.ssrLoadModule(
+      "/src/lib/product-compliance.ts",
+    );
+    // حفظ إعدادات الشحن والعروض الترويجية المشتركة للسيرفر (Single Source of Truth):
+    // BUNDLE_DISCOUNT_RATE + GOOGLE_SHOPPING_BLOCKED بيقروا من نفس مصادر TS
+    // عشان ما يبقىش ثابت مكرر في api/submit-order.js ولا قائمة يدوية في
+    // scripts/validate-schemas.mjs.
     const configDb = {
       GOVERNORATE_SHIPPING,
       FREE_SHIPPING_THRESHOLD,
       PROMO_TIERS,
-      // نسبة خصم الباقة — تصل للـ API عشان يقيس من نفس مصدر الفرونت (SSOT)
+      // نسبة خصم الباقة + المنتجات المحظورة — من نفس مصدر الفرونت (SSOT)
       BUNDLE_DISCOUNT_RATE,
+      GOOGLE_SHOPPING_BLOCKED: [...GOOGLE_SHOPPING_BLOCKED],
     };
     writeFileSync(resolve(apiLibDir, "config-db.json"), JSON.stringify(configDb, null, 2), "utf-8");
-    const { isCatalogFeedEligible, GOOGLE_SHOPPING_BLOCKED } = await vite.ssrLoadModule(
-      "/src/lib/product-compliance.ts",
-    );
     const catalogProducts = products.filter(isCatalogFeedEligible);
 
     let articles = [];

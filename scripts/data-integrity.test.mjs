@@ -34,6 +34,7 @@ try {
   const { articles } = await vite.ssrLoadModule("/src/data/articles.ts");
   const { seoLandingPages } = await vite.ssrLoadModule("/src/data/landing-pages.ts");
   const promo = await vite.ssrLoadModule("/src/lib/promo.ts");
+  const bundle = await vite.ssrLoadModule("/src/lib/bundle-discount.ts");
   const { GOOGLE_SHOPPING_BLOCKED } = await vite.ssrLoadModule("/src/lib/product-compliance.ts");
   const siteConfig = await vite.ssrLoadModule("/src/lib/site-config.ts");
   const vercel = JSON.parse(readFileSync(resolve(ROOT, "vercel.json"), "utf-8"));
@@ -52,45 +53,34 @@ try {
   }
 
   assert.deepEqual(productsDb, products, "products-db.json is stale; run npm run build");
-  const bundleModule = await vite.ssrLoadModule("/src/lib/bundle-discount.ts");
+  // config-db = Single Source of Truth للسيرفر: الشحن/العروض/نسبة الباقة/
+  // المنتجات المحظورة — كلهم مولّدون من نفس مصادر TS وقت البناء.
   assert.deepEqual(
     configDb,
     {
       GOVERNORATE_SHIPPING: siteConfig.GOVERNORATE_SHIPPING,
       FREE_SHIPPING_THRESHOLD: siteConfig.FREE_SHIPPING_THRESHOLD,
       PROMO_TIERS: promo.PROMO_TIERS,
-      BUNDLE_DISCOUNT_RATE: bundleModule.BUNDLE_DISCOUNT_RATE,
+      BUNDLE_DISCOUNT_RATE: bundle.BUNDLE_DISCOUNT_RATE,
+      GOOGLE_SHOPPING_BLOCKED: [...GOOGLE_SHOPPING_BLOCKED],
     },
     "config-db.json is stale; run npm run build",
   );
-
-  // 🛡️ Anti-drift: قائمة noindex في validate-schemas.mjs لازم تتزامن مع
-  // GOOGLE_SHOPPING_BLOCKED + منتجات المحذوفة (301 redirects في vercel.json).
-  // كل طبقة تعريف للمنتجات الدوائية المفروض مصدرها واحد — ده يمنع
-  // "منتج محظور جديد بدون noindex" أو العكس.
-  const validatorSource = readFileSync(resolve(ROOT, "scripts/validate-schemas.mjs"), "utf-8");
-  const noindexSlugs = new Set(
-    [...validatorSource.matchAll(/"products\/(.+?)\.html"/g)].map((m) => m[1]),
-  );
-  const redirectSources = new Set();
-  for (const r of vercel.redirects || []) {
-    const isPermanent = r.status === 301 || r.permanent === true;
-    if (isPermanent && typeof r.source === "string" && r.source.startsWith("/products/")) {
-      redirectSources.add(r.source.replace(/^\/?products\//, "").replace(/\/?$/, ""));
-    }
-  }
-  for (const p of products.filter((item) => GOOGLE_SHOPPING_BLOCKED.has(item.id))) {
+  // 5 منتجات دوائية محذوفة نهائياً (نفس قائمة DELETED_PHARMA_FILES في
+  // scripts/validate-schemas.mjs) — كل واحدة لازم يكون ليها 301 قائم
+  // في vercel.json (حماية من قائمة تاريخية منفصلة عن الـ redirects).
+  const deletedPharmaSlugs = [
+    "hard-on-sildenafil-130mg-dapoxetine-60mg", // m-34
+    "vegal-extra-sildenafil-130mg-cobra", // m-36
+    "cialis-tadalafil-20mg-30-tablets", // m-37
+    "levitra-100mg", // m-47
+    "viagra-for-women-20-tablets", // w-17
+    "viagra-1-2-3-2-10-tablets", // slug دوائي أقدم
+  ];
+  for (const slug of deletedPharmaSlugs) {
     assert.ok(
-      noindexSlugs.has(p.slug),
-      `Blocked product missing from validate-schemas NOINDEX list: ${p.id} (${p.slug})`,
-    );
-  }
-  for (const slug of noindexSlugs) {
-    const isBlocked = products.some((p) => p.slug === slug && GOOGLE_SHOPPING_BLOCKED.has(p.id));
-    const isDeleted = redirectSources.has(slug);
-    assert.ok(
-      isBlocked || isDeleted,
-      `NOINDEX list contains slug with no policy source (not blocked, not 301-redirected): ${slug}`,
+      vercel.redirects.some((r) => r.source === `/products/${slug}` && r.permanent === true),
+      `Deleted pharma product missing 301 redirect in vercel.json: ${slug}`,
     );
   }
 

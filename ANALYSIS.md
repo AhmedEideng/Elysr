@@ -1054,3 +1054,65 @@ GSC هيعيد قراءة الـ sitemap تلقائيًا (أو "طلب إعاد
 - الـ 19 redirect الناقصة اتضافت للـ legacyAliases (المصدر الكامل).
 - Safety guard: لو أي redirect موجود في vercel.json مش في السكربت → الـ sync يرفض الكتابة ويطبع القائمة (exit 1).
 - Order-preserving merge: بيفضل الترتيب الحالي ويحدّث في المكان + يضيف الجديد آخر — idempotent (تجربة: تشغيل على ملف الإنتاج = صفر diff).
+=======
+## 33) دمج الـ sessionين المتوازيين — القائمة noindex المستنتجة + slug غلط قديم (2026-09-05)
+
+> **ملاحظة الدمج**: اتشغّل جلستين متوازيتين على نفس المراجعة (commit
+> `3f0e145` + `a8a2b67`). الـ merge اختار: **fallback 0.2 + warning**
+> لنسبة الباقة (تصميم الجلسة الأولى — الأفضل عمليًا: قيمة الـ fallback هي
+> القيمة الصحيحة في كل سيناريو قديم واقعي، وما ينذرش طلبات)، و
+> **القائمة المستنتجة** في validate-schemas (تصميم الجلسة التانية —
+> أوسع حماية)، وكل إصلاحات `sync-vercel-redirects.mjs` (الجلسة الأولى).
+
+### ✅ اتطبّق (Single Source of Truth)
+1. **`BUNDLE_DISCOUNT_RATE` → config-db.json**: النسبة كانت ثابت مكرر
+
+### ✅ اتطبّق (Single Source of Truth)
+1. **`BUNDLE_DISCOUNT_RATE` → config-db.json**: النسبة كانت ثابت مكرر
+   (`src/lib/bundle-discount.ts` للفرونت + `api/submit-order.js`
+   للباك). دلوقتي: مولّدة من مصدر TS في الـ prebuild وبتروح في
+   config-db.json (نفس نمط PROMO_TIERS/الشحن)، والـ API بقريها من
+   الـ config — fail-closed: إعداد غير متاح → لا خصم باقة (خصم مش
+   بيتأكد منه مش بيتقبل، نفس سلوك PROMO_TIERS). data-integrity
+   بتقفل الشكل الكامل للـ config بـ deepEqual.
+2. **`NOINDEX_PRODUCT_FILES` في validate-schemas اتحولت لمصدرين
+   موثقين**: (أ) المحظورين **النشطين** مستنتجين تلقائياً من
+   config-db.json + products-db.json (أي منتج محظور جديد يظهر لوحده)،
+   (ب) 5+1 slugs **تاريخية** (محذوفة 301) صريحة وموثقة.
+
+### 🐛 اكتشاف مهم (يبرر نقطة "خطر maintenance" بتاع المراجع)
+القائمة اليدوية القديمة في validate-schemas.mjs كانت فيها **slug غلط
+فعليًا** لـ w-17: `viagra-20-tablets` بدل الصحيح
+`viagra-for-women-20-tablets` — يعني الفاليديتور كان بيحامي على
+ملف/URL مش موجود أصلاً من غير ما حد يحس. كمان لقينا redirect سابع
+(`viagra-1-2-3-2-10-tablets`) اتضاف للقائمة التاريخية.
+الحماية الجديدة: data-integrity بتتأكد إن كل slug في القائمة
+التاريخية ليه 301 قائم في vercel.json — أي درفت هيفشل الـ CI.
+
+### ✅ تحققت منه ومفيش فيه مشكلة (أقفل)
+3. **تصميم الـ pharma compliance**: 3 محظورين بس (m-38/m-43/m-45) في
+   `GOOGLE_SHOPPING_BLOCKED` (مصدر واحد — src/lib/product-compliance.ts)،
+   صفحاتهم موجودة في dist بطبقة noindex كاملة
+   (noindex,follow,noarchive,nosnippet,noimageindex) + X-Robots-Tag،
+   والـ 5 المحذوفين ملهمش ملفات (301 لفئاتهم). ItemList guard شغّال
+   على 1163 schema.
+4. **Service Worker force-clear في main.tsx**: تفسير المراجع صحيح —
+   الكود موضح إن ده (أ) bypass لكاش Android Chrome القوي +
+   (ب) privacy migration (حذف `elysr_fallback` اللي كان بيخزن PII في
+   إصدارات قديمة). تصميم سليم: one-time versioned (v28) + idempotent +
+   try/catch. مفيش حاجة تتعمل.
+5. **نقطة Node 24 (البنود "32" بتاع المراجع)**: الإحاطة دي صحيحة
+   بالنسبة لبيئت **هو**، واللي يقفلها بالأدلة: **CI شغّالة على
+   Node 24** (`.github/workflows/ci.yml`: NODE_VERSION=24 لكل الـ
+   jobs) وكل الاختبارات فيها خضرا — يعني "كل CI tests نجحت" اتأكدت
+   فعليًا على Node 24. وكمان كل حاجة خضرا على Node 20.20.2 (ساندبوكس
+   العمل). فشل بيئة المراجع (npm install ناقص) مش فشل مشروع.
+   ملاحظة: `engines: 24.x` أصار من المطلوب (الكود شغّال على 20) —
+   بس **مستني نمسكش** فيه: Vercel بيستخدم engines لاختيار الـ runtime
+   في الإنتاج.
+
+### ✅ مع السياق الجديد (المخزون بالآلاف)
+بند "المخزون مش transactional" اتقفل بالكامل: مع مخزون بالآلاف لكل
+منتج + تأكيد يدوي واتساب لكل طلب، سباق الـ millisecond اللي كان
+نظريًا ممكن مفيش عنده أي أثر عملي. ده مش limitation تاني — ده تصميم
+مقبول بالمقياس الحالي، وبيرجع P1 بس لو اتفرد الآلي.

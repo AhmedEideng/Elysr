@@ -30,15 +30,39 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const DIST = resolve(ROOT, "dist");
 const SITE_URL = "https://elysrmedical.store";
-const NOINDEX_PRODUCT_FILES = new Set([
-  "products/hard-on-sildenafil-130mg-dapoxetine-60mg.html",
-  "products/vegal-extra-sildenafil-130mg-cobra.html",
-  "products/cialis-tadalafil-20mg-30-tablets.html",
-  "products/power-36-power-control-for-36-hours.html",
-  "products/procomil-fort-tablet.html",
-  "products/viagra-pfizer-100mg.html",
-  "products/levitra-100mg.html",
+// 🚫 ملفات noindex — مصدران موثقان (بدل قائمة يدوية واحدة قابلة للدرفت):
+//
+// (أ) المنتجات المحظورة **النشطة** (ماتزال على الموقع — noindex + مستبعدة
+// من الخلاصة/sitemap): مستنتجة تلقائياً من المصدر الرسمي
+// (config-db.json ← src/lib/product-compliance.ts + slugs من products-db.json)
+// — أي منتج محظور جديد يظهر هنا لوحده وقت البناء.
+//
+// (ب) 5 منتجات دوائية **محذوفة نهائياً** (اتحولت 301 لفئاتها في
+// vercel.json) — قائمة تاريخية صريحة: مهمتها إن أي schema/ItemList في أي
+// صفحة يرجع يذكّرهم تاني → error فوري.
+const DELETED_PHARMA_FILES = new Set([
+  "products/hard-on-sildenafil-130mg-dapoxetine-60mg.html", // m-34
+  "products/vegal-extra-sildenafil-130mg-cobra.html", // m-36
+  "products/cialis-tadalafil-20mg-30-tablets.html", // m-37
+  "products/levitra-100mg.html", // m-47
+  "products/viagra-for-women-20-tablets.html", // w-17 (slug الصحيح — كان خطأ قديم في القائمة)
+  "products/viagra-1-2-3-2-10-tablets.html", // slug دوائي أقدم — له 301 قائم
 ]);
+const NOINDEX_PRODUCT_FILES = new Set([...DELETED_PHARMA_FILES]);
+try {
+  const configDb = JSON.parse(readFileSync(resolve(ROOT, "api", "lib", "config-db.json"), "utf-8"));
+  const productsDb = JSON.parse(
+    readFileSync(resolve(ROOT, "api", "lib", "products-db.json"), "utf-8"),
+  );
+  for (const id of configDb.GOOGLE_SHOPPING_BLOCKED ?? []) {
+    const product = productsDb.find((p) => p.id === id);
+    if (product) NOINDEX_PRODUCT_FILES.add(`products/${product.slug}.html`);
+  }
+} catch (err) {
+  // config-db/products-db بيولّدوا وقت البناء — لو ناقصين، القائمة
+  // التاريخية بتفضل شغالة وبنحذر بدل ما نسكت.
+  console.error("⚠️ Could not derive active blocked products:", err.message);
+}
 const NOINDEX_PRODUCT_URLS = new Set(
   [...NOINDEX_PRODUCT_FILES].map((file) => `${SITE_URL}/${file.replace(/\.html$/, "")}`),
 );
