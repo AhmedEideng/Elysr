@@ -179,8 +179,8 @@ function AboutPage() {
             },
             {
               icon: BookOpenCheck,
-              title: "فريق المحتوى والمراجعة",
-              desc: "يكتب المحتوى التعليمي ووصف المنتجات مع مراجعة التحذيرات الطبية والمصادر. يلتزم بسياسة عدم تقديم وعود علاجية.",
+              title: "فريق المحتوى",
+              desc: "د. أحمد عيد (صيدلي) يكتب المحتوى التعليمي ووصف المنتجات بمسؤوليته التحريرية المباشرة، ويتحقق الفحص الآلي (CI) من المصادر والتحذيرات. نلتزم بعدم تقديم أي وعود علاجية.",
             },
             {
               icon: Headphones,
@@ -250,8 +250,8 @@ function AboutPage() {
           className="rounded-2xl border bg-card p-5 text-center hover:border-primary/30 transition-all group"
         >
           <ShieldCheck className="h-8 w-8 mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" />
-          <h3 className="font-bold">سياسة المراجعة الطبية</h3>
-          <p className="text-xs text-muted-foreground mt-1">كيف نراجع المحتوى والتحذيرات</p>
+          <h3 className="font-bold">شفافية المحتوى</h3>
+          <p className="text-xs text-muted-foreground mt-1">من يكتب المحتوى وكيف نتحقق منه</p>
         </Link>
         <Link
           to="/education"

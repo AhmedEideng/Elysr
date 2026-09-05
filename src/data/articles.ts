@@ -21,6 +21,8 @@ export interface Article {
   content: string;
   author: ArticleExpert;
   reviewer: ArticleExpert;
+  /** المحتوى المولّد آليًا: الـ JSON-LD لا يعرض reviewedBy (لا مراجعة بشرية). */
+  autoReviewed?: boolean;
   publishedAt: string;
   updatedAt: string;
   sources: ArticleSource[];
