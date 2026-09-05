@@ -1,6 +1,14 @@
 import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Product } from "@/data/product-types";
 import { getPromoTier, type PromoTier } from "@/lib/promo";
+import { products } from "@/data/products";
+
+// 🛡️ مصدر حقيقة المخزون هو الكتالوج الرسمي — قيمة الـ localStorage محفوظة
+// مجرد snapshot لحظة الإضافة (قد تكون قديمة). لو المنتج موجود في
+// الكتالوج، قيمته في الكتالوج هي الحاكمة (المراجع: stock fallback 10
+// للسلة القديمة كان يخلي المستخدم يظبط كمية يرفضها الـ checkout).
+const CATALOG_STOCK_BY_ID = new Map(products.map((p) => [p.id, p.stock]));
+const catalogStock = (id: string) => CATALOG_STOCK_BY_ID.get(id);
 
 // 🔒 Safe localStorage wrapper — handles quota exceeded and private browsing gracefully
 function safeGetJson<T>(key: string, fallback: T): T {
@@ -79,8 +87,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
             originalPrice: i.originalPrice ?? i.price!,
             emoji: i.emoji ?? "💊",
             image: i.image,
-            qty: Math.max(1, Math.min(i.qty!, i.stock ?? 10)),
-            stock: i.stock,
+            qty: Math.max(1, Math.min(i.qty!, catalogStock(i.id!) ?? i.stock ?? 10)),
+            stock: catalogStock(i.id!) ?? i.stock,
           }));
       }
     } catch (err) {
@@ -216,7 +224,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const setQty = useCallback(
     (id: string, qty: number) =>
       setItems((p) =>
-        p.map((i) => (i.id === id ? { ...i, qty: Math.max(1, Math.min(qty, i.stock ?? 10)) } : i)),
+        p.map((i) =>
+          i.id === id
+            ? { ...i, qty: Math.max(1, Math.min(qty, catalogStock(id) ?? i.stock ?? 10)) }
+            : i,
+        ),
       ),
     [],
   );

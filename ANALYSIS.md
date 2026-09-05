@@ -1116,3 +1116,78 @@ GSC هيعيد قراءة الـ sitemap تلقائيًا (أو "طلب إعاد
 منتج + تأكيد يدوي واتساب لكل طلب، سباق الـ millisecond اللي كان
 نظريًا ممكن مفيش عنده أي أثر عملي. ده مش limitation تاني — ده تصميم
 مقبول بالمقياس الحالي، وبيرجع P1 بس لو اتفرد الآلي.
+
+## 34) المرحلة 1 (Core/Data/Checkout/CI) — تطبيق + أحكام (2026-09-05)
+
+### 🔴 P0 — Data Contract Drift في عدد المقالات (اتصلح)
+- الواقع: 56 مقالة فعلية، والـ UI كان معروض "51" في 5 مواضع
+  (about.tsx ×3, medical-review-board.tsx, landing-pages.ts) — الـ
+  auto-publisher زاد 5 مقالات والنصوص التسويقية متجمدة عند 51.
+- الإصلاح: الأرقام بقت **ديناميكية** (`articles.length`) — اتتحقق
+  برندر حقيقي في متصفح: about + medical-review-board بيعرضوا 56.
+- حماية من التراجع: data-integrity بترفض أي `/^\d+\s*مقالة/` hardcoded
+  في الملفات التلاتة.
+- ملاحظة للمايك: "108 دليل SEO" في about.tsx مش متأكد منها (93 landing
+  دلوقتي) — محتاج تعريفك لإيه اللي معني بـ "دليل SEO" عشان أزقها
+  ديناميكي أو أعدل الرقم.
+
+### P1 — عقد السر (اتصلح)
+`.env.example` كانت تقول "اختياري/وضع قديم" — ده بقى كذب بعد الـ
+fail-closed. بقى **إلزامي** + ترتيب التفعيل الآمن (Vercel الأول ثم
+السكربت).
+
+### P1 — CI auto-publish: validation قبل rebase (اتصلح)
+الـ flow كان: validate → commit → rebase → push (الناتج النهائي
+بعد الـ rebase **متمش عليه validation** — وده مش نظري: جلسات
+متوازية حرفيًا وقعت الأسبوع ده). بقى: rebase → **npm run ci على
+الشجرة النهائية** → push.
+
+### P1 — Generator بدون schema semantic (اتصلح)
+`JSON.parse` كان يضمن syntax بس. اتضاف `validateGeneratedArticle()`
+قبل أي side-effect (slug regex + uniqueness بقى موجود أصلاً، title
+10-120، excerpt 20-300، content 500-30000، category من {men,women,
+devices}، readMin 2-30، emoji، sources ≥2 بـ https:// + publisher).
+أي فشل → الـ job ينفشل **من غير ما يلمس أي ملف**.
+
+### UX — stock fallback 10 في السلة القديمة (اتصلح)
+`stock ?? 10` كان في hydration + updateQty. دلوقتي: **الكتالوج هو
+مصدر الحقيقة** (map من `products`) — السلة القديمة بتيعدل من
+الكتالوج وقت الـ hydration، والـ fallback 10 بقى لأبعد الحدود
+(منتج مش موجود في الكتالوج أصلاً). ملاحظة: import الكتالوج في
+الـ cart context **صفر تكلفة bundle** (الكتالوج موجود أصلاً في
+أول حزمة عبر SearchBar).
+
+### أحكام (بدون تغيير — ومبرراتها)
+- **Stock reservation (P0/P2)**: مع سياق "المخزون بالآلاف + تأكيد
+  يدوي واتساب" — البند مقفل (مش P1). الـ reviewer نفسه حطه P2 في
+  الحالة التشغيلية.
+- **`setState during render` في PDP**: ده **React-documented pattern**
+  (Adjusting state when props change — react.dev) — بيتنفذ قبل
+  commit من غير frame زائد (useEffect هيعمل flicker بكمية المنتج
+  القديم frame واحدة). اتبني + اتوثق بالبرنت — مش bug.
+- **نقد "A == A" في فحص config-db**: الفحص بيقارن **ملف مولّد**
+  (build artifact على القرص) ضد **قيم محملة live من مصادر TS**
+  (vite.ssrLoadModule) — ده cross-artifact check بالظبط، مش A==A.
+  كان هيبقى A==A لو قارن الملف بنفسه. مفيش تغيير.
+- **validate-article-sources مش بتتحقق من دقة المحتوى الطبي**: صحيح
+  وده حدود أي تحقق آلي — ده اللي بيوصل لـ...
+
+### ⚠️ نقطة القرار (محتاجة منك — مش هقرر عنها)
+**Provenance المقالات**: الـ generator بينشر تلقائيًا (AI → sanitize →
+commit → deploy **بلا human gate**)، وفي نفس الوقت الصفحة بتعرض:
+- author: "د. أحمد عيد — فريق المحتوى الصحي" (بكالوريوس صيدلة)
+- reviewer: "قسم مراجعة المحتوى" (مراجعة المصادر والتحذيرات)
+
+التصنيف الصحيح (4 حالات مختلفة):
+1. **AI-generated** ← ده الواقع الفعلي
+2. **AI-validated** ← ده شغّال (schema + sources check)
+3. **Editorially reviewed** ← محتاج human gate
+4. **Medically reviewed** ← محتاج مراجعة طبية فعلية
+
+**السؤال اللي هيحدد الإصلاح**: أنت شوف كل مقال اتولد قبل/بعد النشر
+(ولو ده حاصل، الحالة 3/4 ممكن تكون صحيحة ويكفى توثيق العملية) —
+ولا النشر بيتعمل أوتوماتيك من غير عين بشرية؟ لو التانية، التصحيح
+الصادق: الـ reviewer يكون "مراجعة آلية للمصادر والتحذيرات" (مش
+"قسم مراجعة") + مفيش `reviewedBy` في الـ JSON-LD + وصف الـ
+medical-review-board يتعدل عشان ما يضمنش مراجعة لم تنعمل. ده قرار
+تحريري/سياسي ليه بس.

@@ -67,4 +67,7 @@ jobs:
           git commit -m "content: publish weekly medical article"
           # Rebase on any main updates that landed while validation was running.
           git pull --rebase origin main
+          # Re-validate the FINAL (post-rebase) tree before it ships to main —
+          # the earlier 'npm run ci' validated a pre-rebase snapshot.
+          npm run ci
           git push origin HEAD:main

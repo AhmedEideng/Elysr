@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { products } from "@/data/products";
+import { articles } from "@/data/articles";
 import {
   Award,
   Globe,
@@ -142,7 +143,7 @@ function AboutPage() {
             {
               icon: BookOpenCheck,
               t: "محتوى تعليمي مسؤول",
-              d: "51 مقالة توعوية + 108 دليل SEO — كلها مكتوبة بمسؤولية مع مصادر طبية موثوقة وتحذيرات واضحة. لا نقدم وعوداً علاجية ولا نستبدل الطبيب.",
+              d: `${articles.length} مقالة توعوية + 108 دليل SEO — كلها مكتوبة بمسؤولية مع مصادر طبية موثوقة وتحذيرات واضحة. لا نقدم وعوداً علاجية ولا نستبدل الطبيب.`,
             },
             {
               icon: ShieldCheck,
@@ -218,7 +219,7 @@ function AboutPage() {
             {
               icon: BookOpenCheck,
               t: "التخصص (Expertise)",
-              d: "فريق متخصص في تبسيط المعلومات الصحية. 51 مقالة توعوية بمصادر من WHO وMayo Clinic وCleveland Clinic. نظام تصنيف منتجات (أخضر/أصفر/أحمر).",
+              d: `فريق متخصص في تبسيط المعلومات الصحية. ${articles.length} مقالة توعوية بمصادر من WHO وMayo Clinic وCleveland Clinic. نظام تصنيف منتجات (أخضر/أصفر/أحمر).`,
             },
             {
               icon: Globe,
@@ -258,7 +259,9 @@ function AboutPage() {
         >
           <BookOpenCheck className="h-8 w-8 mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" />
           <h3 className="font-bold">المقالات التعليمية</h3>
-          <p className="text-xs text-muted-foreground mt-1">51 مقالة توعوية بمصادر موثوقة</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {articles.length} مقالة توعوية بمصادر موثوقة
+          </p>
         </Link>
         <Link
           to="/contact"

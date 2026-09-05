@@ -90,6 +90,20 @@ try {
     "Expected 82 products after deleting 5 blocked pharma (including w-17)",
   );
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
+  // 🧭 Anti-drift: أي رقم مقالات hardcoded في واجهات/نصوص التسويق = درفت
+  // حتمي مع auto-publisher. الـ UI لازم يقرا articles.length ديناميكياً.
+  for (const file of [
+    "src/routes/about.tsx",
+    "src/routes/medical-review-board.tsx",
+    "src/data/landing-pages.ts",
+  ]) {
+    const content = readFileSync(resolve(ROOT, file), "utf-8");
+    assert.doesNotMatch(
+      content,
+      /\b\d{1,3}\s*مقالة/,
+      `${file} contains a hardcoded article count — use articles.length (drift risk)`,
+    );
+  }
   assert.ok(
     seoLandingPages.length >= 90,
     `Expected at least 90 SEO landing pages, got ${seoLandingPages.length}`,

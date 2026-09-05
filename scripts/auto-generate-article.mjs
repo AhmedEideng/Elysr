@@ -90,6 +90,53 @@ if (!GEMINI_API_KEY) {
   process.exit(0);
 }
 
+// 🛡️ Semantic validation للـ generated object قبل أي file write أو asset
+// side-effect — JSON.parse يضمن syntax بس مش semantic validity. لو في أي
+// مشكلة: الـ job ينفشل من غير ما تلمس أي ملف (fail closed).
+function validateGeneratedArticle(data) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error("Generated article is not a JSON object");
+  }
+  const isStr = (v) => typeof v === "string" && v.trim().length > 0;
+  const problems = [];
+  const slug = data.slug ?? "";
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug) || slug.length < 3 || slug.length > 80) {
+    problems.push(`slug invalid: ${JSON.stringify(slug)}`);
+  }
+  if (!isStr(data.title) || data.title.length < 10 || data.title.length > 120) {
+    problems.push(`title invalid (len ${String(data.title ?? "").length})`);
+  }
+  if (!isStr(data.excerpt) || data.excerpt.length < 20 || data.excerpt.length > 300) {
+    problems.push(`excerpt invalid (len ${String(data.excerpt ?? "").length})`);
+  }
+  if (!isStr(data.content) || data.content.length < 500 || data.content.length > 30000) {
+    problems.push(`content invalid (len ${String(data.content ?? "").length})`);
+  }
+  if (!["men", "women", "devices"].includes(data.category)) {
+    problems.push(`category invalid: ${JSON.stringify(data.category)}`);
+  }
+  if (!Number.isInteger(data.readMin) || data.readMin < 2 || data.readMin > 30) {
+    problems.push(`readMin invalid: ${JSON.stringify(data.readMin)}`);
+  }
+  if (!isStr(data.emoji) || [...data.emoji].length > 8) {
+    problems.push(`emoji invalid: ${JSON.stringify(data.emoji)}`);
+  }
+  const srcs = Array.isArray(data.sources) ? data.sources : [];
+  if (srcs.length < 2) problems.push(`sources too few: ${srcs.length}`);
+  srcs.forEach((sr, i) => {
+    if (!isStr(sr?.title) || sr.title.length > 200) problems.push(`sources[${i}].title invalid`);
+    if (!isStr(sr?.url) || !/^https:\/\/[a-z0-9.-]+\.[a-z]{2,}/i.test(sr.url)) {
+      problems.push(`sources[${i}].url invalid: ${JSON.stringify(sr?.url)}`);
+    }
+    if (!isStr(sr?.publisher)) problems.push(`sources[${i}].publisher invalid`);
+  });
+  if (problems.length) {
+    throw new Error(
+      `Generated article failed semantic validation:\n  - ${problems.join("\n  - ")}`,
+    );
+  }
+}
+
 async function generateArticle() {
   // 🔒 خطوة مكافحة التكرار المجهرية (Strict Deduplication & Infinite Topics):
   // قراءة المقالات المتواجدة حالياً لضمان عدم توليد أي عنوان أو موضوع مكرر مطلقاً!
@@ -232,6 +279,10 @@ JSON Schema:
     console.error("❌ All Google Gemini API models failed to generate content.");
     process.exit(1);
   }
+
+  // Semantic validation before any side effect (slug dup check, image,
+  // file write) — malformed output must never reach the repo.
+  validateGeneratedArticle(articleData);
 
   // Double check that the generated slug is completely unique in our database to avoid duplicate key conflicts!
   if (existingSlugs.includes(articleData.slug)) {

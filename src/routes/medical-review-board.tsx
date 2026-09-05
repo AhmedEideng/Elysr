@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { articles } from "@/data/articles";
 import {
   CalendarCheck,
   FileText,
@@ -284,7 +285,9 @@ function MedicalReviewBoardPage() {
           className="rounded-2xl border bg-card p-5 text-center hover:border-primary/30 transition-all"
         >
           <h3 className="font-bold">المقالات التعليمية →</h3>
-          <p className="text-xs text-muted-foreground mt-1">51 مقالة توعوية بمصادر موثوقة</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {articles.length} مقالة توعوية بمصادر موثوقة
+          </p>
         </Link>
       </section>
     </div>
