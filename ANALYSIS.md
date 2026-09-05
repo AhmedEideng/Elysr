@@ -1278,3 +1278,45 @@ pre-render) بنفس الصياغة — وأي محتوى مستقبلي AI لا
 الـ dist: author/reviewer الموحدين في HTML **و** JSON-LD،
 والنص القديم ("المراجعة الداخلية") اختفى. lint 0 · tsc 0 ·
 integrity 0 · schemas 249/1163 · 0 أخطاء · 172 وحدة · 18 e2e.
+
+## 37) إعادة إضافة w-17 (Viagra For Women) — سياسة "محظور لكن موجود" (2026-09-05)
+
+### السياق
+المنتج اتحذف 2026-08-25 (b3: "delete Viagra Women w-17 permanently
+per user request") — ثم المالك طلب إعادة إضافته 2026-09-05.
+السياسة: **موجود على الموقع وقابل للشراء، مستبعد من خلاصة Google
+Shopping + sitemap + noindex متدرج** — نفس m-38/m-43/m-45 بالظبط.
+
+### الإعدادات اللي اتظبطت (كلها)
+1. **women.ts**: استرجاع الإدخال من git history (d3703f8^) — نفس
+   الاسم/الوصف/المكونات/الاستخدام/التحذيرات الأصلية (السعر 300 ج.م،
+   rating 4.7/49) + صورة الكاتالوج الموجودة أصلاً (المرفوعة من
+   المستخدم = نفس الصورة) + stock 1000.
+2. **product-compliance.ts**: `w-17` رجعت في `GOOGLE_SHOPPING_BLOCKED`
+   (4 منتجات) — ده يقفل لوحده: استبعاد من catalog-feed + sitemap +
+   noindex في pre-render + استبعاد من ItemList الفئات.
+3. **products.ts**: `w-17` في `HOMEPAGE_EXCLUDED_PRODUCT_IDS`
+   (سياسة موحدة للأدوية المحظورة في الهوم).
+4. **vercel.json**:
+   - header `X-Robots-Tag: noindex,follow,noarchive,nosnippet,
+     noimageindex` اتضافت لقاعدة regex المنتجات المحظورة (صفحة + صور).
+   - 301s: `/products/w-17` + `/products/viagra-for-women-20-tablets`
+     بقوا → **صفحة المنتج** (مش الفئة) — الروابط القديمة توصل للمنتج.
+5. **sync-vercel-redirects.mjs**: الـ legacy alias اتحدّث لنفس الوجهة
+   (والـ auto part بيولّد /products/w-17 → slug من الكتالوج).
+6. **server/index.js** (self-hosted parity): NOINDEX_PRODUCT_PATHS +
+   NOINDEX_IMAGE_NAMES.
+7. **tests**:
+   - compliance.test.ts: w-17 expected true في الـ blocked set.
+   - data-integrity: 83 منتج (52/24/7) + assertion إن w-17 مغطى
+     بقاعدة noindex + قائمة الـ 301s اتحدّث تعليقها.
+   - e2e: +1 اختبار (legacy URLs 301 → المنتج + الصفحة 200 +
+     x-robots-tag noindex + h1).
+8. **validate-schemas.mjs**: التعليق اتحدّث (viagra-20-tablets.html
+   دلوقتي ملف noindex قائم في (أ)، وviagra-for-women-20-tablets slug
+   قديم في (ب)) — الفحوصات نفسها شغالة.
+
+### التحقق (249 صفحة)
+صفحة المنتج: noindex كامل ✓ · sitemap: مش موجودة ✓ · catalog-feed:
+مش موجود ✓ · صفحة women: ظاهر ✓ · الـ 301s سليمة ✓ ·
+lint 0 · tsc 0 · integrity ✓ · schemas 0 · 172 وحدة · 19 e2e.

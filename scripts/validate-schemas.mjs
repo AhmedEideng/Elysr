@@ -37,9 +37,10 @@ const SITE_URL = "https://elysrmedical.store";
 // (config-db.json ← src/lib/product-compliance.ts + slugs من products-db.json)
 // — أي منتج محظور جديد يظهر هنا لوحده وقت البناء.
 //
-// (ب) 5 منتجات دوائية **محذوفة نهائياً** (اتحولت 301 لفئاتها في
-// vercel.json) — قائمة تاريخية صريحة: مهمتها إن أي schema/ItemList في أي
-// صفحة يرجع يذكّرهم تاني → error فوري.
+// (ب) slugs دوائية تاريخية — منتجات محذوفة نهائياً (301 لفئاتها) +
+// slug قديم لمنتج أعيدت إضافته (viagra-for-women-20-tablets → w-17
+// اللي رجعت للموقع 2026-09-05 بصفحة noindex قائمة في (أ)).
+// مهمتها: أي schema/ItemList في أي صفحة يرجع يذكّرهم تاني → error فوري.
 const DELETED_PHARMA_FILES = new Set([
   "products/hard-on-sildenafil-130mg-dapoxetine-60mg.html", // m-34
   "products/vegal-extra-sildenafil-130mg-cobra.html", // m-36

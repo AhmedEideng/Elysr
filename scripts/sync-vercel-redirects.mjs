@@ -154,9 +154,9 @@ async function syncRedirects() {
       },
       {
         source: "/products/viagra-for-women-20-tablets",
-        // المنتج (w-17) محذوف — الوجهة لازم تكون الفئة زي بقية المحذوفات
-        // (الوجهة القديمة كانت /products/viagra-20-tablets = صفحة مش موجودة → 404)
-        destination: "/products/women",
+        // slug قديم للمنتج w-17 (Viagra For Women) — المنتج اتعاد للموقع
+        // 2026-09-05 فـ الـ slug القديم يروح لصفحة المنتج مباشرة.
+        destination: "/products/viagra-20-tablets",
         permanent: true,
       },
       {

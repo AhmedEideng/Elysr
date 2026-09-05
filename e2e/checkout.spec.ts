@@ -63,17 +63,36 @@ test("blocked medicine remains public but carries layered noindex protection", a
 });
 
 test("deleted product legacy URLs 301 to their category section", async ({ baseURL }) => {
-  // Deleted pharma (Merchant report) must never 404: m-34 → men, w-17 → women.
+  // Deleted pharma (Merchant report) must never 404: m-34 → men.
   // Use fetch with redirect:"manual" — Playwright's request fixture follows
   // redirects and would mask the 301.
 
   const menResp = await fetch(`${baseURL}/products/m-34`, { redirect: "manual" });
   expect(menResp.status).toBe(301);
   expect(menResp.headers.get("location")).toBe("/products/men");
+});
 
-  const womenResp = await fetch(`${baseURL}/products/w-17`, { redirect: "manual" });
-  expect(womenResp.status).toBe(301);
-  expect(womenResp.headers.get("location")).toBe("/products/women");
+test("re-added w-17 (Viagra For Women): legacy URLs 301 to the product, page is noindex", async ({
+  page,
+  baseURL,
+}) => {
+  // w-17 was deleted 2026-08-25 then re-added 2026-09-05 as blocked-but-present
+  // (same policy as m-38/m-43/m-45): on-site + purchasable, excluded from
+  // Google Shopping feed/sitemap with layered noindex.
+  const oldIdResp = await fetch(`${baseURL}/products/w-17`, { redirect: "manual" });
+  expect(oldIdResp.status).toBe(301);
+  expect(oldIdResp.headers.get("location")).toBe("/products/viagra-20-tablets");
+
+  const oldSlugResp = await fetch(`${baseURL}/products/viagra-for-women-20-tablets`, {
+    redirect: "manual",
+  });
+  expect(oldSlugResp.status).toBe(301);
+  expect(oldSlugResp.headers.get("location")).toBe("/products/viagra-20-tablets");
+
+  const response = await page.goto("/products/viagra-20-tablets");
+  expect(response?.status()).toBe(200);
+  expect(response?.headers()["x-robots-tag"]).toContain("noindex");
+  await expect(page.locator("h1")).toContainText("Viagra For Women");
 });
 
 test("education index serves 200 directly and slashed form 301s to it (Vercel parity)", async ({
