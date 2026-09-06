@@ -9,6 +9,7 @@ import {
   itemListSchema,
   breadcrumbSchema,
 } from "@/lib/seo";
+import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
 
 export const Route = createFileRoute("/products/devices")({
   loader: async () => {
@@ -35,13 +36,18 @@ function CategoryPage() {
     injectJsonLd(
       "itemlist",
       itemListSchema(
-        items.map((p) => ({
-          id: p.id,
-          name: p.name,
-          slug: p.slug,
-          image: p.image,
-          price: p.price,
-        })),
+        // نفس سلوك الـ prerender: الأدوية المحظورة (GOOGLE_SHOPPING_BLOCKED)
+        // ما تتكشفش في ItemList — إغلاق مسار كشف لـ Google Shopping crawler
+        // (الـ prerender كان بيستبعد والميتا client-side كان بيكشف — اتسوى موحّد).
+        items
+          .filter((p) => !GOOGLE_SHOPPING_BLOCKED.has(p.id))
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            image: p.image,
+            price: p.price,
+          })),
         "الأجهزة والمستلزمات الطبية",
       ),
     );
