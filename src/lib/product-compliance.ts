@@ -1,17 +1,16 @@
 // 🚀 Elysr Medical Group — Product Compliance Module
 //
-// 📌 سياسة الاستبعاد:
-// - كل المنتجات (82) تبقى ظاهرة وقابلة للبيع على الموقع في كل الأقسام
+// 📌 سياسة الاستبعاد (الحالة الحالية 2026-09-06):
+// - كل المنتجات (82) ظاهرة وقابلة للبيع على الموقع في كل الأقسام
 //   (تصنيفات، بحث، واجهة، مقترحات) — لا يوجد أي حذف أو إخفاء من الموقع.
-// - فقط منتجات Google Shopping المرفوضة (أدوية تستلزم وصفة طبية) تُستثنى
-//   من **خلاصة Google Merchant Center** (catalog-feed.xml) لأن جوجل يكتشفها
-//   عبر الخلاصة. الموقع نفسه يبقى ظاهرًا.
+// - GOOGLE_SHOPPING_BLOCKED **فاضي حاليًا** بقرار المالك: إلغاء أي حظر
+//   على Power 36 / Procomil Fort / Viagra Pfizer — دخلوا الخلاصة
+//   (catalog-feed.xml) والسيتماب ويُفهرسوا عادي.
+//   (rollback لو MC رفضهم: أعد إضافتهم للـ Set — كل السلوك بيرجع أوتو.)
 //
-// المنتجات المرفوضة حسب تقرير Google:
-// m-34 (Hard-On / Sildenafil), m-36 (Vegal / Sildenafil),
-// m-37 (Cialis / Tadalafil), m-38 (Power 36 / Sildenafil),
-// m-43 (Procomil Fort / Sildenafil), m-45 (Viagra Pfizer / Sildenafil),
-// m-47 (Levitra / Vardenafil), w-17 (Viagra for Women / Sildenafil).
+// السجل التاريخي — 5 أدوية اتحذفت نهائيا من الكتالوج (تقرير Google +
+// قرار المالك): m-34 (Hard-On), m-36 (Vegal), m-37 (Cialis),
+// m-47 (Levitra), w-17 (Viagra for Women).
 
 /**
  * قرار المالك (2026-09-06): إلغاء أي حظر على Power 36 (m-38) وProcomil
@@ -27,7 +26,7 @@ export const RED_PRODUCT_IDS = new Set<string>([]);
 
 /**
  * مؤهل لخلاصة Google Merchant (catalog-feed.xml):
- * - يستبعد فقط منتجات Google Shopping المرفوضة (أدوية).
+ * - يستبعد المنتجات في GOOGLE_SHOPPING_BLOCKED (فاضي حاليًا — 2026-09-06).
  * - يستبعد المنتجات غير المتوافرة (stock=0).
  * - لا يؤثر إطلاقًا على ظهور المنتج على الموقع.
  */
