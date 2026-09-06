@@ -91,18 +91,31 @@ try {
     "Expected 82 products (5 blocked pharma deleted permanently incl. w-17 final deletion 2026-09-06)",
   );
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
-  // 🧭 Anti-drift: أي رقم مقالات hardcoded في واجهات/نصوص التسويق = درفت
-  // حتمي مع auto-publisher. الـ UI لازم يقرا articles.length ديناميكياً.
+  // 🧭 Anti-drift: أرقام الكتالوج/المحتوى hardcoded في نصوص التسويق = درفت
+  // حتمي مع أي تغيير في الكتالوج أو المقالات. الـ UI لازم يقرأ الـ counts
+  // ديناميكياً (products.length / articles.length / seoLandingPages.length).
+  // (محفوظات: "51 مقالة"، "108 دليل SEO"، "56/24 منتج"، "87 منتجاً" — كله اتصحح 2026-09-06)
   for (const file of [
     "src/routes/about.tsx",
     "src/routes/medical-review-board.tsx",
     "src/data/landing-pages.ts",
+    "src/routes/wishlist.tsx",
   ]) {
     const content = readFileSync(resolve(ROOT, file), "utf-8");
     assert.doesNotMatch(
       content,
       /\b\d{1,3}\s*مقالة/,
       `${file} contains a hardcoded article count — use articles.length (drift risk)`,
+    );
+    assert.doesNotMatch(
+      content,
+      /\b\d{1,3}\s*دليل SEO/,
+      `${file} contains a hardcoded SEO-guide count — use seoLandingPages.length (drift risk)`,
+    );
+    assert.doesNotMatch(
+      content,
+      /\bأكثر من \d{1,3}\s*منتج/,
+      `${file} contains a hardcoded "more than N products" claim — use products.length (drift risk)`,
     );
   }
   assert.ok(

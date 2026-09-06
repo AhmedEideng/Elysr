@@ -187,7 +187,9 @@ function WishlistPage() {
                 💪
               </span>
               <span className="text-sm font-black">منتجات الرجال</span>
-              <span className="text-xs text-muted-foreground">56 منتج</span>
+              <span className="text-xs text-muted-foreground">
+                {allProducts.filter((p) => p.category === "men").length} منتج
+              </span>
             </Link>
             <Link
               to="/products/women"
@@ -197,7 +199,9 @@ function WishlistPage() {
                 🌸
               </span>
               <span className="text-sm font-black">منتجات النساء</span>
-              <span className="text-xs text-muted-foreground">24 منتج</span>
+              <span className="text-xs text-muted-foreground">
+                {allProducts.filter((p) => p.category === "women").length} منتج
+              </span>
             </Link>
             <Link
               to="/products/devices"
@@ -207,7 +211,9 @@ function WishlistPage() {
                 ⚙️
               </span>
               <span className="text-sm font-black">الأجهزة</span>
-              <span className="text-xs text-muted-foreground">7 أجهزة</span>
+              <span className="text-xs text-muted-foreground">
+                {allProducts.filter((p) => p.category === "devices").length} أجهزة
+              </span>
             </Link>
           </div>
         </div>

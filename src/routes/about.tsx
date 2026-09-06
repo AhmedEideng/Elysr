@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { products } from "@/data/products";
 import { articles } from "@/data/articles";
+import { seoLandingPages } from "@/data/landing-pages";
 import {
   Award,
   Globe,
@@ -143,7 +144,7 @@ function AboutPage() {
             {
               icon: BookOpenCheck,
               t: "محتوى تعليمي مسؤول",
-              d: `${articles.length} مقالة توعوية + 108 دليل SEO — كلها مكتوبة بمسؤولية مع مصادر طبية موثوقة وتحذيرات واضحة. لا نقدم وعوداً علاجية ولا نستبدل الطبيب.`,
+              d: `${articles.length} مقالة توعوية + ${seoLandingPages.length} دليل SEO — كلها مكتوبة بمسؤولية مع مصادر طبية موثوقة وتحذيرات واضحة. لا نقدم وعوداً علاجية ولا نستبدل الطبيب.`,
             },
             {
               icon: ShieldCheck,
