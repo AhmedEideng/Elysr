@@ -34,16 +34,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const DIST = resolve(ROOT, "dist");
 const PORT = parseInt(process.env.PORT || "8080", 10);
-const NOINDEX_PRODUCT_PATHS = new Set([
-  "/products/power-36-power-control-for-36-hours",
-  "/products/procomil-fort-tablet",
-  "/products/viagra-pfizer-100mg",
-]);
-const NOINDEX_IMAGE_NAMES = new Set([
-  "power-36-power-control-for-36-hours.webp",
-  "procomil-fort-tablet.webp",
-  "viagra-pfizer-100mg.webp",
-]);
+// 2026-09-06: قرار المالك بإلغاء حظر m-38/m-43/m-45 — مفيش noindex تاني.
+const NOINDEX_PRODUCT_PATHS = new Set();
+const NOINDEX_IMAGE_NAMES = new Set();
 
 // ── Vercel parity redirects ──
 // On Vercel these live in vercel.json edge config; the self-hosted Express

@@ -164,9 +164,5 @@
     }
   ],
   "BUNDLE_DISCOUNT_RATE": 0.2,
-  "GOOGLE_SHOPPING_BLOCKED": [
-    "m-38",
-    "m-43",
-    "m-45"
-  ]
+  "GOOGLE_SHOPPING_BLOCKED": []
 }

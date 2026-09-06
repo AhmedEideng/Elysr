@@ -148,28 +148,6 @@
       ]
     },
     {
-      "source": "/products/(power-36-power-control-for-36-hours|procomil-fort-tablet|viagra-pfizer-100mg)",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, follow, noarchive, nosnippet, noimageindex"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=300, s-maxage=300"
-        }
-      ]
-    },
-    {
-      "source": "/images/(thumbs/|thumbs-180/)?(power-36-power-control-for-36-hours|procomil-fort-tablet|viagra-pfizer-100mg)\\.webp",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, noimageindex"
-        }
-      ]
-    },
-    {
       "source": "/(.*)",
       "headers": [
         {

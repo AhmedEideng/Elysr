@@ -515,15 +515,15 @@ try {
       `Blocked product in catalog feed: ${product.id}`,
     );
   }
+  // 2026-09-06: قرار المالك بإلغاء حظر m-38/m-43/m-45 — قواعد noindex
+  // الخاصة بيه لازم تكون اتشالت بالكامل (مفيش نص-تطبيق في فك الحظر)
   const noindexHeader = vercel.headers.find((entry) =>
     entry.source.includes("power-36-power-control-for-36-hours"),
   );
-  assert.ok(noindexHeader, "Missing X-Robots-Tag header rule for blocked product pages");
-  assert.ok(
-    noindexHeader.headers.some(
-      (header) => header.key === "X-Robots-Tag" && header.value.includes("noindex"),
-    ),
-    "Blocked product header rule must include noindex",
+  assert.equal(
+    noindexHeader,
+    undefined,
+    "Unblocked product (power-36) must not have noindex header rules anymore",
   );
 
   // w-17 (Viagra For Women) اتحذفت نهائياً 2026-09-06 — لازم تخرج من

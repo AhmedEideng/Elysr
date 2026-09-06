@@ -45,18 +45,19 @@ test("customer can add a product, update quantity, calculate shipping and submit
   });
 });
 
-test("blocked medicine remains public but carries layered noindex protection", async ({ page }) => {
-  // m-34 (Hard-On) was deleted per Merchant report (now 301 → /products/men).
-  // The remaining blocked products are m-38/m-43/m-45 — power-36 is the canonical
-  // case: still purchasable on-site, but excluded from SEO with layered noindex.
+test("unblocked power-36 is a fully indexable regular product (owner decision 2026-09-06)", async ({
+  page,
+}) => {
+  // After the owner lifted all pharma blocks, power-36 must be a normal
+  // indexable product: 200, NO noindex meta/header, linked in the category.
   const path = "/products/power-36-power-control-for-36-hours";
   const response = await page.goto(path);
   expect(response?.status()).toBe(200);
-  expect(response?.headers()["x-robots-tag"]).toContain("noindex");
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
-  await expect(page.locator('meta[name="googlebot"]')).toHaveAttribute("content", /noindex/);
+  const robotsMeta = (await page.locator('meta[name="robots"]').getAttribute("content")) ?? "";
+  expect(robotsMeta).not.toContain("noindex");
+  expect(response?.headers()["x-robots-tag"] ?? "").not.toContain("noindex");
   const imageResponse = await page.request.get("/images/power-36-power-control-for-36-hours.webp");
-  expect(imageResponse.headers()["x-robots-tag"]).toContain("noimageindex");
+  expect(imageResponse.headers()["x-robots-tag"] ?? "").not.toContain("noimageindex");
 
   await page.goto("/products/men");
   await expect(page.locator(`a[href="${path}"]`).first()).toBeAttached();

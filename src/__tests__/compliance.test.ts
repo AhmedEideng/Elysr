@@ -21,16 +21,16 @@ describe("تم إلغاء نظام RED — لا يُستثنى أي منتج م�
 });
 
 describe("GOOGLE_SHOPPING_BLOCKED — يستبعد الأدوية المرفوضة من الخلاصة فقط", () => {
-  it("تحوي منتجات الأدوية المرفوضة من Google Shopping", () => {
-    // تم حذف 5 أدوية نهائياً (m-34,m-36,m-37,m-47,w-17).
-    // 3 محظورة معروضة على الموقع ومستبعدة من الخلاصة (m-38,m-43,m-45)
-    // — w-17 (Viagra For Women) اتحذفت نهائياً 2026-09-06 (بعد إعادة إضافتها).
-    expect(GOOGLE_SHOPPING_BLOCKED.has("m-38")).toBe(true); // Power 36
-    expect(GOOGLE_SHOPPING_BLOCKED.has("m-43")).toBe(true); // Procomil Fort
-    expect(GOOGLE_SHOPPING_BLOCKED.has("m-45")).toBe(true); // Viagra Pfizer
-    expect(GOOGLE_SHOPPING_BLOCKED.has("w-17")).toBe(false); // محذوفة نهائياً
+  it("فاضي بالكامل بعد قرار المالك بإلغاء الحظر (2026-09-06)", () => {
+    // قرار المالك: إلغاء أي حظر على m-38/m-43/m-45 — القايمة فاضية.
+    // (5 أدوية تانية اتحذفت من الكتالوج نفسه: m-34,m-36,m-37,m-47,w-17.)
+    expect(GOOGLE_SHOPPING_BLOCKED.has("m-38")).toBe(false); // Power 36 — اتفك الحظر
+    expect(GOOGLE_SHOPPING_BLOCKED.has("m-43")).toBe(false); // Procomil Fort — اتفك الحظر
+    expect(GOOGLE_SHOPPING_BLOCKED.has("m-45")).toBe(false); // Viagra Pfizer — اتفك الحظر
+    expect(GOOGLE_SHOPPING_BLOCKED.has("w-17")).toBe(false); // محذوفة نهائيا
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-01")).toBe(false); // منتج عادي
-    expect(GOOGLE_SHOPPING_BLOCKED.has("m-34")).toBe(false); // محذوف نهائياً
+    expect(GOOGLE_SHOPPING_BLOCKED.has("m-34")).toBe(false); // محذوف نهائيا
+    expect(GOOGLE_SHOPPING_BLOCKED.size).toBe(0);
   });
 });
 

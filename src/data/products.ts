@@ -94,13 +94,12 @@ export const getProductsByCategory = (cat: ProductCategory) => {
  * (لا تزال قابلة للشراء) لكنها لا تظهر إطلاقاً في أقسام الهوم.
  * (أصل المجموعة كان 6 منتجات، بعد حذف m-34 نهائياً أصبح 5، ثم أضيف الم-38 والم-43)
  */
+// ملاحظة (2026-09-06): m-38/m-43/m-45 اتشالوا بقرار المالك مع إلغاء
+// الحظر. التلاتة الباقين استبعاد تجاري قديم (مش حظر دوائي).
 export const HOMEPAGE_EXCLUDED_PRODUCT_IDS = new Set([
   "m-02", // Boost Up MAN
   "m-03", // Powerfully Up
   "m-49", // Power Fully Up Advanced
-  "m-45", // Viagra Pfizer للرجال - كان مستبعد أصلاً
-  "m-38", // Power 36 (Sildenafil) - سياسة موحدة للأدوية المحظورة
-  "m-43", // Procomil Fort (Sildenafil) - سياسة موحدة للأدوية المحظورة
 ]);
 
 export const isHomepageProductEligible = (product: Pick<Product, "id">): boolean =>

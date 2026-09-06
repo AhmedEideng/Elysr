@@ -13,17 +13,14 @@
 // m-43 (Procomil Fort / Sildenafil), m-45 (Viagra Pfizer / Sildenafil),
 // m-47 (Levitra / Vardenafil), w-17 (Viagra for Women / Sildenafil).
 
-/** منتجات مرفوضة من Google Shopping (تُستثنى من الخلاصة فقط، وتبقى على الموقع).
- * تم حذف 5 منتجات نهائياً (m-34,m-36,m-37,m-47,w-17) بناء على تقرير
- * Merchant Center + قرار المالك (w-17: أعيدت 2026-09-05 ثم حذفت نهائيا
- * 2026-09-06 بعد ظهورها "غير مطابقة" في MC — نفس منطق الـ 5).
- * المتبقي 3 منتجات محظورة-موجودة مع حماية noindex كاملة.
+/**
+ * قرار المالك (2026-09-06): إلغاء أي حظر على Power 36 (m-38) وProcomil
+ * Fort (m-43) وViagra Pfizer (m-45) — يدخلوا الخلاصة والسيتماب
+ * ويُفهرسوا عادي زي أي منتج.
+ * (5 أدوية تانية اتحذفت نهائيا من الكتالوج نفسه: m-34,m-36,m-37,m-47,w-17.
+ * rollback لو MC رفضهم: أعد إضافتهم هنا.)
  */
-export const GOOGLE_SHOPPING_BLOCKED = new Set<string>([
-  "m-38", // Power 36 (Sildenafil)
-  "m-43", // Procomil Fort (Sildenafil)
-  "m-45", // Viagra Pfizer 100mg (Sildenafil)
-]);
+export const GOOGLE_SHOPPING_BLOCKED = new Set<string>([]);
 
 /** مجموعة فارغة — محفوظة للتوافق البرمجي، لا تُستثنى أي منتج من الموقع. */
 export const RED_PRODUCT_IDS = new Set<string>([]);
