@@ -1320,3 +1320,30 @@ Shopping + sitemap + noindex متدرج** — نفس m-38/m-43/m-45 بالظبط
 صفحة المنتج: noindex كامل ✓ · sitemap: مش موجودة ✓ · catalog-feed:
 مش موجود ✓ · صفحة women: ظاهر ✓ · الـ 301s سليمة ✓ ·
 lint 0 · tsc 0 · integrity ✓ · schemas 0 · 172 وحدة · 19 e2e.
+
+## 38) الحذف النهائي لـ w-17 (Viagra For Women) — قرار المالك (2026-09-06)
+
+### السياق
+بعد إعادة إضافتها (section 37) ظهر في Google Merchant Center:
+"Viagra For Women" = **غير مطابق** (مرفوضة بسياسة الأدوية) — وأثبت
+المشوار إن سياسة "محظور لكن موجود" مش واقية من الزحف (m-38/m-43
+ظهروا "مطابق"!). المالك قرر: **حذف نهائي** (نفس الـ 5).
+
+### التعديلات (نفس عملية الحذف المثبتة)
+- women.ts: حذف entry (23 women / 82 إجمالي)
+- product-compliance.ts: GOOGLE_SHOPPING_BLOCKED رجع 3 (m-38,m-43,m-45)
+- products.ts: شُفت من HOMEPAGE_EXCLUDED
+- vercel.json: 3 redirects → /products/women (w-17, viagra-20-tablets,
+  viagra-for-women-20-tablets) — **بما فيها /products/viagra-20-tablets
+  اللي كان ناقص من الحذف الأول** ( Oversight اتصاح دلوقتي) + شُفت من
+  قواعد noindex headers
+- server/index.js: NOINDEX lists نظيفة
+- sync-vercel-redirects.mjs: 3 legacy aliases → /products/women
+- tests: compliance (w-17=false) + data-integrity (82 = 52/23/7 +
+  3 slugs لازم عندهم 301 + w-17 خارج قواعد noindex) + e2e (الـ 3
+  legacy URLs 301 → women)
+- validate-schemas: + viagra-20-tablets.html في القائمة التاريخية
+
+### ملاحظة feed
+فياجرا الحريم **كانت مستبعدة من feed أصلاً** (blocked) — فمحتوى
+catalog-feed.xml متغيرش مطلقًا بسبب الحذف (79 منتج قبل وبعدها).

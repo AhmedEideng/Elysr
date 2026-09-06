@@ -68,13 +68,14 @@ try {
   );
   // slugs دوائية لازم يفضل عندها 301 قائم دائماً (نفس قائمة
   // DELETED_PHARMA_FILES في scripts/validate-schemas.mjs): منتجات
-  // محذوفة نهائياً + slugs قديمة لمُنتج اتعاد (w-17).
+  // محذوفة نهائياً (منها 3 slugs لـ w-17 اللي اتحذفت نهائياً 2026-09-06).
   const deletedPharmaSlugs = [
     "hard-on-sildenafil-130mg-dapoxetine-60mg", // m-34
     "vegal-extra-sildenafil-130mg-cobra", // m-36
     "cialis-tadalafil-20mg-30-tablets", // m-37
     "levitra-100mg", // m-47
-    "viagra-for-women-20-tablets", // slug قديم لـ w-17 (المنتج اتعاد 2026-09-05)
+    "viagra-for-women-20-tablets", // slug أقدم لـ w-17
+    "viagra-20-tablets", // slug المنتج w-17 (حذف نهائي 2026-09-06)
     "viagra-1-2-3-2-10-tablets", // slug دوائي أقدم
   ];
   for (const slug of deletedPharmaSlugs) {
@@ -86,8 +87,8 @@ try {
 
   assert.equal(
     products.length,
-    83,
-    "Expected 83 products (82 + w-17 Viagra For Women re-added 2026-09-05 as blocked-but-present)",
+    82,
+    "Expected 82 products (5 blocked pharma deleted permanently incl. w-17 final deletion 2026-09-06)",
   );
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
   // 🧭 Anti-drift: أي رقم مقالات hardcoded في واجهات/نصوص التسويق = درفت
@@ -248,8 +249,8 @@ try {
   }, {});
   assert.deepEqual(
     categories,
-    { men: 52, women: 24, devices: 7 },
-    "Unexpected category split (83 = 52 men / 24 women / 7 devices)",
+    { men: 52, women: 23, devices: 7 },
+    "Unexpected category split (82 = 52 men / 23 women / 7 devices)",
   );
 
   const kreva = products.find((product) => product.id === "m-60");
@@ -525,16 +526,10 @@ try {
     "Blocked product header rule must include noindex",
   );
 
-  // w-17 (Viagra For Women) اتعاد للموقع 2026-09-05 — لازم يكون مغطى
-  // بقاعدة X-Robots-Tag noindex زي بقية الأدوية المحظورة
+  // w-17 (Viagra For Women) اتحذفت نهائياً 2026-09-06 — لازم تخرج من
+  // قاعدة noindex headers (مفيش صفحة تاني تحتها)
   const w17Header = vercel.headers.find((entry) => entry.source.includes("viagra-20-tablets"));
-  assert.ok(
-    w17Header &&
-      w17Header.headers.some(
-        (header) => header.key === "X-Robots-Tag" && header.value.includes("noindex"),
-      ),
-    "Re-added w-17 (Viagra For Women) missing noindex header rule in vercel.json",
-  );
+  assert.equal(w17Header, undefined, "Deleted w-17 must not appear in noindex header rules");
 
   for (const blockedPath of ["/cart", "/thank-you", "/order-confirmed"]) {
     assert.equal(sitemap.includes(`<loc>https://elysrmedical.store${blockedPath}</loc>`), false);

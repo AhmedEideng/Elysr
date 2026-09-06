@@ -153,10 +153,21 @@ async function syncRedirects() {
         permanent: true,
       },
       {
+        source: "/products/viagra-20-tablets",
+        // w-17 (Viagra For Women) اتحذفت نهائياً 2026-09-06 — slug المنتج
+        destination: "/products/women",
+        permanent: true,
+      },
+      {
         source: "/products/viagra-for-women-20-tablets",
-        // slug قديم للمنتج w-17 (Viagra For Women) — المنتج اتعاد للموقع
-        // 2026-09-05 فـ الـ slug القديم يروح لصفحة المنتج مباشرة.
-        destination: "/products/viagra-20-tablets",
+        // slug أقدم لنفس المنتج — حذف نهائي
+        destination: "/products/women",
+        permanent: true,
+      },
+      {
+        source: "/products/w-17",
+        // product-id القديم — حذف نهائي
+        destination: "/products/women",
         permanent: true,
       },
       {

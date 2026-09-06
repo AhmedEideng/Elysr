@@ -101,7 +101,6 @@ export const HOMEPAGE_EXCLUDED_PRODUCT_IDS = new Set([
   "m-45", // Viagra Pfizer للرجال - كان مستبعد أصلاً
   "m-38", // Power 36 (Sildenafil) - سياسة موحدة للأدوية المحظورة
   "m-43", // Procomil Fort (Sildenafil) - سياسة موحدة للأدوية المحظورة
-  "w-17", // Viagra For Women (Sildenafil) - سياسة موحدة للأدوية المحظورة
 ]);
 
 export const isHomepageProductEligible = (product: Pick<Product, "id">): boolean =>

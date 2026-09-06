@@ -72,27 +72,21 @@ test("deleted product legacy URLs 301 to their category section", async ({ baseU
   expect(menResp.headers.get("location")).toBe("/products/men");
 });
 
-test("re-added w-17 (Viagra For Women): legacy URLs 301 to the product, page is noindex", async ({
-  page,
+test("w-17 (Viagra For Women) deleted: all legacy URLs 301 to category, page is 404", async ({
   baseURL,
 }) => {
-  // w-17 was deleted 2026-08-25 then re-added 2026-09-05 as blocked-but-present
-  // (same policy as m-38/m-43/m-45): on-site + purchasable, excluded from
-  // Google Shopping feed/sitemap with layered noindex.
-  const oldIdResp = await fetch(`${baseURL}/products/w-17`, { redirect: "manual" });
-  expect(oldIdResp.status).toBe(301);
-  expect(oldIdResp.headers.get("location")).toBe("/products/viagra-20-tablets");
-
-  const oldSlugResp = await fetch(`${baseURL}/products/viagra-for-women-20-tablets`, {
-    redirect: "manual",
-  });
-  expect(oldSlugResp.status).toBe(301);
-  expect(oldSlugResp.headers.get("location")).toBe("/products/viagra-20-tablets");
-
-  const response = await page.goto("/products/viagra-20-tablets");
-  expect(response?.status()).toBe(200);
-  expect(response?.headers()["x-robots-tag"]).toContain("noindex");
-  await expect(page.locator("h1")).toContainText("Viagra For Women");
+  // w-17 final deletion (2026-09-06, owner decision after MC "disapproved"
+  // evidence) — same treatment as the other 4 deleted pharma: every legacy
+  // URL must 301 to the category, and the product page must be a real 404.
+  for (const path of [
+    "/products/w-17",
+    "/products/viagra-20-tablets",
+    "/products/viagra-for-women-20-tablets",
+  ]) {
+    const resp = await fetch(`${baseURL}${path}`, { redirect: "manual" });
+    expect(resp.status, path).toBe(301);
+    expect(resp.headers.get("location"), path).toBe("/products/women");
+  }
 });
 
 test("education index serves 200 directly and slashed form 301s to it (Vercel parity)", async ({

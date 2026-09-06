@@ -14,16 +14,15 @@
 // m-47 (Levitra / Vardenafil), w-17 (Viagra for Women / Sildenafil).
 
 /** منتجات مرفوضة من Google Shopping (تُستثنى من الخلاصة فقط، وتبقى على الموقع).
- * تم حذف 4 منتجات نهائياً (m-34,m-36,m-37,m-47) بناء على تقرير Merchant Center.
- * 4 منتجات محظورة-موجودة مع حماية noindex كاملة:
- * w-17 (Viagra For Women) اتحذف 2026-08-25 ثم أعيد إضافته 2026-09-05
- * بطلب صريح من المالك — نفس سياسة "محظور من الخلاصة، موجود على الموقع".
+ * تم حذف 5 منتجات نهائياً (m-34,m-36,m-37,m-47,w-17) بناء على تقرير
+ * Merchant Center + قرار المالك (w-17: أعيدت 2026-09-05 ثم حذفت نهائيا
+ * 2026-09-06 بعد ظهورها "غير مطابقة" في MC — نفس منطق الـ 5).
+ * المتبقي 3 منتجات محظورة-موجودة مع حماية noindex كاملة.
  */
 export const GOOGLE_SHOPPING_BLOCKED = new Set<string>([
   "m-38", // Power 36 (Sildenafil)
   "m-43", // Procomil Fort (Sildenafil)
   "m-45", // Viagra Pfizer 100mg (Sildenafil)
-  "w-17", // Viagra For Women 20 tablets (Sildenafil) — أعيدت للموقع (2026-09-05)
 ]);
 
 /** مجموعة فارغة — محفوظة للتوافق البرمجي، لا تُستثنى أي منتج من الموقع. */
