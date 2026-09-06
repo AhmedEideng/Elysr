@@ -60,19 +60,21 @@ describe("النصوص الدوائية", () => {
   });
 });
 
-describe("isCatalogFeedEligible — يستثني الأدوية من الخلاصة فقط", () => {
-  it("منتج آمن متوفر → مؤهل للخلاصة", () => {
+describe("isCatalogFeedEligible — الفلترة بالمخزون (الحظر اتلغى 2026-09-06)", () => {
+  it("منتج متوفر → مؤهل للخلاصة", () => {
     expect(isCatalogFeedEligible({ id: "m-01", stock: 50 })).toBe(true);
     expect(isCatalogFeedEligible({ id: "m-60", stock: 10 })).toBe(true);
   });
 
-  it("دواء مرفوض → غير مؤهل للخلاصة حتى لو متوفر", () => {
-    expect(isCatalogFeedEligible({ id: "m-38", stock: 100 })).toBe(false);
-    expect(isCatalogFeedEligible({ id: "m-45", stock: 50 })).toBe(false);
-    expect(isCatalogFeedEligible({ id: "m-43", stock: 10 })).toBe(false);
+  it("الأدوية اللي اتفك عنها الحظر → بقت مؤهلة للخلاصة (قرار المالك)", () => {
+    // GOOGLE_SHOPPING_BLOCKED فاضي دلوقتي — التلاتة بقت عادية
+    expect(isCatalogFeedEligible({ id: "m-38", stock: 100 })).toBe(true); // Power 36
+    expect(isCatalogFeedEligible({ id: "m-45", stock: 50 })).toBe(true); // Viagra Pfizer
+    expect(isCatalogFeedEligible({ id: "m-43", stock: 10 })).toBe(true); // Procomil Fort
   });
 
-  it("مخزون = 0 → غير مؤهل", () => {
+  it("مخزون = 0 → غير مؤهل (مهما كان المنتج)", () => {
     expect(isCatalogFeedEligible({ id: "m-01", stock: 0 })).toBe(false);
+    expect(isCatalogFeedEligible({ id: "m-38", stock: 0 })).toBe(false);
   });
 });
