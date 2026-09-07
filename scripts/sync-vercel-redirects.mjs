@@ -170,6 +170,43 @@ async function syncRedirects() {
         destination: "/products/women",
         permanent: true,
       },
+      // ── GSC "removed: 404" cleanup (2026-09-07): صفحات اتدمجت/اتغيرت
+      //    سلاجلها — الـ redirects بتحولها لأقرب صفحة حية ──
+      {
+        source: "/products/guides/safe-marital-products-guide",
+        destination: "/products/guides/marital-health-products",
+        permanent: true,
+      },
+      {
+        source: "/products/guides/delay-cream-for-men-guide",
+        destination: "/products/guides/best-delay-products-egypt",
+        permanent: true,
+      },
+      {
+        source: "/products/guides/female-arousal-drops-guide",
+        destination: "/products/guides/women-libido-products-egypt",
+        permanent: true,
+      },
+      {
+        source: "/products/guides/best-honey-for-men",
+        destination: "/products/guides/best-energy-honey-for-men",
+        permanent: true,
+      },
+      {
+        source: "/products/guides/tadalafil-products-guide",
+        destination: "/products/guides/best-delay-products-egypt",
+        permanent: true,
+      },
+      {
+        source: "/products/lovezone-vaginal-gel",
+        destination: "/products/women",
+        permanent: true,
+      },
+      {
+        source: "/products/hilto-wonderful-honey-for-men",
+        destination: "/products/men",
+        permanent: true,
+      },
       {
         source: "/products/black-widow-drops-for-women",
         destination: "/products/black-widow-drops",
