@@ -1377,3 +1377,28 @@ catalog-feed.xml متغيرش مطلقًا بسبب الحذف (79 منتج قب
 ### التحقق
 build 248 · lint 0 · tsc 0 · integrity 0 · schemas 0 · 172 وحدة ·
 19 e2e.
+
+## 40) الحذف النهائي لـ m-43 (Procomil Fort) — قرار المالك (2026-09-07)
+
+### السياق
+بعد يوم واحد من فك الحظر عن m-38/m-43/m-45 (2026-09-06) وظهور
+Procomil Fort "مطابق عليها" في Google Merchant Center، المالك قرر
+حذفه نهائياً. (m-38 Power 36 وm-45 Viagra Pfizer لسه في الكتالوج
+بدون حظر — لو حصل نفس القرار دول كمان، نفس العملية.)
+
+### العملية (نفس playbook الحذف المثبت)
+1. men.ts: entry اتحذف (51 men / 81 إجمالي)
+2. product-compliance.ts: GOOGLE_SHOPPING_BLOCKED لسه فاضي (m-43
+   مش "محظور" دلوقتي — "مش موجود") — التعليق اتحدّث (6 محذوفين)
+3. products.ts: m-43 خارج HOMEPAGE_EXCLUDED + 3 تعليقات اتحدّثت
+4. vercel.json + sync script:
+   - /products/m-43 → /products/men (كان procomil-fort-tablet)
+   - /products/procomil-fort-tablet → /products/men (جديد)
+5. tests: compliance (m-43 = محذوف مش مفكوك) + data-integrity
+   (81 = 51/23/7 + procomil-fort-tablet في قايمة الـ 301s) +
+   validate-schemas (procomil-fort-tablet.html في القائمة التاريخية)
+6. مفيش crossSell/landing page كانت بتشير لـ m-43 (تم المسح)
+
+### التحقق
+محلي: 301s شغالين + feed 81 (m-43 غايب) + 172 وحدة + integrity +
+schemas + build 247. على الإنتاج: 308 للوجهتين بعد الدبليو.

@@ -408,7 +408,7 @@
     },
     {
       "source": "/products/m-43",
-      "destination": "/products/procomil-fort-tablet",
+      "destination": "/products/men",
       "permanent": true
     },
     {
@@ -1053,6 +1053,11 @@
     },
     {
       "source": "/products/hilto-wonderful-honey-for-men",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/procomil-fort-tablet",
       "destination": "/products/men",
       "permanent": true
     }

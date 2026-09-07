@@ -170,6 +170,18 @@ async function syncRedirects() {
         destination: "/products/women",
         permanent: true,
       },
+      {
+        source: "/products/m-43",
+        // Procomil Fort — حذف نهائي 2026-09-07
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/procomil-fort-tablet",
+        // slug المنتج m-43 — حذف نهائي 2026-09-07
+        destination: "/products/men",
+        permanent: true,
+      },
       // ── GSC "removed: 404" cleanup (2026-09-07): صفحات اتدمجت/اتغيرت
       //    سلاجلها — الـ redirects بتحولها لأقرب صفحة حية ──
       {
