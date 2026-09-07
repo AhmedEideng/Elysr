@@ -14,6 +14,26 @@ export const COMPANY = {
 export const waLink = (message: string) =>
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
+/**
+ * تاريخ/وقت الطلب بصيغة مصرية ثابتة (توقيت القاهرة — الشركة) وأرقام لاتينية
+ * لمطابقة بقية الرسالة (الأسعار). مثال: "الاثنين، 07/09/2026، 5:45 م"
+ */
+export const formatOrderDateTime = (date: Date = new Date()): string =>
+  new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Africa/Cairo",
+  })
+    .format(date)
+    // ICU بيركب علامات bidi خفية (U+200E-F وغيرها) لـ RTL rendering —
+    // بنشيلها عشان النص يفضل نظيف للـ copy/paste والمعالجة البرمجية
+    .replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, "");
+
 export interface OrderItemMsg {
   id?: string;
   /** Pretty URL slug used to build product links. */
@@ -48,6 +68,7 @@ export const buildOrderMessage = (
   lines.push("----------------------------------------");
   lines.push("طلب جديد من اليسر ميديكال");
   if (orderId) lines.push(`رقم الطلب: ${orderId}`);
+  lines.push(`التاريخ والوقت: ${formatOrderDateTime()}`);
   if (isPromoActive()) lines.push(PROMO_ORDER_LABEL);
   lines.push("");
 

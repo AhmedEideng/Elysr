@@ -39,7 +39,7 @@ responsibly:
 - Denial-of-Service against our CDN (report to Vercel instead)
 - Issues affecting only outdated browsers (IE11, etc.)
 
-## Security Architecture (المحدثة — أغسطس 2026)
+## Security Architecture (المحدثة — سبتمبر 2026)
 
 نموذج الأمان الحالي بعد آخر التحديثات:
 
@@ -48,7 +48,7 @@ responsibly:
 | **CSP**                | `vercel.json` + `server/index.js` — كلا المستويين + Report-To + NEL         |
 | **HSTS**               | `max-age=63072000; includeSubDomains; preload`                              |
 | **CORS**               | صارم — فقط `elysrmedical.store` و `www.elysrmedical.store`                  |
-| **Rate Limiting**      | In-process IP limit (hashed) + Google Apps Script per-phone limit + 5/min لطلبات الحذف |
+| **Rate Limiting**      | In-process IP limit (hashed) + Google Apps Script per-phone limit (30/min للطلبات، 3/min للمراجعات) |
 | **Price Validation**   | منع تلاعب العميل بأسعار المنتجات (server-side lookup من `products-db.json`) |
 | **Input Sanitization** | كل الإدخالات تُنظف (remove XSS, strip dangerous chars) + Prototype Pollution protection |
 | **Phone Validation**   | regex صارم للأرقام المصرية + الدولية E.164 على الـ client + الـ server      |
@@ -57,7 +57,7 @@ responsibly:
 | **Body Size Limits**   | 64KB للطلبات، 32KB للـ events، 4KB لـ CSP reports                           |
 | **Memory Cleanup**     | CSP + Rate Limiter maps تنظف دورياً كل 5 دقائق + hashed IPs                 |
 | **PII Protection**     | لا تخزين PII في localStorage، sessionStorage يحفظ orderId فقط بدون PII، IP hash في الشيت |
-| **Data Retention**     | `autoCleanupOldOrders()` في Apps Script يحذف طلبات أقدم من 90 يوم + `deleteCustomerData()` لحق النسيان |
+| **Data Retention**     | `autoCleanupOldOrders()` في Apps Script يحذف طلبات أقدم من 90 يوم + حذف يدوي عند الطلب (مفيش endpoint آلي — قرار المالك) |
 | **Security.txt**       | `/.well-known/security.txt` + `/security.txt` مع Contact و Expires          |
 | **API Hardening**      | كل APIs عليها `X-Robots-Tag: noindex` + `no-store` + `Vary: Origin` + COEP + OAC |
 

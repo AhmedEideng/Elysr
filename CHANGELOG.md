@@ -22,9 +22,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Removed deleted product references**: cleaned up dead references to `m-51`
   (Overtime) and `m-10` across pinned-order lists, category tabs, concern cards,
   internal-links, and compliance lists. Kept the **301 redirects** to protect SEO.
-- Current catalog: **82 products** (52 men · 23 women · 7 devices) after the five
-  pharma deletions (m-34, m-36, m-37, m-47, w-17); 3 remaining blocked
-  (m-38, m-43, m-45) stay on-site with layered noindex.
+- **2026-09-06/07 catalog decisions (owner)**: all blocks lifted on
+  m-38/m-43/m-45, then `m-43 Procomil Fort`, `m-38 Power 36`, `m-45
+  Viagra Pfizer` (Viagra for men) and `w-24 Black Widow Drops` deleted
+  permanently (301 → category, dangling references cleaned, tests updated).
+  Current catalog: **78 products** (49 men · 22 women · 7 devices) —
+  **zero prescription products**; 9 items permanently deleted in total
+  (8 pharma + w-24).
+- **GSC 404 cleanup (2026-09-07)**: 7 legacy URLs from the GSC "removed:
+  404" report (5 merged doorway guides + 2 removed products) now 301 to
+  their live destinations; 13 further URLs already had redirects
+  (self-heal on recrawl).
+- **Honest content pass (2026-09-06/07)**: unified article authorship
+  voice (no fake human-review claims — AI-generated content is labeled as
+  such), doctor name corrected to د. أحمد عابد, all marketing counts
+  (products/articles/guides) made dynamic from the data sources with
+  data-integrity drift guards, sitemap search template removed (GSC
+  reports it as an invalid tag — site-wide search is covered by the
+  SearchAction JSON-LD).
 - Articles count is **56** (51 via the `a()` helper + 5 authored as literal objects).
 
 ### 🔒 Security hardening
