@@ -383,7 +383,7 @@
     },
     {
       "source": "/products/m-38",
-      "destination": "/products/power-36-power-control-for-36-hours",
+      "destination": "/products/men",
       "permanent": true
     },
     {
@@ -418,7 +418,7 @@
     },
     {
       "source": "/products/m-45",
-      "destination": "/products/viagra-pfizer-100mg",
+      "destination": "/products/men",
       "permanent": true
     },
     {
@@ -603,7 +603,7 @@
     },
     {
       "source": "/products/w-24",
-      "destination": "/products/black-widow-drops",
+      "destination": "/products/women",
       "permanent": true
     },
     {
@@ -923,7 +923,7 @@
     },
     {
       "source": "/products/black-widow-drops-for-women",
-      "destination": "/products/black-widow-drops",
+      "destination": "/products/women",
       "permanent": true
     },
     {
@@ -1059,6 +1059,21 @@
     {
       "source": "/products/procomil-fort-tablet",
       "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/power-36-power-control-for-36-hours",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/viagra-pfizer-100mg",
+      "destination": "/products/men",
+      "permanent": true
+    },
+    {
+      "source": "/products/black-widow-drops",
+      "destination": "/products/women",
       "permanent": true
     }
   ]

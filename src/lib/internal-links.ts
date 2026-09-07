@@ -403,7 +403,7 @@ export function getProductsForArticle(articleSlug: string): string[] {
         titleAndContent.includes("نقط") ||
         titleAndContent.includes("برود")
       ) {
-        return ["w-02", "w-15", "w-24", "w-16", "w-05", "w-12"]; // Drops first
+        return ["w-02", "w-15", "w-16", "w-05", "w-12"]; // Drops first (w-24 اتحذفت 2026-09-07)
       }
       return ["w-02", "w-15", "w-16", "w-05", "w-12", "w-04"];
     }

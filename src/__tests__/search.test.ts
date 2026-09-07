@@ -41,7 +41,8 @@ describe("searchAllPublicProducts (global /search?q=)", () => {
   });
 
   describe("Egyptian dialect synonyms (نقط/قطرات)", () => {
-    const DROP_IDS = ["w-02", "w-03", "w-15", "w-18", "w-24"];
+    // (w-24 Black Widow اتحذفت 2026-09-07 — اتشالت من القائمة)
+    const DROP_IDS = ["w-02", "w-03", "w-15", "w-18"];
 
     it("searching the dialect word 'نقط' finds all drops products", () => {
       const res = searchAllPublicProducts("نقط");

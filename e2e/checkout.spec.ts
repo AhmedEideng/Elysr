@@ -45,22 +45,25 @@ test("customer can add a product, update quantity, calculate shipping and submit
   });
 });
 
-test("unblocked power-36 is a fully indexable regular product (owner decision 2026-09-06)", async ({
-  page,
+test("power-36, viagra-pfizer, black-widow deleted: legacy URLs 301 to their category", async ({
+  baseURL,
 }) => {
-  // After the owner lifted all pharma blocks, power-36 must be a normal
-  // indexable product: 200, NO noindex meta/header, linked in the category.
-  const path = "/products/power-36-power-control-for-36-hours";
-  const response = await page.goto(path);
-  expect(response?.status()).toBe(200);
-  const robotsMeta = (await page.locator('meta[name="robots"]').getAttribute("content")) ?? "";
-  expect(robotsMeta).not.toContain("noindex");
-  expect(response?.headers()["x-robots-tag"] ?? "").not.toContain("noindex");
-  const imageResponse = await page.request.get("/images/power-36-power-control-for-36-hours.webp");
-  expect(imageResponse.headers()["x-robots-tag"] ?? "").not.toContain("noimageindex");
-
-  await page.goto("/products/men");
-  await expect(page.locator(`a[href="${path}"]`).first()).toBeAttached();
+  // Owner decision 2026-09-07: m-38 Power 36, m-45 Viagra Pfizer and
+  // w-24 Black Widow Drops deleted permanently — every legacy URL must
+  // 301 to its category, and the product pages must be real 404s.
+  const cases: Array<[string, string]> = [
+    ["/products/m-38", "/products/men"],
+    ["/products/power-36-power-control-for-36-hours", "/products/men"],
+    ["/products/m-45", "/products/men"],
+    ["/products/viagra-pfizer-100mg", "/products/men"],
+    ["/products/w-24", "/products/women"],
+    ["/products/black-widow-drops", "/products/women"],
+  ];
+  for (const [path, expected] of cases) {
+    const resp = await fetch(`${baseURL}${path}`, { redirect: "manual" });
+    expect(resp.status, path).toBe(301);
+    expect(resp.headers.get("location"), path).toBe(expected);
+  }
 });
 
 test("deleted product legacy URLs 301 to their category section", async ({ baseURL }) => {

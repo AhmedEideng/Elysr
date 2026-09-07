@@ -13,11 +13,12 @@
 // m-47 (Levitra), w-17 (Viagra for Women).
 
 /**
- * الحالة (2026-09-07): مفيش أي حظر — مفيش أدوية في الكتالوج مستبعدة.
- * (تاريخياً: 6 أدوية اتحذفت نهائياً من الكتالوج:
- *  m-34 Hard-On, m-36 Vegal, m-37 Cialis, m-43 Procomil Fort,
- *  m-47 Levitra, w-17 Viagra for Women.
- *  وm-38/m-45 كانت محظورة من الخلاصة لحد ما المالك ألغي الحظر 2026-09-06.)
+ * الحالة (2026-09-07): مفيش أي حظر — مفيش أدوية في الكتالوج خالص.
+ * 8 منتجات اتحذفت نهائياً على مدار الأيام: 7 أدوية (m-34 Hard-On,
+ * m-36 Vegal, m-37 Cialis, m-38 Power 36, m-43 Procomil Fort,
+ * m-45 Viagra Pfizer, m-47 Levitra, w-17 Viagra for Women) ومنتج
+ * w-24 (Black Widow Drops) — كلهم بقرارات المالك بعد مراجعات
+ * Google Merchant Center + قرار تجاري لبلاك ويدو.
  */
 export const GOOGLE_SHOPPING_BLOCKED = new Set<string>([]);
 

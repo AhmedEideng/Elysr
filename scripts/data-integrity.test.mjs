@@ -77,6 +77,9 @@ try {
     "viagra-for-women-20-tablets", // slug أقدم لـ w-17
     "viagra-20-tablets", // slug المنتج w-17 (حذف نهائي 2026-09-06)
     "procomil-fort-tablet", // m-43 (حذف نهائي 2026-09-07)
+    "power-36-power-control-for-36-hours", // m-38 (حذف نهائي 2026-09-07)
+    "viagra-pfizer-100mg", // m-45 (حذف نهائي 2026-09-07)
+    "black-widow-drops", // w-24 (حذف نهائي 2026-09-07)
     "viagra-1-2-3-2-10-tablets", // slug دوائي أقدم
   ];
   for (const slug of deletedPharmaSlugs) {
@@ -88,8 +91,8 @@ try {
 
   assert.equal(
     products.length,
-    81,
-    "Expected 81 products (6 pharma deleted permanently incl. m-43 final deletion 2026-09-07)",
+    78,
+    "Expected 78 products (8 deleted permanently: 7 pharma + w-24, final batch 2026-09-07)",
   );
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
   // 🧭 Anti-drift: أرقام الكتالوج/المحتوى hardcoded في نصوص التسويق = درفت
@@ -263,8 +266,8 @@ try {
   }, {});
   assert.deepEqual(
     categories,
-    { men: 51, women: 23, devices: 7 },
-    "Unexpected category split (81 = 51 men / 23 women / 7 devices)",
+    { men: 49, women: 22, devices: 7 },
+    "Unexpected category split (78 = 49 men / 22 women / 7 devices)",
   );
 
   const kreva = products.find((product) => product.id === "m-60");

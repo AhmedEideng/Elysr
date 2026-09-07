@@ -24,9 +24,9 @@ describe("GOOGLE_SHOPPING_BLOCKED — يستبعد الأدوية المرفوض
   it("فاضي بالكامل بعد قرار المالك بإلغاء الحظر (2026-09-06)", () => {
     // الحالة (2026-09-07): مفيش أي حظر — مفيش أدوية مستبعدة من الكتالوج.
     // (6 أدوية اتحذفت من الكتالوج نفسه: m-34,m-36,m-37,m-43,m-47,w-17.)
-    expect(GOOGLE_SHOPPING_BLOCKED.has("m-38")).toBe(false); // Power 36 — اتفك الحظر
+    expect(GOOGLE_SHOPPING_BLOCKED.has("m-38")).toBe(false); // Power 36 — اتحذف نهائيا (2026-09-07)
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-43")).toBe(false); // Procomil Fort — اتحذف نهائيا (2026-09-07)
-    expect(GOOGLE_SHOPPING_BLOCKED.has("m-45")).toBe(false); // Viagra Pfizer — اتفك الحظر
+    expect(GOOGLE_SHOPPING_BLOCKED.has("m-45")).toBe(false); // Viagra Pfizer — اتحذف نهائيا (2026-09-07)
     expect(GOOGLE_SHOPPING_BLOCKED.has("w-17")).toBe(false); // محذوفة نهائيا
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-01")).toBe(false); // منتج عادي
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-34")).toBe(false); // محذوف نهائيا
@@ -67,13 +67,12 @@ describe("isCatalogFeedEligible — الفلترة بالمخزون (الحظر 
   });
 
   it("الأدوية اللي اتفك عنها الحظر → بقت مؤهلة للخلاصة (قرار المالك)", () => {
-    // GOOGLE_SHOPPING_BLOCKED فاضي دلوقتي — المفيش مستبعد (m-43 اتحذفت)
-    expect(isCatalogFeedEligible({ id: "m-38", stock: 100 })).toBe(true); // Power 36
-    expect(isCatalogFeedEligible({ id: "m-45", stock: 50 })).toBe(true); // Viagra Pfizer
+    // GOOGLE_SHOPPING_BLOCKED فاضي — ومفيش أدوية في الكتالوج أصلًا دلوقتي
+    expect(isCatalogFeedEligible({ id: "m-01", stock: 100 })).toBe(true); // منتج عادي
   });
 
   it("مخزون = 0 → غير مؤهل (مهما كان المنتج)", () => {
     expect(isCatalogFeedEligible({ id: "m-01", stock: 0 })).toBe(false);
-    expect(isCatalogFeedEligible({ id: "m-38", stock: 0 })).toBe(false);
+    expect(isCatalogFeedEligible({ id: "m-01", stock: 0 })).toBe(false);
   });
 });

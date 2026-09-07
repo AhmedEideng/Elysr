@@ -34,8 +34,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const DIST = resolve(ROOT, "dist");
 const PORT = parseInt(process.env.PORT || "8080", 10);
-// 2026-09-06: قرار المالك بإلغاء حظر m-38/m-45 (وm-43 اتحذفت نهائيا 2026-09-07)
-// — مفيش صفحات noindex تاني.
+// مفيش صفحات noindex تاني: كل الأدوية المحظورة اتحذفت نهائيا (2026-09-06/07).
 const NOINDEX_PRODUCT_PATHS = new Set();
 const NOINDEX_IMAGE_NAMES = new Set();
 

@@ -221,7 +221,38 @@ async function syncRedirects() {
       },
       {
         source: "/products/black-widow-drops-for-women",
-        destination: "/products/black-widow-drops",
+        // w-24 اتحذفت 2026-09-07 — slug أقدم بيقع على الفئة
+        destination: "/products/women",
+        permanent: true,
+      },
+      {
+        source: "/products/black-widow-drops",
+        // w-24 Black Widow — حذف نهائي 2026-09-07
+        destination: "/products/women",
+        permanent: true,
+      },
+      {
+        source: "/products/m-38",
+        // Power 36 — حذف نهائي 2026-09-07
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/power-36-power-control-for-36-hours",
+        // slug m-38 — حذف نهائي 2026-09-07
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/m-45",
+        // Viagra Pfizer — حذف نهائي 2026-09-07
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/viagra-pfizer-100mg",
+        // slug m-45 — حذف نهائي 2026-09-07
+        destination: "/products/men",
         permanent: true,
       },
       // Consolidated SEO guide aliases retained after thin pages were removed.

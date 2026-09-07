@@ -17,9 +17,8 @@ export const products: Product[] = [...men, ...women, ...devices];
 /**
  * ترتيب ثابت لأول المنتجات في كل فئة — الباقي بالشعبية
  * ملاحظات:
- * - الأدوية المحذوفة (m-34,m-36,m-37,m-43,m-47,w-17) مفيش منها أي تثبيت.
- * - m-38/m-45 كانت مستثناة من التثبيت العلوي (حظر قديم اتلغى 2026-09-06)
- *   وفضلوا خارج التثبيت (فك الحظر ≠ تثبيت).
+ * - الأدوية المحذوفة (m-34,m-36,m-37,m-38,m-43,m-45,m-47,w-17) مفيش منها أي تثبيت.
+ * - m-38/m-45 فضلوا خارج التثبيت لحد ما اتحذفوا نهائياً (2026-09-07).
  */
 const PINNED_MEN_ORDER = [
   "m-01", // Hammer of Thor - بديل آمن لـ Hard-On
@@ -46,7 +45,6 @@ export const getProductsByCategory = (cat: ProductCategory) => {
   ];
 
   const PINNED_WOMEN_LAST = [
-    "w-24", // Black Widow
     "w-23", // Toro Duro مناديل
     "w-20", // ماكس فيلر
   ];
@@ -158,9 +156,10 @@ export const getProductById = (id: string) => products.find((p) => p.id === id);
 
 /**
  * منتجات ظاهرة للعامة في صفحات الفئات.
- * 6 أدوية اتحذفت نهائياً من الكتالوج (m-34,m-36,m-37,m-43,m-47,w-17).
- * من 2026-09-06 مفيش أي حظر: كل المنتجات (81) ظاهرة في الفئات عادي
- * ومن غير noindex ولا استبعاد من feed/sitemap.
+ * 8 منتجات اتحذفت نهائياً (7 أدوية: m-34,m-36,m-37,m-38,m-43,m-45,m-47 +
+ * w-17، ومنتج w-24 Black Widow بقرار المالك 2026-09-07).
+ * مفيش أي حظر: كل المنتجات (78) ظاهرة في الفئات عادي ومن غير
+ * noindex ولا استبعاد من feed/sitemap.
  */
 export const getPublicProductsByCategory = (cat: ProductCategory) => {
   return getProductsByCategory(cat);

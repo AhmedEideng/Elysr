@@ -1402,3 +1402,41 @@ Procomil Fort "مطابق عليها" في Google Merchant Center، المالك
 ### التحقق
 محلي: 301s شغالين + feed 81 (m-43 غايب) + 172 وحدة + integrity +
 schemas + build 247. على الإنتاج: 308 للوجهتين بعد الدبليو.
+
+## 41) الحذف النهائي لـ m-38 + m-45 + w-24 — قرار المالك (2026-09-07)
+
+### السياق
+بعد ظهور Power 36 "مطابق عليها" في MC (سبب حذف m-43 بالأمس)، المالك
+قرر حذف Power 36 (m-38) وفياجرا الرجالي (m-45 Viagra Pfizer) — وبكده
+**مفيش أدوية خالص في الكتالوج**. وكمان قطرات بلاك ويدو النسائية (w-24)
+قرار تجاري.
+
+### العملية
+1. men.ts: m-38 + m-45 اتحذفوا (49 men)
+2. women.ts: w-24 اتحذف (22 women) + اتشالت من **PINNED_WOMEN_LAST**
+   (كانت مثبتة آخر الفئات!)
+3. إجمالي: **78 منتج** (49 رجالي / 22 نساء / 7 أجهزة)
+4. redirects (vercel.json + sync script):
+   - /products/m-38 + power-36-power-control-for-36-hours → /products/men
+   - /products/m-45 + viagra-pfizer-100mg → /products/men
+   - /products/w-24 + black-widow-drops (+black-widow-drops-for-women)
+     → /products/women
+5. tests: e2e (اختبار فك حظر power-36 اتبدل باختبار الحذف الستة) +
+   compliance (m-38/m-45 = محذوفين) + data-integrity (78 = 49/22/7 +
+   3 slugs في قايمة الـ 301s) + validate-schemas (4 ملفات تاريخية)
+6. مفيش crossSell/landing page كانت بتشير للتلاتة (تم المسح)
+
+### النتيجة
+- الكتالوج: **صفر أدوية** — 78 منتج آمن
+- feed: 78 · sitemap: 78 · مفيش noindex rules متبقية
+- MC: التلاتة هيتشالوا في الزرفة الجاية (301s) أو يدوي فورًا
+
+### ملاحظات إضافية من عملية الحذف (2026-09-07)
+- **search.test.ts**: DROP_IDS كان بيحتوي w-24 (اختبار مرادفات
+  نقط/قطرات) — اتشالت من القائمة.
+- **landing-pages.ts ×4**: productIds كانت بتشير w-24 في 4 صفحات
+  (منهم marital-health-products) — اتنضفت (data-integrity لاقاه).
+- **internal-links.ts**: توصيات مقالات "قطرات" كانت بتقدم w-24 —
+  اتشالت.
+- e2e: اختبار فك الحظر القديم (power-36 indexable) اتبدل باختبار
+  الحذف الجديد (6 legacy URLs → 301 لفئاتهم).
