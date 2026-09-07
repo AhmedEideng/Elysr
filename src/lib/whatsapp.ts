@@ -15,18 +15,16 @@ export const waLink = (message: string) =>
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
 /**
- * تاريخ/وقت الطلب بصيغة مصرية ثابتة (توقيت القاهرة — الشركة) وأرقام لاتينية
- * لمطابقة بقية الرسالة (الأسعار). مثال: "الاثنين، 07/09/2026، 5:45 م"
+ * تاريخ الطلب بصيغة مصرية ثابتة (توقيت القاهرة — الشركة) وأرقام لاتينية
+ * لمطابقة بقية الرسالة (الأسعار). التاريخ فقط (بدون وقت) بطلب المالك.
+ * مثال: "الثلاثاء، 08/09/2026"
  */
-export const formatOrderDateTime = (date: Date = new Date()): string =>
+export const formatOrderDate = (date: Date = new Date()): string =>
   new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
     weekday: "long",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
     timeZone: "Africa/Cairo",
   })
     .format(date)
@@ -64,12 +62,27 @@ export const buildOrderMessage = (
   const origin =
     typeof window !== "undefined" ? window.location.origin : "https://elysrmedical.store";
 
+  // المجموع والخصم بيتحسبوا الأول — عشان الـ label المبادرة يظهر بس
+  // للطلبات اللي فعلاً لقت خصم (المبادرة دائمة، فلو الشرط isPromoActive
+  // بس هيطلع على كل رسالة — زعزعة ثقة في الطلبات اللي من غير خصم)
+  const subtotalBefore = items.reduce(
+    (sum, it) => sum + (it.originalPrice ?? it.price) * it.qty,
+    0,
+  );
+  const tier = isPromoActive() ? getPromoTier(subtotalBefore) : null;
+  // 🔀 الخصمان متبادلا الاستبعاد (نفس قاعدة السلة والسيرفر):
+  // عند اكتمال الباقة → خصم الباقة (20%) هو الخصم الوحيد المعروض
+  const bundleActive = !!bundleDiscount && bundleDiscount > 0;
+  const discount = bundleActive ? 0 : tier ? Math.round(subtotalBefore * tier.discount) : 0;
+  const subtotalAfter = subtotalBefore - discount - (bundleDiscount || 0);
+
   lines.push("👇 اضغط إرسال الآن لتأكيد طلبك وتجهيز الشحن الفوري 🚚");
   lines.push("----------------------------------------");
   lines.push("طلب جديد من اليسر ميديكال");
   if (orderId) lines.push(`رقم الطلب: ${orderId}`);
-  lines.push(`التاريخ والوقت: ${formatOrderDateTime()}`);
-  if (isPromoActive()) lines.push(PROMO_ORDER_LABEL);
+  lines.push(`التاريخ: ${formatOrderDate()}`);
+  // Label المبادرة يظهر بس لو الطلب لخصم فعلي (شريحة أو باقة)
+  if (discount > 0 || bundleActive) lines.push(PROMO_ORDER_LABEL);
   lines.push("");
 
   if (customer?.name) lines.push(`الاسم: ${sanitizeForMsg(customer.name, 100)}`);
@@ -83,22 +96,13 @@ export const buildOrderMessage = (
   lines.push("");
 
   lines.push("المنتجات:");
-  let subtotalBefore = 0;
   items.forEach((it, i) => {
     const unitPrice = it.originalPrice ?? it.price;
     const lineTotal = unitPrice * it.qty;
-    subtotalBefore += lineTotal;
     lines.push(`${i + 1}. ${sanitizeForMsg(it.name, 150)} × ${it.qty} = ${lineTotal} ج.م`);
     const linkKey = it.slug ?? it.id;
     if (linkKey) lines.push(`${origin}/products/${linkKey}`);
   });
-
-  const tier = isPromoActive() ? getPromoTier(subtotalBefore) : null;
-  // 🔀 الخصمان متبادلا الاستبعاد (نفس قاعدة السلة والسيرفر):
-  // عند اكتمال الباقة → خصم الباقة (20%) هو الخصم الوحيد المعروض
-  const bundleActive = !!bundleDiscount && bundleDiscount > 0;
-  const discount = bundleActive ? 0 : tier ? Math.round(subtotalBefore * tier.discount) : 0;
-  const subtotalAfter = subtotalBefore - discount - (bundleDiscount || 0);
 
   lines.push("");
   lines.push(`المجموع: ${subtotalBefore} ج.م`);
