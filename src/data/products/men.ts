@@ -28,7 +28,7 @@ export const men: Product[] = [
     image: "/images/hammer-of-thor-capsules.webp",
     rating: 4.9,
     reviews: 48,
-    stock: 80,
+    stock: 5000,
     featured: true,
   },
   {
@@ -57,7 +57,7 @@ export const men: Product[] = [
     image: "/images/boost-up-man-korean-ginseng-maca-root.webp",
     rating: 4.8,
     reviews: 44,
-    stock: 120,
+    stock: 5000,
     featured: true,
   },
   {
@@ -87,7 +87,7 @@ export const men: Product[] = [
     image: "/images/powerfully-up-advanced-male-performance-formula.webp",
     rating: 4.7,
     reviews: 65,
-    stock: 60,
+    stock: 5000,
     featured: true,
   },
   {
@@ -117,7 +117,7 @@ export const men: Product[] = [
     image: "/images/ginseng-1650-capsules.webp",
     rating: 4.7,
     reviews: 42,
-    stock: 90,
+    stock: 5000,
     featured: true,
   },
   {
@@ -145,7 +145,7 @@ export const men: Product[] = [
     image: "/images/deadly-shark-power-48000-delay-cream.webp",
     rating: 4.7,
     reviews: 46,
-    stock: 150,
+    stock: 5000,
     featured: true,
   },
   {
@@ -174,7 +174,7 @@ export const men: Product[] = [
     image: "/images/treand-gel.webp",
     rating: 4.8,
     reviews: 70,
-    stock: 200,
+    stock: 5000,
     featured: true,
   },
   {
@@ -201,7 +201,7 @@ export const men: Product[] = [
     image: "/images/dooz-14000-delay-cream.webp",
     rating: 4.9,
     reviews: 73,
-    stock: 70,
+    stock: 5000,
     featured: true,
   },
 
@@ -231,7 +231,7 @@ export const men: Product[] = [
     image: "/images/royal-cream-for-men.webp",
     rating: 4.7,
     reviews: 50,
-    stock: 50,
+    stock: 5000,
     featured: true,
   },
 
@@ -261,7 +261,7 @@ export const men: Product[] = [
     image: "/images/vitamax-doubleshot-energy-honey.webp",
     rating: 4.7,
     reviews: 165,
-    stock: 100,
+    stock: 5000,
   },
   {
     id: "m-12",
@@ -290,7 +290,7 @@ export const men: Product[] = [
     image: "/images/royal-honey-gold-vip.webp",
     rating: 4.8,
     reviews: 51,
-    stock: 65,
+    stock: 5000,
   },
   {
     id: "m-13",
@@ -318,7 +318,7 @@ export const men: Product[] = [
     image: "/images/king-royal-honey-plus.webp",
     rating: 4.7,
     reviews: 83,
-    stock: 140,
+    stock: 5000,
   },
   {
     id: "m-14",
@@ -346,7 +346,7 @@ export const men: Product[] = [
     image: "/images/royal-chocolate-for-him.webp",
     rating: 4.7,
     reviews: 128,
-    stock: 180,
+    stock: 5000,
   },
   {
     id: "m-15",
@@ -374,7 +374,7 @@ export const men: Product[] = [
     image: "/images/hilti-bitter-chocolate-man.webp",
     rating: 4.7,
     reviews: 97,
-    stock: 110,
+    stock: 5000,
   },
   {
     id: "m-16",
@@ -402,7 +402,7 @@ export const men: Product[] = [
     image: "/images/excellent-hard-leopard-miracle-of-honey.webp",
     rating: 4.8,
     reviews: 104,
-    stock: 80,
+    stock: 5000,
   },
   {
     id: "m-17",
@@ -429,7 +429,7 @@ export const men: Product[] = [
     image: "/images/procomil-delay-cream-20g.webp",
     rating: 4.7,
     reviews: 156,
-    stock: 75,
+    stock: 5000,
   },
   {
     id: "m-18",
@@ -456,7 +456,7 @@ export const men: Product[] = [
     image: "/images/royal-honey-natural-honey.webp",
     rating: 4.7,
     reviews: 39,
-    stock: 160,
+    stock: 5000,
   },
   {
     id: "m-19",
@@ -483,7 +483,7 @@ export const men: Product[] = [
     image: "/images/manuka-honey-75.webp",
     rating: 4.8,
     reviews: 38,
-    stock: 100,
+    stock: 5000,
   },
   {
     id: "m-20",
@@ -512,7 +512,7 @@ export const men: Product[] = [
     image: "/images/golden-horse-royal-honey-plus.webp",
     rating: 4.9,
     reviews: 149,
-    stock: 55,
+    stock: 5000,
     featured: true,
   },
   {
@@ -540,7 +540,7 @@ export const men: Product[] = [
     image: "/images/original-black-horse-caviar-code.webp",
     rating: 4.8,
     reviews: 72,
-    stock: 65,
+    stock: 5000,
     featured: true,
   },
   {
@@ -569,7 +569,7 @@ export const men: Product[] = [
     image: "/images/black-horse-vital-honey.webp",
     rating: 4.9,
     reviews: 62,
-    stock: 50,
+    stock: 5000,
     featured: true,
   },
   {
@@ -597,7 +597,7 @@ export const men: Product[] = [
     image: "/images/honeymoon-exclusive-herbal-honey.webp",
     rating: 4.8,
     reviews: 103,
-    stock: 60,
+    stock: 5000,
   },
   {
     id: "m-24",
@@ -624,7 +624,7 @@ export const men: Product[] = [
     image: "/images/super-royal-honey-top-pharma.webp",
     rating: 4.8,
     reviews: 126,
-    stock: 45,
+    stock: 5000,
   },
   {
     id: "m-25",
@@ -651,7 +651,7 @@ export const men: Product[] = [
     image: "/images/al-ghazala-rayqa-delay-erection-cards.webp",
     rating: 4.7,
     reviews: 41,
-    stock: 90,
+    stock: 5000,
   },
   {
     id: "m-26",
@@ -679,7 +679,7 @@ export const men: Product[] = [
     image: "/images/majestic-black-stallion.webp",
     rating: 4.8,
     reviews: 91,
-    stock: 55,
+    stock: 5000,
   },
   {
     id: "m-27",
@@ -706,7 +706,7 @@ export const men: Product[] = [
     image: "/images/xsteel-nutriceutical-original-black-horse.webp",
     rating: 4.7,
     reviews: 86,
-    stock: 80,
+    stock: 5000,
   },
   {
     id: "m-28",
@@ -733,7 +733,7 @@ export const men: Product[] = [
     image: "/images/stallion-delay-gel-for-men.webp",
     rating: 4.7,
     reviews: 81,
-    stock: 120,
+    stock: 5000,
   },
   {
     id: "m-29",
@@ -759,7 +759,7 @@ export const men: Product[] = [
     image: "/images/toro-duro-sachets.webp",
     rating: 4.7,
     reviews: 68,
-    stock: 70,
+    stock: 5000,
   },
   {
     id: "m-30",
@@ -786,7 +786,7 @@ export const men: Product[] = [
     image: "/images/emla-7-5-lidocaine-prilocaine-cream.webp",
     rating: 4.8,
     reviews: 53,
-    stock: 75,
+    stock: 5000,
   },
   {
     id: "m-31",
@@ -814,7 +814,7 @@ export const men: Product[] = [
     image: "/images/sotara-gel-50gm.webp",
     rating: 4.7,
     reviews: 36,
-    stock: 100,
+    stock: 5000,
   },
   {
     id: "m-32",
@@ -842,7 +842,7 @@ export const men: Product[] = [
     image: "/images/titan-gel-gold-special-gel-for-men.webp",
     rating: 4.7,
     reviews: 26,
-    stock: 60,
+    stock: 5000,
   },
   {
     id: "m-33",
@@ -869,7 +869,7 @@ export const men: Product[] = [
     image: "/images/mr-big-extra-size-cream-qlito.webp",
     rating: 4.7,
     reviews: 67,
-    stock: 85,
+    stock: 5000,
   },
   {
     id: "m-35",
@@ -896,7 +896,7 @@ export const men: Product[] = [
     image: "/images/uni-smart-90-minutes-delay-cream.webp",
     rating: 4.7,
     reviews: 132,
-    stock: 100,
+    stock: 5000,
   },
   {
     id: "m-39",
@@ -923,7 +923,7 @@ export const men: Product[] = [
     image: "/images/leech-miracle-cream-for-men.webp",
     rating: 4.7,
     reviews: 124,
-    stock: 85,
+    stock: 5000,
   },
   {
     id: "m-40",
@@ -950,7 +950,7 @@ export const men: Product[] = [
     image: "/images/dmas-chocolate-for-men-9-pcs.webp",
     rating: 4.7,
     reviews: 75,
-    stock: 45,
+    stock: 5000,
   },
   {
     id: "m-41",
@@ -977,7 +977,7 @@ export const men: Product[] = [
     image: "/images/procomil-plus-spray.webp",
     rating: 4.7,
     reviews: 127,
-    stock: 95,
+    stock: 5000,
   },
   {
     id: "m-42",
@@ -1004,7 +1004,7 @@ export const men: Product[] = [
     image: "/images/red-bull-energy-sachets-men.webp",
     rating: 4.7,
     reviews: 63,
-    stock: 140,
+    stock: 5000,
   },
   {
     id: "m-44",
@@ -1032,7 +1032,7 @@ export const men: Product[] = [
     image: "/images/remans-dooz-14000-spray.webp",
     rating: 4.8,
     reviews: 66,
-    stock: 70,
+    stock: 5000,
   },
   {
     id: "m-46",
@@ -1060,7 +1060,7 @@ export const men: Product[] = [
     image: "/images/big-penis-usa-capsules.webp",
     rating: 4.7,
     reviews: 140,
-    stock: 110,
+    stock: 5000,
   },
   {
     id: "m-48",
@@ -1089,7 +1089,7 @@ export const men: Product[] = [
     image: "/images/titan-gel-special-gel-for-penis.webp",
     rating: 4.8,
     reviews: 37,
-    stock: 55,
+    stock: 5000,
     featured: true,
   },
   {
@@ -1117,7 +1117,7 @@ export const men: Product[] = [
     image: "/images/power-fully-up-tablets.webp",
     rating: 4.7,
     reviews: 69,
-    stock: 90,
+    stock: 5000,
   },
   {
     id: "m-50",
@@ -1144,7 +1144,7 @@ export const men: Product[] = [
     image: "/images/black-horse-long-time-gel.webp",
     rating: 4.7,
     reviews: 162,
-    stock: 115,
+    stock: 5000,
   },
 
   {
@@ -1174,7 +1174,7 @@ export const men: Product[] = [
     image: "/images/top-sellers-honey.webp",
     rating: 4.9,
     reviews: 110,
-    stock: 65,
+    stock: 5000,
     featured: true,
   },
   {
@@ -1203,7 +1203,7 @@ export const men: Product[] = [
     image: "/images/night-hunter-capsules.webp",
     rating: 4.7,
     reviews: 163,
-    stock: 85,
+    stock: 5000,
   },
   {
     id: "m-54",
@@ -1230,7 +1230,7 @@ export const men: Product[] = [
     image: "/images/ferrari-chocolate-men.webp",
     rating: 4.8,
     reviews: 47,
-    stock: 120,
+    stock: 5000,
   },
   {
     id: "m-55",
@@ -1257,7 +1257,7 @@ export const men: Product[] = [
     image: "/images/procomil-spray-indian.webp",
     rating: 4.5,
     reviews: 79,
-    stock: 75,
+    stock: 5000,
   },
 
   {
@@ -1285,7 +1285,7 @@ export const men: Product[] = [
     image: "/images/dal-el-khair-honey-cherry.webp",
     rating: 4.8,
     reviews: 154,
-    stock: 130,
+    stock: 5000,
     featured: true,
   },
 
@@ -1314,7 +1314,7 @@ export const men: Product[] = [
     image: "/images/lovezone-intimacy-at-its-peak-10x400mg.webp",
     rating: 4.8,
     reviews: 64,
-    stock: 280,
+    stock: 5000,
   },
   {
     id: "m-60",
@@ -1343,7 +1343,7 @@ export const men: Product[] = [
     image: "/images/kreva-gel-for-men.webp",
     rating: 5,
     reviews: 73,
-    stock: 150,
+    stock: 5000,
   },
   {
     id: "m-61",
@@ -1370,6 +1370,6 @@ export const men: Product[] = [
     image: "/images/golden-turkish-chocolate-for-men.webp",
     rating: 4.9,
     reviews: 99,
-    stock: 120,
+    stock: 5000,
   },
 ];

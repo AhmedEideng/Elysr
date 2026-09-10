@@ -27,7 +27,7 @@ export const devices: Product[] = [
     image: "/images/digital-vacuum-pump.webp",
     rating: 4.9,
     reviews: 139,
-    stock: 50,
+    stock: 5000,
     featured: true,
   },
   {
@@ -56,7 +56,7 @@ export const devices: Product[] = [
     image: "/images/power-ved-kit-with-k-y-jelly.webp",
     rating: 4.8,
     reviews: 76,
-    stock: 80,
+    stock: 5000,
     featured: true,
   },
   {
@@ -84,7 +84,7 @@ export const devices: Product[] = [
     image: "/images/manual-ved-pump.webp",
     rating: 4.7,
     reviews: 147,
-    stock: 200,
+    stock: 5000,
   },
   {
     id: "d-04",
@@ -110,7 +110,7 @@ export const devices: Product[] = [
     image: "/images/big-bro-breast-enlargement-cup.webp",
     rating: 4.8,
     reviews: 160,
-    stock: 150,
+    stock: 5000,
   },
   {
     id: "d-05",
@@ -135,7 +135,7 @@ export const devices: Product[] = [
     image: "/images/manual-vacuum-pump-sawft.webp",
     rating: 4.5,
     reviews: 59,
-    stock: 15,
+    stock: 5000,
   },
   {
     id: "d-06",
@@ -162,7 +162,7 @@ export const devices: Product[] = [
     image: "/images/proextender-traction-device.webp",
     rating: 4.7,
     reviews: 152,
-    stock: 20,
+    stock: 5000,
   },
   {
     id: "d-07",
@@ -189,6 +189,6 @@ export const devices: Product[] = [
     image: "/images/konsa-electric-pump.webp",
     rating: 4.8,
     reviews: 96,
-    stock: 12,
+    stock: 5000,
   },
 ];

@@ -25,7 +25,7 @@
     "image": "/images/hammer-of-thor-capsules.webp",
     "rating": 4.9,
     "reviews": 48,
-    "stock": 80,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -54,7 +54,7 @@
     "image": "/images/boost-up-man-korean-ginseng-maca-root.webp",
     "rating": 4.8,
     "reviews": 44,
-    "stock": 120,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -84,7 +84,7 @@
     "image": "/images/powerfully-up-advanced-male-performance-formula.webp",
     "rating": 4.7,
     "reviews": 65,
-    "stock": 60,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -114,7 +114,7 @@
     "image": "/images/ginseng-1650-capsules.webp",
     "rating": 4.7,
     "reviews": 42,
-    "stock": 90,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -139,7 +139,7 @@
     "image": "/images/deadly-shark-power-48000-delay-cream.webp",
     "rating": 4.7,
     "reviews": 46,
-    "stock": 150,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -167,7 +167,7 @@
     "image": "/images/treand-gel.webp",
     "rating": 4.8,
     "reviews": 70,
-    "stock": 200,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -191,7 +191,7 @@
     "image": "/images/dooz-14000-delay-cream.webp",
     "rating": 4.9,
     "reviews": 73,
-    "stock": 70,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -217,7 +217,7 @@
     "image": "/images/royal-cream-for-men.webp",
     "rating": 4.7,
     "reviews": 50,
-    "stock": 50,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -243,7 +243,7 @@
     "image": "/images/vitamax-doubleshot-energy-honey.webp",
     "rating": 4.7,
     "reviews": 165,
-    "stock": 100
+    "stock": 5000
   },
   {
     "id": "m-12",
@@ -269,7 +269,7 @@
     "image": "/images/royal-honey-gold-vip.webp",
     "rating": 4.8,
     "reviews": 51,
-    "stock": 65
+    "stock": 5000
   },
   {
     "id": "m-13",
@@ -294,7 +294,7 @@
     "image": "/images/king-royal-honey-plus.webp",
     "rating": 4.7,
     "reviews": 83,
-    "stock": 140
+    "stock": 5000
   },
   {
     "id": "m-14",
@@ -319,7 +319,7 @@
     "image": "/images/royal-chocolate-for-him.webp",
     "rating": 4.7,
     "reviews": 128,
-    "stock": 180
+    "stock": 5000
   },
   {
     "id": "m-15",
@@ -344,7 +344,7 @@
     "image": "/images/hilti-bitter-chocolate-man.webp",
     "rating": 4.7,
     "reviews": 97,
-    "stock": 110
+    "stock": 5000
   },
   {
     "id": "m-16",
@@ -369,7 +369,7 @@
     "image": "/images/excellent-hard-leopard-miracle-of-honey.webp",
     "rating": 4.8,
     "reviews": 104,
-    "stock": 80
+    "stock": 5000
   },
   {
     "id": "m-17",
@@ -393,7 +393,7 @@
     "image": "/images/procomil-delay-cream-20g.webp",
     "rating": 4.7,
     "reviews": 156,
-    "stock": 75
+    "stock": 5000
   },
   {
     "id": "m-18",
@@ -417,7 +417,7 @@
     "image": "/images/royal-honey-natural-honey.webp",
     "rating": 4.7,
     "reviews": 39,
-    "stock": 160
+    "stock": 5000
   },
   {
     "id": "m-19",
@@ -441,7 +441,7 @@
     "image": "/images/manuka-honey-75.webp",
     "rating": 4.8,
     "reviews": 38,
-    "stock": 100
+    "stock": 5000
   },
   {
     "id": "m-20",
@@ -469,7 +469,7 @@
     "image": "/images/golden-horse-royal-honey-plus.webp",
     "rating": 4.9,
     "reviews": 149,
-    "stock": 55,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -494,7 +494,7 @@
     "image": "/images/original-black-horse-caviar-code.webp",
     "rating": 4.8,
     "reviews": 72,
-    "stock": 65,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -520,7 +520,7 @@
     "image": "/images/black-horse-vital-honey.webp",
     "rating": 4.9,
     "reviews": 62,
-    "stock": 50,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -545,7 +545,7 @@
     "image": "/images/honeymoon-exclusive-herbal-honey.webp",
     "rating": 4.8,
     "reviews": 103,
-    "stock": 60
+    "stock": 5000
   },
   {
     "id": "m-24",
@@ -569,7 +569,7 @@
     "image": "/images/super-royal-honey-top-pharma.webp",
     "rating": 4.8,
     "reviews": 126,
-    "stock": 45
+    "stock": 5000
   },
   {
     "id": "m-25",
@@ -593,7 +593,7 @@
     "image": "/images/al-ghazala-rayqa-delay-erection-cards.webp",
     "rating": 4.7,
     "reviews": 41,
-    "stock": 90
+    "stock": 5000
   },
   {
     "id": "m-26",
@@ -618,7 +618,7 @@
     "image": "/images/majestic-black-stallion.webp",
     "rating": 4.8,
     "reviews": 91,
-    "stock": 55
+    "stock": 5000
   },
   {
     "id": "m-27",
@@ -642,7 +642,7 @@
     "image": "/images/xsteel-nutriceutical-original-black-horse.webp",
     "rating": 4.7,
     "reviews": 86,
-    "stock": 80
+    "stock": 5000
   },
   {
     "id": "m-28",
@@ -668,7 +668,7 @@
     "image": "/images/stallion-delay-gel-for-men.webp",
     "rating": 4.7,
     "reviews": 81,
-    "stock": 120
+    "stock": 5000
   },
   {
     "id": "m-29",
@@ -691,7 +691,7 @@
     "image": "/images/toro-duro-sachets.webp",
     "rating": 4.7,
     "reviews": 68,
-    "stock": 70
+    "stock": 5000
   },
   {
     "id": "m-30",
@@ -715,7 +715,7 @@
     "image": "/images/emla-7-5-lidocaine-prilocaine-cream.webp",
     "rating": 4.8,
     "reviews": 53,
-    "stock": 75
+    "stock": 5000
   },
   {
     "id": "m-31",
@@ -742,7 +742,7 @@
     "image": "/images/sotara-gel-50gm.webp",
     "rating": 4.7,
     "reviews": 36,
-    "stock": 100
+    "stock": 5000
   },
   {
     "id": "m-32",
@@ -769,7 +769,7 @@
     "image": "/images/titan-gel-gold-special-gel-for-men.webp",
     "rating": 4.7,
     "reviews": 26,
-    "stock": 60
+    "stock": 5000
   },
   {
     "id": "m-33",
@@ -793,7 +793,7 @@
     "image": "/images/mr-big-extra-size-cream-qlito.webp",
     "rating": 4.7,
     "reviews": 67,
-    "stock": 85
+    "stock": 5000
   },
   {
     "id": "m-35",
@@ -817,7 +817,7 @@
     "image": "/images/uni-smart-90-minutes-delay-cream.webp",
     "rating": 4.7,
     "reviews": 132,
-    "stock": 100
+    "stock": 5000
   },
   {
     "id": "m-39",
@@ -841,7 +841,7 @@
     "image": "/images/leech-miracle-cream-for-men.webp",
     "rating": 4.7,
     "reviews": 124,
-    "stock": 85
+    "stock": 5000
   },
   {
     "id": "m-40",
@@ -865,7 +865,7 @@
     "image": "/images/dmas-chocolate-for-men-9-pcs.webp",
     "rating": 4.7,
     "reviews": 75,
-    "stock": 45
+    "stock": 5000
   },
   {
     "id": "m-41",
@@ -891,7 +891,7 @@
     "image": "/images/procomil-plus-spray.webp",
     "rating": 4.7,
     "reviews": 127,
-    "stock": 95
+    "stock": 5000
   },
   {
     "id": "m-42",
@@ -915,7 +915,7 @@
     "image": "/images/red-bull-energy-sachets-men.webp",
     "rating": 4.7,
     "reviews": 63,
-    "stock": 140
+    "stock": 5000
   },
   {
     "id": "m-44",
@@ -942,7 +942,7 @@
     "image": "/images/remans-dooz-14000-spray.webp",
     "rating": 4.8,
     "reviews": 66,
-    "stock": 70
+    "stock": 5000
   },
   {
     "id": "m-46",
@@ -969,7 +969,7 @@
     "image": "/images/big-penis-usa-capsules.webp",
     "rating": 4.7,
     "reviews": 140,
-    "stock": 110
+    "stock": 5000
   },
   {
     "id": "m-48",
@@ -997,7 +997,7 @@
     "image": "/images/titan-gel-special-gel-for-penis.webp",
     "rating": 4.8,
     "reviews": 37,
-    "stock": 55,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -1022,7 +1022,7 @@
     "image": "/images/power-fully-up-tablets.webp",
     "rating": 4.7,
     "reviews": 69,
-    "stock": 90
+    "stock": 5000
   },
   {
     "id": "m-50",
@@ -1048,7 +1048,7 @@
     "image": "/images/black-horse-long-time-gel.webp",
     "rating": 4.7,
     "reviews": 162,
-    "stock": 115
+    "stock": 5000
   },
   {
     "id": "m-52",
@@ -1076,7 +1076,7 @@
     "image": "/images/top-sellers-honey.webp",
     "rating": 4.9,
     "reviews": 110,
-    "stock": 65,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -1104,7 +1104,7 @@
     "image": "/images/night-hunter-capsules.webp",
     "rating": 4.7,
     "reviews": 163,
-    "stock": 85
+    "stock": 5000
   },
   {
     "id": "m-54",
@@ -1128,7 +1128,7 @@
     "image": "/images/ferrari-chocolate-men.webp",
     "rating": 4.8,
     "reviews": 47,
-    "stock": 120
+    "stock": 5000
   },
   {
     "id": "m-55",
@@ -1154,7 +1154,7 @@
     "image": "/images/procomil-spray-indian.webp",
     "rating": 4.5,
     "reviews": 79,
-    "stock": 75
+    "stock": 5000
   },
   {
     "id": "m-56",
@@ -1178,7 +1178,7 @@
     "image": "/images/dal-el-khair-honey-cherry.webp",
     "rating": 4.8,
     "reviews": 154,
-    "stock": 130,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -1203,7 +1203,7 @@
     "image": "/images/lovezone-intimacy-at-its-peak-10x400mg.webp",
     "rating": 4.8,
     "reviews": 64,
-    "stock": 280
+    "stock": 5000
   },
   {
     "id": "m-60",
@@ -1231,7 +1231,7 @@
     "image": "/images/kreva-gel-for-men.webp",
     "rating": 5,
     "reviews": 73,
-    "stock": 150
+    "stock": 5000
   },
   {
     "id": "m-61",
@@ -1255,7 +1255,7 @@
     "image": "/images/golden-turkish-chocolate-for-men.webp",
     "rating": 4.9,
     "reviews": 99,
-    "stock": 120
+    "stock": 5000
   },
   {
     "id": "w-01",
@@ -1282,7 +1282,7 @@
     "image": "/images/connubial-new-gold-newgold-spray.webp",
     "rating": 4.9,
     "reviews": 25,
-    "stock": 90,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -1312,7 +1312,7 @@
     "image": "/images/lady-era-30ml-drops.webp",
     "rating": 4.9,
     "reviews": 164,
-    "stock": 300,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -1341,7 +1341,7 @@
     "image": "/images/spanish-fly-drops-15ml.webp",
     "rating": 4.7,
     "reviews": 148,
-    "stock": 110,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -1366,7 +1366,7 @@
     "image": "/images/checoo-love-chocolate-for-women.webp",
     "rating": 4.8,
     "reviews": 58,
-    "stock": 130,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -1391,7 +1391,7 @@
     "image": "/images/royal-honey-for-women.webp",
     "rating": 4.7,
     "reviews": 102,
-    "stock": 220,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -1416,7 +1416,7 @@
     "image": "/images/sexlove-chewing-gum.webp",
     "rating": 4.7,
     "reviews": 146,
-    "stock": 100
+    "stock": 5000
   },
   {
     "id": "w-07",
@@ -1444,7 +1444,7 @@
     "image": "/images/top-sellers-honey-women.webp",
     "rating": 4.9,
     "reviews": 88,
-    "stock": 180,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -1469,7 +1469,7 @@
     "image": "/images/coffemix-caviar-original-for-women.webp",
     "rating": 4.8,
     "reviews": 52,
-    "stock": 400
+    "stock": 5000
   },
   {
     "id": "w-09",
@@ -1493,7 +1493,7 @@
     "image": "/images/lipo-6-for-all-10ml.webp",
     "rating": 4.7,
     "reviews": 121,
-    "stock": 150
+    "stock": 5000
   },
   {
     "id": "w-10",
@@ -1520,7 +1520,7 @@
     "image": "/images/beauty-love.webp",
     "rating": 4.7,
     "reviews": 56,
-    "stock": 70
+    "stock": 5000
   },
   {
     "id": "w-11",
@@ -1544,7 +1544,7 @@
     "image": "/images/spanish-fly-forte-gum.webp",
     "rating": 4.7,
     "reviews": 153,
-    "stock": 90
+    "stock": 5000
   },
   {
     "id": "w-12",
@@ -1568,7 +1568,7 @@
     "image": "/images/royal-chocolate-for-her.webp",
     "rating": 4.7,
     "reviews": 82,
-    "stock": 120
+    "stock": 5000
   },
   {
     "id": "w-13",
@@ -1592,7 +1592,7 @@
     "image": "/images/golden-gum-30-pieces.webp",
     "rating": 4.7,
     "reviews": 61,
-    "stock": 140
+    "stock": 5000
   },
   {
     "id": "w-14",
@@ -1619,7 +1619,7 @@
     "image": "/images/aromal-emollient-gel.webp",
     "rating": 4.7,
     "reviews": 113,
-    "stock": 140
+    "stock": 5000
   },
   {
     "id": "w-15",
@@ -1648,7 +1648,7 @@
     "image": "/images/connubial-drops.webp",
     "rating": 4.9,
     "reviews": 136,
-    "stock": 90,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -1676,7 +1676,7 @@
     "image": "/images/argi-fem-female-gel-50g.webp",
     "rating": 4.7,
     "reviews": 34,
-    "stock": 110
+    "stock": 5000
   },
   {
     "id": "w-18",
@@ -1704,7 +1704,7 @@
     "image": "/images/lovezone-drops-by-mouth.webp",
     "rating": 4.7,
     "reviews": 169,
-    "stock": 130
+    "stock": 5000
   },
   {
     "id": "w-19",
@@ -1727,7 +1727,7 @@
     "image": "/images/ferrari-chocolate.webp",
     "rating": 4.9,
     "reviews": 159,
-    "stock": 380
+    "stock": 5000
   },
   {
     "id": "w-20",
@@ -1751,7 +1751,7 @@
     "image": "/images/paxtone-max-filler.webp",
     "rating": 4.7,
     "reviews": 89,
-    "stock": 70
+    "stock": 5000
   },
   {
     "id": "w-21",
@@ -1775,7 +1775,7 @@
     "image": "/images/marcin-cherry-women.webp",
     "rating": 4.7,
     "reviews": 176,
-    "stock": 95
+    "stock": 5000
   },
   {
     "id": "w-22",
@@ -1799,7 +1799,7 @@
     "image": "/images/lovezone-intimacy-at-its-peak-10x380mg.webp",
     "rating": 4.8,
     "reviews": 151,
-    "stock": 250
+    "stock": 5000
   },
   {
     "id": "w-23",
@@ -1822,7 +1822,7 @@
     "image": "/images/toro-duro-woman.webp",
     "rating": 4.9,
     "reviews": 29,
-    "stock": 80
+    "stock": 5000
   },
   {
     "id": "d-01",
@@ -1847,7 +1847,7 @@
     "image": "/images/digital-vacuum-pump.webp",
     "rating": 4.9,
     "reviews": 139,
-    "stock": 50,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -1873,7 +1873,7 @@
     "image": "/images/power-ved-kit-with-k-y-jelly.webp",
     "rating": 4.8,
     "reviews": 76,
-    "stock": 80,
+    "stock": 5000,
     "featured": true
   },
   {
@@ -1898,7 +1898,7 @@
     "image": "/images/manual-ved-pump.webp",
     "rating": 4.7,
     "reviews": 147,
-    "stock": 200
+    "stock": 5000
   },
   {
     "id": "d-04",
@@ -1921,7 +1921,7 @@
     "image": "/images/big-bro-breast-enlargement-cup.webp",
     "rating": 4.8,
     "reviews": 160,
-    "stock": 150
+    "stock": 5000
   },
   {
     "id": "d-05",
@@ -1944,7 +1944,7 @@
     "image": "/images/manual-vacuum-pump-sawft.webp",
     "rating": 4.5,
     "reviews": 59,
-    "stock": 15
+    "stock": 5000
   },
   {
     "id": "d-06",
@@ -1968,7 +1968,7 @@
     "image": "/images/proextender-traction-device.webp",
     "rating": 4.7,
     "reviews": 152,
-    "stock": 20
+    "stock": 5000
   },
   {
     "id": "d-07",
@@ -1992,6 +1992,6 @@
     "image": "/images/konsa-electric-pump.webp",
     "rating": 4.8,
     "reviews": 96,
-    "stock": 12
+    "stock": 5000
   }
 ]

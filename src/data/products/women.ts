@@ -27,7 +27,7 @@ export const women: Product[] = [
     image: "/images/connubial-new-gold-newgold-spray.webp",
     rating: 4.9,
     reviews: 25,
-    stock: 90,
+    stock: 5000,
     featured: true,
   },
   {
@@ -57,7 +57,7 @@ export const women: Product[] = [
     image: "/images/lady-era-30ml-drops.webp",
     rating: 4.9,
     reviews: 164,
-    stock: 300,
+    stock: 5000,
     featured: true,
   },
   {
@@ -86,7 +86,7 @@ export const women: Product[] = [
     image: "/images/spanish-fly-drops-15ml.webp",
     rating: 4.7,
     reviews: 148,
-    stock: 110,
+    stock: 5000,
     featured: true,
   },
   {
@@ -114,7 +114,7 @@ export const women: Product[] = [
     image: "/images/checoo-love-chocolate-for-women.webp",
     rating: 4.8,
     reviews: 58,
-    stock: 130,
+    stock: 5000,
     featured: true,
   },
   {
@@ -142,7 +142,7 @@ export const women: Product[] = [
     image: "/images/royal-honey-for-women.webp",
     rating: 4.7,
     reviews: 102,
-    stock: 220,
+    stock: 5000,
     featured: true,
   },
   {
@@ -170,7 +170,7 @@ export const women: Product[] = [
     image: "/images/sexlove-chewing-gum.webp",
     rating: 4.7,
     reviews: 146,
-    stock: 100,
+    stock: 5000,
   },
   {
     id: "w-07",
@@ -199,7 +199,7 @@ export const women: Product[] = [
     image: "/images/top-sellers-honey-women.webp",
     rating: 4.9,
     reviews: 88,
-    stock: 180,
+    stock: 5000,
     featured: true,
   },
   {
@@ -227,7 +227,7 @@ export const women: Product[] = [
     image: "/images/coffemix-caviar-original-for-women.webp",
     rating: 4.8,
     reviews: 52,
-    stock: 400,
+    stock: 5000,
   },
   {
     id: "w-09",
@@ -254,7 +254,7 @@ export const women: Product[] = [
     image: "/images/lipo-6-for-all-10ml.webp",
     rating: 4.7,
     reviews: 121,
-    stock: 150,
+    stock: 5000,
   },
   {
     id: "w-10",
@@ -282,7 +282,7 @@ export const women: Product[] = [
     image: "/images/beauty-love.webp",
     rating: 4.7,
     reviews: 56,
-    stock: 70,
+    stock: 5000,
   },
   {
     id: "w-11",
@@ -309,7 +309,7 @@ export const women: Product[] = [
     image: "/images/spanish-fly-forte-gum.webp",
     rating: 4.7,
     reviews: 153,
-    stock: 90,
+    stock: 5000,
   },
   {
     id: "w-12",
@@ -336,7 +336,7 @@ export const women: Product[] = [
     image: "/images/royal-chocolate-for-her.webp",
     rating: 4.7,
     reviews: 82,
-    stock: 120,
+    stock: 5000,
   },
   {
     id: "w-13",
@@ -363,7 +363,7 @@ export const women: Product[] = [
     image: "/images/golden-gum-30-pieces.webp",
     rating: 4.7,
     reviews: 61,
-    stock: 140,
+    stock: 5000,
   },
   {
     id: "w-14",
@@ -391,7 +391,7 @@ export const women: Product[] = [
     image: "/images/aromal-emollient-gel.webp",
     rating: 4.7,
     reviews: 113,
-    stock: 140,
+    stock: 5000,
   },
   {
     id: "w-15",
@@ -420,7 +420,7 @@ export const women: Product[] = [
     image: "/images/connubial-drops.webp",
     rating: 4.9,
     reviews: 136,
-    stock: 90,
+    stock: 5000,
     featured: true,
   },
   {
@@ -449,7 +449,7 @@ export const women: Product[] = [
     image: "/images/argi-fem-female-gel-50g.webp",
     rating: 4.7,
     reviews: 34,
-    stock: 110,
+    stock: 5000,
   },
   {
     id: "w-18",
@@ -477,7 +477,7 @@ export const women: Product[] = [
     image: "/images/lovezone-drops-by-mouth.webp",
     rating: 4.7,
     reviews: 169,
-    stock: 130,
+    stock: 5000,
   },
   {
     id: "w-19",
@@ -503,7 +503,7 @@ export const women: Product[] = [
     image: "/images/ferrari-chocolate.webp",
     rating: 4.9,
     reviews: 159,
-    stock: 380,
+    stock: 5000,
   },
   {
     id: "w-20",
@@ -530,7 +530,7 @@ export const women: Product[] = [
     image: "/images/paxtone-max-filler.webp",
     rating: 4.7,
     reviews: 89,
-    stock: 70,
+    stock: 5000,
   },
   {
     id: "w-21",
@@ -557,7 +557,7 @@ export const women: Product[] = [
     image: "/images/marcin-cherry-women.webp",
     rating: 4.7,
     reviews: 176,
-    stock: 95,
+    stock: 5000,
   },
 
   {
@@ -585,7 +585,7 @@ export const women: Product[] = [
     image: "/images/lovezone-intimacy-at-its-peak-10x380mg.webp",
     rating: 4.8,
     reviews: 151,
-    stock: 250,
+    stock: 5000,
   },
   {
     id: "w-23",
@@ -611,6 +611,6 @@ export const women: Product[] = [
     image: "/images/toro-duro-woman.webp",
     rating: 4.9,
     reviews: 29,
-    stock: 80,
+    stock: 5000,
   },
 ];

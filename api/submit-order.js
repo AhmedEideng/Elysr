@@ -255,7 +255,9 @@ export function validateOrderPayload(payload) {
     if (!isNonEmptyString(item.id, 30) || !isNonEmptyString(item.name, 180))
       return "Invalid item structure";
     const quantity = Number(item.qty);
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 999)
+    // سق فني مريح أعلى بكثير من سقف المخزون الفعلي (5000 لكل منتج حالياً) —
+    // الحد الحقيقي هو فحص "Quantity exceeds stock" أدناه لكل منتج على حدة.
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 9999)
       return "Invalid item quantity";
 
     // 🔒 البحث عن المنتج بالكتالوج الرسمي المعتمد في السيرفر للتحقق من سعره الحقيقي

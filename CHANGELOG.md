@@ -41,6 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   reports it as an invalid tag — site-wide search is covered by the
   SearchAction JSON-LD).
 - Articles count is **56** (51 via the `a()` helper + 5 authored as literal objects).
+- **Stock baseline (owner direction)**: all **78 products** set to `stock: 5000` —
+  the owner confirmed real inventory is in the thousands, so the old 50–200
+  values under-stated availability. Effect: the artificial low-stock urgency
+  badge ("باقي X فقط", shown at ≤ 5) no longer renders, the Google Shopping feed
+  reports `in stock` for every eligible product, and order quantity validation
+  now uses the true baseline. When exact per-SKU counts become known, replace
+  the baseline with the real number per product (single edit each).
 
 ### 🔒 Security hardening
 
