@@ -1579,3 +1579,38 @@ devDeps).
   (تعرض 56 كارت) والـ internal-links ما يحتاجوش نص المقالات — يقلل
   preload الراوتر من 78KB لحوالي نصه.
 - Field LCP (2.8s) هيتتابع بعد 1–2 أسبوع بيانات حقلية جديدة.
+
+## 46) فصل content المقالات عن الـ bundles (2026-09-11)
+
+### المشكلة (اتلقت من الـ trace مش من التخمين)
+`src/data/landing-pages.ts` كان بيستورد `articles` كامل (78KB wire) بس
+عشان `articles.length` في سطر واحد — وده كان بيجرّ نص الـ 56 مقال في
+كل الـ bundles اللي فيها data-landing (منهم الـ home preload). كمان
+`education.tsx` (قائمة الـ 56 كارت) و`internal-links.ts` كانوا بياخدوا
+المحتوى كامل برضه.
+
+### الحل
+- `generate-sitemap.mjs` بقى بيولّد module-ات تالتة (نفس نمط الـ cards):
+  - `articles-meta.generated.ts`: كل الـ 56 بلا content/sources (~10KB wire).
+  - `article-content.generated.ts`: content + sources بس — صفحة التفاصيل فقط.
+- كل المستهلكين اتحولوا للـ meta: education list + detail (meta + body
+  join بالـ slug) + internal-links + products.$slug + guides + about +
+  medical-review-board + **landing-pages** (السبب الرئيسي للـ 78KB).
+- `editorialTrustSignals` اتنقلت في `editorial-trust-signals.ts` مستقل
+  (كانت بتجرّ الـ chunk كامل في صفحة المقال).
+- `getProductsForArticle`: الـ keyword fallback بقى بيمatch على
+  title+excerpt بدل content (content مش متحمّل مع الـ meta) — ده
+  heuristic fallback بس (الـ category + PRODUCT_RULES هم الأساس).
+- Prettier: الـ generator بقى بيستخدم `printWidth: 100` (إعدادات الـ repo)
+  عشان الملفات المولّدة تفضل lint-clean من غير ما "تفلت" بين builds.
+
+### الأثر (قياس)
+| | قبل | بعد |
+|---|---|---|
+| data-articles chunk | 360KB (في الـ home preload) | **meta بس ~10.3KB wire** |
+| نص المقالات في الـ client | موجود في preload | **موجود في صفحة التفاصيل بس** |
+| /education (قائمة 56 كارت) | 78KB | ~10KB |
+| عن/لجان المراجعة | 78KB (length بس!) | ~2KB (ARTICLE_COUNT) |
+
+Drift guards: meta + body بيتأكدوا حقل حقل من articles.ts في
+`data-integrity.test.mjs` — أي تعديل في المصدر من غير build = CI هترفض.

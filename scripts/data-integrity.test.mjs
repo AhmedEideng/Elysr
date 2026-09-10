@@ -105,12 +105,13 @@ try {
     "src/data/landing-pages.ts",
     "src/routes/wishlist.tsx",
     "src/components/sections/ArticlesGrid.tsx",
+    "src/routes/education.tsx",
   ]) {
     const content = readFileSync(resolve(ROOT, file), "utf-8");
     assert.doesNotMatch(
       content,
-      /\b\d{1,3}\s*مقالة/,
-      `${file} contains a hardcoded article count — use articles.length (drift risk)`,
+      /\b\d{1,3}\s*مقال(ة)?\b/,
+      `${file} contains a hardcoded article count — use ARTICLE_COUNT/articles.length (drift risk)`,
     );
     assert.doesNotMatch(
       content,
@@ -171,6 +172,48 @@ try {
     assert.equal(src.emoji, card.emoji, `featured card ${card.slug} emoji stale`);
     assert.equal(src.image ?? undefined, card.image, `featured card ${card.slug} image stale`);
   }
+  // ── Drift guard: meta + body المولّدين (فصل content عن القوائم) ──
+  assert.ok(
+    existsSync(resolve(ROOT, "src/data/articles-meta.generated.ts")),
+    "src/data/articles-meta.generated.ts missing; run npm run build",
+  );
+  assert.ok(
+    existsSync(resolve(ROOT, "src/data/article-content.generated.ts")),
+    "src/data/article-content.generated.ts missing; run npm run build",
+  );
+  const meta = await vite.ssrLoadModule("/src/data/articles-meta.generated.ts");
+  const body = await vite.ssrLoadModule("/src/data/article-content.generated.ts");
+  assert.equal(
+    meta.articlesMeta.length,
+    articles.length,
+    "articlesMeta count stale; run npm run build",
+  );
+  const metaBySlug = new Map(meta.articlesMeta.map((m) => [m.slug, m]));
+  const bodyBySlug = new Map(Object.entries(body.articleBodies));
+  for (const a of articles) {
+    const m = metaBySlug.get(a.slug);
+    const b = bodyBySlug.get(a.slug);
+    assert.ok(m, `meta ${a.slug} missing in generated meta`);
+    assert.ok(b, `body ${a.slug} missing in generated content`);
+    for (const f of [
+      "title",
+      "excerpt",
+      "category",
+      "readMin",
+      "emoji",
+      "publishedAt",
+      "updatedAt",
+    ]) {
+      assert.deepEqual(m[f], a[f], `meta ${a.slug}.${f} stale; run npm run build`);
+    }
+    assert.equal(m.image ?? undefined, a.image, `meta ${a.slug}.image stale`);
+    assert.deepEqual(m.author, a.author, `meta ${a.slug}.author stale`);
+    assert.deepEqual(m.reviewer, a.reviewer, `meta ${a.slug}.reviewer stale`);
+    assert.equal(m.autoReviewed ?? undefined, a.autoReviewed, `meta ${a.slug}.autoReviewed stale`);
+    assert.equal(b.content, a.content, `body ${a.slug}.content stale; run npm run build`);
+    assert.deepEqual(b.sources, a.sources, `body ${a.slug}.sources stale; run npm run build`);
+  }
+  assert.equal(bodyBySlug.size, articles.length, "articleBodies has extra/unknown slugs");
   // ── وعود مطلقة في المحتوى الطبي: ممنوعة (سلامة + التزام "لا وعود علاجية") ──
   // القائمة مقصودة بدقة: لا تشمل "يعالج"/"100%" لأنهما يظهران سياقات
   // تفنيد مشروعة (خرافة: "الطبيعي آمن 100%" / "ادعاءات أنه يعالج... لا يدعمها دليل")

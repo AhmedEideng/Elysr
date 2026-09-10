@@ -2,26 +2,28 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Clock } from "lucide-react";
 import { useState } from "react";
 import { PageHero } from "@/components/PageHero";
-import type { Article } from "@/data/articles";
+import type { ArticleMeta } from "@/data/articles-meta.generated";
+import { ARTICLE_COUNT } from "@/data/articles-cards.generated";
 
 export const Route = createFileRoute("/education")({
   loader: async () => {
-    const { articles } = await import("@/data/articles");
-    return { articles };
+    // meta فقط (بلا content/sources) — النصوص مش محتاجة في صفحة القائمة
+    const { articlesMeta } = await import("@/data/articles-meta.generated");
+    return { articles: articlesMeta };
   },
   head: () => ({
     meta: [
       { title: "التوعية الجنسية — مقالات علمية موثوقة | اليسر ميديكال" },
       {
         name: "description",
-        content: "18 مقال توعوي علمي عن الصحة الجنسية والعلاقات الزوجية بإشراف مختصين.",
+        content: `${ARTICLE_COUNT} مقالة توعوية علمية عن الصحة الجنسية والعلاقات الزوجية بإشراف مختصين`,
       },
     ],
   }),
   component: EducationIndex,
 });
 
-function ArticleCard({ a }: { a: Article }) {
+function ArticleCard({ a }: { a: ArticleMeta }) {
   const [isError, setIsError] = useState(false);
 
   return (

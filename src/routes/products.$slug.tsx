@@ -118,8 +118,9 @@ function ProductPage() {
   useEffect(() => {
     // Defer loading heavy articles to prevent blocking route transition & page paint
     let cancelled = false;
-    Promise.all([import("@/lib/internal-links"), import("@/data/articles")]).then(
-      ([{ getArticlesForProduct }, { articles: allArticles }]) => {
+    // meta بس (بلا نصوص المقالات) — الكروت محتاجة 5 حقول بس
+    Promise.all([import("@/lib/internal-links"), import("@/data/articles-meta.generated")]).then(
+      ([{ getArticlesForProduct }, { articlesMeta: allArticles }]) => {
         if (cancelled) return;
         const articleSlugs = getArticlesForProduct(product);
         const matches = allArticles

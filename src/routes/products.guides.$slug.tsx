@@ -40,7 +40,7 @@ export const Route = createFileRoute("/products/guides/$slug")({
     const articleSlugs = getArticlesForLandingPage(page.slug, page.title);
     let linkedArticles: { slug: string; title: string; emoji: string; readMin: number }[] = [];
     try {
-      const { articles: allArticles } = await import("@/data/articles");
+      const { articlesMeta: allArticles } = await import("@/data/articles-meta.generated");
       linkedArticles = allArticles
         .filter((a) => articleSlugs.includes(a.slug))
         .map((a) => ({ slug: a.slug, title: a.title, emoji: a.emoji, readMin: a.readMin }));

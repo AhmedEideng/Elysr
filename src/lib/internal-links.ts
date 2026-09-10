@@ -7,7 +7,7 @@
  */
 
 import type { Product } from "@/data/product-types";
-import { articles } from "@/data/articles";
+import { articlesMeta as articles } from "@/data/articles-meta.generated";
 
 // ─── Product → Article Mapping ───
 // Based on product name/slug keywords → relevant article slugs
@@ -356,7 +356,9 @@ export function getProductsForArticle(articleSlug: string): string[] {
   const article = articles.find((a) => a.slug === articleSlug);
   if (article) {
     const category = article.category ? article.category.toLowerCase() : "";
-    const titleAndContent = `${article.title} ${article.content}`.toLowerCase();
+    // excerpt بدل content: الـ content في ملف مولّد منفصل (مش بيتحمّل مع الـ meta).
+    // ده fallback heuristic بس (الـ category + PRODUCT_RULES هم الأساس) — كفاية.
+    const titleAndContent = `${article.title} ${article.excerpt}`.toLowerCase();
 
     // Determine target category based on article category first:
     let isWomen = category === "women" || category === "صحة المرأة";

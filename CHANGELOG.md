@@ -126,6 +126,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (GA loads within the 10 s preconnect TTL; Lighthouse audit: ~300 ms).
   Local Lighthouse (mobile, throttled): perf **64 → 74**, FCP 3.3 → 2.7 s,
   TBT 310 → 240 ms, CLS 0.
+- **Article content split out of the client bundles (2026-09-11)**: the
+  build now also generates `articles-meta.generated.ts` (all 56 articles
+  minus `content`/`sources`) and `article-content.generated.ts`
+  (content + sources only). Every client page (home preload, /education,
+  internal links, product pages, guides) now imports meta — the wire size
+  for article data dropped from ~78 KiB to ~10 KiB (brotli); full article
+  text loads only on the article detail page. `landing-pages.ts` stopped
+  importing the whole catalog just for a count (`ARTICLE_COUNT`), which
+  removed the last hidden 78 KiB pull. Drift guards verify both generated
+  files field-by-field against `articles.ts`.
+- **GA fallback 3 s → 5 s**: the latest PSI run still caught gtag.js
+  (168 KiB) inside the LCP window; 5 s clears both the lab (3.3 s) and
+  field (2.8 s) LCP windows. Pre-load `dataLayer` events are still sent
+  on GA boot — no pageviews lost.
 
 ### 🎯 SEO / Indexation
 

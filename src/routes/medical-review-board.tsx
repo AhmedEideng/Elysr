@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { articles } from "@/data/articles";
+import { ARTICLE_COUNT } from "@/data/articles-cards.generated";
 import {
   CalendarCheck,
   FileText,
@@ -294,7 +294,7 @@ function MedicalReviewBoardPage() {
         >
           <h3 className="font-bold">المقالات التعليمية →</h3>
           <p className="text-xs text-muted-foreground mt-1">
-            {articles.length} مقالة توعوية بمصادر موثوقة
+            {ARTICLE_COUNT} مقالة توعوية بمصادر موثوقة
           </p>
         </Link>
       </section>

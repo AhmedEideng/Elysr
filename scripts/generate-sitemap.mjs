@@ -177,10 +177,110 @@ async function generateSitemap() {
       `export const ARTICLE_COUNT = ${articles.length};`,
       "",
     ].join("\n");
-    // نبقي الملف Prettier-stable (نفس شكل الـ repo) عشان ما "يفلتشش" مع كل build.
+    // نبقي الملفات Prettier-stable (بنفس إعدادات الـ repo: printWidth 100)
+    // عشان ما "تفلتشش" مع كل build ولا ترخص الـ lint.
     const prettier = await import("prettier");
-    const cardsOut = await prettier.format(cardsTs, { parser: "typescript" });
+    const prettierOpts = {
+      parser: "typescript",
+      printWidth: 100,
+      semi: true,
+      singleQuote: false,
+      trailingComma: "all",
+    };
+    const cardsOut = await prettier.format(cardsTs, prettierOpts);
     writeFileSync(resolve(ROOT, "src/data/articles-cards.generated.ts"), cardsOut, "utf-8");
+
+    // ──  فصل مقالات: meta + body ──
+    // articles.ts هو مصدر الحقيقة (يتعدل يدويًا) — والمولّدين دول هما الوحيدين
+    // اللي الـ client بيستوردهم:
+    //  • articles-meta.generated.ts  → كل الـ 56 (بلا content/sources) — صفحات
+    //    القوائم/الروابط الداخلية (~20KB بدل 78KB).
+    //  • article-content.generated.ts → content + sources بس — صفحة المقال فقط.
+    // النتيجة: ما فيش أي client bundle فيه نص المقالات كلها.
+    const metaFields = (a) => {
+      const o = {
+        slug: a.slug,
+        title: a.title,
+        excerpt: a.excerpt,
+        ...(a.image ? { image: a.image } : {}),
+        category: a.category,
+        readMin: a.readMin,
+        emoji: a.emoji,
+        author: a.author,
+        reviewer: a.reviewer,
+        ...(a.autoReviewed !== undefined ? { autoReviewed: a.autoReviewed } : {}),
+        publishedAt: a.publishedAt,
+        updatedAt: a.updatedAt,
+      };
+      return o;
+    };
+    const objLit = (o) =>
+      Object.entries(o)
+        .map(([k, v]) => `    ${k}: ${JSON.stringify(v)}`)
+        .join(",\n");
+    const metaTs = [
+      "/**",
+      " * ⚙️ GENERATED FILE — `npm run build` (scripts/generate-sitemap.mjs).",
+      " * ⚠️ لا يُعدَّل يدوياً — عدّل src/data/articles.ts ثم أعِد البناء.",
+      " *",
+      " * ميتاداتا كل المقالات (بلا content/sources) — للصفحات اللي بتعرض",
+      " * قوائم/روابط مقالات. صفحة التفاصيل بتجيب النصوص من",
+      " * article-content.generated.ts (chunk منفصل بيتحمل وقتها بس).",
+      " */",
+      "export interface ArticleMeta {",
+      "  slug: string;",
+      "  title: string;",
+      "  excerpt: string;",
+      "  image?: string;",
+      "  category: string;",
+      "  readMin: number;",
+      "  emoji: string;",
+      "  author: { name: string; role: string; credentials: string };",
+      "  reviewer: { name: string; role: string; credentials: string };",
+      "  autoReviewed?: boolean;",
+      "  publishedAt: string;",
+      "  updatedAt: string;",
+      "}",
+      "",
+      "export const articlesMeta: ArticleMeta[] = [",
+      ...articles.map((a) => `  {\n${objLit(metaFields(a))},\n  },`),
+      "];",
+      "",
+    ].join("\n");
+    const bodies = {};
+    for (const a of articles) {
+      bodies[a.slug] = { content: a.content, sources: a.sources };
+    }
+    const bodyTs = [
+      "/**",
+      " * ⚙️ GENERATED FILE — `npm run build` (scripts/generate-sitemap.mjs).",
+      " * ⚠️ لا يُعدَّل يدوياً — عدّل src/data/articles.ts ثم أعِد البناء.",
+      " *",
+      " * نصوص المقالات + مصادرها (أثقل جزء ~41KB+16KB) — بيتحمل بس في",
+      " * صفحة تفاصيل المقال، مش في القوائم ولا الـ homepage.",
+      " */",
+      "export interface ArticleBody {",
+      "  content: string;",
+      "  sources: { title: string; url: string; publisher: string }[];",
+      "}",
+      "",
+      "export const articleBodies: Record<string, ArticleBody> = {",
+      ...Object.entries(bodies).map(
+        ([slug, b]) => `  ${JSON.stringify(slug)}: {\n${objLit(b)},\n  },`,
+      ),
+      "};",
+      "",
+    ].join("\n");
+    writeFileSync(
+      resolve(ROOT, "src/data/articles-meta.generated.ts"),
+      await prettier.format(metaTs, prettierOpts),
+      "utf-8",
+    );
+    writeFileSync(
+      resolve(ROOT, "src/data/article-content.generated.ts"),
+      await prettier.format(bodyTs, prettierOpts),
+      "utf-8",
+    );
 
     let seoLandingPages = [];
     try {

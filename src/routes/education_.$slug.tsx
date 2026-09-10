@@ -11,20 +11,28 @@ import {
 } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 import { articleSchema, clearJsonLd, clearPrerenderJsonLd, injectJsonLd } from "@/lib/seo";
-import { editorialTrustSignals, type Article } from "@/data/articles";
+import { editorialTrustSignals } from "@/data/editorial-trust-signals";
+import { type Article } from "@/data/articles";
+import { type ArticleMeta } from "@/data/articles-meta.generated";
 import { ArticleContentWithAds } from "@/components/sections/ArticleContentWithAds";
 import { ProductCard } from "@/components/ProductCard";
 
 export const Route = createFileRoute("/education_/$slug")({
   loader: async ({ params }) => {
-    const { articles, getArticleBySlug } = await import("@/data/articles");
-    const article = getArticleBySlug(params.slug);
-    if (!article) throw notFound();
+    // meta + body متقسمين: meta (بلا نصوص) للروابط + body للـ content/sources
+    const [{ articlesMeta }, { articleBodies }] = await Promise.all([
+      import("@/data/articles-meta.generated"),
+      import("@/data/article-content.generated"),
+    ]);
+    const meta = articlesMeta.find((a) => a.slug === params.slug);
+    if (!meta) throw notFound();
+    const article: Article = { ...meta, ...articleBodies[meta.slug] };
+    if (!article.content || !Array.isArray(article.sources)) throw notFound();
     // Smart related articles
     const { getRelatedArticles, getProductsForArticle } = await import("@/lib/internal-links");
-    const relatedSlugs = getRelatedArticles(article.slug, article.category, articles);
+    const relatedSlugs = getRelatedArticles(article.slug, article.category, articlesMeta);
     const related = relatedSlugs
-      .map((s) => articles.find((a) => a.slug === s))
+      .map((s) => articlesMeta.find((a) => a.slug === s))
       .filter((a): a is NonNullable<typeof a> => Boolean(a));
 
     // Linked products
@@ -85,7 +93,7 @@ function TrustCard({
   );
 }
 
-function RelatedCard({ a }: { a: Article }) {
+function RelatedCard({ a }: { a: ArticleMeta }) {
   const [isError, setIsError] = useState(false);
   return (
     <Link
