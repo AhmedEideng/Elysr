@@ -33,7 +33,7 @@ Browser ──→ Vercel CDN (dist/ ثابتة مسبقاً)
 | `src/components/` + `src/components/sections/` | Header/Footer/ProductCard/SearchBar/11 قسم للهوم                                                                                          |
 | `src/contexts/cart.tsx`                        | حالة السلة (localStorage)                                                                                                                 |
 | `src/hooks/`                                   | use-cart، use-wishlist، use-recently-viewed، use-scroll-tracking، use-pwa-install                                                         |
-| `api/`                                         | submit-order + csp-report + rate-limiter                                                                           |
+| `api/`                                         | submit-order + submit-review + reviews + csp-report + rate-limiter                                                 |
 | `api/lib/`                                     | products-db.json + config-db.json (مولّدان وقت البناء — Single Source of Truth)                                                           |
 | `server/index.js`                              | خادم Express 5 للـ SSG (Docker/Railway/تجربة محلية)                                                                                       |
 | `scripts/`                                     | prerender-seo، generate-sitemap، data-integrity، sync-vercel-redirects، release، health-check، validate-schemas، validate-article-sources |
@@ -721,7 +721,7 @@ Apps Script `action=review` → شيت **"المراجعات"** بحالة "قي
 
 | القطعة | التفاصيل |
 |---|---|
-| `google-apps-script.gs` | شيت "المراجعات" (9 أعمدة + Data Validation للحالة)، `handleReviewPost` (rate limit + تحقق شراء + إشعار إيميل)، `handleReviewsGet` (محمي بـ `REVIEW_READ_TOKEN`، fail-closed، كاش 5 د، حد 20، الأحدث أولاً، **الهاتف لا يُكشف أبداً**)، (الحذف اليدوي للمراجعات المرتبطة بالهاتف يتم يدويًا من الشيت عند الطلب — GDPR). |
+| `google-apps-script.gs` | شيت "المراجعات" (9 أعمدة + Data Validation للحالة)، `handleReviewPost` (rate limit + تحقق شراء + إشعار إيميل)، `handleReviewsGet` (محمي بـ `REVIEW_READ_TOKEN`، fail-closed، كاش 5 د، حد 20، الأحدث أولاً، **الهاتف لا يُكشف أبداً**)، والحذف اليدوي للمراجعات المرتبطة بالهاتف يتم يدويًا من الشيت عند الطلب (GDPR). |
 | `api/submit-review.js` | تحقق صلب: منتج من catalog معتمد (الاسم من الـ server وليس العميل)، rating 1-5 صحيح، نص 10-600، هاتف مصري/E.164، IP hash فقط. 429 بعد 3/د/IP. |
 | `api/reviews.js` | قراءة معتمدة فقط، fail-soft (أي خطأ → 200 فارغ — الصفحة لا تنكسر)، كاش ذاكرة 5 د + Cache-Control 60 ث، rate limit 10/د/IP، التوكن لا يخرج من الخادم. |
 | `server/index.js` | mount الـ APIs الجديدة للنشر الذاتي. |
