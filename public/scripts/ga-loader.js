@@ -34,13 +34,14 @@
     // ⚠️ scroll مش محفز: scroll restore الراوتر (scrollTo(0)) بيطلق الحدث
     // بعد اللود مباشرة بدون أي تصرف من المستخدم → GA كان بيبدأ التحميل
     // في نافذة الـ LCP وبيتنافس على bandwidth (167KB). المحفزات دلوقتي
-    // تفاعلات حقيقية بس + fallback timer بعد نافذة الـ LCP المعتادة.
+    // تفاعلات حقيقية بس + fallback 5s: بعد LCP الحقل (2.8s) والـ lab (3.3s)
+    // بفترة أمان، فـ gtag.js (168KB) خارج نافذة الـ LCP خالص في الـ traces.
     // الأحداث اللي تُدفع قبل تحميل gtag.js بتنحفظ في dataLayer وتتبعت
     // عند التحميل (page_view الأول بيتبعت من الكود — مفيش بيانات بتضيع).
     window.addEventListener("pointerdown", loadGA, { passive: true });
     window.addEventListener("touchstart", loadGA, { passive: true });
     window.addEventListener("keydown", loadGA, { passive: true });
     window.addEventListener("click", loadGA, { passive: true });
-    setTimeout(loadGA, 3000);
+    setTimeout(loadGA, 5000);
   }
 })();
