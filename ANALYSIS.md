@@ -1466,3 +1466,37 @@ schemas + build 247. على الإنتاج: 308 للوجهتين بعد الدب
 - شال `aggregateRating` من `seo.ts` (سطر 223) + `prerender-seo.mjs`
 - إرجاع `rating`/`reviews` في الكتالوج لـ 0 لحد ما تتراكم مراجعات
   حقيقية معتمدة توفّي حد أدنى (مثلاً 3+)
+
+## 43) إصلاح GSC sitemap error + تفعيل webhook secret + IP موثوق (2026-09-08)
+
+### السبب (من لوغات Vercel + GSC)
+1. **GSC: "علامة XML غير صالحة" (سطر 2213)** — وسم `<search>`
+   (امتداد Yandex) في الـ sitemap. جوجل مبيدعمش الامتداد ده وبيعلّمه
+   كـ error دائم في تقرير الـ sitemap.
+2. **Vercel: "Reviews fetch failed: Unexpected token '<'"** — سببه
+   `hmacHex` كان بيفجّر على `.getBytes()` (تم إصلاحه في `9188b47`).
+   المراجعات دلوقتي شغالة على الإنتاج (m-01 بيرجع مراجعات حقيقية).
+
+### الإصلاحات (commit `e8ea2b2` + ده)
+- **الـ sitemap**: اتشال امتداد `<search>` (Yandex) + `xmlns:search`
+  بالكامل — sitemap دلوقتي بوسوم مدعومة من جوجل بس (loc/lastmod/
+  changefreq/priority/image). "بحث الموقع" عند جوجل شغال عبر
+  `SearchAction` في JSON-LD الصفحة الرئيسية (مش عبر sitemap).
+- **`api/reviews.js`**: content-type guard — لو الـ webhook رجع حاجة
+  مش JSON (صفحة خطأ HTML مثلاً)، يسجل تشخيص مفصل (status + content-type
+   + أول 160 حرف) ويرجع قائمة فاضية (fail-soft).
+- **IP موثوق**: `getClientIp` في كل الـ APIs بياخد `x-vercel-ip`
+   الأول (مصدر موثوق من Vercel)، وبعدين آخر قيمة في X-Forwarded-For،
+   وبعدين remoteAddress.
+- **وثائق**: صححت مواضع `delete-customer-data` (اتنزل بقرار المالك في
+   `1abe95f` — كان موصوف كأنه موجود).
+
+### التحقق
+- sitemap الحي: 0 وسوم search/`search_term_string` · 238 URL.
+- 172 وحدة + data-integrity + lint + tsc + build 248 صفحة — كله خضرا.
+- `GET /api/reviews?product=m-01` على الإنتاج: بيرجع مراجعات حقيقية.
+
+### ملاحظة CI
+`npm run audit:perf` لسه بيلتهم الفشل (`|| echo ...`) — تفعيل الـ hard
+gate الفعلي خطوة منفصلة بعد runs خضرا مستقرة (+ تثبيت @lhci/cli في
+devDeps).
