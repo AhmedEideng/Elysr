@@ -51,7 +51,11 @@
       content="اليسر أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. شحن سري وتغليف محايد ودفع عند الاستلام مع دعم متخصص عبر واتساب."
     />
     <meta name="twitter:image" content="https://elysrmedical.store/og-default.webp" />
-    <!-- 🚀 Early preconnect to third-party origins — saves 100-300ms on first pixel/tag load -->
+    <!-- 🚀 Early preconnect to third-party origins — saves 100-300ms on first pixel/tag load.
+         GA يُحمَّل بعد أول تفاعل أو بعد ~3s (ga-loader.js) — ضمن الـ TTL (10s)
+         فتكون الـ connection جاهزة عند الطلب (Lighthouse: +300ms). -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://www.google-analytics.com" />
 
     <!-- 🚀 Self-hosted font (no Google Fonts round-trip).
          Preload only the Arabic subset since the page is Arabic. -->

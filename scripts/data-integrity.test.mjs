@@ -104,6 +104,7 @@ try {
     "src/routes/medical-review-board.tsx",
     "src/data/landing-pages.ts",
     "src/routes/wishlist.tsx",
+    "src/components/sections/ArticlesGrid.tsx",
   ]) {
     const content = readFileSync(resolve(ROOT, file), "utf-8");
     assert.doesNotMatch(
@@ -143,6 +144,32 @@ try {
       assert.match(source.url, /^https:\/\//, `Article source must be https: ${article.slug}`);
       assert.ok(source.title && source.publisher, `Incomplete source: ${article.slug}`);
     }
+  }
+  // ── Drift guard: بطاقات الـ homepage المولّدة (articles-cards.generated.ts) ──
+  // لازم تطابق المصدر (articles.ts) حقاً — لو قديمة → البناء مولّد قبل تعديلك.
+  assert.ok(
+    existsSync(resolve(ROOT, "src/data/articles-cards.generated.ts")),
+    "src/data/articles-cards.generated.ts missing; run npm run build",
+  );
+  const cards = await vite.ssrLoadModule("/src/data/articles-cards.generated.ts");
+  assert.equal(
+    cards.ARTICLE_COUNT,
+    articles.length,
+    "articles-cards.generated.ts ARTICLE_COUNT stale; run npm run build",
+  );
+  assert.ok(
+    Array.isArray(cards.featuredArticleCards) && cards.featuredArticleCards.length >= 1,
+    "featuredArticleCards missing/empty; run npm run build",
+  );
+  for (const card of cards.featuredArticleCards) {
+    const src = articles.find((a) => a.slug === card.slug);
+    assert.ok(src, `featured card ${card.slug} not found in articles.ts`);
+    assert.equal(src.title, card.title, `featured card ${card.slug} title stale`);
+    assert.equal(src.excerpt, card.excerpt, `featured card ${card.slug} excerpt stale`);
+    assert.equal(src.category, card.category, `featured card ${card.slug} category stale`);
+    assert.equal(src.readMin, card.readMin, `featured card ${card.slug} readMin stale`);
+    assert.equal(src.emoji, card.emoji, `featured card ${card.slug} emoji stale`);
+    assert.equal(src.image ?? undefined, card.image, `featured card ${card.slug} image stale`);
   }
   // ── وعود مطلقة في المحتوى الطبي: ممنوعة (سلامة + التزام "لا وعود علاجية") ──
   // القائمة مقصودة بدقة: لا تشمل "يعالج"/"100%" لأنهما يظهران سياقات

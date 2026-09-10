@@ -14,10 +14,10 @@
     if (loaded) return;
     loaded = true;
     if (typeof window !== "undefined") {
-      window.removeEventListener("click", loadGA);
+      window.removeEventListener("pointerdown", loadGA);
       window.removeEventListener("touchstart", loadGA);
       window.removeEventListener("keydown", loadGA);
-      window.removeEventListener("scroll", loadGA);
+      window.removeEventListener("click", loadGA);
     }
     window.gtag("js", new Date());
     window.gtag("config", "G-V3X7Q3D0RR", {
@@ -31,10 +31,16 @@
   }
 
   if (typeof window !== "undefined") {
-    window.addEventListener("click", loadGA, { passive: true });
+    // ⚠️ scroll مش محفز: scroll restore الراوتر (scrollTo(0)) بيطلق الحدث
+    // بعد اللود مباشرة بدون أي تصرف من المستخدم → GA كان بيبدأ التحميل
+    // في نافذة الـ LCP وبيتنافس على bandwidth (167KB). المحفزات دلوقتي
+    // تفاعلات حقيقية بس + fallback timer بعد نافذة الـ LCP المعتادة.
+    // الأحداث اللي تُدفع قبل تحميل gtag.js بتنحفظ في dataLayer وتتبعت
+    // عند التحميل (page_view الأول بيتبعت من الكود — مفيش بيانات بتضيع).
+    window.addEventListener("pointerdown", loadGA, { passive: true });
     window.addEventListener("touchstart", loadGA, { passive: true });
     window.addEventListener("keydown", loadGA, { passive: true });
-    window.addEventListener("scroll", loadGA, { passive: true, once: true });
-    setTimeout(loadGA, 2000);
+    window.addEventListener("click", loadGA, { passive: true });
+    setTimeout(loadGA, 3000);
   }
 })();

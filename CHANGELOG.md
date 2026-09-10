@@ -108,6 +108,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Homepage articles load lazily** with a skeleton + error fallback.
 - **Recently Viewed now validates against current catalog** (no 404 links / stale
   prices for deleted products).
+- **Homepage stops loading the full articles chunk (2026-09-10)**: the home
+  ArticlesGrid now reads a build-generated `articles-cards.generated.ts`
+  (4 conversion cards + `ARTICLE_COUNT`, no `content`/`sources`) instead of
+  importing all 56 articles' full text. Home critical-path data drops ~78 kB;
+  cards still render on first paint (static import — no CLS). Drift guard in
+  the data-integrity tests fails if the generated file goes stale, and the
+  hardcoded "51 مقالة" count became dynamic (`ARTICLE_COUNT`).
+- **GA loads after the LCP window (2026-09-10)**: the `scroll` trigger in
+  `ga-loader.js` was removed — TanStack Router's scroll restoration
+  (`scrollTo(0)`) fired it on every load with no user action, pulling the
+  167 kB `gtag.js` into the LCP bandwidth window (measured: t≈450–520 ms).
+  GA now loads on a real gesture (`pointerdown`/`touchstart`/`keydown`/
+  `click`) or after a 3 s fallback. Pageviews pushed before load stay queued
+  in `dataLayer` and are sent on load — no analytics loss.
+- **Preconnect restored** for `googletagmanager.com` + `google-analytics.com`
+  (GA loads within the 10 s preconnect TTL; Lighthouse audit: ~300 ms).
+  Local Lighthouse (mobile, throttled): perf **64 → 74**, FCP 3.3 → 2.7 s,
+  TBT 310 → 240 ms, CLS 0.
 
 ### 🎯 SEO / Indexation
 

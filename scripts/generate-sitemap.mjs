@@ -117,6 +117,71 @@ async function generateSitemap() {
       articles = mod.articles || [];
     } catch {}
 
+    // 🎴 بطاقات مقالات الـ homepage (ArticlesGrid) — module مولّد صغير من نفس
+    // المصدر (SSOT): الكروت الأربع التحويلية فقط، بلا حقل content/sources،
+    // عشان الـ chunk الكامل data-articles (~78KB) ما يدخلش المسار الحرج
+    // للـ homepage (نافذة الـ LCP). تغيير البطاقات = تعديل الـ slugs هنا + build.
+    const FEATURED_ARTICLE_SLUGS = [
+      // الترتيب = الترتيب الفعّال (نية شراء أعلى أولاً):
+      "best-selling-products-guide", // دليل أقوى 10 منتجات مبيعاً
+      "buying-first-product-guide", // الشراء الأول + خصوصية التوصيل
+      "delay-sprays-safe-use", // بخاخات التأخير
+      "royal-honey-benefits", // العسل الملكي والأعشاب
+    ];
+    const featuredCards = FEATURED_ARTICLE_SLUGS.flatMap((slug) => {
+      const a = articles.find((x) => x.slug === slug);
+      if (!a) {
+        console.warn(`⚠️ featured article slug not found in articles.ts: ${slug}`);
+        return [];
+      }
+      return [
+        {
+          slug: a.slug,
+          title: a.title,
+          excerpt: a.excerpt,
+          ...(a.image ? { image: a.image } : {}),
+          category: a.category,
+          readMin: a.readMin,
+          emoji: a.emoji,
+        },
+      ];
+    });
+    const cardsTs = [
+      "/**",
+      " * ⚙️ GENERATED FILE — `npm run build` (scripts/generate-sitemap.mjs).",
+      " * ⚠️ لا يُعدَّل يدوياً — عدّل src/data/articles.ts (أو قائمة الـ slugs في",
+      " *    السكربت) ثم أعِد البناء.",
+      " *",
+      " * بطاقات المقالات المعروضة في الـ homepage (ArticlesGrid): الحقول اللازمة",
+      " * فقط (بلا content/sources) حتى لا يدخل chunk data-articles الكامل في",
+      " * المسار الحرج.",
+      " */",
+      "export interface ArticleCard {",
+      "  slug: string;",
+      "  title: string;",
+      "  excerpt: string;",
+      "  image?: string;",
+      "  category: string;",
+      "  readMin: number;",
+      "  emoji: string;",
+      "}",
+      "",
+      `export const featuredArticleCards: ArticleCard[] = [`,
+      ...featuredCards.map((c) => {
+        const entries = Object.entries(c).map(([k, v]) => `    ${k}: ${JSON.stringify(v)}`);
+        return `  {\n${entries.join(",\n")},\n  },`;
+      }),
+      `];`,
+      "",
+      "/** عدد المقالات التوعوية إجمالاً (أرقام ديناميكية في الواجهة — بلا hardcode). */",
+      `export const ARTICLE_COUNT = ${articles.length};`,
+      "",
+    ].join("\n");
+    // نبقي الملف Prettier-stable (نفس شكل الـ repo) عشان ما "يفلتشش" مع كل build.
+    const prettier = await import("prettier");
+    const cardsOut = await prettier.format(cardsTs, { parser: "typescript" });
+    writeFileSync(resolve(ROOT, "src/data/articles-cards.generated.ts"), cardsOut, "utf-8");
+
     let seoLandingPages = [];
     try {
       const mod = await vite.ssrLoadModule("/src/data/landing-pages.ts");

@@ -1527,3 +1527,55 @@ devDeps).
   build 244 صفحة + JSON-LD schemas (1150 schema / 0 errors).
 - لو جهود أرقام مخزون فعلية لكل SKU: استبدال الـ 5000 بالقيمة الفعلية
   في ملفات البيانات + إعادة البناء (drift guard بيضبط الباقي).
+
+## 45) تحسين أداء الـ homepage — PageSpeed 71 → تحليل + إصلاحات (2026-09-10)
+
+### القراءة الصححة للـ PageSpeed (mobile)
+- **Field (بيانات حقيقية 28 يوم)**: CLS 0.01 ✅ · INP 171ms ✅ · TTFB 0.6s ✅
+  · **LCP 2.8s** (شوية فوق حد الـ 2.5s — هو البند الوحيد اللي محتاج شغل).
+- **Lab (Lighthouse محلي على نفس الـ live)**: perf 64 · LCP 5.9s · FCP 3.3s ·
+  TBT 310ms — الـ lab أقسى (CPU 4x).
+- ملاحظة: فحص "تقليل حجم الصور" في التقرير القديم كان قاعد على نسخة قديمة من
+  hero-banner-768 (76.4KB) — الملف الحي دلوقتي 25.8KB (اتحسّن من قبل).
+
+### المشاكل الحقيقية اللي لُقيت (بقياس مش تخمين)
+1. **الـ homepage بيحمل `data-articles` كامل (78KB) static import**:
+   `ArticlesGrid` بيستخدم 4 كروت بس (title/excerpt/image/category/readMin/
+   emoji/slug) لكنه كان بيستورد كل الـ 56 مقال بكامل الـ content.
+2. **scroll trigger في ga-loader بيخرب فكرة التأجيل**: scroll restore الراوتر
+   `window.scrollTo({top:0})` بيبعت حدث scroll بعد اللود (تأكيد trace: t≈165/238ms
+   + call من vendor-router عند t≈523ms) → gtag.js (167KB) كان بيلتقط من أول
+   lighthouse run عند **t≈458ms** — في قلب نافذة الـ LCP وبيتنافس على bandwidth.
+3. **مفيش preconnect** لـ googletagmanager/google-analytics (الـ comment كان
+   موجود في index.html والـ links محذوفة) — audit: ~300ms.
+
+### الإصلاحات
+1. **`scripts/generate-sitemap.mjs`**: بيولّد `src/data/articles-cards.generated.ts`
+   (4 كروت + `ARTICLE_COUNT`) من نفس المصدر (SSOT) — `ArticlesGrid` بقى
+   يستورده هو (static → أول render، CLS زي ما هو) والـ chunk الكامل بقى
+   lazy بس (preload راوتر + صفحات التعليم). Drift guard في
+   `data-integrity.test.mjs` (حقل حقل + count).
+2. **`public/scripts/ga-loader.js`**: اتشال محفز الـ scroll (بيبعت بدون
+   تصرف من المستخدم) — المحفزات دلوقتي تفاعلات حقيقية
+   (pointerdown/touchstart/keydown/click) + fallback **3s** (بعد نافذة LCP
+   المعتادة). الأحداث اللي قبل التحميل بتنحفظ في dataLayer وتتبعت — مفيش
+   pageview بيتفقد.
+3. **`index.html`**: preconnect لـ `googletagmanager.com` +
+   `google-analytics.com` (GA بيحمل ضمن الـ TTL 10s).
+4. **"(51 مقالة)" hardcoded** بقى ديناميكي `{ARTICLE_COUNT}` — و
+   `ArticlesGrid.tsx` دخل قائمة anti-hardcoded-count في الـ integrity tests
+   (كانت فاتته من القدام).
+
+### النتيجة (Lighthouse محلي، نفس شروط الـ lab)
+| المقياس | قبل | بعد |
+|---|---|---|
+| perf score | 64 | **74** |
+| FCP | 3.3s | **2.7s** |
+| TBT | 310ms | **240ms** |
+| CLS | 0 | 0 |
+
+### متبقي (محتمل، مش طارئ)
+- فصل `content`/`sources` في ملف generated مستقل عشان صفحة قائمة التعليم
+  (تعرض 56 كارت) والـ internal-links ما يحتاجوش نص المقالات — يقلل
+  preload الراوتر من 78KB لحوالي نصه.
+- Field LCP (2.8s) هيتتابع بعد 1–2 أسبوع بيانات حقلية جديدة.

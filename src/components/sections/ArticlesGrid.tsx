@@ -1,25 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { articles } from "@/data/articles";
 import { BookOpen, Clock } from "lucide-react";
+import { ARTICLE_COUNT, featuredArticleCards } from "@/data/articles-cards.generated";
 
-// اختيار أفضل 4 مقالات تجيب أعلى معدل تحويل (Conversion Rate) بالترتيب الفعّال:
-// 1. دليل أقوى 10 منتجات مبيعاً (استهداف نية شراء عالية)
-// 2. دليل الشراء الأول وخصوصية التوصيل (تبديد مخاوف الشراء والسرية)
-// 3. دليل استخدام بخاخات التأخير آمنة الاستخدام (مجموعة منتجات مطلوبة بشدة)
-// 4. فوائد العسل الملكي والأعشاب الطبيعية (استهداف فئة المكملات وعسل المقويات)
-const conversionSlugs = [
-  "best-selling-products-guide",
-  "buying-first-product-guide",
-  "delay-sprays-safe-use",
-  "royal-honey-benefits",
-];
-
-// 🚀 CLS fix: تُستورد المقالات مباشرة (وليس كسولاً) بحيث تظهر الكروت مع أول
-// render ولا تتأخر فيحقن المحتوى لاحقاً فيسبب قفزة تخطيط (CLS) على الشاشات
-// الكبيرة. articles تُحزَّم في chunk منفصل (data-articles) لا يثقل المسار الحرج.
-const featured = conversionSlugs
-  .map((slug) => articles.find((a) => a.slug === slug))
-  .filter((a): a is NonNullable<typeof a> => Boolean(a));
+// 🚀 البطاقات مولّدة وقت البناء من نفس المصدر (src/data/articles.ts) في
+// module صغير بلا حقل content — عشان الـ chunk الكامل data-articles (~78KB)
+// ما يدخلش المسار الحرج للـ homepage (نافذة الـ LCP). الترتيب = الترتيب
+// الفعّال (نية شراء أعلى أولاً) ومحدد في scripts/generate-sitemap.mjs.
+// CLS: استيراد ثابت فتظهر الكروت مع أول render ولا قفزة تخطيط.
+const featured = featuredArticleCards;
 
 export function ArticlesGrid() {
   return (
@@ -90,7 +78,7 @@ export function ArticlesGrid() {
             to="/education"
             className="inline-flex items-center gap-2 rounded-full border border-primary px-8 py-3 text-sm font-bold text-primary transition hover:bg-primary hover:text-primary-foreground"
           >
-            عرض كل المقالات التوعوية (51 مقالة)
+            عرض كل المقالات التوعوية ({ARTICLE_COUNT} مقالة)
             <BookOpen className="h-4 w-4" />
           </Link>
         </div>
