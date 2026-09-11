@@ -420,7 +420,7 @@ export function getProductsForArticle(articleSlug: string): string[] {
         titleAndContent.includes("غذاء") ||
         titleAndContent.includes("طاقة")
       ) {
-        return ["m-11", "m-52", "m-12", "m-14", "m-02", "m-60"]; // Honey/Ginseng/Kreva
+        return ["m-11", "m-52", "m-12", "m-14", "m-02", "m-49"]; // Honey/Ginseng/Power (كريفا خارجها — توجيه تأخير فقط)
       }
       if (
         titleAndContent.includes("سرعة") ||
@@ -435,7 +435,7 @@ export function getProductsForArticle(articleSlug: string): string[] {
         titleAndContent.includes("صلابة") ||
         titleAndContent.includes("ضعف")
       ) {
-        return ["m-01", "m-02", "m-60", "m-11", "m-03"]; // Erection & double action
+        return ["m-01", "m-02", "m-11", "m-03"]; // Erection (كريفا خارجها — منتج تأخير وليس انتصاب)
       }
       return ["m-11", "m-60", "m-02", "m-48", "m-03"];
     }
