@@ -76,55 +76,6 @@ export function WhyUs() {
           ))}
         </div>
 
-        {/* 📦 بطاقة الأمان وسرية التغليف — تبديد مخاوف الاستلام */}
-        <div className="mt-6 mb-6 rounded-2xl border border-violet-100 bg-violet-50/40 p-5 md:p-6 text-right shadow-sm">
-          <div className="flex flex-col md:flex-row items-center gap-5">
-            <div className="flex-1">
-              <h3 className="text-lg md:text-xl font-black text-violet-950 mb-2 flex items-center gap-2">
-                <Lock className="h-5 w-5 text-violet-600 shrink-0" />
-                كيف نضمن لك سرية وخصوصية الاستلام تماماً؟
-              </h3>
-              <ul className="space-y-2.5 text-xs md:text-sm leading-6 text-violet-900/80">
-                <li className="flex items-start gap-1.5">
-                  <span className="text-violet-600 font-bold">✓</span>
-                  <span>
-                    <strong>كرتونة بنية مغلقة تماماً:</strong> يتم تغليف طلبك بالكامل داخل صندوق
-                    كرتوني بني سادة أو كيس بولي أسود متين ومحكم الغلق.
-                  </span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-violet-600 font-bold">✓</span>
-                  <span>
-                    <strong>بدون أي اسم للمنتج:</strong> لا يكتب اسم المنتج إطلاقاً على الطرد من
-                    الخارج ولا يتم الإفصاح عن طبيعته بوليصة الشحن.
-                  </span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-violet-600 font-bold">✓</span>
-                  <span>
-                    <strong>اسم المرسل "شركة اليسر":</strong> اسم المرسل على البوليصة يكون عاماً
-                    (شركة اليسر) لضمان الخصوصية التامة مع المندوب.
-                  </span>
-                </li>
-              </ul>
-            </div>
-
-            {/* تمثيل بصري للطرد السري */}
-            <div className="w-full md:w-56 shrink-0 flex flex-col items-center justify-center rounded-xl border border-violet-100 bg-white p-4 text-center">
-              <div className="relative mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-violet-50 text-violet-700 animate-float-slow">
-                <span className="text-4xl">📦</span>
-                <div className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-800 text-white text-[10px] font-black shadow-sm">
-                  100%
-                </div>
-              </div>
-              <div className="text-xs font-black text-violet-950">شكل الطرد عند الاستلام</div>
-              <div className="mt-1 text-[10px] font-medium text-muted-foreground leading-snug">
-                صندوق سادة مغلق تماماً بدون أي علامات تشير لمحتواه
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* CTA مدمج */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 text-center">
           <Link
