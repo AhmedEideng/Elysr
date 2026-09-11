@@ -19,44 +19,44 @@ export interface ArticleCard {
 
 export const featuredArticleCards: ArticleCard[] = [
   {
-    slug: "best-selling-products-guide",
-    title: "أقوى 10 منتجات مبيعاً في اليسر ميديكال: لماذا يفضلها عملاؤنا؟",
+    slug: "erectile-dysfunction",
+    title: "ضعف الانتصاب: الأسباب والحلول",
     excerpt:
-      "نتيجة سنوات من الخبرة في اليسر ميديكال نعرض أفضل المنتجات مبيعاً في فئات الصحة الزوجية. نشرح سبب تفضيل العملاء لكل منتج، وطريقة عمله، وكيف تختار الأنسب",
-    image: "/images/article-best-selling-hero.webp",
-    category: "تغذية ومكملات",
+      "ضعف الانتصاب مشكلة شائعة لها أسباب نفسية وجسدية، والتحرك المبكر يصنع فرقاً كبيراً. نقدم شرحاً مبسطاً لآليتها وأسبابها، وطرق التعامل الطبيعي والطبي الحديثة.",
+    image: "/images/article-erectile-dysfunction.webp",
+    category: "صحة الرجل",
+    readMin: 10,
+    emoji: "💪",
+  },
+  {
+    slug: "premature-ejaculation",
+    title: "سرعة القذف: الأسباب الشائعة وطرق التحكم",
+    excerpt:
+      "سرعة القذف من أكثر المشكلات الجنسية شيوعاً وليست نهاية للعلاقة. نستعرض أسبابها النفسية والجسدية، وتقنيات سلوكية مثبتة للتحكم، وخيارات طبيعية وطبية آمنة",
+    image: "/images/article-premature-ejaculation.webp",
+    category: "صحة الرجل",
     readMin: 9,
-    emoji: "🏆",
+    emoji: "⏱️",
   },
   {
-    slug: "buying-first-product-guide",
-    title: "دليل شراء أول منتج صحة زوجية: بدون حرج ومع ثقة",
+    slug: "women-orgasm",
+    title: "صحة المرأة الجنسية: حقائق علمية",
     excerpt:
-      "شراء أول منتج صحة زوجية قرار طبيعي يستحق تحضيراً لا خجلاً ولا تهوراً. نرشدك إلى معايير الاختيار الصحيح، وقراءة المكونات، وأهمية المصدر الموثوق والتغليف",
-    image: "/images/article-buying-guide-hero.webp",
-    category: "أساسيات",
-    readMin: 6,
-    emoji: "🛒",
+      "فهم الاستجابة الجنسية الأنثوية مفتاح علاقة ممتعة ومرضية. نتناول معلومات عن جسد المرأة وطبيعة الاستجابة والذروة، وما الطبيعي وما المبالغ فيه، وكيف",
+    image: "/images/article-stress-libido.webp",
+    category: "صحة المرأة",
+    readMin: 10,
+    emoji: "🌸",
   },
   {
-    slug: "delay-sprays-safe-use",
-    title: "دليل آمن لاستخدام بخاخات التأخير للرجال",
+    slug: "pre-marriage-health-guide",
+    title: "دليل المقبلين على الزواج: كل ما تحتاج معرفته",
     excerpt:
-      "بخاخات التأخير خيار شائع للتحكم بالتوقيت، لكن استخدامها الخاطئ قد يسبب تنميلاً وفقدان المتعة. نقدم دليلاً عملياً لاختيار النوع الآمن وتطبيقه صحيحاً دون",
-    image: "/images/article-delay-spray-hero.webp",
-    category: "صحة الرجال",
-    readMin: 7,
-    emoji: "🧴",
-  },
-  {
-    slug: "royal-honey-benefits",
-    title: "فوائد العسل الملكي والأعشاب للرجال",
-    excerpt:
-      "العسل الملكي مع الجينسنج والتونغكات علي مزيج رائج في منتجات الطاقة، فما حقيقته؟ نستعرض الفوائد المدعومة علمياً، وأسس اختيار الأصلي، والتوقعات الواقعية",
-    image: "/images/article-royal-honey-hero.webp",
-    category: "تغذية ومكملات",
-    readMin: 6,
-    emoji: "🍯",
+      "الاستعداد الجيد قبل الزواج يضع أساساً صحيحاً لحياة زوجية مستقرة وسعيدة. نجيب عن أسئلة العروسين: الفحوصات الموصى بها، والتوقعات الواقعية، وأهمية التواصل",
+    image: "/images/article-pre-marriage-hero.webp",
+    category: "علاقات",
+    readMin: 10,
+    emoji: "💒",
   },
 ];
 

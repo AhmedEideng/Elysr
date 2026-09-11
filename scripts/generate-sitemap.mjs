@@ -122,11 +122,13 @@ async function generateSitemap() {
     // عشان الـ chunk الكامل data-articles (~78KB) ما يدخلش المسار الحرج
     // للـ homepage (نافذة الـ LCP). تغيير البطاقات = تعديل الـ slugs هنا + build.
     const FEATURED_ARTICLE_SLUGS = [
-      // الترتيب = الترتيب الفعّال (نية شراء أعلى أولاً):
-      "best-selling-products-guide", // دليل أقوى 10 منتجات مبيعاً
-      "buying-first-product-guide", // الشراء الأول + خصوصية التوصيل
-      "delay-sprays-safe-use", // بخاخات التأخير
-      "royal-honey-benefits", // العسل الملكي والأعشاب
+      // الترتيب = الترتيب المعروض. اختيار 2026-09-11 (المالك): أقوى 4 مقالات
+      // بالمكتبة (9–10 دقائق + 6 مصادر موثوقة) بتغطية متوازنة:
+      // الرجل (الكتالوج الأساسي) ×2، المرأة ×1، شريحة ما قبل الجواز ×1.
+      "erectile-dysfunction", // ضعف الانتصاب: الأسباب والحلول (صحة الرجل · 10د)
+      "premature-ejaculation", // سرعة القذف: الأسباب وطرق التحكم (صحة الرجل · 9د)
+      "women-orgasm", // صحة المرأة الجنسية: حقائق علمية (صحة المرأة · 10د)
+      "pre-marriage-health-guide", // دليل المقبلين على الزواج (علاقات · 10د)
     ];
     const featuredCards = FEATURED_ARTICLE_SLUGS.flatMap((slug) => {
       const a = articles.find((x) => x.slug === slug);
