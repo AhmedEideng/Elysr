@@ -1,4 +1,13 @@
-import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { trackAddToCart, trackRemoveFromCart } from "@/lib/analytics";
 import type { Product } from "@/data/product-types";
 import { getPromoTier, type PromoTier } from "@/lib/promo";
 import { products } from "@/data/products";
@@ -180,7 +189,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  // أحدث نسخة من السلة للتتبع — من غير ما نغير deps الكولبكات
+  const itemsRef = useRef(items);
+  useEffect(() => {
+    itemsRef.current = items;
+  });
+
   const add = useCallback((p: Product, qty = 1) => {
+    // GA: add_to_cart — قبل تغيير الحالة، ورفض السلة الممتلئة مش بيحسب
+    const prevItems = itemsRef.current;
+    const alreadyInCart = prevItems.some((i) => i.id === p.id);
+    const rejectedByCap = !alreadyInCart && prevItems.length >= MAX_CART_ITEMS;
+    if (!rejectedByCap) {
+      trackAddToCart({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        qty: Math.max(1, Math.min(qty, p.stock ?? 10)),
+      });
+    }
     setItems((prev) => {
       if (prev.length >= MAX_CART_ITEMS && !prev.find((i) => i.id === p.id)) {
         return prev;
@@ -219,7 +246,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const remove = useCallback((id: string) => setItems((p) => p.filter((i) => i.id !== id)), []);
+  const remove = useCallback((id: string) => {
+    const target = itemsRef.current.find((i) => i.id === id);
+    if (target) {
+      trackRemoveFromCart({ id, name: target.name, price: target.price, qty: target.qty });
+    }
+    setItems((p) => p.filter((i) => i.id !== id));
+  }, []);
 
   const setQty = useCallback(
     (id: string, qty: number) =>

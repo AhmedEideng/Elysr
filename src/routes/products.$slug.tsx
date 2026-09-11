@@ -59,6 +59,7 @@ import {
   submitToGoogleSheets,
   beaconOrderToSheets,
 } from "@/lib/governorates";
+import { trackBeginCheckout, trackPurchase, trackViewItem } from "@/lib/analytics";
 
 export const Route = createFileRoute("/products/$slug")({
   component: ProductPage,
@@ -167,6 +168,11 @@ function ProductPage() {
   useEffect(() => {
     trackRecentlyViewed(product);
   }, [product.id, trackRecentlyViewed, product]);
+
+  // GA: view_item — كل زيارة لصفحة منتج (سعر من الكتالوج الرسمي)
+  useEffect(() => {
+    trackViewItem({ id: product.id, name: product.name, price: product.price, qty: 1 });
+  }, [product.id, product.name, product.price]);
 
   useEffect(() => {
     // أزل نسخ الـ prerender أولاً حتى لا يتكرر أي schema بعد الـ hydration
@@ -292,6 +298,11 @@ function ProductPage() {
       if (!beaconOrderToSheets(payload)) {
         void submitToGoogleSheets(payload);
       }
+
+      // GA: begin_checkout + purchase — شراء فوري بيكمل لواتساب مباشرة
+      // (نفس منطق سلة: beacon best-effort = طلب مكتمل تجارياً)
+      trackBeginCheckout(orderItems, grandTotal, shipping);
+      trackPurchase(orderId, orderItems, grandTotal, shipping, discount);
 
       try {
         // 🔒 لا نخزن رابط واتساب الكامل الذي يحتوي PII — رقم الطلب فقط

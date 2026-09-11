@@ -30,6 +30,7 @@ import {
   FREE_SHIPPING_THRESHOLD,
   qualifiesForFreeShipping,
 } from "@/lib/governorates";
+import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
 import { toast } from "sonner";
 import { getNextTier, PROMO_TAGLINE, isPromoActive } from "@/lib/promo";
 
@@ -166,6 +167,9 @@ function CartPage() {
       promoApplied: discount > 0 || bundleDiscount > 0,
     };
 
+    // GA: begin_checkout — اتقدم الطلب (مشاع للطريقتين)
+    trackBeginCheckout(orderItems, grandTotal, shipping);
+
     if (method === "whatsapp") {
       const msg = buildOrderMessage(
         orderItems,
@@ -193,6 +197,10 @@ function CartPage() {
         void submitToGoogleSheets(payload);
       }
 
+      // GA: purchase — الطلب اتبعت (beacon) والعميل اتحرك لواتساب؛
+      // بنحسبه كطلب مكتمل بما يتطابق مع الواقع التجاري
+      trackPurchase(orderId, orderItems, grandTotal, shipping, discount + bundleDiscount);
+
       clear();
       setSubmitting(false);
       window.location.assign(url);
@@ -204,6 +212,8 @@ function CartPage() {
       // العميل من إعادة المحاولة، مع قناة بديلة (واتساب) — لا فقدان صامت.
       submitToGoogleSheets(payload).then((result) => {
         if (result.success) {
+          // GA: purchase — سُجل فعلياً في الشيت (فشل التسجيل = مفيش revenue)
+          trackPurchase(orderId, orderItems, grandTotal, shipping, discount + bundleDiscount);
           // سُجل بنجاح → نطهر السلة (العميل في صفحة التأكيد الآن)
           clear();
         } else {
