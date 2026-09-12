@@ -5,7 +5,7 @@ describe("buildOrderMessage phone handling", () => {
   it("keeps the full maximum-length E.164 phone number", () => {
     const phone = "+123456789012345"; // plus sign + 15 digits
     const message = buildOrderMessage(
-      [{ id: "m-60", slug: "kreva-gel", name: "كريفا", qty: 1, price: 300 }],
+      [{ id: "m-60", slug: "kreva-gel-for-men", name: "كريفا", qty: 1, price: 300 }],
       { name: "International Customer", phone, governorate: "القاهرة" },
       "EL-PHONE-TEST",
       50,
@@ -27,7 +27,7 @@ describe("order message date (date only — owner decision)", () => {
 
   it("includes a date line in the order message (right after the order id)", () => {
     const message = buildOrderMessage(
-      [{ id: "m-60", slug: "kreva-gel", name: "كريفا", qty: 1, price: 300 }],
+      [{ id: "m-60", slug: "kreva-gel-for-men", name: "كريفا", qty: 1, price: 300 }],
       { name: "عميل", phone: "01000000000", governorate: "القاهرة" },
       "EL-DATE-TEST",
       50,
@@ -45,7 +45,7 @@ describe("promo label in the order message — only when a discount actually app
 
   it("hides the label for a small order with no discount", () => {
     const message = buildOrderMessage(
-      [{ id: "m-60", slug: "kreva-gel", name: "كريفا", qty: 1, price: 300 }],
+      [{ id: "m-60", slug: "kreva-gel-for-men", name: "كريفا", qty: 1, price: 300 }],
       customer,
       "EL-NO-DISCOUNT",
       50,
@@ -56,7 +56,7 @@ describe("promo label in the order message — only when a discount actually app
   it("shows the label for an order that earns a tier discount (>= 1000)", () => {
     // 1200 ج.م → شريحة 1000 (15%) → خصم 180
     const message = buildOrderMessage(
-      [{ id: "m-60", slug: "kreva-gel", name: "كريفا", qty: 2, price: 600 }],
+      [{ id: "m-60", slug: "kreva-gel-for-men", name: "كريفا", qty: 2, price: 600 }],
       customer,
       "EL-TIER-DISCOUNT",
       0,
@@ -69,7 +69,7 @@ describe("promo label in the order message — only when a discount actually app
   it("shows the label for a bundle-discount order even under the tier threshold", () => {
     const message = buildOrderMessage(
       [
-        { id: "m-60", slug: "kreva-gel", name: "كريفا", qty: 1, price: 300 },
+        { id: "m-60", slug: "kreva-gel-for-men", name: "كريفا", qty: 1, price: 300 },
         { id: "m-01", slug: "hammer-of-thor", name: "هامر", qty: 1, price: 300 },
       ],
       customer,

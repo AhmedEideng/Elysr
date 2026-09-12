@@ -94,10 +94,11 @@ async function syncRedirects() {
       { source: "/return-policy", destination: "/returns", permanent: true },
       { source: "/terms-and-conditions", destination: "/terms", permanent: true },
       { source: "/privacy-policy", destination: "/privacy", permanent: true },
-      { source: "/products/kreva", destination: "/products/kreva-gel", permanent: true },
+      // kreva-gel-for-men هو الرابط الأساسي (primary) — kreva-gel وkreva 301 له
+      { source: "/products/kreva", destination: "/products/kreva-gel-for-men", permanent: true },
       {
-        source: "/products/kreva-gel-for-men",
-        destination: "/products/kreva-gel",
+        source: "/products/kreva-gel",
+        destination: "/products/kreva-gel-for-men",
         permanent: true,
       },
       { source: "/products/sotara-gel", destination: "/products/sotara-gel-50gm", permanent: true },
@@ -217,6 +218,12 @@ async function syncRedirects() {
       {
         source: "/products/hilto-wonderful-honey-for-men",
         destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/w-24",
+        // w-24 Black Widow — product-id — حذف نهائي 2026-09-07
+        destination: "/products/women",
         permanent: true,
       },
       {

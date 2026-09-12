@@ -478,7 +478,7 @@
     },
     {
       "source": "/products/m-60",
-      "destination": "/products/kreva-gel",
+      "destination": "/products/kreva-gel-for-men",
       "permanent": true
     },
     {
@@ -798,12 +798,7 @@
     },
     {
       "source": "/products/kreva",
-      "destination": "/products/kreva-gel",
-      "permanent": true
-    },
-    {
-      "source": "/products/kreva-gel-for-men",
-      "destination": "/products/kreva-gel",
+      "destination": "/products/kreva-gel-for-men",
       "permanent": true
     },
     {
@@ -1074,6 +1069,11 @@
     {
       "source": "/products/black-widow-drops",
       "destination": "/products/women",
+      "permanent": true
+    },
+    {
+      "source": "/products/kreva-gel",
+      "destination": "/products/kreva-gel-for-men",
       "permanent": true
     }
   ]

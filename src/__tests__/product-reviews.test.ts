@@ -3,7 +3,7 @@ import { getProductReviews } from "@/lib/product-reviews";
 
 describe("Kreva historical reviews", () => {
   it("shows exactly five comments and every displayed rating is 5/5", () => {
-    const result = getProductReviews("kreva-gel", "men");
+    const result = getProductReviews("kreva-gel-for-men", "men");
 
     expect(result.reviews).toHaveLength(5);
     expect(result.reviews.every((review) => review.rating === 5)).toBe(true);

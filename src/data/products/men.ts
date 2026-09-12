@@ -1318,7 +1318,7 @@ export const men: Product[] = [
   },
   {
     id: "m-60",
-    slug: "kreva-gel",
+    slug: "kreva-gel-for-men",
     name: "جل كريفا الألماني المتطور للرجال (50 جم)",
     nameEn: "Kreva Gel – Advanced Formula for Men",
     category: "men",
