@@ -498,15 +498,14 @@ ${articleImageEntries}
 
     // 4. بناء ملفات الكتالوج (XML + CSV + TXT) للـ 79 منتجاً المؤهل فقط
     // 🛒 Google Merchant Center يطلب المكونات داخل الوصف.
-    // معظم أوصاف المنتجات تنتهي أصلاً بـ "المكونات/طريقة الاستخدام" —
-    // نضيفها فقط إن لم تكن موجودة لمنع تكرار النص (كان يكرر في كل الأصناف).
+    // نضيف المكونات فقط إن لم تكن موجودة (منع تكرار النص).
+    // ملاحظة (GSC 2026-09-13): "طريقة الاستخدام" مقصود إن مش في وصف الـ feed —
+    // وصفات الاستخدام الموضعي بتزوّد إشارة "محتوى بالغين" في الـ feed، والتعليمات
+    // الكاملة بتفضل على صفحة المنتج (مصدر الحقيقة للزبون).
     const buildFeedDescription = (p) => {
       let fullDesc = (p.description || "").trim();
       if (p.ingredients && !fullDesc.includes(p.ingredients)) {
         fullDesc += " المكونات: " + p.ingredients;
-      }
-      if (p.usage && !fullDesc.includes(p.usage)) {
-        fullDesc += " طريقة الاستخدام: " + p.usage;
       }
       // Google Merchant يقبل حتى 5000 حرف في الوصف
       return fullDesc.slice(0, 5000);
