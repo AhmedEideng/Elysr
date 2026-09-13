@@ -512,6 +512,27 @@ ${articleImageEntries}
       return fullDesc.slice(0, 5000);
     };
 
+    // 🏷️ Google Product Category (official taxonomy IDs) — صادق لكل منتج:
+    // قبل كده مكنش في تصنيف في الـ feed فـ Google كان "بيخمن" (طلّع خطافات
+    // صيد لأكياس عشبية و"تصفيف شعر" لكريم) — تقرير GSC 2026-09-13.
+    // القيم IDs رسمية من taxonomy-with-ids.en-US.txt (stable/locale-independent).
+    const feedCategory = (p) => {
+      // أجهزة البالغين (مضخات/VED/جهاز شد) — التصنيف الصادق
+      // "Mature > Erotic > Sex Toys". d-04 (حقيبة تكبير صدر نسائية) مش sex toy.
+      if (p.category === "devices") return p.id === "d-04" ? "2915" : "778";
+      const n = `${p.name} ${p.nameEn || ""}`;
+      // موضعي الأول (بخاخ/جل/كريم/مناديل) — عشان نصوص زي "with Vitamin E" في
+      // الـ nameEn ما تدفعش بخاخ لقائمة المكملات
+      if (/بخاخ|سبراي|سبراى|جل\b|جيل\b|كريم|مناديل|spray|\bgel\b|cream|wipes/i.test(n))
+        return "2915"; // Health & Beauty > Personal Care
+      if (/عسل|honey/i.test(n)) return "4947"; // Food Items > Condiments & Sauces > Honey
+      if (/شوكولاتة|شيكولاته|chocolate|علكة|\bgum\b|بنكهة/i.test(n)) return "4748"; // Food Items > Candy & Chocolate
+      if (/قهوة|coffee/i.test(n)) return "1868"; // Beverages > Coffee
+      // فمّي (كبسولات/أقراص/أكياس/قطرات فمّية)
+      if (/كبسول|أقراص|أكياس|قطرات|capsules?|tablets?|drops?|nutriceutical/i.test(n)) return "525"; // Fitness & Nutrition > Vitamins & Supplements
+      return "2915"; // fallback: Personal Care
+    };
+
     const feedRow = (p) => ({
       id: p.id,
       title: p.name,
@@ -522,6 +543,7 @@ ${articleImageEntries}
       condition: "new",
       availability: p.stock > 0 ? "in stock" : "out of stock",
       price: `${p.price} EGP`,
+      google_product_category: feedCategory(p),
     });
 
     const catalogXml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -543,6 +565,7 @@ ${catalogProducts
       <g:condition>${row.condition}</g:condition>
       <g:availability>${row.availability}</g:availability>
       <g:price>${row.price}</g:price>
+      <g:google_product_category>${esc(row.google_product_category)}</g:google_product_category>
     </item>`;
   })
   .join("\n")}
@@ -562,6 +585,7 @@ ${catalogProducts
       "condition",
       "availability",
       "price",
+      "google_product_category",
     ];
     const feedRows = catalogProducts.map(feedRow);
     const csvEscape = (v) => {
