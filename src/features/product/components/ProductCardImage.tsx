@@ -54,7 +54,8 @@ export function ProductCardImage({
   }
 
   const srcUrl = thumbUrl(image, "thumbs");
-  const srcSetUrl = `${thumbUrl(image, "thumbs-180")} 360w, ${thumbUrl(image, "thumbs")} 480w, ${assetUrl(image)} 800w`;
+  // 240w (thumbs-120) للكروت الصغيرة — المتصفح بيختار حسب العرض الفعلي × DPR
+  const srcSetUrl = `${thumbUrl(image, "thumbs-120")} 240w, ${thumbUrl(image, "thumbs-180")} 360w, ${thumbUrl(image, "thumbs")} 480w, ${assetUrl(image)} 800w`;
 
   return (
     <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-[#f0f9ff] via-white to-[#fef9c3]">

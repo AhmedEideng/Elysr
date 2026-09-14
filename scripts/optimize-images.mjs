@@ -23,6 +23,9 @@ const ROOT = resolve(__dirname, "..");
 const IMAGES_DIR = resolve(ROOT, "public", "images");
 const THUMBS_DIR = resolve(IMAGES_DIR, "thumbs");
 const THUMBS_180_DIR = resolve(IMAGES_DIR, "thumbs-180");
+// 240px = 120 CSS px × 2 (DPR) — الكروت الصغيرة (Featured ~100px) كانت
+// تاخد 360px (1.8x زائد) على الموبايل — توفير ~40KiB في الصفحة الرئيسية.
+const THUMBS_120_DIR = resolve(IMAGES_DIR, "thumbs-120");
 
 const FORCE = process.argv.includes("--force");
 const VERBOSE = process.argv.includes("--verbose");
@@ -39,7 +42,7 @@ function walk(dir) {
     const full = join(dir, entry);
     const st = statSync(full);
     if (st.isDirectory()) {
-      if (entry === "thumbs" || entry === "thumbs-180") continue;
+      if (entry === "thumbs" || entry === "thumbs-180" || entry === "thumbs-120") continue;
       out.push(...walk(full));
     } else if (/\.(png|jpe?g|webp)$/i.test(entry)) {
       out.push({ path: full, size: st.size, name: entry });
@@ -50,6 +53,7 @@ function walk(dir) {
 
 if (!existsSync(THUMBS_DIR)) mkdirSync(THUMBS_DIR, { recursive: true });
 if (!existsSync(THUMBS_180_DIR)) mkdirSync(THUMBS_180_DIR, { recursive: true });
+if (!existsSync(THUMBS_120_DIR)) mkdirSync(THUMBS_120_DIR, { recursive: true });
 
 const files = walk(IMAGES_DIR);
 let processed = 0;
@@ -71,6 +75,7 @@ for (const file of files) {
 
   const thumbPath = join(THUMBS_DIR, name.replace(/\.(png|jpe?g)$/i, ".webp"));
   const thumb180Path = join(THUMBS_180_DIR, name.replace(/\.(png|jpe?g)$/i, ".webp"));
+  const thumb120Path = join(THUMBS_120_DIR, name.replace(/\.(png|jpe?g)$/i, ".webp"));
   const targetPath = file.path.replace(/\.(png|jpe?g)$/i, ".webp");
 
   try {
@@ -99,26 +104,37 @@ for (const file of files) {
       .resize({ width: 360, height: 360, fit: "cover" })
       .webp({ quality: 75, effort: 6 });
 
-    const [mainBuf, thumbBuf, thumb180Buf] = await Promise.all([
+    const thumb120Pipeline = sharp(inputBuffer)
+      .rotate()
+      .resize({ width: 240, height: 240, fit: "cover" })
+      .webp({ quality: 75, effort: 6 });
+
+    const [mainBuf, thumbBuf, thumb180Buf, thumb120Buf] = await Promise.all([
       mainPipeline.toBuffer(),
       thumbPipeline.toBuffer(),
       thumb180Pipeline.toBuffer(),
+      thumb120Pipeline.toBuffer(),
     ]);
 
-    if (!FORCE && existsSync(targetPath) && existsSync(thumbPath) && existsSync(thumb180Path)) {
-      const existingSize = statSync(targetPath).size;
-      if (existingSize <= mainBuf.length) {
-        if (VERBOSE) console.log(`⏭  Skip: ${name} (existing file is smaller)`);
-        skipped++;
-        continue;
-      }
+    // بنكتب بس اللي ناقص/مشغّل — مفيش لمس لملفات موجودة أصغر (يحمي من
+    // إعادة توليد غير ضرورية عند تشغيل السكربت تاني)
+    const needMain = FORCE || !existsSync(targetPath) || statSync(targetPath).size > mainBuf.length;
+    const needThumb = FORCE || !existsSync(thumbPath);
+    const needThumb180 = FORCE || !existsSync(thumb180Path);
+    const needThumb120 = FORCE || !existsSync(thumb120Path);
+
+    if (!needMain && !needThumb && !needThumb180 && !needThumb120) {
+      if (VERBOSE) console.log(`⏭  Skip: ${name} (existing file is smaller)`);
+      skipped++;
+      continue;
     }
 
-    writeFileSync(targetPath, mainBuf);
-    writeFileSync(thumbPath, thumbBuf);
-    writeFileSync(thumb180Path, thumb180Buf);
+    if (needMain) writeFileSync(targetPath, mainBuf);
+    if (needThumb) writeFileSync(thumbPath, thumbBuf);
+    if (needThumb180) writeFileSync(thumb180Path, thumb180Buf);
+    if (needThumb120) writeFileSync(thumb120Path, thumb120Buf);
 
-    savedBytes += file.size - mainBuf.length;
+    savedBytes += needMain ? file.size - mainBuf.length : 0;
     processed++;
 
     if (processed % 10 === 0) {
