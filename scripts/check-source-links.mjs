@@ -13,7 +13,11 @@
  * القاعدة:
  *   2xx/3xx  → سليم
  *   401/403  → تحذير فقط (فلتر روبوتات — الصفحة غالباً حية)
- *   404/5xx/خطأ/انتهاء مهلة (مع إعادة محاولة واحدة) → فشل (exit 1)
+ *   ERR (مهلة/DNS/reset بعد 3 محاولات) → تحذير "غير قابل للتحقق" — فشل على
+ *   مستوى الشبكة مش دليل إن الصفحة اتحذفت (اللي بيثبت الحذف 404 حقيقي).
+ *   404 وأي 4xx تاني → فشل (exit 1)
+ *   5xx بعد 3 محاولات → فشل، ما عدا المؤسسات في FLAKY_AUTHORITY_HOSTS
+ *   (CDN-ها يقطع عملاء مراكز البيانات — تُصنّف "غير قابلة للتحقق")
  *
  * التشغيل: node scripts/check-source-links.mjs
  * ============================================================
@@ -104,8 +108,11 @@ try {
 
       if (status >= 200 && status < 400) ok.push(url);
       else if (status === 401 || status === 403) blocked.push(url);
-      else if ((status === "ERR" || status >= 500) && isFlakyAuthority(url)) {
-        // مرجع أولي + فشل خادم/شبكة بعد 3 محاولات — ليس دليلاً على حذف
+      else if (status === "ERR" || (status >= 500 && isFlakyAuthority(url))) {
+        // ERR بعد 3 محاولات = فشل على مستوى الشبكة (مهلة/DNS/reset) — مش دليل
+        // على حذف الصفحة (ده اللي بيحصل فعلاً مع شبكات CI/مراكز البيانات).
+        // 5xx بتبقى "غير قابلة للتحقق" للمرجعيات الأولية (FLAKY_AUTHORITY_HOSTS)
+        // بس — أي 404 حقيقي لسه dead كعادته وبيفشل الـ CI.
         unverifiable.push([url, status]);
       } else dead.push([url, status]);
     }
@@ -118,7 +125,9 @@ try {
   );
   for (const u of blocked) console.log(`   ⚠ 401/403  ${u}`);
   for (const [u, st] of unverifiable) {
-    console.log(`   ⚠ 5xx/timeout (authority)  ${u}  — راجعيها يدوياً من متصفح من وقت لآخر`);
+    console.log(
+      `   ⚠ ${st === "ERR" ? "ERR/timeout (شبكة)" : "5xx (مرجع أولي)"}  ${u}  — راجعيها يدوياً من متصفح من وقت لآخر`,
+    );
   }
   for (const [u, s] of dead) {
     const meta = byUrl.get(u);
