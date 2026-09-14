@@ -432,16 +432,17 @@ test("complete bundle applies the real 20% bundle discount (exclusive with tier)
     });
   });
 
-  // باقة m-01 (هامر أوف ثور) = [m-01: 590, m-44: 580, m-20: 200] → 1370
-  // خصم الباقة = 20% من 1370 = 274 — وخصم شريحة الماسة (15% = 206)
+  // باقة m-01 (هامر أوف ثور) = [m-01: 580, m-44: 580, m-20: 200] → 1360
+  // خصم الباقة = 20% من 1360 = 272 — وخصم شريحة الماسة (15% = 204)
   // موقوف لهذا الطلب: الخصمان متبادلا الاستبعاد، الباقة هي الخصم الوحيد
+  // (الأرقام تتبع أسعار الكتالوج — آخر تحديث 2026-09-14: m-01 اتغير 590→580)
   await page.goto("/products/hammer-of-thor-capsules");
   await page.getByRole("button", { name: /أضف الباقة للسلة/ }).click();
   await page.waitForTimeout(1000);
 
   await page.goto("/cart");
   await expect(page.getByText("خصم الباقة المكتملة (20%)")).toBeVisible();
-  await expect(page.getByText("-274 ج.م")).toBeVisible();
+  await expect(page.getByText("-272 ج.م")).toBeVisible();
   // خصم الشرائح يجب ألا يظهر (موقوف بسبب الباقة)
   await expect(page.getByText(/خصم 15%/)).toHaveCount(0);
 
@@ -455,11 +456,11 @@ test("complete bundle applies the real 20% bundle discount (exclusive with tier)
 
   expect(submittedPayload).toBeTruthy();
   expect(submittedPayload).toMatchObject({
-    subtotalBeforeDiscount: 1370,
+    subtotalBeforeDiscount: 1360,
     discount: 0, // شريحة 15% موقوف — الباقة هي الخصم الوحيد
-    bundleDiscount: 274, // خصم الباقة 20%
-    subtotal: 1096,
+    bundleDiscount: 272, // خصم الباقة 20%
+    subtotal: 1088,
     shipping: 50,
-    total: 1146,
+    total: 1138,
   });
 });
