@@ -3159,5 +3159,3 @@ export const articles: Article[] = [
     "/images/article-device-hygiene-hero.webp",
   ),
 ];
-
-export const getArticleBySlug = (s: string) => articles.find((a) => a.slug === s);

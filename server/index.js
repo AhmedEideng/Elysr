@@ -34,9 +34,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const DIST = resolve(ROOT, "dist");
 const PORT = parseInt(process.env.PORT || "8080", 10);
-// مفيش صفحات noindex تاني: كل الأدوية المحظورة اتحذفت نهائيا (2026-09-06/07).
-const NOINDEX_PRODUCT_PATHS = new Set();
-const NOINDEX_IMAGE_NAMES = new Set();
+// (مجموعتا NOINDEX_PRODUCT_PATHS / NOINDEX_IMAGE_NAMES اتشالوا 2026-09-14:
+// كانوا فاضيين من يوم ما اتحذفت آخر الأدوية المحظورة 2026-09-07 — كود ميت.)
 
 // ── Vercel parity redirects ──
 // On Vercel these live in vercel.json edge config; the self-hosted Express
@@ -165,14 +164,6 @@ app.use((req, res, next) => {
   if (req.path.startsWith("/api/")) {
     res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet");
     res.setHeader("Cache-Control", "no-store");
-  }
-  if (NOINDEX_PRODUCT_PATHS.has(req.path.replace(/\/$/, ""))) {
-    res.setHeader("X-Robots-Tag", "noindex, follow, noarchive, nosnippet, noimageindex");
-  } else if (
-    req.path.startsWith("/images/") &&
-    NOINDEX_IMAGE_NAMES.has(req.path.split("/").pop())
-  ) {
-    res.setHeader("X-Robots-Tag", "noindex, noimageindex");
   }
 
   // Enterprise-grade strict Content Security Policy matching vercel.json exactly

@@ -1,0 +1,31 @@
+# Git
+.git
+.gitignore
+
+# Dependencies (reinstalled in the build stage)
+node_modules
+
+# Build output (generated in the build stage)
+dist
+
+# Local env / secrets — never bake these into any image layer
+.env
+.env.*
+*.pem
+*.key
+
+# Local tooling artifacts
+.npm
+.cache
+.lighthouseci
+test-results
+coverage
+
+# Workspace docs not needed at build time
+ANALYSIS.md
+CHANGELOG.md
+SECURITY.md
+README.ar.md
+README.md
+e2e
+scripts/*.test.mjs

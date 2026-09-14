@@ -875,6 +875,33 @@ function now() {
 // 🔒 حماية بيانات العملاء - GDPR-like
 // ============================================================
 
+/**
+ * تحليل تاريخ الشيت — يدعم الصيغتين:
+ *   1) كائن Date (لو خلية التاريخ محفوظة كتاريخ)
+ *   2) النص اللي تكتبه now() بصيغة "d/M/yyyy h:mm:ss a" (مثال:
+ *      "14/9/2026 2:30:45 PM" أو بصيغة عربية "14/9/2026 2:30:45 م")
+ * أي فشل في التحليل → null (الصف ما يتشالش أبداً — الأمان قبل التنظيف).
+ */
+function parseSheetDate(value) {
+  if (value instanceof Date) return value;
+  var s = String(value || "").trim();
+  // الصيغة الإنجليزية (en-US locale — الحالة الافتراضية لمعظم المشاريع)
+  var m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})[ T](\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)$/i);
+  if (m) {
+    var d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), Number(m[4]) % 12, Number(m[5]), Number(m[6]));
+    if (/pm/i.test(m[7]) && d.getHours() < 12) d.setHours(d.getHours() + 12);
+    return d;
+  }
+  // الصيغة العربية (لو timezone/لغة المشروع العربية — "م" = مساءً)
+  var m2 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})[ T](\d{1,2}):(\d{2}):(\d{2})\s*([صم])$/);
+  if (m2) {
+    var d2 = new Date(Number(m2[3]), Number(m2[2]) - 1, Number(m2[1]), Number(m2[4]) % 12, Number(m2[5]), Number(m2[6]));
+    if (m2[7] === "م" && d2.getHours() < 12) d2.setHours(d2.getHours() + 12);
+    return d2;
+  }
+  return null;
+}
+
 // حذف الطلبات القديمة تلقائياً بعد 90 يوم (لتقليل الاحتفاظ بـ PII)
 function autoCleanupOldOrders() {
   try {
@@ -889,13 +916,20 @@ function autoCleanupOldOrders() {
     if (dateColIdx <= 0) return;
     var cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 90);
+    var deleted = 0;
     // نحذف من الأسفل للأعلى لتجنب إزاحة الصفوف
     for (var r = lastRow; r >= 2; r--) {
       var cell = sheet.getRange(r, dateColIdx).getValue();
-      if (cell && cell instanceof Date && cell < cutoff) {
+      // 🐛 إصلاح (2026-09-14): التاريخ بيتكتب كنص منطّق (now()) مش كائن Date —
+      // الشرط القديم `cell instanceof Date` كان بيفشل دايمًا فالحذف مكنش
+      // بيحصل خالص والـ PII كان بيتراكم. دلوقتي بنحلل النص صراحةً.
+      var cellDate = parseSheetDate(cell);
+      if (cellDate && cellDate < cutoff) {
         sheet.deleteRow(r);
+        deleted++;
       }
     }
+    if (deleted > 0) console.log("autoCleanupOldOrders: deleted " + deleted + " order(s) older than 90 days.");
   } catch (err) {
     console.error("autoCleanupOldOrders failed:", err);
   }

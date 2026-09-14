@@ -36,7 +36,7 @@ flow through the same webhook into a moderated reviews sheet.
 | Products               | **78** (49 men · 22 women · 7 devices) — 9 items permanently deleted; **zero prescription products remain** |
 | Eligible (feed/sitemap)| **78** — every catalog product is eligible in every channel (no blocked items remain)             |
 | Articles               | **56** educational health articles with trusted medical sources (NIH/Mayo/NHS/…)                |
-| SEO landing pages      | **93** long-form guide pages (91 indexed, 2 noindex)                                            |
+| SEO landing pages      | **93** long-form guide pages — all indexed (the 2 legacy noindex pages disappeared with the 2026-09-07 deletions) |
 | Pre-rendered pages     | **244** (17 static + 78 products + 56 articles + 93 guides)                                     |
 | Sitemap URLs           | **237** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)     |
 | Catalog feed           | **78** items (Google Shopping RSS, price + availability per product)                            |
