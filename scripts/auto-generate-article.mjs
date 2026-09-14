@@ -221,7 +221,10 @@ JSON Schema:
   let articleData = null;
 
   // 🚀 Using official Google Gemini API with automatic model fallbacks for maximum resilience
-  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+  // ملاحظة (2026-09-14): Google اتوقف دعم 2.5/2.0/1.5-flash لمستخدمي API الجدد
+  // (404 "no longer available to new users — use models/gemini-3.6-flash")،
+  // فـ 3.6-flash على الأول والباقي fallback احتياطي.
+  const models = ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
   let response = null;
   let success = false;
 

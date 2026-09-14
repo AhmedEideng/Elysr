@@ -108,30 +108,46 @@ EVIDENCE:\n${evidence
     )
     .join("\n\n")}`;
 
-  // 🔒 المفتاح في الـ header وليس في الـ URL + مهلة 60 ثانية للطلب
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60_000);
+  // 🔒 المفتاح في الـ header وليس في الـ URL + مهلة 60 ثانية لكل محاولة
+  // + fallback على الموديل التالي (نفس سلسلة موديلات الـ generator:
+  // Google اتوقف 2.5-flash لمستخدمي API الجدد 2026-09-14 → 3.6-flash على الأول)
+  const verifierModels = [
+    "gemini-3.6-flash",
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+  ];
   let response;
-  try {
-    response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
+  for (const model of verifierModels) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60_000);
+    try {
+      response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: "application/json", temperature: 0 },
+          }),
+          signal: controller.signal,
         },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { responseMimeType: "application/json", temperature: 0 },
-        }),
-        signal: controller.signal,
-      },
-    );
-  } finally {
-    clearTimeout(timeout);
+      );
+    } finally {
+      clearTimeout(timeout);
+    }
+    if (response.ok) break;
+    console.warn(`⚠️ Verifier model "${model}" failed (HTTP ${response.status}) — trying next...`);
   }
-  if (!response.ok) throw new Error(`Claim-support verifier failed with HTTP ${response.status}`);
+  if (!response.ok) {
+    throw new Error(
+      `Claim-support verifier failed: all models failed (last HTTP ${response.status})`,
+    );
+  }
   const payload = await response.json();
   const raw = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!raw) throw new Error("Claim-support verifier returned no result");
