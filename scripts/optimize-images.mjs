@@ -81,11 +81,13 @@ for (const file of files) {
       .resize({ width: 800, height: 800, fit: "inside", withoutEnlargement: true })
       .webp({ quality: 50, effort: 6 });
 
-    // 🚀 AVIF نسخة إضافية — توفير 20-30% حجم
-    const avifPipeline = sharp(inputBuffer)
-      .rotate()
-      .resize({ width: 800, height: 800, fit: "inside", withoutEnlargement: true })
-      .avif({ quality: 40, effort: 4 });
+    // 🚫 AVIF: الموقع بيدور على .webp بس (مفيش أي srcset/reference لـ .avif
+    // — اتأكد 2026-09-14)، فالنسخة الإضافية كانت حجم repo ضايع (78 ملف اتنضفت).
+    // لو رجعنا نخدم AVIF في المستقبل (srcset type=image/avif)، نعيد تفعيلها هنا.
+    // const avifPipeline = sharp(inputBuffer)
+    //   .rotate()
+    //   .resize({ width: 800, height: 800, fit: "inside", withoutEnlargement: true })
+    //   .avif({ quality: 40, effort: 4 });
 
     const thumbPipeline = sharp(inputBuffer)
       .rotate()
@@ -97,9 +99,8 @@ for (const file of files) {
       .resize({ width: 360, height: 360, fit: "cover" })
       .webp({ quality: 75, effort: 6 });
 
-    const [mainBuf, avifBuf, thumbBuf, thumb180Buf] = await Promise.all([
+    const [mainBuf, thumbBuf, thumb180Buf] = await Promise.all([
       mainPipeline.toBuffer(),
-      avifPipeline.toBuffer(),
       thumbPipeline.toBuffer(),
       thumb180Pipeline.toBuffer(),
     ]);
@@ -113,9 +114,7 @@ for (const file of files) {
       }
     }
 
-    const avifPath = file.path.replace(/\.(png|jpe?g|webp)$/i, ".avif");
     writeFileSync(targetPath, mainBuf);
-    writeFileSync(avifPath, avifBuf);
     writeFileSync(thumbPath, thumbBuf);
     writeFileSync(thumb180Path, thumb180Buf);
 
