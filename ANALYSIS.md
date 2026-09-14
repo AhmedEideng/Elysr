@@ -1614,3 +1614,45 @@ devDeps).
 
 Drift guards: meta + body بيتأكدوا حقل حقل من articles.ts في
 `data-integrity.test.mjs` — أي تعديل في المصدر من غير build = CI هترفض.
+
+## 47) Critical CSS inline + CSS non-blocking (2026-09-14)
+
+### المشكلة
+الـ CSS الكامل (18KB wire) كان **render-blocking** — أول رسمة مستنية
+تحميله بالكامل. ده كان بيأثر على FCP ولـ LCP في الشبكات الضعيفة
+(نفس المشكلة اللي وراها أرقام Vercel Speed Insights: FCP 3.95s / LCP 4.09s).
+
+### الحل
+- **`scripts/inject-critical-css.mjs`** (post-build، بعد الـ prerender):
+  - بيجمع الـ classes من مصادر فوق الـ fold (Header, PageHero, Hero,
+    AnniversaryPromo, WhyUs, ProductCard/ProductCardImage, ProductImage,
+    FloatingActions) + قائمة core utilities — بتتحدّث تلقائيًا مع الكود.
+  - بيشطّب من الـ CSS المبنى كل rule فيها class من الـ set (شامل
+    المتداخلة جوا `@media` للـ responsive variants sm:/md:/lg:) +
+    قواعد العناصر الأساسية + `:root` (متغيرات البراند) + theme/base
+    المفكوكة — بترتيب أولوية حسب تكرار الكلاس في المصادر.
+  - بيشيل rules الـ transform (var(--tw-...)) اللي مالهاش fallback.
+  - بيقفل الحجم بسقف 30KB.
+- **الحقن في كل صفحات dist**: `<style id="critical-above-the-fold">` +
+  تحويل `<link rel="stylesheet">` إلى `preload + <noscript> fallback +
+  /scripts/css-swapper.js (defer)` — الـ defer عشان مفيش round-trip
+  مانع (inline handler محظور: CSP عندها `script-src-attr 'none'`).
+
+### 🔴 Bug اتكشف بالـ visual testing (وأهم درس)
+أول نسخة كانت بتفلت الـ rules خارج أي layer — وفي CSS cascade layers
+**الـ unlayered دايمًا يتغلب على الـ layered** — يعني `.sm\:grid-cols-2`
+المستخرجة (unlayered) كانت بتفوز على `.lg\:grid-cols-4` جوا
+`@layer utilities` في الـ CSS الكامل حتى وهو جاي بعدها في الـ document.
+النتيجة: الـ grid اتقفل 2 أعمدة على الدوبل. **الحل**: كل الـ critical
+جوا `@layer critical{}` — بيظهر قبل طبقات الـ CSS الكامل فأولويته
+أدنى، والـ CSS الكامل دايمًا هو المصدر النهائي.
+
+### التحقق (visual testing بالـ pixel)
+- **Before/After final**: 4 صفحات 0.0000% فرق، والرئيسية 0.0025%
+  (200 بكسل = أرقام العداد التنازلي اللي بيتغير وقت التصوير بس).
+- **أول رسمة مع CSS full محجوب** (أسوأ سيناريو): الهيدر + الهيرو +
+  الأزرار + الإحصائيات كلها مستيلز كمل — مفيش flash فوق الـ fold.
+
+### الأثر (Lighthouse live — قبل الدفع)
+Baseline live (قبل الـ critical): score 91 · FCP 2.2s · LCP 2.9s ·
+TBT 170ms · CLS 0 · SI 2.2s — التقييم بعد الدفع في تقرير الـ release.

@@ -140,7 +140,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (168 KiB) inside the LCP window; 5 s clears both the lab (3.3 s) and
   field (2.8 s) LCP windows. Pre-load `dataLayer` events are still sent
   on GA boot — no pageviews lost.
-
+- **Critical CSS inlined + full CSS non-blocking (2026-09-14)**: a new
+  post-build step (`scripts/inject-critical-css.mjs`) extracts the
+  above-the-fold rules (auto-derived from Header/PageHero/Hero/Promo/
+  WhyUs/product-card sources, incl. responsive `@media` variants and the
+  `:root` brand variables), inlines them as `<style>` in every prerendered
+  page, and turns the 18 KiB stylesheet into preload + deferred swapper
+  script + `<noscript>` fallback (CSP-safe: `script-src-attr 'none'`).
+  First paint no longer waits for the full CSS. Verified pixel-identical
+  final renders (0.0000% on 4/5 pages; home differs only by the live
+  countdown digits) and a fully styled first paint even with the full CSS
+  blocked. All rules are wrapped in `@layer critical` so the full
+  stylesheet always wins the cascade (an unlayered build was caught by
+  the visual test — it broke `lg:grid-cols-4` via CSS layer precedence).
 ### 🎯 SEO / Indexation
 
 - **Layered noindex protection for prescription products**: the eight blocked medicine
