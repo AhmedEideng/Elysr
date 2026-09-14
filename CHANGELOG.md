@@ -65,6 +65,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Live feed verification (2026-09-14)**: the deployed `/catalog-feed.xml`
   (plus .csv/.txt) is byte-identical to the tracked artifacts — all fixes are
   live, not just in the repo.
+- **Big Penis U.S.A. (`m-46`) usage card fixed (2026-09-14)**: the
+  "طريقة الاستخدام" card carried a vague "اتبع تعليمات العبوة" cop-out;
+  it now states the real instruction (1 capsule ~2 h before with a large
+  glass of water, max one per 24 h) while keeping every existing safety
+  warning. The product description was already usage-free since the P2 feed
+  cleanup — old GMC listings showing usage in the description predate that
+  fix and heal on the next feed refresh.
 
 ### 🔒 Security hardening
 
