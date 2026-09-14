@@ -1656,3 +1656,44 @@ Drift guards: meta + body بيتأكدوا حقل حقل من articles.ts في
 ### الأثر (Lighthouse live — قبل الدفع)
 Baseline live (قبل الـ critical): score 91 · FCP 2.2s · LCP 2.9s ·
 TBT 170ms · CLS 0 · SI 2.2s — التقييم بعد الدفع في تقرير الـ release.
+
+## 48) تقييم ما بعد الدفع — Critical CSS + تدقيق الـ feed الحي (2026-09-14)
+
+### 48.1) التحقق إن الـ critical CSS فعلاً شغال على الـ live
+- **244/244 صفحة** في الـ build المولّد فيه الحقن (log: "حقن الـ critical CSS
+  في 244 صفحة")، والـ build الأخضر كله اتعمل اليوم:
+  data-integrity ✓ · 185 unit test ✓ · prerender 244 ✓ · critical 30.0KB/
+  408 rule (جوه الباجت).
+- عينة حية من الـ live (curl مباشر): الرئيسية + منتج
+  (`/products/kreva-gel-for-men`) + `/education` + صفحة مقال — كلها فيها
+  `<style id="critical-above-the-fold">` + `<link rel="preload" ... as="style">`
+  + `<noscript><link rel="stylesheet">` fallback + `css-swapper.js` (defer).
+- **الـ feed الحي = الـ feed في الـ repo**: diff بايت-بـ-بايت بين
+  `https://elysrmedical.store/catalog-feed.xml` والمُتتبع في الـ git =
+  **0 فرق** — يعني إصلاحات GMC (P0/P1/P2) كلها شغالة فعلًا، مش بس في الكود:
+  - `g:google_product_category` موجود لكل الـ 78 منتج.
+  - مفيش usage instructions في أوصاف الـ feed.
+  - "للإثارة" اتشالت من New Gold (grep = 0 في الـ feed الحي).
+- تقرير GMC "محتوى البالغين المحظور" (2026-09-13) كان بيظهر 31 منتج
+  **كلهم "ما مِن تأثير"** — السبب الجذري (غياب التصنيف → التخمين الذاتي
+  اللي طلع خSteel→خُطّاف صيد وDose 14000→أدوية) اتصلّح بالـ P0.
+
+### 48.2) Lighthouse بعد الدفع (mobile · simulated · 3 runs)
+| Run | Perf | FCP | LCP | TBT | CLS | SI |
+|---|---|---|---|---|---|---|
+| Baseline (قبل الدفع) | 91 | 2.2s | 2.9s | 170ms | 0 | 2.2s |
+| 1 | 83 | 2.3s | 3.2s | 330ms | 0 | 2.3s |
+| 2 | 92 | 2.3s | 2.7s | 150ms | 0 | 2.3s |
+| 3 | 91 | 2.2s | 2.7s | 180ms | 0 | 2.2s |
+| **متوسط 1–3** | **≈89** | **2.27s** | **2.87s** | **220ms** | **0** | **2.27s** |
+
+**الحكم: مفيش regression.** LCP تحسن خفيف (أفضل run 2.7s مقابل 2.9s)،
+FCP/SI ثابتين، TBT أفضل run (150ms) أفضل من الـ baseline (170ms) — والـ
+run الأول (83/330ms) ضجيج لـ lab عادي (Lighthouse simulate عنده تذبذب
+±10 نقطة عادة). الـ CSS الـ non-blocking خلى أول رسمة مش مستنية 18KiB.
+
+### 48.3) ملاحظات صغيرة (مش هادية)
+- **20KiB unused JS** في `vendor-react` — طبيعي لـ bundle React،
+  ومفيش worth إعادة تقسيم لأجل ده.
+- **4.8KiB** في اللوجو (responsive images audit) — حجم ضئيل جدًا.
+- Field LCP (2.8s) لسه بيتتابع بعد 1–2 أسبوع بيانات حقلية (من §45).

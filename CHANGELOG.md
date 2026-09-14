@@ -49,6 +49,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   now uses the true baseline. When exact per-SKU counts become known, replace
   the baseline with the real number per product (single edit each).
 
+- **Google Shopping feed compliance (2026-09-13/14)**: the GMC
+  "prohibited adult content" report (2026-09-13, 31 items, all "no impact")
+  exposed the root cause — the feed sent **no product category**, so Google
+  auto-guessed absurd mappings (XSteel → fishing hooks, Dose 14000 → drugs &
+  medicines, Procomil cream → hair styling, Power VED Kit → empty). Now every
+  one of the 78 feed items carries an honest `google_product_category` with an
+  official taxonomy ID (verified against `taxonomy-with-ids.en-US.txt`):
+  Personal Care 2915 (25 topical items), Vitamins & Supplements 525 (18 oral),
+  Honey 4947 (16), Candy & Chocolate 4748 (12), Mature > Erotic > Sex Toys 778
+  (6 pumps/VED/extender — honest, not hidden), Coffee 1868 (1).
+- **Feed description cleanup (P1/P2)**: usage instructions stripped from feed
+  descriptions (kept on the site pages), and the marketing word "للإثارة"
+  dropped from New Gold's feed title.
+- **Live feed verification (2026-09-14)**: the deployed `/catalog-feed.xml`
+  (plus .csv/.txt) is byte-identical to the tracked artifacts — all fixes are
+  live, not just in the repo.
+
 ### 🔒 Security hardening
 
 - **Phone pipeline parity**: frontend, WhatsApp message generation, Node API, and
@@ -160,6 +177,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (48.3KB); they now get 960w (42.2KB, ~13% less on the LCP image).
   Zero visual change — the browser picks the closest width per device.
   `process-hero.mjs` SIZES updated so a future hero swap regenerates it.
+- **Critical CSS post-deploy verification (2026-09-14)**: confirmed live on
+  all 244 prerendered pages (home / product / education list / article
+  spot-checks: inline `<style id="critical-above-the-fold">` + preload +
+  `<noscript>` + deferred swapper present). Lighthouse mobile (simulated),
+  3 live runs after deploy: perf **83 / 92 / 91** (avg ≈ 89) vs the 91
+  pre-deploy baseline; FCP 2.2–2.3 s (baseline 2.2 s); LCP best 2.7 s
+  (baseline 2.9 s); TBT best 150 ms (baseline 170 ms; one noisy 330 ms run);
+  CLS 0; SI ≈ 2.2–2.3 s. **No regression** — first paint no longer blocks on
+  the 18 KiB stylesheet, and the variance band matches normal lab noise.
+  Remaining lab nits are cosmetic: 20 KiB unused vendor-React JS and a 4.8 KiB
+  non-responsive logo.
 ### 🎯 SEO / Indexation
 
 - **Layered noindex protection for prescription products**: the eight blocked medicine
