@@ -153,6 +153,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   blocked. All rules are wrapped in `@layer critical` so the full
   stylesheet always wins the cascade (an unlayered build was caught by
   the visual test — it broke `lg:grid-cols-4` via CSS layer precedence).
+- **Hero 960w variant (2026-09-14)**: added `hero-banner-960.webp`
+  (960×530, q60 — same encoding quality as the 768w sibling) to the
+  hero `srcset` (480/768/960/1200w). High-DPR phones (DPR 2.0–2.75 on a
+  ~412px viewport) previously jumped straight to the 1200w file
+  (48.3KB); they now get 960w (42.2KB, ~13% less on the LCP image).
+  Zero visual change — the browser picks the closest width per device.
+  `process-hero.mjs` SIZES updated so a future hero swap regenerates it.
 ### 🎯 SEO / Indexation
 
 - **Layered noindex protection for prescription products**: the eight blocked medicine
