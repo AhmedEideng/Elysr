@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { createServer } from "vite";
 
@@ -87,6 +87,22 @@ try {
       vercel.redirects.some((r) => r.source === `/products/${slug}` && r.permanent === true),
       `Deleted pharma product missing 301 redirect in vercel.json: ${slug}`,
     );
+  }
+
+  // 🖼️ Anti-drift: مفيش أي ملف صور (full/thumbs/thumbs-180) لمنتج محذوف.
+  // الصور بتترجع للكتالوج بـ optimize-images.mjs من أسماء الـ slugs، فلو أي
+  // slug محذوف رجع يلاقي اسم صورته هنا = الدرفت رجعت. بنفشل الفوراً.
+  for (const imgDir of ["public/images", "public/images/thumbs", "public/images/thumbs-180"]) {
+    const dir = resolve(ROOT, imgDir);
+    if (!existsSync(dir)) continue;
+    for (const file of readdirSync(dir)) {
+      const stem = file.replace(/\.[^.]+$/, "");
+      const leaked = deletedPharmaSlugs.find((slug) => stem.startsWith(slug));
+      assert.ok(
+        !leaked,
+        `Deleted product image still on disk: ${imgDir}/${file} (matches deleted slug "${leaked}") — remove it`,
+      );
+    }
   }
 
   assert.equal(

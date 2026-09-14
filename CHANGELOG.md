@@ -73,6 +73,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   warning. The product description was already usage-free since the P2 feed
   cleanup — old GMC listings showing usage in the description predate that
   fix and heal on the next feed refresh.
+- **Deleted-product image purge + drift guard (2026-09-14)**: full audit
+  confirmed 20 orphan image files (full `.webp` + `.avif` + 2 thumb
+  sizes × 5 products: m-38 Power 36, m-43 Procomil Fort, m-45 Viagra
+  Pfizer, w-17 Viagra for Women, w-24 Black Widow) still on disk — removed.
+  A new data-integrity guard now scans `public/images{,/thumbs,/thumbs-180}`
+  on every build and fails if any deleted product's image reappears. All
+  other references to deleted products are intentional protection layers
+  (301 redirects, `DELETED_PHARMA_FILES` schema guard, e2e redirect tests,
+  historical comments) — verified feeds, sitemaps, prerendered pages,
+  bundles and articles carry zero functional references.
 
 ### 🔒 Security hardening
 
