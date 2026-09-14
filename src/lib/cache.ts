@@ -35,7 +35,10 @@ export function assetUrl(path: string): string {
 
 /** نسخة thumbs (الـ srcSet) — تستخدم نفس رقم الإصدار.
  * (thumbs=480px · thumbs-180=360px · thumbs-120=240px — الحجم = CSS px × 2 DPR) */
-export function thumbUrl(baseWebP: string, thumbDir: "thumbs" | "thumbs-180" | "thumbs-120"): string {
+export function thumbUrl(
+  baseWebP: string,
+  thumbDir: "thumbs" | "thumbs-180" | "thumbs-120",
+): string {
   const base = String(baseWebP)
     .split("?")[0]
     .replace(/^\/images\//, `/images/${thumbDir}/`);
