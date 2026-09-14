@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Kreva Gel (`m-60`)**: price **300 EGP**, historical rating **5/5** from
   **73 ratings**, with exactly five visible 5-star customer comments.
+- **Hammer of Thor (`m-01`)**: price **590 → 580 EGP** (2026-09-14, owner).
 - **Homepage selection**: Lady Era Drops (`w-02`) replaced Boost Up MAN (`m-02`) in
   the top six, and Hard-On (`m-34`), both Powerfully Up variants (`m-03`/`m-49`),
   Viagra Men (`m-45`), and Viagra Women (`w-17`) are excluded from every homepage
