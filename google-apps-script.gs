@@ -63,9 +63,10 @@ const REVIEW_CACHE_TTL_SEC = 300; // حماية حصة Apps Script (تخزين �
 const REVIEW_READ_TOKEN = "";
 
 /**
- * 🔒 سر الـ webhook (حماية كتابة إضافية): اكتب نفس القيمة هنا وفي متغير البيئة
- * GOOGLE_SHEETS_WEBHOOK_SECRET على Vercel.
- * - فارغ = الوضع القديم (التحقق + rate limit فقط) — فترة الانتقال.
+ * 🔒 سر الـ webhook — إلزامي (Fail Closed): اكتب نفس القيمة هنا وفي متغير
+ * البيئة GOOGLE_SHEETS_WEBHOOK_SECRET على Vercel.
+ * - فارغ = كل الكتابة مرفوضة (doPost بيشيك !WEBHOOK_SECRET ويرفض) —
+ *   الموقع ما يستقبلش طلبات لحد ما يتضبط السر في الطرفين. مفيش "وضع قديم".
  * - معبأ = كل كتابة (طلب/مراجعة) يجب أن تحمل السر الصحيح، وقراءة
  *   المراجعات تتطلب توقيع HMAC صالحاً (السر نفسه لا يُرسل إطلاقاً).
  */
@@ -822,7 +823,12 @@ function checkRateLimit(key) {
       e.count += 1;
       return e.count <= RATE_LIMIT_MAX;
     } catch (err2) {
-      return true; // آخر حل أخير — حماية من تعطيل التسجيل كلياً
+      // (2026-09-15) Fail-closed: فشل كل مستويات الـ limiter (CacheService +
+      // الذاكرة) يعني حالة شاذة — نرفض بدل ما نفتح الباب لطلبات بلا حدود.
+      // الفرع ده عمليًا غير قابل للحدوث (الذاكرة ما تفلتش)، لكن المبدأ:
+      // endpoint مفيش له rate limiter عامل ≠ endpoint آمن.
+      console.error("Rate limiter fully failed (cache + memory) — denying:", err2);
+      return false;
     }
   }
 }

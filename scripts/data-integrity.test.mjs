@@ -43,6 +43,22 @@ try {
   const cacheConfig = JSON.parse(readFileSync(resolve(ROOT, "config/cache-version.json"), "utf-8"));
   const cacheModule = await vite.ssrLoadModule("/src/lib/cache.ts");
   assert.equal(cacheModule.CACHE_VERSION, cacheConfig.version, "Cache version source mismatch");
+  // (2026-09-15) package.json ↔ package-lock.json لازم يفضلوا متزامنين —
+  // كان الـ release script بيهمل الـ lock فتجمع drift لـ 5 releases.
+  {
+    const pkg = JSON.parse(readFileSync(resolve(ROOT, "package.json"), "utf-8"));
+    const lock = JSON.parse(readFileSync(resolve(ROOT, "package-lock.json"), "utf-8"));
+    assert.equal(
+      lock.version,
+      pkg.version,
+      `package-lock.json version ${lock.version} != package.json ${pkg.version} (run: npm install or a release)`,
+    );
+    assert.equal(
+      lock.packages?.[""]?.version,
+      pkg.version,
+      `package-lock.json root package version ${lock.packages?.[""]?.version} != package.json ${pkg.version}`,
+    );
+  }
   for (const script of ["scripts/prerender-seo.mjs", "scripts/generate-sitemap.mjs"]) {
     const content = readFileSync(resolve(ROOT, script), "utf-8");
     assert.doesNotMatch(
@@ -53,8 +69,9 @@ try {
   }
 
   assert.deepEqual(productsDb, products, "products-db.json is stale; run npm run build");
-  // config-db = Single Source of Truth للسيرفر: الشحن/العروض/نسبة الباقة/
-  // المنتجات المحظورة — كلهم مولّدون من نفس مصادر TS وقت البناء.
+  // config-db.json = artifact للسيرفر (مش مصدر): الشحن/العروض/نسبة الباقة/
+  // المنتجات المحظورة — كلهم مولّدون من مصادر TS وقت البناء (SSOT = TS).
+  // لو حد عدّل الـ JSON يدويًا، هيفشل الـ test هنا حتى يعمل build.
   assert.deepEqual(
     configDb,
     {

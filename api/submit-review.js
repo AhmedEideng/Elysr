@@ -214,6 +214,15 @@ export default async function handler(req, res) {
     console.error("Missing GOOGLE_SHEETS_WEBHOOK_URL environment variable.");
     return res.status(500).json({ error: "Server configuration error" });
   }
+  // 🔒 (2026-09-15) نفس fail-fast طلبات (production only): الـ doPost
+  // fail-closed على السر لكل المسارات (بما فيها المراجعات).
+  const SHEET_SECRET = process.env.GOOGLE_SHEETS_WEBHOOK_SECRET;
+  if (!SHEET_SECRET && process.env.NODE_ENV === "production") {
+    console.error(
+      "Missing GOOGLE_SHEETS_WEBHOOK_SECRET — review writes will be rejected by the fail-closed webhook.",
+    );
+    return res.status(500).json({ error: "Server configuration error" });
+  }
 
   // 🔒 اسم المنتج من الـ catalog المعتمد — لا نمرر أي اسم من العميل
   const product = getProductsDb().find((p) => p && p.id === payload.productId.trim());
@@ -240,10 +249,7 @@ export default async function handler(req, res) {
           reviewerPhone: payload.reviewerPhone ? String(payload.reviewerPhone).trim() : "",
           reviewText: String(payload.reviewText).trim(),
           clientIp: hashedIp,
-          // 🔒 سر الكتابة (اختياري — يفعَّل بمتغير GOOGLE_SHEETS_WEBHOOK_SECRET)
-          ...(process.env.GOOGLE_SHEETS_WEBHOOK_SECRET
-            ? { secret: process.env.GOOGLE_SHEETS_WEBHOOK_SECRET }
-            : {}),
+          secret: SHEET_SECRET,
         }),
       }),
       signal: sheetsController.signal,

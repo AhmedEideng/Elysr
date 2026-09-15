@@ -374,6 +374,17 @@ export default async function handler(req, res) {
     console.error("Missing GOOGLE_SHEETS_WEBHOOK_URL environment variable.");
     return res.status(500).json({ error: "Server configuration error" });
   }
+  // 🔒 (2026-09-15) Fail-fast configuration check (production only): الـ Apps
+  // Script fail-closed ويرفض كل كتابة بدون السر — لو المتغير ناقص في الإنتاج،
+  // كل طلب هيرجع 502 غامض. نكشف المشكلة من المصدر (500 configuration).
+  // في dev/test مفيش enforcement — عشان ما نتحكمش في بيئات الاختبار المحلية.
+  const SHEET_SECRET = process.env.GOOGLE_SHEETS_WEBHOOK_SECRET;
+  if (!SHEET_SECRET && process.env.NODE_ENV === "production") {
+    console.error(
+      "Missing GOOGLE_SHEETS_WEBHOOK_SECRET — the Apps Script webhook is fail-closed and will reject every write. Set it (same value as WEBHOOK_SECRET in the script).",
+    );
+    return res.status(500).json({ error: "Server configuration error" });
+  }
 
   // 🔒 قائمة بيضاء صارمة للحقول المرسلة إلى الشيت — نُمرّر الحقول المعروفة فقط.
   // يمنع تمرير مفاتيح تحكمية من العميل (مثل __proto__/constructor → Prototype Pollution)
@@ -422,9 +433,7 @@ export default async function handler(req, res) {
           ...safePayload,
           clientIp: hashedIp,
           clientIpHash: hashedIp,
-          ...(process.env.GOOGLE_SHEETS_WEBHOOK_SECRET
-            ? { secret: process.env.GOOGLE_SHEETS_WEBHOOK_SECRET }
-            : {}),
+          secret: SHEET_SECRET,
         }),
       }),
       signal: sheetsController.signal,

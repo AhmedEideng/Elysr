@@ -197,16 +197,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const add = useCallback((p: Product, qty = 1) => {
     // GA: add_to_cart — قبل تغيير الحالة، ورفض السلة الممتلئة مش بيحسب
+    // (2026-09-15) بنسجل الكمية المضافة **فعليًا** مش المطلوبة: لو المنتج
+    // موجود وسقف المخزون قريب، الإضافة الفعلية ممكن تكون أقل (مثال:
+    // stock 5 وcurrent 4 وqty 3 → المسجل كان 3 والفعلية 1 — distortion
+    // في أرقام GA4). لو الإضافة الفعلية 0 (السلة وصلت السقف) مفيش event.
     const prevItems = itemsRef.current;
     const alreadyInCart = prevItems.some((i) => i.id === p.id);
     const rejectedByCap = !alreadyInCart && prevItems.length >= MAX_CART_ITEMS;
     if (!rejectedByCap) {
-      trackAddToCart({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        qty: Math.max(1, Math.min(qty, p.stock ?? 10)),
-      });
+      const maxStock = p.stock ?? 10;
+      const safeQty = Math.max(1, Math.min(qty, maxStock));
+      const existingQty = alreadyInCart ? (prevItems.find((i) => i.id === p.id)?.qty ?? 0) : 0;
+      const actualAdded = Math.min(safeQty, maxStock - existingQty);
+      if (actualAdded > 0) {
+        trackAddToCart({
+          id: p.id,
+          name: p.name,
+          price: p.price,
+          qty: actualAdded,
+        });
+      }
     }
     setItems((prev) => {
       if (prev.length >= MAX_CART_ITEMS && !prev.find((i) => i.id === p.id)) {

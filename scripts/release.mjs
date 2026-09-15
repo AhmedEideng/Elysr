@@ -55,9 +55,11 @@ if (!arg) {
   process.exit(1);
 }
 
-console.log(`🏷️  رفع الإصدار: ${current} → ${next}`);
-pkg.version = next;
-writeFileSync(PKG_PATH, JSON.stringify(pkg, null, 2) + "\n");
+// (2026-09-15) npm version بدل كتابة package.json يدويًا: npm يحدّث
+// package.json و package-lock.json معًا (تحت الـ name الجذري) — كده
+// مفيش drift أبداً بين الملفين (كان السكربت بيهمل الـ lock فتجمع
+// drift لـ 5 releases: 2.1.22 في package.json مقابل 2.1.17 في lock).
+execSync(`npm version ${next} --no-git-tag-version`, { stdio: "inherit" });
 
 // ── 🔄 رفع رقم إصدار الكاش من المصدر المركزي الوحيد ──
 function bumpCacheVersion() {
@@ -88,7 +90,9 @@ function syncGaLoaderVersion(newVersion) {
 syncGaLoaderVersion(newCacheVersion);
 
 try {
-  execSync("git add package.json config/cache-version.json index.html", { stdio: "inherit" });
+  execSync("git add package.json package-lock.json config/cache-version.json index.html", {
+    stdio: "inherit",
+  });
   execSync(`git commit -m "release: v${next}"`, { stdio: "inherit" });
   execSync(`git tag "v${next}"`, { stdio: "inherit" });
   console.log(`✅ تم إنشاء tag: v${next}`);

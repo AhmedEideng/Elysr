@@ -151,6 +151,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     READMEs; the auto-publish cron comment's wrong "Egypt permanently
     UTC+2" claim corrected (DST was reinstated in 2023).
 
+- **Second external audit — architecture & process fixes (2026-09-15)**:
+  - **SSOT made real (config architecture)**: shared settings had two
+    sources of truth — `config-db.json` for shipping/promos (read by the
+    TS bridge) while `BUNDLE_DISCOUNT_RATE` / `GOOGLE_SHOPPING_BLOCKED`
+    came from TS and were copied into the JSON at build (a misleading
+    "cycle": idempotent, but two sources for one direction). Now
+    `src/lib/site-config.ts` is the single source for ALL shared
+    settings (27 governorates, free-shipping threshold, promo tiers);
+    the build generates `config-db.json` as a server artifact only
+    (same pattern as `products.ts → products-db.json`). Editing the
+    JSON by hand is now explicitly wrong — the integrity test already
+    fails on drift.
+  - **`package.json` / `package-lock.json` drift (5 releases deep:
+    2.1.22 vs 2.1.17)**: `release.mjs` now uses `npm version
+    --no-git-tag-version` (updates both files atomically) and commits
+    the lock; the one-time drift was synced, and the integrity test
+    now fails if the two versions ever diverge again.
+  - **Apps Script rate limiter last resort**: the final
+    `catch → return true` (fail-open) is now fail-closed (deny) — the
+    branch is practically unreachable (memory fallback), but a
+    limiter-less endpoint ≠ a safe endpoint.
+  - **API fail-fast on missing webhook secret (production only)**:
+    with no `GOOGLE_SHEETS_WEBHOOK_SECRET`, submit-order and
+    submit-review now return a clear 500 configuration error instead
+    of every order failing deep in the webhook with an opaque 502.
+  - **GA `add_to_cart` accuracy**: the event now reports the quantity
+    *actually added* (capped by stock), not the requested quantity —
+    previously adding 3 to a nearly-full cart line reported +3 while
+    the cart grew +1 (GA4 units distortion); 0-actual adds send no
+    event.
+  - **Stale fail-closed doc in `google-apps-script.gs`** fixed
+    ("فارغ = الوضع القديم" → "فارغ = كل الكتابة مرفوضة").
+
 ### 🔒 Security hardening
 
 - **Phone pipeline parity**: frontend, WhatsApp message generation, Node API, and

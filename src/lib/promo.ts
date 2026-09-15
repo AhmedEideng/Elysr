@@ -43,7 +43,7 @@ export function getPromoEndIso(now: Date = new Date()): string {
 }
 
 /**
- * الشرائح تُقرأ من مصدر الحقيقة الوحيد (api/lib/config-db.json) عبر site-config.
+ * الشرائح مصدرها الوحيد site-config.ts (الـ build يولّد منه نسخة JSON للسيرفر).
  * مرتّبة من الأعلى للأدنى — مهم لمنطق الحساب (find أول شريحة يساوي/يقل عنها المبلغ).
  */
 export const PROMO_TIERS: PromoTier[] = SHARED_PROMO_TIERS;
