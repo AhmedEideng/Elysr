@@ -91,6 +91,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   paths referenced by the built site (244 pages + JS + CSS) exist on disk
   with zero `.avif` references in the output. `optimize-images.mjs` no
   longer emits `.avif` so the dead weight cannot reappear.
+- **Visible prerendered hero for LCP (2026-09-15)**: the home page HTML
+  now contains a visible copy of the hero `<img>` (exact `Hero.tsx`
+  markup + fixed aspect-ratio container) inside `#root`, so the LCP
+  element is discoverable in the initial document instead of waiting for
+  React to mount (previously the page was blank until JS executed — the
+  prerender was a hidden SEO text block only). React replaces the block
+  atomically at hydration (same image URL from cache, identical box →
+  measured CLS 0.0005). Local lab: FCP −0.5 s; the LCP win manifests on
+  real mobile networks where the JS bundle arrives seconds later.
+  **Bug found & fixed while verifying**: the old `left:-9999px` hiding of
+  the SEO block broke viewport paint on some Chromium builds (a huge
+  negative coordinate kills the tile grid — the whole page painted
+  blank); the block now uses the standard sr-only `clip:rect(0,0,0,0)`
+  pattern (still in the DOM for crawlers, paint-safe).
+- **Unused preconnects removed (2026-09-15)**: the
+  `googletagmanager.com` / `google-analytics.com` preconnects were flagged
+  by PSI as unused for LCP (GA loads after the LCP window via the 5 s
+  fallback) — removed to stop two background handshakes at page start on
+  every visit.
 
 ### 🔒 Security hardening
 
