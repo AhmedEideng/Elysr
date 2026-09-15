@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { products } from "@/data/products";
 import { ARTICLE_COUNT } from "@/data/articles-cards.generated";
-import { seoLandingPages } from "@/data/landing-pages";
+// (2026-09-15) العدد من ملف مولّد صغير بدل استيراد landing-pages.ts كلها
+// (538KB من محتوى مش محتاجينه لـ .length).
+import { SEO_LANDING_PAGE_COUNT } from "@/data/landing-pages-meta.generated";
 import {
   Award,
   Globe,
@@ -144,7 +146,7 @@ function AboutPage() {
             {
               icon: BookOpenCheck,
               t: "محتوى تعليمي مسؤول",
-              d: `${ARTICLE_COUNT} مقالة توعوية + ${seoLandingPages.length} دليل SEO — كلها مكتوبة بمسؤولية مع مصادر طبية موثوقة وتحذيرات واضحة. لا نقدم وعوداً علاجية ولا نستبدل الطبيب.`,
+              d: `${ARTICLE_COUNT} مقالة توعوية + ${SEO_LANDING_PAGE_COUNT} دليل SEO — كلها مكتوبة بمسؤولية مع مصادر طبية موثوقة وتحذيرات واضحة. لا نقدم وعوداً علاجية ولا نستبدل الطبيب.`,
             },
             {
               icon: ShieldCheck,
