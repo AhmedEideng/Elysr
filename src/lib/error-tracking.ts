@@ -35,19 +35,52 @@ interface ErrorContext {
   colno?: number;
 }
 
+// (2026-09-15) بديل Record<string, unknown> المفتوح: allowlist عملي —
+// primitives بس (مفيش objects متداخلة = مفيش هياكل PII ممكن تتخزن
+// في breadcrumb من غير تغيير مقصود في النوع ده — نفس فلسفة ErrorContext).
+interface BreadcrumbData {
+  href?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
 interface Breadcrumb {
   type: "click" | "navigation" | "fetch" | "error" | "custom";
   message: string;
   timestamp: string;
-  data?: Record<string, unknown>;
+  data?: BreadcrumbData;
 }
 
-const SINK_URL = import.meta.env.VITE_ERROR_SINK_URL;
+// (2026-09-15) الافتراضي: /api/errors — endpoint على نفس الأصل فـ CSP
+// `connect-src 'self'` تسمح بيه من غير ما نضيف domain خارجي (النسخة
+// القديمة كانت بتطلب VITE_ERROR_SINK_URL خارجي والـ CSP كانت هتمنعه).
+// لو حابب sink خارجي (Sentry-compatible): اضبط VITE_ERROR_SINK_URL
+// وإيداف domainه في connect-src (server/index.js + vercel.json).
+const SINK_URL = import.meta.env.VITE_ERROR_SINK_URL || "/api/errors";
 const IS_PROD = import.meta.env.PROD;
 const MAX_BREADCRUMBS = 20;
 
 // ── Correlation ID: stable per page-session ──
 let correlationId: string | null = null;
+
+// (2026-09-15) توكن عشوائي قوي بـ crypto.getRandomValues (متوفر في كل
+// المتصفحات الحديثة) بدل Math.random — للـ correlation ID بس (مش security
+// secret)، بس مفيش سبب نستخدم RNG ضعيف وهو متاح قوي.
+function secureTokenHex(chars: number): string {
+  try {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) {
+      return crypto.randomUUID().replace(/-/g, "").slice(0, chars);
+    }
+    const arr = new Uint8Array(Math.ceil(chars / 2));
+    crypto.getRandomValues(arr);
+    return Array.from(arr, (b) => b.toString(16).padStart(2, "0"))
+      .join("")
+      .slice(0, chars);
+  } catch {
+    return Math.random()
+      .toString(36)
+      .slice(2, 2 + chars);
+  }
+}
 
 function getCorrelationId(): string {
   if (correlationId) return correlationId;
@@ -57,10 +90,7 @@ function getCorrelationId(): string {
       // Reuse or create a session-scoped ID
       let sid = sessionStorage.getItem("elysr_cid");
       if (!sid) {
-        sid =
-          typeof crypto !== "undefined" && crypto.randomUUID
-            ? crypto.randomUUID().slice(0, 8)
-            : Math.random().toString(36).slice(2, 10);
+        sid = secureTokenHex(8);
         sessionStorage.setItem("elysr_cid", sid);
       }
       correlationId = sid;
@@ -71,10 +101,7 @@ function getCorrelationId(): string {
   }
 
   if (!correlationId) {
-    correlationId =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID().slice(0, 8)
-        : Math.random().toString(36).slice(2, 10);
+    correlationId = secureTokenHex(8);
   }
   return correlationId;
 }
@@ -86,11 +113,7 @@ const breadcrumbs: Breadcrumb[] = [];
  * Record a breadcrumb — a user action that happened before an error.
  * Helps debug: "user clicked checkout, then the error happened."
  */
-export function addBreadcrumb(
-  type: Breadcrumb["type"],
-  message: string,
-  data?: Record<string, unknown>,
-) {
+export function addBreadcrumb(type: Breadcrumb["type"], message: string, data?: BreadcrumbData) {
   breadcrumbs.push({
     type,
     message,
