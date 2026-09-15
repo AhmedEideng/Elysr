@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { trackAddToCart, trackRemoveFromCart } from "@/lib/analytics";
+import { toast } from "sonner";
 import type { Product } from "@/data/product-types";
 import { getPromoTier, type PromoTier } from "@/lib/promo";
 import { products } from "@/data/products";
@@ -85,9 +86,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       const parsed = safeGetJson<Partial<CartItem>[]>(STORAGE_KEY, []);
       if (parsed.length > 0) {
+        // (2026-09-15) منتجات اتحذفت من الكتالوج أو مخزونها نَفَد
+        // (معروض صفر) اتحذف من السلة بدل كميات كسولة:
+        // Math.max(1, Math.min(qty, 0)) كان بيطلّع qty=1 لمنتج نافد،
+        // وsync كان بيبقى بqty=0 — الاتنين بيترفضوا في الـ checkout
+        // برسالة مش مفهومة. الحذف الأنظف وأوضح.
+        const catalogById = new Map(products.map((p) => [p.id, p]));
         return parsed
           .filter((i) => i.id && typeof i.qty === "number" && i.name && i.price)
           .slice(0, MAX_CART_ITEMS)
+          .filter((i) => {
+            const p = catalogById.get(i.id!);
+            if (!p) return false; // منتج اتحذف من الكتالوج
+            if (p.stock !== undefined && p.stock <= 0) return false; // نفد
+            return true;
+          })
           .map((i) => ({
             id: i.id!,
             slug: i.slug,
@@ -278,25 +291,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const syncCatalog = useCallback((catalog: Product[]) => {
     if (!catalog.length) return;
-    setItems((prev) =>
-      prev.flatMap((item): CartItem[] => {
-        const product = catalog.find((p) => p.id === item.id);
-        if (!product) return [];
-        return [
-          {
-            ...item,
-            slug: product.slug,
-            name: product.name,
-            price: product.price,
-            originalPrice: product.price,
-            emoji: product.emoji ?? item.emoji,
-            image: product.image ? product.image : undefined,
-            qty: Math.min(item.qty, product.stock ?? item.stock ?? 10),
-            stock: product.stock,
-          },
-        ];
-      }),
-    );
+    const byId = new Map(catalog.map((p) => [p.id, p]));
+    // نحسب من itemsRef (قيمة لحظة الاستدعاء — الاستدعاء الوحيد في
+    // useEffect تحميل الكاتالوج بعد الـ mount) عشان نقدر نبلّغ العميل
+    // لو اتحذف منتج — updater دالة نقية مش مكانه side effects.
+    const prev = itemsRef.current;
+    const kept = prev.flatMap((item): CartItem[] => {
+      const product = byId.get(item.id);
+      if (!product) return []; // منتج اتحذف من الكتالوج
+      // مخزون معروض بوضوح وناصفر → حذف. (undefined = مفيش بيانات مخزون
+      // → fallback قديم محفوظ للوراء)
+      if (product.stock !== undefined && product.stock <= 0) return [];
+      return [
+        {
+          ...item,
+          slug: product.slug,
+          name: product.name,
+          price: product.price,
+          originalPrice: product.price,
+          emoji: product.emoji ?? item.emoji,
+          image: product.image ? product.image : undefined,
+          qty: Math.min(item.qty, product.stock ?? item.stock ?? 10),
+          stock: product.stock,
+        },
+      ];
+    });
+    setItems(kept);
+    if (kept.length !== prev.length) {
+      toast.error("تمت إزالة منتجات غير متوفرة من سلتك.", { duration: 5000 });
+    }
   }, []);
 
   const isStockLimitReached = useCallback(
