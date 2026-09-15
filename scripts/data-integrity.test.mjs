@@ -421,7 +421,6 @@ try {
     assert.deepEqual(duplicates(ids), [], "Duplicate @id in index.html JSON-LD graph");
   }
 
-
   const kreva = products.find((product) => product.id === "m-60");
   assert.equal(kreva?.price, 300, "Kreva price must be 300 EGP");
   assert.equal(kreva?.rating, 5, "Kreva rating must be 5/5");
