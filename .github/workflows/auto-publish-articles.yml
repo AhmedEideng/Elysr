@@ -58,7 +58,12 @@ jobs:
         run: |
           git config user.name "Elysr Medical Automation"
           git config user.email "automation@elysrmedical.store"
-          git add .
+          # (2026-09-15) add محصور على مسارات المحتوى فقط — "git add ."
+          # كان هيقدر يدخل أي ملف معدّل غير مقصود (بما فيها
+          # google-apps-script.gs لو حد حط فيه سر يدويًا) في commit
+          # آلي. ملفات التوليد: src/data/articles.ts + public/images/
+          # + .generated-article-slug.
+          git add src/ public/ .generated-article-slug
 
           if git diff --cached --quiet; then
             echo "No article changes were generated."
@@ -71,4 +76,12 @@ jobs:
           # Re-validate the FINAL (post-rebase) tree before it ships to main —
           # the earlier 'npm run ci' validated a pre-rebase snapshot.
           npm run ci
+          # (2026-09-15) safety net: لو الـ validation بعد الـ rebase ولّد
+          # generated files معدلة، نلتقطها صراحةً (نفس النطاق) بدل ما
+          # تروح main غير مسجلة — بدل افتراض أن الـ generation حتمية دائمًا.
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Generated artifacts changed during post-rebase validation — committing them."
+            git add src/ public/ .generated-article-slug
+            git commit -m "content: sync generated artifacts after rebase"
+          fi
           git push origin HEAD:main

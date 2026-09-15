@@ -79,9 +79,12 @@ const KEYWORD_BANK = [
   "دليل السلامة للتعامل مع المكملات العشبية",
 ];
 
-// اختيار كلمة مفتاحية عشوائية للدورة الحالية
-const keyword = KEYWORD_BANK[Math.floor(Math.random() * KEYWORD_BANK.length)];
-console.log(`🤖 Starting 100% Free Google Gemini Content Generator for Keyword: "${keyword}"...`);
+// (2026-09-15) اختار كلمة مفتاحية عشوائية كانت هنا بس كانت redundant:
+// الاختيار الحقيقي (chosenKeyword) بيحصل بعد الـ dedup من المقالات
+// المنشورة تحت. كان الاختيار الأول بيُستخدم في الـ log بس.
+console.log(
+  "🤖 Starting Gemini content generator (keyword selected below after dedup vs. published titles)...",
+);
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -171,7 +174,7 @@ async function generateArticle() {
     // 🚀 آلية الابتكار اللانهائي (Infinite Unique Topic Generator):
     // إذا نفد بنك الكلمات، تطلب الخوارزمية من الذكاء الاصطناعي ابتكار موضوع طبي جديد كلياً لم يسبق نشره!
     console.log(
-      "静态 All keywords in bank have been successfully published! AI will now invent a brand new, unique topic...",
+      "All keywords in bank have been successfully published! AI will now invent a brand new, unique topic...",
     );
     topicInstruction = `Invent a brand new, highly compelling, unique medical/wellness organic search keyword in Arabic about marital health, natural supplements, or intimate care.
 The topic must be completely different and unique from these already published articles:
@@ -489,11 +492,14 @@ JSON Schema:
   relativeImagePath = `${chosenImage}?v=${cacheVersion}`;
 
   if (articleData.imagePrompt) {
-    // 🚀 100% Free & Unlimited AI Image Generation via Pollinations AI (Stable Diffusion)
+    //  AI image generation via Pollinations AI (Stable Diffusion).
+    // (2026-09-15) ده خدمة خارجية — التوفر والquotas والسياسات مش تحت
+    // سيطرنا (مفيش "free & unlimited" مضمون)، فالـ fallback للبانرات
+    // الموجودة هو الخط الدفاعي الحقيقي.
     // 🔒 نمرر بذرة عشوائية فريدة (random seed) في كل طلب لضمان عدم تكرار ملامح الصورة ورسم لوحة حصرية جديدة بالكامل!
     const randomSeed = Math.floor(Math.random() * 1000000);
     console.log(
-      `🎨 Requesting Pollinations AI (100% Free, Seed: ${randomSeed}) to generate custom illustration...`,
+      `🎨 Requesting Pollinations AI (external free-tier service, Seed: ${randomSeed}) to generate custom illustration...`,
     );
     try {
       const encodedPrompt = encodeURIComponent(

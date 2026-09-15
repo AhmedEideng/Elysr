@@ -138,6 +138,10 @@ app.use(
 );
 
 // Trust proxy
+// (2026-09-15) التووبولوجيا المفترضة: عميل → proxy موثوق واحد → Express
+// (nginx/Caddy على VPS، أو Vercel edge بنفسه). لو اتغير الشكل (Cloudflare +
+// LB + Nginx ...) لازم يتضبط الرقم ده يطابق عدد الـ proxies الموثوقة —
+// وإلا الـ rate limiting بيبني على XFF ممكن يتزوير.
 app.set("trust proxy", 1);
 
 // Security headers (unified and synchronized with vercel.json for perfect security parity) - 2026 hardened
@@ -149,7 +153,11 @@ app.use((req, res, next) => {
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
   );
-  res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  // HSTS: production بس — على self-hosted dev (http://localhost) هيسيب
+  // المتصفح يرفض الاتصال بعد كده (HSTS ما بينساش). (2026-09-15)
+  if (process.env.NODE_ENV === "production") {
+    res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  }
   res.setHeader("X-DNS-Prefetch-Control", "on");
   res.setHeader("X-Permitted-Cross-Domain-Policies", "none");
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
@@ -261,6 +269,7 @@ mountApi("/api/submit-order", "../api/submit-order.js");
 mountApi("/api/submit-review", "../api/submit-review.js");
 mountApi("/api/reviews", "../api/reviews.js");
 mountApi("/api/csp-report", "../api/csp-report.js");
+mountApi("/api/errors", "../api/errors.js");
 app.use("/api", (_req, res) => res.status(404).json({ error: "API route not found" }));
 
 // ── Vercel platform stubs (self-hosted) ──
