@@ -8,17 +8,7 @@
 
 import { describe, it, expect } from "vitest";
 import { products } from "@/data/products";
-import {
-  isCatalogFeedEligible,
-  RED_PRODUCT_IDS,
-  GOOGLE_SHOPPING_BLOCKED,
-} from "@/lib/product-compliance";
-
-describe("تم إلغاء نظام RED — لا يُستثنى أي منتج من الموقع", () => {
-  it("قائمة RED فارغة تمامًا", () => {
-    expect(RED_PRODUCT_IDS.size).toBe(0);
-  });
-});
+import { isCatalogFeedEligible, GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
 
 describe("GOOGLE_SHOPPING_BLOCKED — يستبعد الأدوية المرفوضة من الخلاصة فقط", () => {
   it("فاضي بالكامل بعد قرار المالك بإلغاء الحظر (2026-09-06)", () => {

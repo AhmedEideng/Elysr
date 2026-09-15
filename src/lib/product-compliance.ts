@@ -22,9 +22,6 @@
  */
 export const GOOGLE_SHOPPING_BLOCKED = new Set<string>([]);
 
-/** مجموعة فارغة — محفوظة للتوافق البرمجي، لا تُستثنى أي منتج من الموقع. */
-export const RED_PRODUCT_IDS = new Set<string>([]);
-
 /**
  * مؤهل لخلاصة Google Merchant (catalog-feed.xml):
  * - يستبعد المنتجات في GOOGLE_SHOPPING_BLOCKED (فاضي حاليًا — 2026-09-06).

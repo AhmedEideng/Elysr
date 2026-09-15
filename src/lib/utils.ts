@@ -82,14 +82,24 @@ export function normalizeEgyptianPhone(phone: string): string {
 }
 
 // 🔧 توليد رقم طلب آمن بدون تكرار - محسن لمنع التصادم في الاختبارات السريعة
+// (2026-09-15) الـ fallback بقى crypto.getRandomValues بدل Math.random —
+// getRandomValues متوفرة في كل المتصفحات الحديثة (2015+) فمفيش سبب نستخدم
+// RNG ضعيف أصلاً. رقم الطلب مفتاح dedup في الشيت فالتصادم = طلب مكرر.
+function secureToken(chars: number): string {
+  const arr = new Uint8Array(Math.ceil(chars / 2));
+  crypto.getRandomValues(arr);
+  return Array.from(arr, (b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, chars)
+    .toUpperCase();
+}
+
 export function generateOrderId(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
-  let randomPart: string;
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    randomPart = crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase();
-  } else {
-    randomPart = Math.random().toString(36).slice(2, 10).toUpperCase();
-  }
+  const randomPart =
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase()
+      : secureToken(8);
   return `#EL-${timestamp}-${randomPart}`;
 }
 
