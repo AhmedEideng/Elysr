@@ -32,7 +32,7 @@ import {
 } from "@/lib/governorates";
 import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
 import { toast } from "sonner";
-import { getNextTier, PROMO_TAGLINE, isPromoActive } from "@/lib/promo";
+import { getNextTier, PROMO_TAGLINE, isPromotionEnabled } from "@/lib/promo";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -81,7 +81,7 @@ function CartPage() {
   const nextTier = appliedBundle ? null : getNextTier(subtotalBeforeDiscount);
   const amountToNext = nextTier ? nextTier.threshold - subtotalBeforeDiscount : 0;
   const amountToFreeShipping = Math.max(FREE_SHIPPING_THRESHOLD - subtotalBeforeDiscount, 0);
-  const promoLive = isPromoActive();
+  const promoLive = isPromotionEnabled();
 
   // مزامنة السلة بالكتالوج المعتمد (اسم/سعر/مخزون/صورة):
   // عند mount وعلى أي تغيير في العناصر (إضافة/حذف/تغيير كمية) —

@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useFocusTrap } from "@/components/Accessibility";
 import { formatPrice } from "@/data/product-types";
-import { isPromoActive, PROMO_MIN_THRESHOLD, getPromoTier } from "@/lib/promo";
+import { isPromotionEnabled, PROMO_MIN_THRESHOLD, getPromoTier } from "@/lib/promo";
 import { useCart } from "@/hooks/use-cart";
 import { useRecentlyViewed } from "@/hooks/use-recently-viewed";
 import { RecentlyViewed } from "@/components/sections/RecentlyViewed";
@@ -256,7 +256,7 @@ function ProductPage() {
 
       const orderId = generateOrderId();
       const subtotal = product.price * qty;
-      const tier = isPromoActive() ? getPromoTier(subtotal) : null;
+      const tier = isPromotionEnabled() ? getPromoTier(subtotal) : null;
       const discount = tier ? Math.round(subtotal * tier.discount) : 0;
       const subtotalAfterDiscount = subtotal - discount;
       const shipping = getShippingCost(sc.governorate, subtotal);
@@ -449,7 +449,7 @@ function ProductPage() {
               </div>
             </div>
 
-            {isPromoActive() && (
+            {isPromotionEnabled() && (
               <div className="mt-4 rounded-2xl border border-accent bg-accent/40 px-4 py-3 text-sm font-bold text-primary">
                 💎 مبادرة الرعاية الماسية — خصومات تصل إلى 25% عند الطلب من{" "}
                 {formatPrice(PROMO_MIN_THRESHOLD)} فأكثر

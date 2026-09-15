@@ -1,4 +1,4 @@
-import { getPromoTier, isPromoActive, PROMO_ORDER_LABEL } from "@/lib/promo";
+import { getPromoTier, isPromotionEnabled, PROMO_ORDER_LABEL } from "@/lib/promo";
 import { MAX_CUSTOMER_PHONE_LENGTH, sanitizeForMsg } from "@/lib/utils";
 
 // رقم الواتساب الرسمي للشركة
@@ -63,13 +63,13 @@ export const buildOrderMessage = (
     typeof window !== "undefined" ? window.location.origin : "https://elysrmedical.store";
 
   // المجموع والخصم بيتحسبوا الأول — عشان الـ label المبادرة يظهر بس
-  // للطلبات اللي فعلاً لقت خصم (المبادرة دائمة، فلو الشرط isPromoActive
+  // للطلبات اللي فعلاً لقت خصم (المبادرة دائمة، فلو الشرط isPromotionEnabled
   // بس هيطلع على كل رسالة — زعزعة ثقة في الطلبات اللي من غير خصم)
   const subtotalBefore = items.reduce(
     (sum, it) => sum + (it.originalPrice ?? it.price) * it.qty,
     0,
   );
-  const tier = isPromoActive() ? getPromoTier(subtotalBefore) : null;
+  const tier = isPromotionEnabled() ? getPromoTier(subtotalBefore) : null;
   // 🔀 الخصمان متبادلا الاستبعاد (نفس قاعدة السلة والسيرفر):
   // عند اكتمال الباقة → خصم الباقة (20%) هو الخصم الوحيد المعروض
   const bundleActive = !!bundleDiscount && bundleDiscount > 0;

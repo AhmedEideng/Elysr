@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Sparkles, Clock, ArrowLeft, ChevronLeft } from "lucide-react";
-import { PROMO_TITLE, PROMO_TAGLINE, PROMO_TIERS, getTimeLeft, isPromoActive } from "@/lib/promo";
+import {
+  PROMO_TITLE,
+  PROMO_TAGLINE,
+  PROMO_TIERS,
+  getTimeLeft,
+  isPromotionEnabled,
+} from "@/lib/promo";
 import type { TimeLeft } from "@/lib/promo";
 
 /**
@@ -19,11 +25,11 @@ import type { TimeLeft } from "@/lib/promo";
 export function AnniversaryPromo() {
   // 🐛 Fix: useState بـ lazy initializer ثم setInterval
   const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(() =>
-    isPromoActive() ? getTimeLeft() : null,
+    isPromotionEnabled() ? getTimeLeft() : null,
   );
 
   useEffect(() => {
-    if (!isPromoActive()) return;
+    if (!isPromotionEnabled()) return;
 
     const intervalId = window.setInterval(() => {
       const next = getTimeLeft();

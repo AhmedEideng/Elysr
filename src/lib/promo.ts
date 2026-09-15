@@ -50,18 +50,21 @@ export const PROMO_TIERS: PromoTier[] = SHARED_PROMO_TIERS;
 
 export const PROMO_MIN_THRESHOLD: number = SHARED_MIN;
 
-export function isPromoActive(_now: Date = new Date()): boolean {
-  // المبادرة ممتدة ونشطة وتتجدد تلقائياً دائماً
+// (2026-09-15) تمسّى من isPromoActive: المبادرة **دائمة التفعيل** — مفيش
+// حالة "انتهاء". العدّاد (getPromoEndIso/getTimeLeft) دورة عرض UI بس،
+// مش مفتاح تفعيل، فاسم "Active" كان يوحي بمنطق انتهاء مش موجود.
+export function isPromotionEnabled(_now: Date = new Date()): boolean {
+  // المبادرة دائمة (قرار المالك) — تتجدد دورتها تلقائياً كل 3 أيام في الـ UI
   return true;
 }
 
 export function getPromoTier(subtotal: number, now: Date = new Date()): PromoTier | null {
-  if (!isPromoActive(now)) return null;
+  if (!isPromotionEnabled(now)) return null;
   return PROMO_TIERS.find((tier) => subtotal >= tier.threshold) ?? null;
 }
 
 export function getNextTier(subtotal: number, now: Date = new Date()): PromoTier | null {
-  if (!isPromoActive(now)) return null;
+  if (!isPromotionEnabled(now)) return null;
   const ascending = [...PROMO_TIERS].sort((a, b) => a.threshold - b.threshold);
   return ascending.find((tier) => subtotal < tier.threshold) ?? null;
 }

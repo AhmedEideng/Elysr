@@ -15,7 +15,7 @@ import {
   getNextTier,
   calcDiscount,
   applyPromoToSubtotal,
-  isPromoActive,
+  isPromotionEnabled,
   getTimeLeft,
   PROMO_TIERS,
   PROMO_MIN_THRESHOLD,
@@ -28,10 +28,10 @@ const ACTIVE_DATE = new Date("2026-06-15T12:00:00Z");
 // تاريخ بعد فترة طويلة
 const EXPIRED_DATE = new Date("2027-01-02T00:00:00Z");
 
-describe("isPromoActive", () => {
+describe("isPromotionEnabled", () => {
   it("يرجع true دائماً لأن المبادرة تتجدد تلقائياً وتعمل على مدار الساعة", () => {
-    expect(isPromoActive(ACTIVE_DATE)).toBe(true);
-    expect(isPromoActive(EXPIRED_DATE)).toBe(true);
+    expect(isPromotionEnabled(ACTIVE_DATE)).toBe(true);
+    expect(isPromotionEnabled(EXPIRED_DATE)).toBe(true);
   });
 });
 

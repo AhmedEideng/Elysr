@@ -755,8 +755,8 @@ try {
   assert.equal(promo.calcDiscount(1000, new Date("2026-06-01T12:00:00Z")), 150);
   assert.equal(promo.calcDiscount(1500, new Date("2026-06-01T12:00:00Z")), 300);
   assert.equal(promo.calcDiscount(2000, new Date("2026-06-01T12:00:00Z")), 500);
-  assert.equal(promo.isPromoActive(new Date("2026-06-26T00:00:00Z")), true);
-  assert.equal(promo.isPromoActive(new Date("2027-01-02T00:00:00Z")), true);
+  assert.equal(promo.isPromotionEnabled(new Date("2026-06-26T00:00:00Z")), true);
+  assert.equal(promo.isPromotionEnabled(new Date("2027-01-02T00:00:00Z")), true);
 
   // 🧪 Smart Dynamic recommendations integrity test
   const { getProductsForArticle } = await vite.ssrLoadModule("/src/lib/internal-links.ts");

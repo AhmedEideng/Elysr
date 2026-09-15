@@ -5,7 +5,7 @@ import { formatPrice } from "@/data/product-types";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { toast } from "sonner";
-import { isPromoActive } from "@/lib/promo";
+import { isPromotionEnabled } from "@/lib/promo";
 import { ProductCardImage } from "@/features/product/components/ProductCardImage";
 import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
 
@@ -70,7 +70,7 @@ export function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
   const nofollow = GOOGLE_SHOPPING_BLOCKED.has(product.id) ? "nofollow" : undefined;
   const { has: hasInWishlist, toggle: toggleWishlist } = useWishlist();
-  const promoOn = isPromoActive();
+  const promoOn = isPromotionEnabled();
   const useBadge = getUseBadge(product);
   const wishlisted = hasInWishlist(product.id);
   const showImage = Boolean(product.image);

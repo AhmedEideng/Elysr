@@ -164,13 +164,13 @@ export function getShippingCost(governorate, subtotal = 0) {
   return found ? found.shipping : 70;
 }
 
-function isPromoActive() {
-  // مبادرة الرعاية الماسية دائماً نشطة ومتجددة تلقائياً كل 3 أيام!
+function isPromotionEnabled() {
+  // (2026-09-15) المبادرة دائمة التفعيل — العدّاد دورة UI بس مش مفتاح تفعيل.
   return true;
 }
 
 function calcDiscount(subtotal) {
-  if (!isPromoActive()) return 0;
+  if (!isPromotionEnabled()) return 0;
   const config = getConfigDb();
   // البحث عن فئة الخصم المطابقة من المصفوفة المرتبة من الأعلى للأدنى
   const foundTier = config.PROMO_TIERS.find((tier) => subtotal >= tier.threshold);
