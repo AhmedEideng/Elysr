@@ -92,47 +92,47 @@
     },
     {
       "name": "الفيوم",
-      "shipping": 80,
+      "shipping": 90,
       "region": "وجه قبلي"
     },
     {
       "name": "بني سويف",
-      "shipping": 80,
+      "shipping": 90,
       "region": "وجه قبلي"
     },
     {
       "name": "المنيا",
-      "shipping": 80,
+      "shipping": 90,
       "region": "وجه قبلي"
     },
     {
       "name": "أسيوط",
-      "shipping": 100,
+      "shipping": 90,
       "region": "وجه قبلي"
     },
     {
       "name": "سوهاج",
-      "shipping": 100,
+      "shipping": 90,
       "region": "وجه قبلي"
     },
     {
       "name": "قنا",
-      "shipping": 120,
+      "shipping": 90,
       "region": "وجه قبلي"
     },
     {
       "name": "الأقصر",
-      "shipping": 120,
+      "shipping": 90,
       "region": "وجه قبلي"
     },
     {
       "name": "أسوان",
-      "shipping": 120,
+      "shipping": 90,
       "region": "وجه قبلي"
     },
     {
       "name": "الوادي الجديد",
-      "shipping": 120,
+      "shipping": 90,
       "region": "وجه قبلي"
     }
   ],

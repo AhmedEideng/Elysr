@@ -184,6 +184,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Stale fail-closed doc in `google-apps-script.gs`** fixed
     ("فارغ = الوضع القديم" → "فارغ = كل الكتابة مرفوضة").
 
+- **Upper Egypt shipping unified to 90 EGP (2026-09-15, owner)**: all 9
+  وجه قبلي governorates (Faiyum/Beni Sueif/Minya were 80, Asyut/Sohag 100,
+  Qena/Luxor/Aswan/New Valley 120) now ship at a single 90 EGP rate — one
+  edit in `site-config.ts` (the SSOT), shipped page renders it
+  automatically, server recalculation uses the same source.
+
 ### 🔒 Security hardening
 
 - **Phone pipeline parity**: frontend, WhatsApp message generation, Node API, and

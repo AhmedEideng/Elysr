@@ -51,7 +51,7 @@ describe("getShippingCost", () => {
   });
 
   it("أسيوط = 100 ج.م", () => {
-    expect(getShippingCost("أسيوط")).toBe(100);
+    expect(getShippingCost("أسيوط")).toBe(90);
   });
 
   it("شمال سيناء = 120 ج.م", () => {

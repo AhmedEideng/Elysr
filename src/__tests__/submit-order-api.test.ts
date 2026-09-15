@@ -279,8 +279,8 @@ describe("submit-order payload validation", () => {
 
   it("uses all configured shipping bands and free shipping threshold", () => {
     expect(getShippingCost("القاهرة", 0)).toBe(50);
-    expect(getShippingCost("أسيوط", 0)).toBe(100);
-    expect(getShippingCost("أسوان", 0)).toBe(120);
+    expect(getShippingCost("أسيوط", 0)).toBe(90);
+    expect(getShippingCost("أسوان", 0)).toBe(90);
     expect(getShippingCost("القاهرة", 2000)).toBe(0);
     expect(getShippingCost("غير موجودة", 0)).toBe(70);
   });
