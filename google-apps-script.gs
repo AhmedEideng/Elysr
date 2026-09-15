@@ -4,14 +4,22 @@
  * يستقبل الطلبات من الموقع ويسجلها في شيت "الطلبات"
  * مع دعم حقول الخصم والعمود المتدرج.
  *
- * ⏰ مهم بعد النشر: شغّلي setupAutoCleanupTrigger() مرة واحدة من المحرر (Run)
- * لإنشاء الـ trigger اليومي — مجرد وجود الدالة لا يجعلها تعمل تلقائياً.
- * 🔒 إلزامي دلوقتي (Fail Closed): عبّئي WEBHOOK_SECRET هنا +
- * GOOGLE_SHEETS_WEBHOOK_SECRET في Vercel بنفس القيمة — بدون كده
- * doPost بيرفض كل الكتابة (الحماية مش اختيارية تاني).
- * التفعيل الآمن بالترتيب: (1) ضعي المتغير في Vercel + Redeploy،
- * (2) بعدين حطي السر هنا وانشري New version — عشان الـ API يبلّغ
- * بالسر قبل ما السكربت يطلبه.
+ * 🔐 Deployment checklist (2026-09-15 — شغّليها بالترتيب):
+ *   1. Project Settings → Script Properties → اضبط:
+ *        WEBHOOK_SECRET     = نفس قيمة GOOGLE_SHEETS_WEBHOOK_SECRET في Vercel (إلزامي)
+ *        REVIEW_READ_TOKEN  = نفس قيمة GOOGLE_SHEETS_REVIEWS_TOKEN في الخادم (لو مفيش مراجعات)
+ *        NOTIFICATION_EMAIL = إيميل الإشعارات (اختياري)
+ *        SPREADSHEET_ID     = معرف الشيت (سكريبت standalone بس)
+ *   2. Vercel: تأكدي أن GOOGLE_SHEETS_WEBHOOK_SECRET مضبوط بنفس القيمة + Redeploy.
+ *   3. Deploy → Manage deployments → New version.
+ *   4. شغّلي setupAutoCleanupTrigger() مرة واحدة من المحرر (Run) —
+ *      trigger التنظيف اليومي (PII بعد 90 يوم + المراجعات المرفوضة).
+ *   5. اختبري: POST تجريبي + GET للمراجعات.
+ *
+ * 🔒 السرور **مفيش في كود الملف** (2026-09-15): اتنقلت لـ Script
+ * Properties (runtime) عشان ما تدخلش بالغلط في commit — الـ auto-publish
+ * workflow بيعمل commit/push آلي، فأي سر في الكود كان خطر تشغيلي.
+ * WEBHOOK_SECRET فاضی = كل الكتابة مرفوضة (Fail Closed) — مش اختياري.
  *
  * التحسينات عن النسخة السابقة:
  *   1. ✅ عمود "حالة الطلب" — لتتبع (جديد / تم التأكيد / تم الشحن / مكتمل / ملغي)
@@ -56,32 +64,32 @@ const REVIEW_LIST_LIMIT = 20;
 const REVIEW_CACHE_TTL_SEC = 300; // حماية حصة Apps Script (تخزين مؤقت لكل منتج)
 
 /**
- * 🔒 توكن قراءة المراجعات — اكتب نفس القيمة هنا وفي متغير البيئة
- * GOOGLE_SHEETS_REVIEWS_TOKEN على الخادم.
- * إن بقي فارغاً تبقى قراءة المراجعات معطلة تماماً (fail-closed).
+ * 🔐 قراءة السرور والإعدادات من Script Properties (2026-09-15):
+ * Project Settings → Script Properties. مفيش سر في الكود نفسه.
+ * الأمان محفوظ: قيمة فاضية = الميزة معطلة / الكتابة مرفوضة (fail-closed).
  */
-const REVIEW_READ_TOKEN = "";
+function scriptProp(name) {
+  try {
+    return PropertiesService.getScriptProperties().getProperty(name) || "";
+  } catch (e) {
+    return "";
+  }
+}
 
-/**
- * 🔒 سر الـ webhook — إلزامي (Fail Closed): اكتب نفس القيمة هنا وفي متغير
- * البيئة GOOGLE_SHEETS_WEBHOOK_SECRET على Vercel.
- * - فارغ = كل الكتابة مرفوضة (doPost بيشيك !WEBHOOK_SECRET ويرفض) —
- *   الموقع ما يستقبلش طلبات لحد ما يتضبط السر في الطرفين. مفيش "وضع قديم".
- * - معبأ = كل كتابة (طلب/مراجعة) يجب أن تحمل السر الصحيح، وقراءة
- *   المراجعات تتطلب توقيع HMAC صالحاً (السر نفسه لا يُرسل إطلاقاً).
- */
-const WEBHOOK_SECRET = "";
+// 🔒 سر كتابة الـ webhook — إلزامي: فاضی = doPost بيرفض كل الكتابة.
+// لازم يوافق GOOGLE_SHEETS_WEBHOOK_SECRET في Vercel.
+const WEBHOOK_SECRET = scriptProp("WEBHOOK_SECRET");
 
-/**
- * 🟢 معرف الشيت (Spreadsheet ID) - اختياري
- * إذا قمت بإنشاء هذا السكريبت كـ سكريبت مستقل (Standalone) مباشرة من script.google.com،
- * يجب عليك كتابة معرف الشيت الخاص بك هنا لكي يعمل الاتصال (تجد المعرف في رابط الشيت بين d/ و /edit).
- * مثال: "1aBcDeFgHiJkLmNoPqRsTuVwXyZ"
- *
- * أما إذا قمت بإنشائه بالطريقة الصحيحة والسهلة من داخل الشيت نفسه (Extensions -> Apps Script)،
- * فاترك هذا المتغير فارغاً كالتالي "" ليعمل تلقائياً!
- */
-const SPREADSHEET_ID = "";
+// 🔒 توكن قراءة المراجعات — لازم يوافق GOOGLE_SHEETS_REVIEWS_TOKEN
+// في الخادم. فاضی = قراءة المراجعات معطلة تماماً (fail-closed).
+const REVIEW_READ_TOKEN = scriptProp("REVIEW_READ_TOKEN");
+
+// 🟢 معرف الشيت (Spreadsheet ID) — للسكريبت standalone بس
+// (لو اتعمل من script.google.com خارج الشيت).
+const SPREADSHEET_ID = scriptProp("SPREADSHEET_ID");
+
+// 📧 إيميل إشعارات الطلبات/المراجعات — اختياري (فاضی = من غير إشعارات).
+const NOTIFICATION_EMAIL = scriptProp("NOTIFICATION_EMAIL");
 
 function getSpreadsheet() {
   if (typeof SPREADSHEET_ID !== "undefined" && SPREADSHEET_ID && SPREADSHEET_ID.trim() !== "") {
@@ -102,11 +110,6 @@ function getSpreadsheet() {
   return ss;
 }
 
-/**
- * 📧 إيميل لإشعارات الطلبات الجديدة.
- * غيّره لإيميلك الحقيقي أو اتركه فاضي لإيقاف الإشعارات.
- */
-const NOTIFICATION_EMAIL = "";
 
 const COLUMNS = [
   { header: "التاريخ", key: "date", width: 140 },
@@ -177,8 +180,9 @@ function doPost(e) {
     // 🔒 حماية الكتابة — Fail Closed: لو السر غير مضبوط أو ناقص أو غلط
     // → نرفض. ده يقفل ثغرة "الوصول المباشر لـ /exec" اللي كانت بتتجاوز
     // كل تحقق طبقة Vercel (منتج/سعر/مخزون/خصم/شحن/إجمالي).
-    // التفعيل: عبّئي WEBHOOK_SECRET هنا + GOOGLE_SHEETS_WEBHOOK_SECRET في
-    // Vercel بنفس القيمة (Vercel بيبعت السر جوه الـ payload تلقائيًا).
+    // التفعيل: اضبطي WEBHOOK_SECRET في Script Properties +
+    // GOOGLE_SHEETS_WEBHOOK_SECRET في Vercel بنفس القيمة
+    // (Vercel بيبعت السر جوه الـ payload تلقائيًا).
     if (!WEBHOOK_SECRET || data.secret !== WEBHOOK_SECRET) {
       return json({ success: false, error: "Forbidden" });
     }
@@ -254,7 +258,7 @@ function doPost(e) {
     }, 0);
 
     var rowValues = {
-      date: now(),
+      date: new Date(), // (2026-09-15) كائن Date حقيقي مش نص منطّق — cleanup موثوق للأبد
       orderId: orderId,
       orderStatus: "جديد",
       customerName: customerName,
@@ -348,7 +352,7 @@ function handleReviewPost(data) {
 
     var sheet = getOrCreateReviewsSheet();
     appendRowByHeaders(sheet, REVIEWS_COLUMNS, {
-      date: now(),
+      date: new Date(), // (2026-09-15) كائن Date حقيقي مش نص منطّق — cleanup موثوق للأبد
       productId: productId,
       productName: productName,
       rating: ratingNum,
@@ -957,8 +961,45 @@ function autoCleanupOldOrders() {
       }
     }
     if (deleted > 0) console.log("autoCleanupOldOrders: deleted " + deleted + " order(s) older than 90 days.");
+
+    // (2026-09-15) سياسة retention للمراجعات: المراجعة "المرفوضة" قديمة
+    // (>90 يوم) = PII (اسم + هاتف) لن تُعرض أبدًا → حذف. المعتمدة تفضل
+    // (محتوى عام منشور على الموقع) والقيد المراجعة تفضل (لسه ممكن تعتمد).
+    cleanupOldRejectedReviews();
   } catch (err) {
     console.error("autoCleanupOldOrders failed:", err);
+  }
+}
+
+/** حذف المراجعات المرفوضة الأقدم من 90 يوم (سياسة PII retention للمراجعات). */
+function cleanupOldRejectedReviews() {
+  try {
+    var sheet = getOrCreateReviewsSheet();
+    var lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return;
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var dateCol = -1, statusCol = -1;
+    for (var i = 0; i < headers.length; i++) {
+      var h = String(headers[i]).trim();
+      if (h === "التاريخ") dateCol = i + 1;
+      else if (h === "الحالة") statusCol = i + 1;
+    }
+    if (dateCol <= 0 || statusCol <= 0) return;
+    var cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 90);
+    var deleted = 0;
+    for (var r = lastRow; r >= 2; r--) {
+      var status = String(sheet.getRange(r, statusCol).getValue() || "").trim();
+      if (status !== "مرفوض") continue;
+      var cellDate = parseSheetDate(sheet.getRange(r, dateCol).getValue());
+      if (cellDate && cellDate < cutoff) {
+        sheet.deleteRow(r);
+        deleted++;
+      }
+    }
+    if (deleted > 0) console.log("cleanupOldRejectedReviews: deleted " + deleted + " rejected review(s) older than 90 days.");
+  } catch (err) {
+    console.error("cleanupOldRejectedReviews failed:", err);
   }
 }
 
