@@ -262,7 +262,7 @@ writing an order.
 | `GOOGLE_SHEETS_WEBHOOK_URL`      | ✅       | Apps Script Web App `/exec` URL (orders + reviews)                  |
 | `SITE_URL`                       | ✅       | Canonical origin (canonicals, feeds, OG tags)                       |
 | `GOOGLE_SHEETS_REVIEWS_TOKEN`    | ⚠️ revs  | HMAC key for the reviews read endpoint (must match `REVIEW_READ_TOKEN` in the script; unset = reviews section silently off) |
-| `GOOGLE_SHEETS_WEBHOOK_SECRET`   | optional | Optional shared write-secret (must match `WEBHOOK_SECRET` in the script) |
+| `GOOGLE_SHEETS_WEBHOOK_SECRET`   | **required** | Shared write-secret (must match `WEBHOOK_SECRET` in the Apps Script). Fail-closed: with no secret, the script rejects **all** writes — set both or the site takes no orders |
 | `VITE_ERROR_SINK_URL`            | optional | Sentry-compatible error sink (console-only in dev)                  |
 
 ### Commands

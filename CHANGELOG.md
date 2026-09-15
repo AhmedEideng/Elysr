@@ -110,6 +110,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   by PSI as unused for LCP (GA loads after the LCP window via the 5 s
   fallback) — removed to stop two background handshakes at page start on
   every visit.
+- **External security audit — fixes (2026-09-15)**: response to an
+  independent audit (20 findings; 12 verified real, 3 overstated/stale,
+  2 already handled — details in the audit reply):
+  - **Stock bypass via duplicate lines** (server): the per-line stock
+    check allowed `m-01 × 5000 + m-01 × 5000` (total 10000) to pass on
+    stock 5000. Duplicate product lines are now rejected outright, plus a
+    per-product total check as defense in depth (+2 regression tests).
+  - **Order acknowledgement before "success"** (cart + PDP): the WhatsApp
+    flow no longer treats `sendBeacon()` (browser-accepted, not
+    server-received) as a completed order — it now awaits the real API
+    result (8 s client timeout, beacon kept as last-resort fallback), and
+    GA `purchase` is tracked only on confirmed success (revenue honesty;
+    the order text still reaches us via the WhatsApp message itself on
+    failure, with a warning toast). Direct checkout no longer shows
+    "success" and navigates before the result — it awaits, then either
+    confirms (clear + track + navigate) or keeps the cart with the
+    WhatsApp fallback (no silent loss, no misleading screen).
+  - **JSON-LD drift**: the home `LocalBusiness` catalog counts were stale
+    (52/23 vs the real 49/22) and shared the Organization's `@id` — fixed,
+    and a new data-integrity guard now fails the build if the JSON-LD
+    counts ever drift from the catalog again (or any `@id` duplicates).
+  - **Compliance scanner blind spot**: the absolute-claim scanner now also
+    covers `index.html` static copy + all `prerender-seo.mjs` static
+    strings — which immediately caught a real pre-existing violation
+    ("شحن سري 100%" in the hero `alt` — fixed in `Hero.tsx`).
+  - **`clean()` control characters**: all C0 control chars (incl. `\n`)
+    are now stripped in Apps Script before values reach Sheets/email
+    subjects (header-injection hardening).
+  - **Apps Script rate limiter**: the `CacheService` catch was pure
+    fail-open — it now falls back to an in-memory counter with the same
+    limits (fail-open only as the last resort).
+  - **`/thank-you` legacy route**: removed (no inbound links) with a 301
+    to `/order-confirmed` (in the synced redirect table).
+  - **`build:ssr`** ran the prerender twice (`build` already includes it) —
+    fixed; **`audit:perf`** was fail-open (`|| echo` swallowed every
+    failure incl. a missing LHCI) — now exits 1 with a clear message.
+  - **Docs**: `GOOGLE_SHEETS_WEBHOOK_SECRET` documented as **required**
+    (fail-closed: without it the script rejects all writes) in both
+    READMEs; the auto-publish cron comment's wrong "Egypt permanently
+    UTC+2" claim corrected (DST was reinstated in 2023).
 
 ### 🔒 Security hardening
 

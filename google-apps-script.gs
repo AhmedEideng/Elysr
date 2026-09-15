@@ -796,6 +796,9 @@ function sendOrderNotification(orderId, name, phone, governorate, total, items) 
 // Rate Limiting
 // ============================================================
 
+// مخزن مؤقت بالذاكرة (fallback) — حيّ طوال عمر حاوية الـ runtime.
+var _memoryRateLimit = {};
+
 function checkRateLimit(key) {
   try {
     var cache = CacheService.getScriptCache();
@@ -805,7 +808,22 @@ function checkRateLimit(key) {
     cache.put(cacheKey, String(current + 1), RATE_LIMIT_WINDOW_SEC);
     return true;
   } catch (err) {
-    return true;
+    // (2026-09-15) كان fail-open مطلق (return true) — أي عطل في
+    // CacheService كان بيلغي الـ rate limit بالكامل. دلوقتي فيه fallback
+    // بالذاكرة بنفس الحدود؛ fail-open يبقى آخر حل أخير بس.
+    try {
+      var now = Date.now();
+      var windowMs = RATE_LIMIT_WINDOW_SEC * 1000;
+      var e = _memoryRateLimit[key];
+      if (!e || now - e.start > windowMs) {
+        _memoryRateLimit[key] = { start: now, count: 1 };
+        return true;
+      }
+      e.count += 1;
+      return e.count <= RATE_LIMIT_MAX;
+    } catch (err2) {
+      return true; // آخر حل أخير — حماية من تعطيل التسجيل كلياً
+    }
   }
 }
 
@@ -842,10 +860,13 @@ function normalizeOrderType(value) {
 function clean(value, maxLen) {
   var cleaned = String(value || "")
     .replace(/[<>"'&\\]/g, "")
+    // (2026-09-15) كل control characters (بما فيها \n) → مسافة: تمنع حقن
+    // سطور في الإيميلات (customerName يدخل subject الطلب) وفي السجلات.
+    .replace(/[\u0000-\u001F\u007F]/g, " ")
     .slice(0, maxLen)
     .trim();
 
-  if (cleaned.match(/^[=\+\-@\t\r]/)) {
+  if (cleaned.match(/^[=\+\-@]/)) {
     cleaned = "'" + cleaned;
   }
   return cleaned;

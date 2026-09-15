@@ -340,6 +340,36 @@ try {
     );
   }
 
+  // (2026-09-15) النسخ الثابتة (index.html + نصوص prerender-seo.mjs):
+  // نفس قواعد المحتوى الطبي — كان عندها blind spot (الـ scanner كان
+  // بيفحص المنتجات/المقالات/الأدلة بس، ووش الـ home النصوص الثابتة).
+  const scanStaticCopy = (label, text) => {
+    if (!text) return;
+    scanForClaims(label, text);
+    scanNoAbsolute100(label, text);
+  };
+  {
+    const indexHtml = readFileSync(resolve(ROOT, "index.html"), "utf8");
+    // النص الظاهر + meta + JSON-LD (بنشيل الـ tags ونس캔 كل النصوص)
+    scanStaticCopy(
+      "index.html static copy",
+      indexHtml
+        .replace(/<script[\s\S]*?<\/script>/g, " ")
+        .replace(/<style[\s\S]*?<\/style>/g, " ")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&amp;/g, "&"),
+    );
+    // نصوص الـ staticRoutes/bodyContent جوا سورس الـ prerender (كل strings
+    // العربية) — لو نضيف نسخة ثابتة جديدة، هتدخل الفحص تلقائيًا.
+    const prerenderSrc = readFileSync(resolve(ROOT, "scripts/prerender-seo.mjs"), "utf8");
+    const arabicStrings = [...prerenderSrc.matchAll(/"([^"]*[\u0600-\u06FF][^"]*)"/g)].map(
+      (m) => m[1],
+    );
+    scanStaticCopy("prerender static copy", arabicStrings.join(" "));
+  }
+
   assert.deepEqual(
     duplicates(seoLandingPages.map((page) => page.slug)),
     [],
@@ -355,6 +385,42 @@ try {
     { men: 49, women: 22, devices: 7 },
     "Unexpected category split (78 = 49 men / 22 women / 7 devices)",
   );
+
+  // (2026-09-15) JSON-LD OfferCatalog في index.html لازم يطابق كتالوج
+  // البيانات — ده كان drifting (52/23 بدل 49/22) من غير ما أي guard يلتقطه.
+  {
+    const indexHtml = readFileSync(resolve(ROOT, "index.html"), "utf8");
+    const offerCatalog = indexHtml.match(/"name":\s*"منتجات الرجال",\s*"numberOfItems":\s*(\d+)/);
+    const offerCatalogWomen = indexHtml.match(
+      /"name":\s*"منتجات النساء",\s*"numberOfItems":\s*(\d+)/,
+    );
+    const offerCatalogDevices = indexHtml.match(
+      /"name":\s*"الأجهزة الطبية",\s*"numberOfItems":\s*(\d+)/,
+    );
+    assert.ok(offerCatalog, "index.html JSON-LD missing men OfferCatalog");
+    assert.ok(offerCatalogWomen, "index.html JSON-LD missing women OfferCatalog");
+    assert.ok(offerCatalogDevices, "index.html JSON-LD missing devices OfferCatalog");
+    assert.equal(
+      Number(offerCatalog[1]),
+      categories.men,
+      `index.html JSON-LD men count ${offerCatalog[1]} != catalog ${categories.men}`,
+    );
+    assert.equal(
+      Number(offerCatalogWomen[1]),
+      categories.women,
+      `index.html JSON-LD women count ${offerCatalogWomen[1]} != catalog ${categories.women}`,
+    );
+    assert.equal(
+      Number(offerCatalogDevices[1]),
+      categories.devices,
+      `index.html JSON-LD devices count ${offerCatalogDevices[1]} != catalog ${categories.devices}`,
+    );
+    // كل @id لازم يكون فريد في الـ graph (كان Organization وLocalBusiness
+    // مشاركين #organization — graph غير نظيف)
+    const ids = [...indexHtml.matchAll(/"@id":\s*"([^"]+)"/g)].map((m) => m[1]);
+    assert.deepEqual(duplicates(ids), [], "Duplicate @id in index.html JSON-LD graph");
+  }
+
 
   const kreva = products.find((product) => product.id === "m-60");
   assert.equal(kreva?.price, 300, "Kreva price must be 300 EGP");

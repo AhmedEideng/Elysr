@@ -39,13 +39,18 @@ export interface SheetSubmitResult {
 /** إرسال الطلب للشيت مع إرجاع نتيجة واضحة للطلب المباشر */
 export async function submitToGoogleSheets(
   data: Record<string, unknown>,
+  /** مهلة اختيارية (ms) — بعد انتهائها يُقطع الطلب ويُعامل كفشل (fallback عند المنادى). */
+  timeoutMs?: number,
 ): Promise<SheetSubmitResult> {
+  const controller = new AbortController();
+  const timer = timeoutMs ? setTimeout(() => controller.abort(), timeoutMs) : undefined;
   try {
     // إرسال الطلب إلى الـ API الوسيط — الأمان عبر CORS + Origin + Rate Limiting
     const response = await fetch("/api/submit-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
+      signal: controller.signal,
     });
 
     if (!response.ok) {
@@ -68,6 +73,8 @@ export async function submitToGoogleSheets(
       success: false,
       error: err instanceof Error ? err.message : "Unknown Google Sheets error",
     };
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 

@@ -239,6 +239,13 @@ async function syncRedirects() {
         permanent: true,
       },
       {
+        source: "/thank-you",
+        // (2026-09-15) route legacy اتحذف — 301 لصفحة التأكيد الحالية
+        // (الحماية لأي روابط خارجية قديمة / مشاركات)
+        destination: "/order-confirmed",
+        permanent: true,
+      },
+      {
         source: "/products/m-38",
         // Power 36 — حذف نهائي 2026-09-07
         destination: "/products/men",

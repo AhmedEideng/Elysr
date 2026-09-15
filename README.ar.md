@@ -121,7 +121,7 @@ npm run dev              # → http://localhost:8080
 | `GOOGLE_SHEETS_WEBHOOK_URL` | ✅ | رابط Web App الخاص بـ Apps Script (طلبات + مراجعات) |
 | `SITE_URL` | ✅ | الأصل الرسمي (canonicals، feeds، OG tags) |
 | `GOOGLE_SHEETS_REVIEWS_TOKEN` | ⚠️ للمراجعات | مفتاح HMAC لقراءة المراجعات (يجب أن يطابق `REVIEW_READ_TOKEN` في السكريبت؛ بدونها قسم المراجعات معطّل بصمت) |
-| `GOOGLE_SHEETS_WEBHOOK_SECRET` | اختياري | سر كتابة مشترك (يجب أن يطابق `WEBHOOK_SECRET` في السكريبت) |
+| `GOOGLE_SHEETS_WEBHOOK_SECRET` | **إلزامي** | سر كتابة مشترك (يجب أن يطابق `WEBHOOK_SECRET` في السكريبت). Fail-closed: بدون السر، السكريبت يرفض **كل** الكتابات — اضبط الاتنين أو الموقع مش هيستقبل طلبات |
 | `VITE_ERROR_SINK_URL` | اختياري | منفذ أخطاء متوافق مع Sentry (console فقط في dev) |
 
 ### الأوامر

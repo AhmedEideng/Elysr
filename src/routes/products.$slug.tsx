@@ -292,17 +292,25 @@ function ProductPage() {
         promoApplied: discount > 0,
       };
 
-      // 🚀 العميل يدخل واتساب مباشرةً (نفس التبويب) — بدون تبويب جديد
-      // وبدون انتظار. الطلب يُسجل بـ sendBeacon فيكمل حتى بعد مغادرة
-      // الصفحة (fetch عادي كان هيتقطع وقت التحميل). fallback نادر: fetch.
-      if (!beaconOrderToSheets(payload)) {
-        void submitToGoogleSheets(payload);
-      }
-
-      // GA: begin_checkout + purchase — شراء فوري بيكمل لواتساب مباشرة
-      // (نفس منطق سلة: beacon best-effort = طلب مكتمل تجارياً)
+      // GA: begin_checkout — اتقدم الطلب
       trackBeginCheckout(orderItems, grandTotal, shipping);
-      trackPurchase(orderId, orderItems, grandTotal, shipping, discount);
+
+      // 🔒 (2026-09-15) نفس إصلاح السلة: sendBeacon مش تأكيد وصول.
+      // بنستنى النتيجة الفعلية (مهلة 8 ثوانٍ): نجاح → GA purchase +
+      // (مفيش سلة هنا تمسح). فشل → beacon كمحاولة أخيرة + تحذير —
+      // نص الطلب يوصلنا عبر رسالة واتساب نفسها (قناة مزدوجة) بس من
+      // غير GA purchase (صدق الإيرادات).
+      const submitResult = await submitToGoogleSheets(payload, 8_000);
+      if (submitResult.success) {
+        // GA: purchase — سُجل فعلياً في الشيت
+        trackPurchase(orderId, orderItems, grandTotal, shipping, discount);
+      } else {
+        beaconOrderToSheets(payload); // محاولة أخيرة best-effort
+        toast.error(
+          "⚠️ تعذر تسجيل الطلب آلياً، لكن طلبك أُرسل عبر واتساب. لو ما وصلك رد تأكيد خلال دقائق، تواصل معنا.",
+          { duration: 8000 },
+        );
+      }
 
       try {
         // 🔒 لا نخزن رابط واتساب الكامل الذي يحتوي PII — رقم الطلب فقط

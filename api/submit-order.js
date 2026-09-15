@@ -250,15 +250,23 @@ export function validateOrderPayload(payload) {
   const productsDb = getProductsDb();
   let calculatedSubtotal = 0;
 
+  // 🔒 تجميع الكميات لكل منتج (إصلاح 2026-09-15): فحص المخزون كان per-line
+  // فيمكن تجاوز المخزون بسطرين من نفس المنتج (5000 + 5000 على stock 5000).
+  // السلة الحقيقية لا تنتج سطوراً مكررة — أي تكرار = طلب مشبوه نرفضه فوراً.
+  const qtyByProduct = new Map();
   for (const item of payload.items) {
     if (!item || typeof item !== "object" || Array.isArray(item)) return "Invalid item structure";
     if (!isNonEmptyString(item.id, 30) || !isNonEmptyString(item.name, 180))
       return "Invalid item structure";
     const quantity = Number(item.qty);
     // سق فني مريح أعلى بكثير من سقف المخزون الفعلي (5000 لكل منتج حالياً) —
-    // الحد الحقيقي هو فحص "Quantity exceeds stock" أدناه لكل منتج على حدة.
+    // الحد الحقيقي هو فحص "Quantity exceeds stock" أدناه على إجمالي الكميات.
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 9999)
       return "Invalid item quantity";
+    if (qtyByProduct.has(item.id)) {
+      return `Duplicate product in order: ${item.id}`;
+    }
+    qtyByProduct.set(item.id, quantity);
 
     // 🔒 البحث عن المنتج بالكتالوج الرسمي المعتمد في السيرفر للتحقق من سعره الحقيقي
     const officialProduct = productsDb.find((p) => p.id === item.id);
@@ -267,9 +275,6 @@ export function validateOrderPayload(payload) {
     }
     if (!Number.isInteger(officialProduct.stock) || officialProduct.stock < 1) {
       return `Product out of stock: ${item.id}`;
-    }
-    if (quantity > officialProduct.stock) {
-      return `Quantity exceeds stock for product: ${item.id}`;
     }
 
     // تفعيل مبدأ "مصدر الحقيقة الموحد" واستبدال الاسم المرسل من العميل بالاسم الرسمي المعتمد في الكتالوج لمنع ثغرات الحقن
@@ -281,6 +286,14 @@ export function validateOrderPayload(payload) {
     }
 
     calculatedSubtotal += officialProduct.price * quantity;
+  }
+
+  // 🔒 فحص المخزون على الإجمالي المجمّع لكل منتج (بعد منع التكرار أعلاه)
+  for (const [productId, totalQty] of qtyByProduct) {
+    const officialProduct = productsDb.find((p) => p.id === productId);
+    if (totalQty > officialProduct.stock) {
+      return `Quantity exceeds stock for product: ${productId}`;
+    }
   }
 
   // 🔒 التحقق الصارم من صحة الحقول المالية الإجمالية

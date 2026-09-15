@@ -190,61 +190,35 @@ function CartPage() {
         // Ignore storage failures.
       }
 
-      // 🚀 العميل يدخل واتساب مباشرةً (نفس التبويب) — بدون صفحة وسيطة
-      // وبدون زر تاني. الطلب يُسجل بـ sendBeacon فيكمل حتى بعد مغادرة
-      // الصفحة (fetch عادي كان هيتقطع وقت التحميل). fallback نادر: fetch.
-      if (!beaconOrderToSheets(payload)) {
-        void submitToGoogleSheets(payload);
+      // 🔒 (2026-09-15) sendBeacon لم يعد يُعد تأكيداً — إنه يعني "المتصفح
+      // قبل البيانات" وليس "السيرفر استلم الطلب". بنستنى النتيجة الفعلية
+      // (مهلة 8 ثوانٍ) قبل أي قرار:
+      //   نجاح → GA purchase + مسح السلة (الطلب موجود في الشيت فعلياً)
+      //   فشل  → beacon كمحاولة أخيرة (الـ payload يفضل حي في المتصفح) +
+      //          تحذير للعميل + نص الطلب يوصلنا برضه عبر رسالة واتساب
+      //          نفسها (قناة مزدوجة) — بس من غير GA purchase (صدق الإيرادات)
+      const submitResult = await submitToGoogleSheets(payload, 8_000);
+      if (submitResult.success) {
+        // GA: purchase — سُجل فعلياً في الشيت
+        trackPurchase(orderId, orderItems, grandTotal, shipping, discount + bundleDiscount);
+        clear();
+      } else {
+        beaconOrderToSheets(payload); // محاولة أخيرة best-effort
+        toast.error(
+          "⚠️ تعذر تسجيل الطلب آلياً، لكن طلبك أُرسل عبر واتساب. لو ما وصلك رد تأكيد خلال دقائق، تواصل معنا.",
+          { duration: 8000 },
+        );
       }
-
-      // GA: purchase — الطلب اتبعت (beacon) والعميل اتحرك لواتساب؛
-      // بنحسبه كطلب مكتمل بما يتطابق مع الواقع التجاري
-      trackPurchase(orderId, orderItems, grandTotal, shipping, discount + bundleDiscount);
-
-      clear();
       setSubmitting(false);
       window.location.assign(url);
       return;
     } else {
-      // 🚀 الطلب المباشر فوري زي الواتساب: التسجيل في الشيت في الخلفية وفتح
-      // صفحة التأكيد فوراً (بدون انتظار حتى 10 ثوانٍ للشيت).
-      // ⚠️ موثوقية: عند فشل التسجيل **لا نمسح السلة** — تبقى محفوظة ليتمكن
-      // العميل من إعادة المحاولة، مع قناة بديلة (واتساب) — لا فقدان صامت.
-      submitToGoogleSheets(payload).then((result) => {
-        if (result.success) {
-          // GA: purchase — سُجل فعلياً في الشيت (فشل التسجيل = مفيش revenue)
-          trackPurchase(orderId, orderItems, grandTotal, shipping, discount + bundleDiscount);
-          // سُجل بنجاح → نطهر السلة (العميل في صفحة التأكيد الآن)
-          clear();
-        } else {
-          toast.error(
-            "⚠️ تعذر تسجيل طلبك آلياً. سلّتك محفوظة لإعادة المحاولة، أو أكمل طلبك الآن عبر واتساب.",
-            {
-              duration: 10000,
-              action: {
-                label: "الطلب عبر واتساب",
-                onClick: () => {
-                  const msg = buildOrderMessage(
-                    orderItems,
-                    sc,
-                    orderId,
-                    shipping,
-                    freeShippingApplied,
-                    bundleDiscount,
-                  );
-                  const a = document.createElement("a");
-                  a.href = waLink(msg);
-                  a.target = "_blank";
-                  a.rel = "noopener noreferrer";
-                  document.body.appendChild(a);
-                  a.click();
-                  a.remove();
-                },
-              },
-            },
-          );
-        }
-      });
+      // 🔒 (2026-09-15) مفيش "نجاح" قبل معرفة النتيجة: بنستنى الرد الفعلي
+      // (مهلة 8 ثوانٍ) والزر يبقى في حالة submitting أثناء الانتظار.
+      // نجاح → GA purchase + مسح السلة + صفحة التأكيد.
+      // فشل  → السلة محفوظة لإعادة المحاولة + قناة بديلة (واتساب) —
+      //         لا فقدان صامت ولا شاشة نجاح مضللة.
+      const result = await submitToGoogleSheets(payload, 8_000);
 
       try {
         sessionStorage.setItem("elysr_last_order_id", orderId);
@@ -252,9 +226,42 @@ function CartPage() {
         // Ignore storage failures.
       }
 
-      toast.success("✅ تم استلام طلبك بنجاح!", { duration: 2500 });
+      if (result.success) {
+        // GA: purchase — سُجل فعلياً في الشيت (فشل التسجيل = مفيش revenue)
+        trackPurchase(orderId, orderItems, grandTotal, shipping, discount + bundleDiscount);
+        // سُجل بنجاح → نطهر السلة (العميل رايح لصفحة التأكيد)
+        clear();
+        toast.success("✅ تم استلام طلبك بنجاح!", { duration: 2500 });
+        navigate({ to: "/order-confirmed" });
+      } else {
+        toast.error(
+          "⚠️ تعذر تسجيل طلبك آلياً. سلّتك محفوظة لإعادة المحاولة، أو أكمل طلبك الآن عبر واتساب.",
+          {
+            duration: 10000,
+            action: {
+              label: "الطلب عبر واتساب",
+              onClick: () => {
+                const msg = buildOrderMessage(
+                  orderItems,
+                  sc,
+                  orderId,
+                  shipping,
+                  freeShippingApplied,
+                  bundleDiscount,
+                );
+                const a = document.createElement("a");
+                a.href = waLink(msg);
+                a.target = "_blank";
+                a.rel = "noopener noreferrer";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+              },
+            },
+          },
+        );
+      }
       setSubmitting(false);
-      navigate({ to: "/order-confirmed" });
     }
   };
 

@@ -232,7 +232,7 @@ function buildHtml(template, opts) {
     // React للكتلة. الصورة نفسها من الـ preload (نفس الـ URL) → من الكاش.
     // التدرج الخلفي inline (مش critical CSS) يمنع فلش أبيض لو الصورة تأخرت.
     const visibleHero = heroPreload
-      ? `<div data-prerender-hero><section class="relative w-full overflow-hidden"><div class="relative w-full overflow-hidden" style="aspect-ratio: 1200 / 663; background: linear-gradient(to bottom right, #f0f9ff, #eff6ff, #ecfeff);"><img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري 100% — دفع عند الاستلام — شحن سريع لجميع المحافظات" class="block h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async" width="1200" height="663"></div></section></div>`
+      ? `<div data-prerender-hero><section class="relative w-full overflow-hidden"><div class="relative w-full overflow-hidden" style="aspect-ratio: 1200 / 663; background: linear-gradient(to bottom right, #f0f9ff, #eff6ff, #ecfeff);"><img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" class="block h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async" width="1200" height="663"></div></section></div>`
       : "";
     html = html.replace(
       '<div id="root"></div>',
@@ -588,13 +588,9 @@ async function prerender() {
         h1: "تم استلام طلبك",
         noindex: true,
       },
-      {
-        path: "/thank-you",
-        title: "شكراً لك — اليسر ميديكال",
-        desc: "شكراً لإرسال طلبك عبر واتساب. سنقوم بمعالجته فوراً.",
-        h1: "شكراً لك",
-        noindex: true,
-      },
+      // (2026-09-15) /thank-you كان route legacy بدون أي روابط داخلية —
+      // اتشال من الـ prerender والـ route tree، و301 → /order-confirmed
+      // (في sync-vercel-redirects.mjs) يحمي أي روابط خارجية قديمة.
       // User-specific SPA route — needs static HTML for cleanUrls + Vercel fallback
       {
         path: "/wishlist",

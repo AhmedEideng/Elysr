@@ -1075,6 +1075,11 @@
       "source": "/products/kreva-gel",
       "destination": "/products/kreva-gel-for-men",
       "permanent": true
+    },
+    {
+      "source": "/thank-you",
+      "destination": "/order-confirmed",
+      "permanent": true
     }
   ]
 }

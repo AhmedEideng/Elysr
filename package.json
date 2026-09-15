@@ -22,10 +22,10 @@
     "prepare": "husky || true",
     "ci": "npm run lint && npm run typecheck && npm run test:all",
     "audit:deps": "npm audit --audit-level=high",
-    "audit:perf": "lhci autorun --config=.lighthouserc.json || echo 'Run npm i -g @lhci/cli first'",
+    "audit:perf": "command -v lhci >/dev/null 2>&1 || { echo '@lhci/cli is not installed — run: npm i -g @lhci/cli'; exit 1; }; lhci autorun --config=.lighthouserc.json",
     "start": "node server/index.js",
     "start:dev": "node --watch server/index.js",
-    "build:ssr": "npm run build && npm run prerender",
+    "build:ssr": "npm run build",
     "prerender": "node scripts/prerender-seo.mjs",
     "release": "node scripts/release.mjs"
   },

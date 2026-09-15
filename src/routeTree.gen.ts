@@ -21,7 +21,6 @@ import { Route as ReturnsRouteImport } from './routes/returns'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShippingRouteImport } from './routes/shipping'
 import { Route as TermsRouteImport } from './routes/terms'
-import { Route as ThankYouRouteImport } from './routes/thank-you'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as EducationSlugRouteImport } from './routes/education_.$slug'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
@@ -90,11 +89,6 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ThankYouRoute = ThankYouRouteImport.update({
-  id: '/thank-you',
-  path: '/thank-you',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
   path: '/wishlist',
@@ -144,7 +138,6 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
   '/terms': typeof TermsRoute
-  '/thank-you': typeof ThankYouRoute
   '/wishlist': typeof WishlistRoute
   '/education/$slug': typeof EducationSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -166,7 +159,6 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
   '/terms': typeof TermsRoute
-  '/thank-you': typeof ThankYouRoute
   '/wishlist': typeof WishlistRoute
   '/education/$slug': typeof EducationSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -189,7 +181,6 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
   '/terms': typeof TermsRoute
-  '/thank-you': typeof ThankYouRoute
   '/wishlist': typeof WishlistRoute
   '/education_/$slug': typeof EducationSlugRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -213,7 +204,6 @@ export interface FileRouteTypes {
     | '/search'
     | '/shipping'
     | '/terms'
-    | '/thank-you'
     | '/wishlist'
     | '/education/$slug'
     | '/products/$slug'
@@ -235,7 +225,6 @@ export interface FileRouteTypes {
     | '/search'
     | '/shipping'
     | '/terms'
-    | '/thank-you'
     | '/wishlist'
     | '/education/$slug'
     | '/products/$slug'
@@ -257,7 +246,6 @@ export interface FileRouteTypes {
     | '/search'
     | '/shipping'
     | '/terms'
-    | '/thank-you'
     | '/wishlist'
     | '/education_/$slug'
     | '/products/$slug'
@@ -280,7 +268,6 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   ShippingRoute: typeof ShippingRoute
   TermsRoute: typeof TermsRoute
-  ThankYouRoute: typeof ThankYouRoute
   WishlistRoute: typeof WishlistRoute
   EducationSlugRoute: typeof EducationSlugRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
@@ -376,13 +363,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/thank-you': {
-      id: '/thank-you'
-      path: '/thank-you'
-      fullPath: '/thank-you'
-      preLoaderRoute: typeof ThankYouRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/wishlist': {
       id: '/wishlist'
       path: '/wishlist'
@@ -448,7 +428,6 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   ShippingRoute: ShippingRoute,
   TermsRoute: TermsRoute,
-  ThankYouRoute: ThankYouRoute,
   WishlistRoute: WishlistRoute,
   EducationSlugRoute: EducationSlugRoute,
   ProductsSlugRoute: ProductsSlugRoute,

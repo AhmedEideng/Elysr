@@ -151,6 +151,27 @@ describe("submit-order payload validation", () => {
     expect(validateOrderPayload(payload)).toContain("Quantity exceeds stock");
   });
 
+  // Regression (2026-09-15): stock was checked per-line, so two lines of the
+  // same product each at full stock (5000 + 5000) passed validation while the
+  // combined 10000 exceeded stock. The real cart never emits duplicate lines,
+  // so duplicates are now rejected outright (defense in depth on top of the
+  // per-product total check).
+  it("rejects duplicate product lines that would bypass the stock cap", () => {
+    const payload = validPayload();
+    const line = payload.items[0];
+    payload.items = [
+      { ...line, qty: line.qty },
+      { ...line, qty: line.qty },
+    ];
+    expect(validateOrderPayload(payload)).toContain("Duplicate product");
+  });
+
+  it("rejects a single line whose qty exceeds stock even when split looks valid", () => {
+    const payload = validPayload();
+    payload.items[0].qty = product.stock + 1;
+    expect(validateOrderPayload(payload)).toContain("Quantity exceeds stock");
+  });
+
   it.each([
     ["orderType", "other", "Invalid orderType"],
     ["paymentMethod", "card", "Invalid paymentMethod"],
