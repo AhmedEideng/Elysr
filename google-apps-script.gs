@@ -337,18 +337,21 @@ function handleReviewPost(data) {
     var isLocalEgypt = /^01[0125][0-9]{8}$/.test(rawPhone);
     var isInternational = /^\+[1-9][0-9]{6,14}$/.test(rawPhone);
     if (rawPhone && !isLocalEgypt && !isInternational) throw new Error("Invalid phone");
+    // (2026-09-15) تخزين بالصيغة الموحدة (010...) — نفس الرقم متهتش
+    // تطابق "شراء موثق" بسبب الصيغة اللي اتكتب بيها.
+    var reviewerPhone = rawPhone ? normalizePhoneForMatch(rawPhone) : "";
 
     var reviewText = clean(data.reviewText, REVIEW_MAX_TEXT);
     if (reviewText.length < REVIEW_MIN_TEXT) throw new Error("Review too short");
 
     // Rate limiting — بالهاتف إن وُجد وإلا بالـ IP
     var clientIp = clean(data.clientIp, 64);
-    var rateKey = rawPhone || clientIp || "";
+    var rateKey = reviewerPhone || clientIp || "";
     if (!rateKey || !checkRateLimit("review:" + rateKey)) {
       throw new Error("Too many requests; please wait a moment");
     }
 
-    var verified = rawPhone ? hasVerifiedPurchase(rawPhone, productId, productName) : "لا";
+    var verified = reviewerPhone ? hasVerifiedPurchase(reviewerPhone, productId, productName) : "لا";
 
     var sheet = getOrCreateReviewsSheet();
     appendRowByHeaders(sheet, REVIEWS_COLUMNS, {
@@ -357,7 +360,7 @@ function handleReviewPost(data) {
       productName: productName,
       rating: ratingNum,
       reviewerName: reviewerName,
-      reviewerPhone: rawPhone,
+      reviewerPhone: reviewerPhone,
       reviewText: reviewText,
       status: REVIEW_STATUS_PENDING,
       verified: verified,
@@ -403,9 +406,13 @@ function hasVerifiedPurchase(phone, productId, productName) {
       statusCol > 0 ? ordersSheet.getRange(2, statusCol, lastRow - 1, 1).getValues() : [];
 
     for (var r = 0; r < phoneRange.length; r++) {
-      if (String(phoneRange[r][0] || "").trim() !== phone) continue;
-      // الطلبات الملغاة لا تُعتبر شراءً موثقاً
-      if (statusCol > 0 && String(statusRange[r][0] || "").trim() === "ملغي") continue;
+      // (2026-09-15) تطبيع الجانبين: 010... / +2010... / 002010... نفس الرقم
+      if (normalizePhoneForMatch(phoneRange[r][0]) !== normalizePhoneForMatch(phone)) continue;
+      // (2026-09-15) "شراء موثق" = طلب **مكتمل** فعلًا (وصل + دُفع COD).
+      // "جديد/تم التأكيد/تم الشحن" لسه مش شراء مؤكد (الدفع عند الاستلام
+      // بيحصل عند التسليم). لو الإدارة قررت إن "تم التأكيد" أو أجدى يكفى،
+      // عدّل الشرط هنا بس.
+      if (statusCol > 0 && String(statusRange[r][0] || "").trim() !== "مكتمل") continue;
 
       var idsCell = idsRange.length ? String(idsRange[r][0] || "").trim() : "";
       if (idsCell) {
@@ -865,6 +872,23 @@ function normalizeOrderType(value) {
   if (v === "buy-now" || v === "buynow" || v === "شراء فوري") return "شراء فوري";
   if (v === "cart" || v === "سلة") return "سلة";
   return v ? clean(v, 30) : "سلة";
+}
+
+// (2026-09-15) توحيد صيغة الهاتف للمطابقة:
+// +201012345678 / 00201012345678 / 01012345678 → 01012345678
+// المشكلة اللي كانت بتحصل: الطلب بيتخزن بصيغة 010... (الفرونت بيعمل
+// normalization) والمراجعة كانت بتتخزن زي ما العميل كتبها (+2010...)
+// → نفس الشخص ما كانش بيتطابق. بنطبع الجانبين وقت المقارنة عشان
+// الصفوف القديمة بأي صيغة تفضل تشتغل.
+function normalizePhoneForMatch(phone) {
+  var digits = String(phone || "").replace(/[^0-9]/g, "");
+  // المصري: 01012345678 (11) / +201012345678 (12) / 00201012345678 (14)
+  // → الصيغة المحلية 010...
+  if (digits.length === 11 && digits.indexOf("01") === 0) return digits;
+  if (digits.length === 12 && digits.indexOf("20") === 0) return "0" + digits.slice(2);
+  if (digits.length === 14 && digits.indexOf("0020") === 0) return "0" + digits.slice(4);
+  // صيغ تانية (أجنبية) → trim خام (التطابق بالـ raw)
+  return String(phone || "").trim();
 }
 
 function clean(value, maxLen) {
