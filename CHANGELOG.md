@@ -7,6 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] — 2026-Q3
 
+### 🧹 Third external audit — implementation batch (2026-09-15)
+
+Independent static audit of the full ZIP (source + API + Apps Script +
+build/CI + data + assets). Implemented (verified: typecheck · lint ·
+186 unit · data integrity · 19/19 e2e):
+- **Cart stock=0 bug fix**: hydration produced qty=1 for out-of-stock
+  products (`Math.max(1, min(qty, 0))`) and catalog sync left qty=0
+  items behind — both rejected at checkout with a confusing error.
+  Both paths now remove the item (deleted-from-catalog or stock≤0);
+  sync shows a toast when it removes anything.
+- **Error tracking finally works in production**: `error-tracking.ts`
+  was inert without `VITE_ERROR_SINK_URL`, and any external sink would
+  be blocked by the CSP `connect-src` (only `'self'` + Google domains).
+  New **`/api/errors`** endpoint (self-origin → CSP-safe): POST-only,
+  per-IP rate limit, 32 KB cap, allowlist fields, control-char
+  sanitization (log-injection safe). `SINK_URL` now defaults to it;
+  an external Sentry-compatible sink is still possible via env (add the
+  domain to `connect-src`). `Breadcrumb.data` tightened to a
+  primitives-only allowlist type; correlation-id fallback upgraded to
+  `crypto.getRandomValues`.
+- **`isPromoActive` → `isPromotionEnabled`**: the promo is permanent
+  (owner decision) — the 3-day cycle is a UI countdown, not an
+  activation state. Renamed across frontend, API and tests.
+- **Dead code**: `RED_PRODUCT_IDS` removed (empty set whose only
+  consumer was a test asserting it is empty; `GOOGLE_SHOPPING_BLOCKED`
+  is the set with real behavior).
+- **About page perf**: the whole `landing-pages.ts` (538 KB) was
+  imported for `.length` — replaced by a generated
+  `SEO_LANDING_PAGE_COUNT` const (~100 bytes, same pattern as
+  `ARTICLE_COUNT`).
+- **Ops/CI hardening**: Vercel `installCommand` `npm install` →
+  `npm ci` (deterministic prod installs); auto-publish workflow
+  `git add .` → scoped to content paths (a secrets-bearing file could
+  no longer ride into an automated commit) + post-rebase
+  `git status --porcelain` safety commit; HSTS only in production on
+  self-hosted (dev http could brick the browser); trust-proxy
+  topology documented (1 trusted proxy); auto-generate script lost its
+  redundant pre-dedup keyword pick, a stray "静态" log string, and the
+  "100% Free & Unlimited" claims (external service — availability is
+  not ours to promise).
+- **Apps Script**: secrets (WEBHOOK_SECRET / REVIEW_READ_TOKEN /
+  SPREADSHEET_ID / NOTIFICATION_EMAIL) moved to **Script Properties**
+  — the auto-publish workflow commits automatically, so in-code
+  secrets were an operational leak risk (fail-closed unchanged).
+  Order/review dates stored as real `Date` objects (cleanup can no
+  longer silently break on a format change; old string rows still
+  parse). **Rejected** reviews > 90 days now deleted by the daily
+  trigger (approved stay — public site content; pending stay — may
+  still be approved). Header now carries an explicit deployment
+  checklist.
+
+Deliberately deferred (documented rationale, future work):
+transactional inventory (stock=5000 is the owner's "available"
+placeholder + orders are WhatsApp-confirmed before shipping),
+TypeScript conversion of the JS backend, distributed rate limiting,
+client-retry idempotency keys, Sheets→database migration, review-domain
+unification, CSP nonces (incompatible with build-time critical-CSS
+injection), CI build-time reduction.
+
 ### 🔄 Catalog / Product changes
 
 - **Kreva Gel (`m-60`)**: price **300 EGP**, historical rating **5/5** from
