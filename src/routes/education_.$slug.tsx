@@ -10,6 +10,8 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
+import { ShareButton } from "@/components/ShareButton";
+import { shareArticleText } from "@/lib/share";
 import { articleSchema, clearJsonLd, clearPrerenderJsonLd, injectJsonLd } from "@/lib/seo";
 import { editorialTrustSignals } from "@/data/editorial-trust-signals";
 import { type Article } from "@/data/articles";
@@ -144,13 +146,20 @@ function ArticlePage() {
       </Link>
 
       <PageHero eyebrow={article.category} title={article.title} description={article.excerpt}>
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-bold text-muted-foreground shadow-sm border border-primary/10">
             <Clock className="h-4 w-4 text-primary" /> {article.readMin} دقائق قراءة
           </div>
           <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-bold text-muted-foreground shadow-sm border border-primary/10">
             <CalendarDays className="h-4 w-4 text-primary" /> آخر تحديث: {article.updatedAt}
           </div>
+          {/* (2026-09-16) حلقة الانتشار: المحتوى التوعوي هو اللي بيتشارك
+              "لحد يعرفه" — رسالة جاهزة (عنوان + لينك) بدون بيع */}
+          <ShareButton
+            text={shareArticleText(article.title, `/education/${article.slug}`)}
+            label="شارك المقال"
+            className="px-4 py-2 text-sm"
+          />
         </div>
       </PageHero>
 

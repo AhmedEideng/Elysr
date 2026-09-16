@@ -13,6 +13,7 @@ import {
   MessageCircle,
   X,
   BookOpen,
+  Share2,
 } from "lucide-react";
 import { useFocusTrap } from "@/components/Accessibility";
 import { formatPrice } from "@/data/product-types";
@@ -36,6 +37,8 @@ import { ProductReviews } from "@/features/product/components/ProductReviews";
 import { CustomerReviews } from "@/features/product/components/CustomerReviews";
 import { ProductImage } from "@/features/product/components/ProductImage";
 import { buildOrderMessage, waLink } from "@/lib/whatsapp";
+import { ShareButton } from "@/components/ShareButton";
+import { shareProductText, waShareUrl } from "@/lib/share";
 import { getProductBySlug, getProductsByCategory, getCrossSellsForProduct } from "@/data/products";
 import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
 
@@ -543,6 +546,12 @@ function ProductPage() {
           {product.stock > 0 && (
             <div className="mt-6 border-t pt-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                {/* (2026-09-16) حلقة الانتشار: مشاركة المنتج واتساب برسالة
+                    جاهزة (اسم + سعر + لينك) — أقل مجهود ممكن للمشاركة */}
+                <ShareButton
+                  text={shareProductText(product.name, product.price, `/products/${product.slug}`)}
+                  label="شارك المنتج"
+                />
                 <div className="flex items-center rounded-full border bg-muted/50 p-1 w-fit">
                   <button
                     onClick={() => setQty(Math.max(1, qty - 1))}
@@ -791,6 +800,19 @@ function ProductPage() {
               <div className="text-[10px] font-bold text-muted-foreground">السعر</div>
               <div className="text-base font-black text-primary">{formatPrice(product.price)}</div>
             </div>
+            {/* (2026-09-16) زر مشاركة للموبايل — الموبايل هو المنصة
+                الأساسي لنشر منتجات النيتش ده واتساب */}
+            <a
+              href={waShareUrl(
+                shareProductText(product.name, product.price, `/products/${product.slug}`),
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="مشاركة المنتج عبر واتساب"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#25D366]/40 bg-[#25D366]/10 text-[#128C3A] active:scale-[0.97]"
+            >
+              <Share2 className="h-5 w-5" />
+            </a>
             <button
               onClick={handleAddToCart}
               className="flex-1 rounded-2xl bg-gradient-brand px-4 py-3.5 text-sm font-black text-primary-foreground shadow-lg active:scale-[0.98]"

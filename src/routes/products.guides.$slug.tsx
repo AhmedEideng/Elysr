@@ -2,6 +2,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { ArrowRight, ShieldCheck, Truck, AlertCircle } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
+import { ShareButton } from "@/components/ShareButton";
+import { shareGuideText } from "@/lib/share";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryFAQ } from "@/components/CategoryFAQ";
 import type { SeoLandingPage } from "@/data/landing-pages";
@@ -110,7 +112,7 @@ function SeoLandingPageComponent() {
       </Link>
 
       <PageHero eyebrow={page.eyebrow} title={page.title} description={page.heroDescription}>
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           {page.relatedKeywords.slice(0, 4).map((keyword) => (
             <span
               key={keyword}
@@ -119,6 +121,13 @@ function SeoLandingPageComponent() {
               {keyword}
             </span>
           ))}
+          {/* (2026-09-16) حلقة الانتشار: الأدلة التجارية تتشارك واتساب
+              (رسالة جاهزة: عنوان + لينك) */}
+          <ShareButton
+            text={shareGuideText(page.title, `/products/guides/${page.slug}`)}
+            label="شارك الدليل"
+            className="px-3 py-1"
+          />
         </div>
       </PageHero>
 
