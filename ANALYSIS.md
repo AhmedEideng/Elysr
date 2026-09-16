@@ -1718,3 +1718,61 @@ run الأول (83/330ms) ضجيج لـ lab عادي (Lighthouse simulate عند
   ومفيش worth إعادة تقسيم لأجل ده.
 - **4.8KiB** في اللوجو (responsive images audit) — حجم ضئيل جدًا.
 - Field LCP (2.8s) لسه بيتتابع بعد 1–2 أسبوع بيانات حقلية (من §45).
+
+## 49) تدقيق الـ 35 بند — الجولة التانية: canonical cart + backend تحت TypeScript (2026-09-16)
+
+### أ) Cart normalization اكتمل — الـ catalog هو المصدر الوحيد
+النقطة الأولى من التدقيق لسه مش مكتملة 100%: `normalizeCartItem()` كانت
+لسه بتاخد `name/price/slug/emoji/image` من localStorage. دلوقتي:
+- `CATALOG_BY_ID` (map كامل للمنتجات) بدل `CATALOG_STOCK_BY_ID` (stock بس).
+- `normalizeCartItem()` **بتثق في `id + qty` بس** من الـ storage — كل
+  الحقول التانية (name/price/slug/emoji/image/stock) من الكتالوج الرسمي.
+  أي نسخة معدلة يدويًا في localStorage بتتجاهل (اتثبت باختبار regression
+  جديد: entry بهوية مزيفة → بيتعرض بيانات الكتالوج).
+- `CartItem.stock` بقى **مطلوب** (مش optional) — كل سكة (hydration/
+  storage/add/setQty/syncCatalog) بتضبطه من الكتالوج.
+- **شلت كل `?? 10`** (4 مواضع: syncCatalog + isStockLimitReached في
+  contexts/cart.tsx + routes/cart.tsx + `maxStock` في products.$slug.tsx).
+  المخزون الناقص/الناصفر = مشكلة data integrity → حذف العنصر، مش fallback
+  كان بيخبي المشكلة. `product.stock` في Product interface مطلوب أصلاً —
+  الـ `?? 10` في الـ PDP كان dead code.
+
+### ب) Report-To: أولويات صريحة (مش Host header في الإنتاج)
+المراجعة صححت إن `req.protocol + req.get("host")` بيبني على Host. دلوقتي
+الأولويات في `config/security-headers.mjs`:
+1. `CSP_REPORT_ENDPOINT` (URL كامل صريح — override مطلق)
+2. `SITE_URL` (الـ public origin اللي المشروع بيستخدمه أصلاً — مفيش
+   متغير تاني لنفس القيمة)
+3. origin الطلب — **dev fallback بس**
+اتوثق في `.env.example` (النشر الذاتي: `CSP_REPORT_ENDPOINT=...`).
+runtime-مُتحقق: dev → نفس الأصل · SITE_URL مضبوط → النطاق الرسمي.
+
+### ج) الـ backend (api/ + server/) دخل تحت TypeScript — P1 #17 (الخطوة 1)
+- `tsconfig.json`: `allowJs + checkJs` + include `api/**/*.js` و
+  `server/**/*.js`. **strict ما اتكسرش** (مفيش noImplicitAny-off ولا
+  checkJs-off).
+- **شلت `api/*.d.ts` (5 ملفات)** — كانت بتكبت الفحص (TS بيفضل الـ .d.ts
+  على الـ .js) والـ allowJs بيدي الاختبارات أنواع مستنتجة من الكود نفسه.
+- `@types/express` + `@types/compression` في devDeps.
+- **اللي الـ check كشفه (اتصلح):**
+  - `x-forwarded-for` نوعه `string | string[]` حسب الـ proxy — الكود كان
+    بيفتكر string دايمًا (csp-report + errors) → دلوقتي بيقدم الحالتين.
+  - `mainId` في `calcBundleDiscount` مش مستخدمة → `_mainId`.
+  - `req` غير مستخدمة في /health → `_req`.
+  - **باغ حقيقي كاد يبين من الـ refactor نفسه**: إعادة تسمية `req`→`_req`
+    في `mountApi` كانت هتفجّر `ReferenceError` في كل طلب API (الكود كان
+    بيعمل `handler(req, res)` — الـ type check مسكه فورًا).
+  - null-safety: getters بترجع `| null` (atypical) → `@returns` صريح +
+    local `parsed` · `officialProduct` في فحص المخزون → guard صريح ·
+    `payload` بعد try/catch → guard موحّد الرسالة · `product` في
+    submit-review → guard defense-in-depth · `reviews`/`knownProductIds`/
+    `redirectPatterns`/`rateLimitMap`/`qtyByProduct` → أنواع صريحة.
+  - `catch (err)` variables (strict unknown) → `instanceof Error ? .message : String(err)`.
+- **التحويل التدريجي .js → .ts** (rate-limiter أولًا) = الخطوة التانية
+  لما نحتاج — مش دلوقتي (الكود تحت الـ check فعلًا، مش وعود).
+
+### التحقق
+TSC 0 (شامل الـ backend) · lint 0 (2 warn fast-refresh معروفين) ·
+data-integrity + security parity · **209 وحدة (16 ملف)** · build 243 ·
+schemas 0 · runtime smoke: Report-To في الحالتين (dev/SITE_URL) +
+API routes حية.
