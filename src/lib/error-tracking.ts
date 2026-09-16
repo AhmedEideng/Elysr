@@ -35,12 +35,14 @@ interface ErrorContext {
   colno?: number;
 }
 
-// (2026-09-15) بديل Record<string, unknown> المفتوح: allowlist عملي —
-// primitives بس (مفيش objects متداخلة = مفيش هياكل PII ممكن تتخزن
-// في breadcrumb من غير تغيير مقصود في النوع ده — نفس فلسفة ErrorContext).
+// (2026-09-16, P2 #11) allowlist صارم — مفيش index signature خالص.
+// الحقل الوحيد المستعمل في الـ breadcrumbs فعلًا هو href (نقرات اللينكات).
+// أي حقل جديد = تغيير مقصود ومُراجَع للنوع ده (نفس فلسفة ErrorContext) —
+// لو في index signature مفتوح كان ممكن أي dev يعلّق phone/name/address
+// على breadcrumb من غير ما حد يلحظ.
 interface BreadcrumbData {
+  /** href اللينك النُقِر عليه — معقّم عبر toBreadcrumbHref (بلا query/hash) */
   href?: string;
-  [key: string]: string | number | boolean | undefined;
 }
 
 interface Breadcrumb {
@@ -108,6 +110,30 @@ function getCorrelationId(): string {
 
 // ── Breadcrumbs ──
 const breadcrumbs: Breadcrumb[] = [];
+
+// (2026-09-16, P2 #10) URL آمن PII لـ breadcrumbs.
+// `target.href` الكامل ممكن ياخد query string وفيه بيانات عميل
+// (tracking IDs، أرقام تليفونات، أسرار session) — وده كان بيوصل
+// لـ error logs. القاعدة:
+//   • نفس الأصل → pathname بس (مفيش query/hash).
+//   • خارجي → protocol + host + path (مفيش query/hash) — معرفة
+//     إن المستخدم انزل لفين مفيدة في الـ debug.
+//   • tel:/mailto:/javascript: → اسم الـ protocol بس — الـ payload
+//     (الرقم/الإيميل) هو نفسه PII.
+// exported for unit tests (PII stripping — P2 #10).
+export function toBreadcrumbHref(url: string): string {
+  try {
+    const u = new URL(url, window.location.href);
+    if (u.protocol !== "http:" && u.protocol !== "https:") {
+      return u.protocol.replace(":", ""); // "tel" / "mailto" / "javascript"
+    }
+    if (u.origin === window.location.origin) return u.pathname;
+    return `${u.protocol}//${u.host}${u.pathname}`;
+  } catch {
+    // URL مش صالح — نشيل كل اللي بعد أول ? أو #
+    return url.split(/[?#]/)[0] || "invalid-url";
+  }
+}
 
 /**
  * Record a breadcrumb — a user action that happened before an error.
@@ -205,12 +231,21 @@ function installBreadcrumbListeners() {
   const pushState = history.pushState.bind(history);
   const replaceState = history.replaceState.bind(history);
 
+  // (2026-09-16) الـ URL في breadcrumb message نفسه كان ممكن ياخد query
+  // string (نفس مشكلة الـ href في النقرات) — بنعقّمه بنفس القاعدة.
+  const navLabel = (args: Parameters<typeof pushState>): string => {
+    const urlArg = args[2];
+    if (typeof urlArg === "string") return toBreadcrumbHref(urlArg);
+    if (urlArg instanceof URL) return toBreadcrumbHref(urlArg.href);
+    return "(بدون تغيير URL)";
+  };
+
   history.pushState = (...args) => {
-    addBreadcrumb("navigation", `pushState → ${String(args[2] || args[0])}`);
+    addBreadcrumb("navigation", `pushState → ${navLabel(args)}`);
     return pushState(...args);
   };
   history.replaceState = (...args) => {
-    addBreadcrumb("navigation", `replaceState → ${String(args[2] || args[0])}`);
+    addBreadcrumb("navigation", `replaceState → ${navLabel(args)}`);
     return replaceState(...args);
   };
 
@@ -222,8 +257,10 @@ function installBreadcrumbListeners() {
       const tag = target.tagName?.toLowerCase() || "unknown";
       const text = (target.textContent || "").slice(0, 50);
       if (tag === "a" || tag === "button") {
+        // (2026-09-16) href معقّم — مفيش query/hash في الـ breadcrumb
+        // (P2 #10: PII leak).
         addBreadcrumb("click", `${tag}: ${text}`, {
-          href: tag === "a" ? (target as HTMLAnchorElement).href : undefined,
+          href: tag === "a" ? toBreadcrumbHref((target as HTMLAnchorElement).href) : undefined,
         });
       }
     },
