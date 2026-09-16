@@ -172,6 +172,18 @@ describe("submit-order payload validation", () => {
     expect(validateOrderPayload(payload)).toContain("Quantity exceeds stock");
   });
 
+  // (2026-09-15) Total-order-unit cap guards against "wrecking" orders
+  // (50 SKUs × 5000 = 250,000 units) even when each single product stays
+  // within its own stock. The cap (MAX_ORDER_UNITS) sits below stock, so a
+  // single line at 101 passes the per-product stock check but trips the
+  // total-units cap first.
+  it("rejects orders whose total units exceed the cap even though each product is within stock", () => {
+    const payload = validPayload();
+    // Above MAX_ORDER_UNITS (100) but far below this product's stock (5000).
+    payload.items[0].qty = 101;
+    expect(validateOrderPayload(payload)).toContain("total units");
+  });
+
   it.each([
     ["orderType", "other", "Invalid orderType"],
     ["paymentMethod", "card", "Invalid paymentMethod"],

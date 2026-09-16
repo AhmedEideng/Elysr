@@ -10,23 +10,18 @@ const BUNDLES_DB_PATH = join(__dirname, "lib", "bundles-db.json");
 
 // نسبة خصم الباقة — Single Source of Truth: src/lib/bundle-discount.ts،
 // وتصل للـ API عبر config-db.json (مولّد وقت البناء).
-// هذا الـ fallback للأمان فقط لو الـ config قديم/ناقص المفتاح (نذر الطلبات).
-const FALLBACK_BUNDLE_DISCOUNT_RATE = 0.2;
-let bundleRateWarned = false;
+// (2026-09-15) Fail-closed: لو القيمة ناقصة (artifact تالف) نرفض الطلب
+// بـ 500 configuration بدل fallback صامت لقيمة ممكن تكون قديمة —
+// fallback صامت = الفرونت يعرض نسبة جديدة والسيرفر يحسب قديمة
+// = drift صامت في أسعار الخصم.
 function getBundleDiscountRate() {
   const configDb = getConfigDb();
   if (typeof configDb.BUNDLE_DISCOUNT_RATE === "number") {
     return configDb.BUNDLE_DISCOUNT_RATE;
   }
-  if (!bundleRateWarned) {
-    bundleRateWarned = true;
-    console.warn(
-      "config-db.json missing BUNDLE_DISCOUNT_RATE — using fallback " +
-        FALLBACK_BUNDLE_DISCOUNT_RATE +
-        " (run npm run build to regenerate)",
-    );
-  }
-  return FALLBACK_BUNDLE_DISCOUNT_RATE;
+  throw new Error(
+    "config-db.json missing BUNDLE_DISCOUNT_RATE (broken build artifact — run npm run build)",
+  );
 }
 
 // مخازن ذاكرة مؤقتة (In-memory Caching) لتسريع أداء السيرفر السحابي وتجنب القراءة المتكررة من القرص الصلب
@@ -89,6 +84,10 @@ const ALLOWED_ORIGINS = new Set(
 );
 
 const MAX_BODY_SIZE_BYTES = 64_000;
+// (2026-09-15) سقف إجمالي وحدات الطلب (مجموع كل الكميات) — حماية من طلبات
+// هدامة (50 SKU × 5000 = 250,000 وحدة). 100 = سخي جدًا لعميل حقيقي
+// وواقعي كحد تشغيلي (الشحن يدوي).
+const MAX_ORDER_UNITS = 100;
 export const GOOGLE_SHEETS_TIMEOUT_MS = 10_000;
 
 // Fast per-instance limit; Google Apps Script applies a second per-phone limit.
@@ -296,6 +295,14 @@ export function validateOrderPayload(payload) {
     }
   }
 
+  // 🔒 (2026-09-15) سقف إجمالي كميات الطلب: 50 SKU × 5000 = 250,000 وحدة
+  // مش طلب حقيقي (abuse/risks تشغيلية — الشحن يدوي). سقف 100 وحدة إجمالي
+  // = 20× أكبر طلب حقيقي متوقع، ولسه سخي جدًا لأي عميل حقيقي.
+  const totalUnits = [...qtyByProduct.values()].reduce((sum, q) => sum + q, 0);
+  if (totalUnits > MAX_ORDER_UNITS) {
+    return `Order exceeds maximum of ${MAX_ORDER_UNITS} total units`;
+  }
+
   // 🔒 التحقق الصارم من صحة الحقول المالية الإجمالية
   if (Number(payload.subtotalBeforeDiscount) !== calculatedSubtotal) {
     return "Subtotal before discount mismatch";
@@ -366,7 +373,15 @@ export default async function handler(req, res) {
 
   // 🔒 الأمان عبر CORS + Origin checking + Rate Limiting + Payload Validation
   // لم نعد نستخدم HMAC CSRF token بمفتاح مكشوف في الـ client bundle
-  const payloadError = validateOrderPayload(payload);
+  let payloadError;
+  try {
+    payloadError = validateOrderPayload(payload);
+  } catch (err) {
+    // (2026-09-15) فشل configuration (config-db تالف) = 500 صريحة بدل
+    // throw غير معالج — fail-closed واضح للسيرفر بدل 500 عامي من المنصة.
+    console.error("Order validation configuration error:", err.message);
+    return res.status(500).json({ error: "Server configuration error" });
+  }
   if (payloadError) return res.status(400).json({ error: payloadError });
 
   const SHEET_URL = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
