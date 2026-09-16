@@ -24,11 +24,18 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 8080,
+    // (2026-09-16) Dev-only: بيستقبل أي hostname عشان الـ preview
+    // (sandbox/CI) يفتح dev server بنطاقات ديناميكية (e2b.app).
+    // مفيش أي تأثير على الإنتاج — Vercel/الخادم الذاتي بيخدمون dist/
+    // المسبق البناء، مش vite dev. رُصد في audit 2026-09-14 كمشكلة
+    // 🟡 بسيطة (dev server مفتوح لأي جهاز على الـ LAN) — مقبول
+    // مقصود مقابل عمل الـ preview.
     allowedHosts: true,
   },
   preview: {
     host: "0.0.0.0",
     port: 8080,
+    // نفس ملاحظة server.allowedHosts — dev/preview بس.
     allowedHosts: true,
   },
   build: {
