@@ -486,6 +486,23 @@ async function prerender() {
         title: "عن اليسر ميديكال — Elysr Medical Group",
         desc: "تعرف على اليسر ميديكال ومسيرتنا في مجال الصحة الزوجية بمصر: رؤيتنا في المنتجات الأصلية، شفافية المحتوى، الخصوصية، وثقة عملائنا منذ سنوات.",
         h1: "عن اليسر ميديكال",
+        // (2026-09-16) E-E-A-T: كيان Person للمؤسس-الصيدلي — نفس الـ @id
+        // اللي بيوصل له author في Article schema لكل المقالات (seo.ts)،
+        // فكل المحتوى التعليمي مربوطة بهيكلية بذات الكيان صاحب الاعتمادات.
+        extraJsonLd: [
+          {
+            "@context": "https://schema.org",
+            "@type": "Person",
+            "@id": `${SITE_URL}/about#founder`,
+            name: "د. أحمد عابد",
+            jobTitle: "المؤسس والمسؤولية التحريرية المباشرة",
+            description:
+              "بكالوريوس صيدلة — مؤسس اليسر ميديكال، يكتب المحتوى التعليمي ووصف المنتجات بمسؤوليته التحريرية المباشرة، مع تحقق آلي (CI) من المصادر والتحذيرات.",
+            url: `${SITE_URL}/about`,
+            worksFor: { "@type": "Organization", name: "اليسر ميديكال", url: SITE_URL },
+            knowsAbout: ["الصحة الزوجية", "الصيدلة", "المكملات الغذائية", "الأجهزة الطبية"],
+          },
+        ],
         body:
           "<h2>شركتنا ورؤيتنا</h2>" +
           "<p>اليسر ميديكال شركة مصرية متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء. انطلقنا من إيماننا بأن الرعاية الصحية والزوجية حق أساسي للجميع، وأن الوصول إلى منتجات أصلية وآمنة بمعلومات صادقة يجب ألا يكون صعباً أو محرجاً.</p>" +
@@ -661,6 +678,11 @@ async function prerender() {
             },
           })),
         });
+      }
+
+      // JSON-LD إضافي محدد للصفحة (مثلاً: كيان Person للمؤسس في /about)
+      if (Array.isArray(r.extraJsonLd)) {
+        jsonLd.push(...r.extraJsonLd);
       }
 
       const faqBody = Array.isArray(r.faqs)
@@ -888,11 +910,18 @@ async function prerender() {
           timeRequired: `PT${article.readMin}M`,
           inLanguage: "ar-EG",
           mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
+          // (2026-09-16) مطابقه هوكلية مع Article schema في seo.ts:
+          // كيان Person واحد للمؤسس (نفس الـ @id في /about#founder) —
+          // النسخة القديمة هنا كانت author = Organization، فـ Googlebot
+          // كان يقرأ مؤلف منظمة بدل صيدلي صاحب اعتمادات (تضليل E-E-A-T).
           author: {
-            "@type": "Organization",
-            name: article.author?.name || "Elysr Medical Group",
+            "@type": "Person",
+            "@id": `${SITE_URL}/about#founder`,
+            name: article.author?.name || "د. أحمد عابد",
             description: article.author?.credentials,
-            url: SITE_URL,
+            jobTitle: article.author?.role || "إعداد ومراجعة المحتوى",
+            url: `${SITE_URL}/about`,
+            worksFor: { "@type": "Organization", name: "اليسر ميديكال", url: SITE_URL },
           },
           // 🛡️ Provenance: reviewedBy يُصدر فقط للمقالات اللي عليها مراجعة
           // فعلية — المحتوى المولّد آليًا (autoReviewed) ما يتشملش reviewedBy

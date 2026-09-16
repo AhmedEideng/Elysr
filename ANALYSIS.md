@@ -1776,3 +1776,61 @@ TSC 0 (شامل الـ backend) · lint 0 (2 warn fast-refresh معروفين) �
 data-integrity + security parity · **209 وحدة (16 ملف)** · build 243 ·
 schemas 0 · runtime smoke: Report-To في الحالتين (dev/SITE_URL) +
 API routes حية.
+
+## 50) تشخيص قلة الظهور + تحسينات SEO والانتشار (2026-09-16)
+
+### التشخيص (لماذا الظهور ضعيف؟)
+1. **النطاق عمره 4 شهور فقط** (registered 2026-05-20) — العامل الأكبر:
+   جوجل تعامل النطاقات الجديدة بحذر أقصى في نيتش حساس (صحة زوجية ≈
+   YMYL-adjacent) ومن غير backlink profile.
+2. **فهرس جوجل قديم**: البحث أظهر أن جوجل لسه بتقيّم نسخة قديمة
+   (89 منتج، عنوان قصر العيني بدل العاشر، منتجات دوائية محذوفة جوه
+   ItemList، medicalSpecialty) — الموقع الحي نظيف 100% (تحقق: 237/237
+   URL = 200، 0 noindex، 0 canonical mismatch، 0 duplicate titles،
+   0 صفحات من غير JSON-LD). محتاج re-crawl (GSC).
+3. **مفيش حلقة انتشار**: مفيش زر مشاركة في أي صفحة — والنيتش ده
+   بيتنشر واتساب.
+4. **Cannibalization خفيف**: 6 أزواج أدلة متداخلة + تصادم حقيقي واحد
+   (مقال erectile-dysfunction vs دليل weak-erection-young-men).
+5. **E-E-A-T ناقص شوية**: المؤسس-الصيدلي ليهش كيان Person هوكلية
+   في /about، وكان في تناقض: الـ Article static author = Organization
+   (Googlebot) vs Person (runtime) — اتوحدوا.
+
+### اللي اتنفذ (code)
+1. **حلقة الانتشار (share loop)**:
+   - `src/lib/share.ts`: wa.me share API (بلا رقم = شاشة اختيار جهة)
+     + صياغات طبيعية مش إعلانية (منتج: اسم+سعر+لينك · مقال/دليل:
+     عنوان+لينك).
+   - `ShareButton.tsx` + تركيب في: PDP (سطر الأزرار + شريط الموبايل
+     السفلي)، صفحات المقالات (بجوار "دقائق قراءة")، صفحات الأدلة.
+   - +8 اختبارات (صياغات + render + target/rel security attrs).
+2. **E-E-A-T entity graph**:
+   - Person node في /about (static HTML للـ crawlers): @id
+     `/about#founder` + jobTitle + credentials + worksFor.
+   - Article schema (runtime + **prerender static**) author بقى نفس
+     الكيان بنفس الـ @id — كان في تناقض حقيقي (static = Organization).
+   - كارت المؤسس المرئي في /about (id="founder") — الـ structured
+     data لازم يطابق محتوى مرئي.
+3. **Cannibalization**: metaTitle دليل weak-erection-young-men اتفرّق
+   عن المقال (زاويته الفريدة: الشباب + الأسباب النفسية).
+4. **FAQPage مش اتضاف للهوم** — مقصود: FAQ rich results من 2023
+   محصورة في مواقع حكومية/صحية (جوجل) — مفيش فايدة لمتجر.
+
+### التحقق
+TSC 0 · lint 0 · data-integrity + parity ✓ · **217 وحدة (18 ملف)** ·
+build 243 · schemas 0 · تحقق dist: Person @id في المقالات + about +
+الشير لوب في الباندل.
+
+### إجراءات المالك (GSC + Off-site) — أهم من أي code
+1. GSC: Submit sitemap تاني + "Request Indexing" لأهم 20 URL
+   (هوم + 3 أقسام + الـ pillar + أقوى 15 دليل تجاري) — عشان جوجل
+   تقرا النسخة الحالية بدل القديمة.
+2. GSC: مراجعة Actions → Manual actions (تاريخ المنتجات الدوائية +
+   التقييمات المولّدة = خطر إجراء يدوي على structured data).
+3. Google Business Profile: إنشاؤه/مطابقته لنفس عنوان الـ LocalBusiness
+   schema (العاشر من رمضان) — local pack.
+4. sameAs في Organization: إضافة حسابات السوشيال الحقيقية (Instagram
+   /TikTok لو موجودة) — دلوقتي facebook + whatsapp بس.
+5. الانتشار: الشير لوب اتفعّل — كل عميل دلوقتي بيقدر يشارك منتج/
+   مقال واتساب بنقرة. المحتوى التوعوي هو وقود الانتشار في النيتش ده.
+6. الزمن: 3–6 شهور بناء ثقة (عمر النطاق) — مفيش shortcut تقني.

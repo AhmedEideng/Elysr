@@ -19,6 +19,7 @@ import {
   Star,
   Package,
   Headphones,
+  UserCheck,
 } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 import { useEffect } from "react";
@@ -173,6 +174,31 @@ function AboutPage() {
         <p className="text-center text-sm text-muted-foreground mb-6 max-w-2xl mx-auto">
           يعمل خلف اليسر ميديكال فريق متكامل يضمن جودة كل خطوة من الاستيراد للتوصيل
         </p>
+
+        {/* (2026-09-16) كارت المؤسس — المقابل المرئي لكيان Person في
+            JSON-LD (نفس الـ @id: /about#founder) — إشارة E-E-A-T واضحة */}
+        <div
+          id="founder"
+          className="mb-4 rounded-2xl border border-primary/20 bg-gradient-soft p-5"
+        >
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-brand text-2xl">
+              <UserCheck className="h-7 w-7 text-primary-foreground" />
+            </div>
+            <div>
+              <h3 className="font-black text-lg">د. أحمد عابد</h3>
+              <p className="text-sm font-bold text-primary">
+                المؤسس — بكالوريوس صيدلة — المسؤولية التحريرية المباشرة لكل محتوى الموقع
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground leading-7">
+                صيدلي ومؤسس اليسر ميديكال. يكتب المحتوى التعليمي ووصف المنتجات شخصيًا بمسؤوليته
+                التحريرية المباشرة، ويعتمد على مصادر طبية معتمدة (WHO، Mayo Clinic، Cleveland
+                Clinic، NIH) مع فحص آلي (CI) لكل مقال قبل النشر.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="grid gap-4 md:grid-cols-3">
           {[
             {

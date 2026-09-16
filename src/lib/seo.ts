@@ -282,10 +282,14 @@ export const articleSchema = (a: {
   dateModified: a.updatedAt ?? new Date().toISOString().slice(0, 10),
   author: {
     "@type": "Person",
+    // (2026-09-16) ربط هوكلية بذات كيان المؤسس في /about (نفس الـ @id) —
+    // كل المقالات 56 + صفحة من نحن تشير لـ Person واحد صاحب الاعتمادات
+    // (إشارة E-E-A-T واضحة بدل 56 كيانًا منفصلًا).
+    "@id": `${SITE_URL}/about#founder`,
     name: a.author?.name ?? "د. أحمد عابد",
     description: a.author?.credentials,
     jobTitle: a.author?.role ?? "إعداد ومراجعة المحتوى",
-    url: `${SITE_URL}/medical-review-board`,
+    url: `${SITE_URL}/about`,
     worksFor: {
       "@type": "Organization",
       name: "اليسر ميديكال",
