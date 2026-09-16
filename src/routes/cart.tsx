@@ -120,7 +120,8 @@ function CartPage() {
       toast.error("برجاء إدخال رقم هاتف صحيح، مصري أو دولي بصيغة +رمز الدولة");
       return;
     }
-    const overStock = items.find((i) => i.qty > (i.stock ?? 10));
+    // (2026-09-16) i.stock canonical (مخزون الكتالوج) — مفيش fallback
+    const overStock = items.find((i) => i.qty > i.stock);
     if (overStock) {
       toast.error(`الكمية المطلوبة لـ "${overStock.name}" تتجاوز المخزون`);
       return;

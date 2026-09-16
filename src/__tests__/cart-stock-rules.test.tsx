@@ -100,6 +100,46 @@ describe("normalizeCartItem — the single stock rule", () => {
       }),
     ).toBeNull();
   });
+
+  // (2026-09-16) Only id + qty are trusted from storage. A tampered
+  // localStorage entry (fake name/price/slug/emoji/image) must come
+  // back with the CATALOG values — the storage copy is never rendered.
+  it("ignores tampered name/price/slug/emoji/image and uses catalog data", () => {
+    const item = normalizeCartItem({
+      id: inStockProduct.id,
+      slug: "totally-fake-slug",
+      name: "اسم مزيف",
+      price: 1,
+      originalPrice: 1,
+      emoji: "🎩",
+      image: "/images/fake.webp",
+      qty: 2,
+    });
+    expect(item).not.toBeNull();
+    expect(item!.name).toBe(inStockProduct.name);
+    expect(item!.price).toBe(inStockProduct.price);
+    expect(item!.originalPrice).toBe(inStockProduct.price);
+    expect(item!.slug).toBe(inStockProduct.slug);
+    expect(item!.emoji).toBe(inStockProduct.emoji);
+    expect(item!.image).toBe(inStockProduct.image ? inStockProduct.image : undefined);
+    expect(item!.qty).toBe(2);
+  });
+
+  it("hydration from a tampered localStorage entry shows catalog name/price", () => {
+    const p = inStockProduct;
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify([
+        { id: p.id, name: "اسم مزيف", price: 1, originalPrice: 1, emoji: "🎩", qty: 2 },
+      ]),
+    );
+    renderCart();
+    const items = fresh().items;
+    expect(items).toHaveLength(1);
+    expect(items[0].name).toBe(p.name);
+    expect(items[0].price).toBe(p.price);
+    expect(items[0].qty).toBe(2);
+  });
 });
 
 describe("normalizeCartItems — dedupe + cap", () => {

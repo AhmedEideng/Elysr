@@ -332,7 +332,9 @@ function ProductPage() {
     }
   };
 
-  const maxStock = product.stock ?? 10;
+  // (2026-09-16) Product.stock مطلوب (canonical من الكتالوج) — الـ
+  // `?? 10` كان dead code بيخبي أي مشكلة data integrity محتملة.
+  const maxStock = product.stock;
   const atStockLimit = qty >= maxStock;
   const categoryName =
     product.category === "men"

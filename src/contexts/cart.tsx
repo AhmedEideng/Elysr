@@ -13,44 +13,52 @@ import type { Product } from "@/data/product-types";
 import { getPromoTier, type PromoTier } from "@/lib/promo";
 import { products } from "@/data/products";
 
-// 🛡️ مصدر حقيقة المخزون هو الكتالوج الرسمي — قيمة الـ localStorage محفوظة
-// مجرد snapshot لحظة الإضافة (قد تكون قديمة). لو المنتج موجود في
-// الكتالوج، قيمته في الكتالوج هي الحاكمة (المراجع: stock fallback 10
-// للسلة القديمة كان يخلي المستخدم يظبط كمية يرفضها الـ checkout).
-const CATALOG_STOCK_BY_ID = new Map(products.map((p) => [p.id, p.stock]));
-const catalogStock = (id: string) => CATALOG_STOCK_BY_ID.get(id);
+// 🛡️ (2026-09-16) مصدر الحقيقة للمنتج = الكتالوج الرسمي بالكامل.
+// localStorage بياخد منه بس **id + qty** — كل حاجة تانية (name/price/
+// slug/emoji/image/stock) بتتجاهل لو اتعدلت يدويًا. الـ snapshot في
+// الـ storage كان بيسمح باسم/سعر مزيفين يظهروا في السلة لحد ما
+// syncCatalog() يشتغل — دلوقتي مفيش سكة غير الكتالوج.
+const CATALOG_BY_ID = new Map(products.map((p) => [p.id, p]));
+const catalogProduct = (id: string) => CATALOG_BY_ID.get(id);
 
 // سقف كمية الصنف الواحد في السلة (مستقل عن المخزون — عميل حقيقي ما يطلبش
 // 100 وحدة من صنف واحد، والسيرفر عنده سقف إجمالي 100 وحدة للطلب كله).
 const MAX_QTY_PER_ITEM = 99;
 
-// ── (2026-09-15) توحيد normalization عناصر السلة ──
+// ── (2026-09-15 → 2026-09-16) توحيد normalization عناصر السلة ──
 // كان الـ bug موجود في 4 implementations بقواعد مختلفة:
 //   hydration: 1..stock (مع ?? 10) · storage event: 1..99 من غير مخزون
 //   add: stock=0 → qty=1 (!) · setQty: stock=0 → qty=1 (!)
-// دلوقتي مصدر واحد لبيانات الـ storage الخام (localStorage/ات بين تابات):
+// 2026-09-16: التوحيد اكتمل — دالة واحدة وبياناتها كلها من الكتالوج:
 //   • منتج مش في الكتالوج → حذف
 //   • stock <= 0 (أو مفيش بيانات) → حذف
-//   • qty مقصورة على مخزون الكتالوج (وسقف 99)
-//   • stock من الكتالوج (هو مصدر الحقيقة)
+//   • qty مقصورة على min(stock, 99)
+//   • name/price/slug/emoji/image/stock = من الكتالوج (مش من الـ storage)
 // exported for unit tests (التوحيد normalization — قواعد مخزون السلة)
 export function normalizeCartItem(raw: Partial<CartItem>): CartItem | null {
-  if (!raw.id || typeof raw.qty !== "number" || !raw.name || typeof raw.price !== "number") {
+  if (!raw.id || typeof raw.qty !== "number") {
     return null;
   }
-  const stock = catalogStock(raw.id);
-  if (stock === undefined || stock <= 0) return null; // اتحذف / نافد
-  const qty = Math.max(1, Math.min(Math.floor(raw.qty), stock, MAX_QTY_PER_ITEM));
+
+  const product = catalogProduct(raw.id);
+
+  // المنتج غير موجود أو غير متاح
+  if (!product || product.stock === undefined || product.stock <= 0) {
+    return null;
+  }
+
+  const qty = Math.max(1, Math.min(Math.floor(raw.qty), product.stock, MAX_QTY_PER_ITEM));
+
   return {
-    id: raw.id,
-    slug: raw.slug,
-    name: raw.name,
-    price: raw.originalPrice ?? raw.price,
-    originalPrice: raw.originalPrice ?? raw.price,
-    emoji: raw.emoji ?? "💊",
-    image: raw.image,
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    price: product.price,
+    originalPrice: product.price,
+    emoji: product.emoji,
+    image: product.image ? product.image : undefined,
     qty,
-    stock,
+    stock: product.stock,
   };
 }
 
@@ -94,7 +102,12 @@ export interface CartItem {
   emoji: string;
   image?: string;
   qty: number;
-  stock?: number;
+  /**
+   * (2026-09-16) مطلوب مش اختياري: بيتضبط دايمًا من مخزون الكتالوج
+   * الرسمي (normalizeCartItem/add/syncCatalog) — مفيش سكة لحد ما يبقى
+   * عند كل عنصر stock حقيقي، فمفيش fallback `?? 10` في أي مكان.
+   */
+  stock: number;
 }
 
 export interface CartCtx {
@@ -289,7 +302,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const setQty = useCallback((id: string, qty: number) => {
     // (2026-09-15) نفس قواعد التوحيد: stock نَفَد/مفيش بيانات → حذف
     // العنصر بدل ما Math.max(1, Math.min(qty, 0)) يطلّع qty=1.
-    const stock = catalogStock(id);
+    const stock = catalogProduct(id)?.stock;
     if (stock === undefined || stock <= 0) {
       setItems((p) => p.filter((i) => i.id !== id));
       return;
@@ -311,9 +324,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const kept = prev.flatMap((item): CartItem[] => {
       const product = byId.get(item.id);
       if (!product) return []; // منتج اتحذف من الكتالوج
-      // مخزون معروض بوضوح وناصفر → حذف. (undefined = مفيش بيانات مخزون
-      // → fallback قديم محفوظ للوراء)
-      if (product.stock !== undefined && product.stock <= 0) return [];
+      // (2026-09-16) مخزون ناقص/ناصفر = مشكلة data integrity → حذف
+      // العنصر (مش fallback قديم `?? 10` كان بيخبي المشكلة).
+      const stock = product.stock;
+      if (stock === undefined || stock <= 0) return [];
       return [
         {
           ...item,
@@ -323,8 +337,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
           originalPrice: product.price,
           emoji: product.emoji ?? item.emoji,
           image: product.image ? product.image : undefined,
-          qty: Math.min(item.qty, product.stock ?? item.stock ?? 10),
-          stock: product.stock,
+          qty: Math.min(item.qty, stock, MAX_QTY_PER_ITEM),
+          stock,
         },
       ];
     });
@@ -338,7 +352,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     (id: string) => {
       const item = items.find((i) => i.id === id);
       if (!item) return false;
-      return item.qty >= (item.stock ?? 10);
+      // (2026-09-16) item.stock canonical ومطلوب (من مخزون الكتالوج) —
+      // مفيش fallback `?? 10`.
+      return item.qty >= item.stock;
     },
     [items],
   );
