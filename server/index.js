@@ -46,6 +46,7 @@ const PORT = parseInt(process.env.PORT || "8080", 10);
 // server reproduces the same table so legacy URLs (old product IDs, deleted
 // pharma, old URL schemes) keep their SEO value with 301s instead of 404s.
 // Only internal destinations (starting with "/") are honored.
+/** @param {string} source */
 function compileRedirectSource(source) {
   const names = [];
   let out = "";
@@ -65,6 +66,7 @@ function compileRedirectSource(source) {
   return { re: new RegExp(`^${out}$`), names };
 }
 
+/** @param {string} destination @param {string[]} names @param {RegExpMatchArray} match */
 function applyRedirectDestination(destination, names, match) {
   return destination.replace(/:([A-Za-z_][A-Za-z0-9_]*)/g, (whole, name) => {
     const idx = names.indexOf(name) + 1;
@@ -72,7 +74,9 @@ function applyRedirectDestination(destination, names, match) {
   });
 }
 
+/** @type {Map<string, { destination: string, status: number }>} */
 const redirectExact = new Map();
+/** @type {Array<{ re: RegExp, names: string[], destination: string, status: number }>} */
 const redirectPatterns = [];
 try {
   const vercelConfig = JSON.parse(readFileSync(resolve(ROOT, "vercel.json"), "utf-8"));
@@ -85,10 +89,14 @@ try {
     else redirectPatterns.push({ re, names, destination: rule.destination, status });
   }
 } catch (err) {
-  console.warn("[ssr] vercel.json unreadable — legacy redirects disabled:", err.message);
+  console.warn(
+    "[ssr] vercel.json unreadable — legacy redirects disabled:",
+    err instanceof Error ? err.message : String(err),
+  );
 }
 
 // ── Pattern matching for route-to-file mapping ──
+/** @param {string} url */
 function fileForUrl(url) {
   let path = url.split("?")[0].split("#")[0];
   if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
@@ -112,12 +120,14 @@ function fileForUrl(url) {
 const STATIC_MAX_AGE = "public, max-age=31536000, immutable";
 const HTML_MAX_AGE = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400";
 
+/** @param {import("express").Response} res @param {string} policy */
 function setCache(res, policy) {
   res.setHeader("Cache-Control", policy);
   res.setHeader("CDN-Cache-Control", policy);
 }
 
 // ── Real 404 response for routes that were not generated at build time ──
+/** @param {import("express").Response} res */
 function notFoundResponse(res) {
   const notFoundPath = resolve(DIST, "404.html");
   res.status(404);
@@ -167,10 +177,12 @@ app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   res.setHeader("Origin-Agent-Cluster", "?1");
   res.setHeader("X-XSS-Protection", "0");
-  // (2026-09-16, P2 #12) نبني الـ endpoint من الأصل الفعلي اللي الطلب
-  // واصل منه (proxy-aware عبر trust proxy=1) بدل hardcode نطاق
-  // الإنتاج — النسخة self-hosted كانت بتبعت تقارير CSP الخاصة بيها
-  // لـ elysrmedical.store (trafics متبادلة + تقارير مش من نفس الأصل).
+  // (2026-09-16, P2 #12 — مراجعة 2) أولويات endpoint التقارير:
+  //   1. CSP_REPORT_ENDPOINT (صريح)  2. SITE_URL (الإنتاج)
+  //   3. origin الطلب — dev fallback بس (localhost من غير إعداد)
+  // الإنتاج مش بيعتمد على Host header: SITE_URL مضبوطة أصلاً
+  // (CORS/feeds) فالتقارير هتمشي للنطاق الرسمي حتى لو حد ضارب
+  // على الـ VPS مباشرة بـ Host تاني.
   const reportOrigin = `${req.protocol}://${req.get("host") || "localhost"}`;
   res.setHeader("Report-To", buildReportToHeader(reportOrigin));
   res.setHeader("NEL", '{"report_to":"csp","max_age":10886400}');
@@ -234,13 +246,15 @@ app.use(
 );
 
 // ── Health check ──
-app.get("/health", (req, res) => {
+// (2026-09-16) req مش مستخدمة — _-prefix (اكتشاف من الـ typecheck)
+app.get("/health", (_req, res) => {
   // 🔒 نبقي الاستجابة بأدنى قدر من المعلومات التشغيلية (لا mode/ssgReady/uptime)
   // حتى لا تكشف بنية النشر لأي شخص يستطلع الخادم.
   res.json({ status: "ok" });
 });
 
 // ── API handlers (self-hosted mode) ──
+/** @param {string} path @param {string} modPath */
 const mountApi = (path, modPath) => {
   app.use(path, async (req, res) => {
     try {
@@ -264,7 +278,8 @@ app.use("/api", (_req, res) => res.status(404).json({ error: "API route not foun
 // على Vercel يخدم `/insights/script.js` و`/speed-insights/script.js` منصة
 // Vercel نفسها (Web Analytics + Speed Insights). في النشر الذاتي لا توجد
 // المنصة، فيُخدَّم سكريبت فارغ سليم بدلاً من 404 + خطأ MIME في الـ console.
-app.get(/^\/_vercel\/(insights|speed-insights)\/script\.js$/, (req, res) => {
+// (2026-09-16) req مش مستخدمة — _-prefix للـ noUnusedParameters
+app.get(/^\/_vercel\/(insights|speed-insights)\/script\.js$/, (_req, res) => {
   res.setHeader("Content-Type", "application/javascript; charset=utf-8");
   res.setHeader("Cache-Control", "public, max-age=86400");
   res.send("// no-op: Vercel Analytics is a platform feature (unavailable self-hosted)\n");
