@@ -20,6 +20,49 @@ import { products } from "@/data/products";
 const CATALOG_STOCK_BY_ID = new Map(products.map((p) => [p.id, p.stock]));
 const catalogStock = (id: string) => CATALOG_STOCK_BY_ID.get(id);
 
+// سقف كمية الصنف الواحد في السلة (مستقل عن المخزون — عميل حقيقي ما يطلبش
+// 100 وحدة من صنف واحد، والسيرفر عنده سقف إجمالي 100 وحدة للطلب كله).
+const MAX_QTY_PER_ITEM = 99;
+
+// ── (2026-09-15) توحيد normalization عناصر السلة ──
+// كان الـ bug موجود في 4 implementations بقواعد مختلفة:
+//   hydration: 1..stock (مع ?? 10) · storage event: 1..99 من غير مخزون
+//   add: stock=0 → qty=1 (!) · setQty: stock=0 → qty=1 (!)
+// دلوقتي مصدر واحد لبيانات الـ storage الخام (localStorage/ات بين تابات):
+//   • منتج مش في الكتالوج → حذف
+//   • stock <= 0 (أو مفيش بيانات) → حذف
+//   • qty مقصورة على مخزون الكتالوج (وسقف 99)
+//   • stock من الكتالوج (هو مصدر الحقيقة)
+// exported for unit tests (التوحيد normalization — قواعد مخزون السلة)
+export function normalizeCartItem(raw: Partial<CartItem>): CartItem | null {
+  if (!raw.id || typeof raw.qty !== "number" || !raw.name || typeof raw.price !== "number") {
+    return null;
+  }
+  const stock = catalogStock(raw.id);
+  if (stock === undefined || stock <= 0) return null; // اتحذف / نافد
+  const qty = Math.max(1, Math.min(Math.floor(raw.qty), stock, MAX_QTY_PER_ITEM));
+  return {
+    id: raw.id,
+    slug: raw.slug,
+    name: raw.name,
+    price: raw.originalPrice ?? raw.price,
+    originalPrice: raw.originalPrice ?? raw.price,
+    emoji: raw.emoji ?? "💊",
+    image: raw.image,
+    qty,
+    stock,
+  };
+}
+
+export function normalizeCartItems(raws: Partial<CartItem>[]): CartItem[] {
+  const byId = new Map<string, CartItem>();
+  for (const raw of raws) {
+    const item = normalizeCartItem(raw);
+    if (item && !byId.has(item.id)) byId.set(item.id, item);
+  }
+  return [...byId.values()].slice(0, MAX_CART_ITEMS);
+}
+
 // 🔒 Safe localStorage wrapper — handles quota exceeded and private browsing gracefully
 function safeGetJson<T>(key: string, fallback: T): T {
   try {
@@ -85,34 +128,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const parsed = safeGetJson<Partial<CartItem>[]>(STORAGE_KEY, []);
-      if (parsed.length > 0) {
-        // (2026-09-15) منتجات اتحذفت من الكتالوج أو مخزونها نَفَد
-        // (معروض صفر) اتحذف من السلة بدل كميات كسولة:
-        // Math.max(1, Math.min(qty, 0)) كان بيطلّع qty=1 لمنتج نافد،
-        // وsync كان بيبقى بqty=0 — الاتنين بيترفضوا في الـ checkout
-        // برسالة مش مفهومة. الحذف الأنظف وأوضح.
-        const catalogById = new Map(products.map((p) => [p.id, p]));
-        return parsed
-          .filter((i) => i.id && typeof i.qty === "number" && i.name && i.price)
-          .slice(0, MAX_CART_ITEMS)
-          .filter((i) => {
-            const p = catalogById.get(i.id!);
-            if (!p) return false; // منتج اتحذف من الكتالوج
-            if (p.stock !== undefined && p.stock <= 0) return false; // نفد
-            return true;
-          })
-          .map((i) => ({
-            id: i.id!,
-            slug: i.slug,
-            name: i.name!,
-            price: i.originalPrice ?? i.price!,
-            originalPrice: i.originalPrice ?? i.price!,
-            emoji: i.emoji ?? "💊",
-            image: i.image,
-            qty: Math.max(1, Math.min(i.qty!, catalogStock(i.id!) ?? i.stock ?? 10)),
-            stock: catalogStock(i.id!) ?? i.stock,
-          }));
-      }
+      // توحيد normalization: النافد/المحذوف يتحذف، والكميات مقصورة
+      // بمخزون الكتالوج (نفس القواعد في كل مسارات السلة).
+      return normalizeCartItems(parsed);
     } catch (err) {
       console.warn("Failed to read cart from localStorage:", err);
     }
@@ -172,29 +190,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Sync cart across multiple tabs in real-time
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY && e.newValue) {
-        try {
-          const parsed = safeGetJson<Partial<CartItem>[]>(STORAGE_KEY, []);
-          if (parsed.length === 0) return;
-          const valid: CartItem[] = parsed
-            .filter((i) => i.id && typeof i.qty === "number" && i.name && i.price)
-            .slice(0, MAX_CART_ITEMS)
-            .map((i) => ({
-              id: i.id!,
-              slug: i.slug,
-              name: i.name!,
-              price: i.originalPrice ?? i.price!,
-              originalPrice: i.originalPrice ?? i.price!,
-              emoji: i.emoji ?? "💊",
-              qty: Math.min(99, Math.max(1, i.qty!)),
-              image: i.image,
-            }));
-          setItems(valid);
-        } catch {
-          // Ignore parsing errors from other tabs
-        }
-      } else if (e.key === STORAGE_KEY && !e.newValue) {
-        setItems([]);
+      if (e.key !== STORAGE_KEY) return;
+      // (2026-09-15) نفس قواعد التوحيد normalization — المسار القديم كان
+      // Math.min(99, ...) من غير أي فحص مخزون (qty 99 ممكنة مع stock 5!)
+      // وكان بيقفل حتى الـ stock field. بنقرأ من localStorage (المصدر
+      // الوحيد للحقيقة) عشان نستقبل "اتغيرت القيمة" و"اتمسح المفتاح"
+      // (newValue=null) مع بعض، والمسح بيتزامن (الكود القديم كان
+      // بـ return من غير مزامنة).
+      try {
+        const parsed = safeGetJson<Partial<CartItem>[]>(STORAGE_KEY, []);
+        setItems(normalizeCartItems(parsed));
+      } catch {
+        // Ignore parsing errors from other tabs
       }
     };
 
@@ -209,19 +216,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
   });
 
   const add = useCallback((p: Product, qty = 1) => {
-    // GA: add_to_cart — قبل تغيير الحالة، ورفض السلة الممتلئة مش بيحسب
-    // (2026-09-15) بنسجل الكمية المضافة **فعليًا** مش المطلوبة: لو المنتج
-    // موجود وسقف المخزون قريب، الإضافة الفعلية ممكن تكون أقل (مثال:
-    // stock 5 وcurrent 4 وqty 3 → المسجل كان 3 والفعلية 1 — distortion
-    // في أرقام GA4). لو الإضافة الفعلية 0 (السلة وصلت السقف) مفيش event.
+    // (2026-09-15) الـ context API نفسه لازم يكون صح: منتج نافد/مفيش مخزون
+    // بياناته ما ينضيفش — Math.max(1, Math.min(qty, 0)) كان بضيف بـ qty=1!
+    // (الـ UI كمان بيمنع، بس الـ API مستقل عن الـ UI لازم يكون محكم.)
+    const stock = p.stock;
+    if (stock === undefined || stock <= 0) return;
+    const safeQty = Math.max(1, Math.min(qty, stock, MAX_QTY_PER_ITEM));
+
+    // GA: add_to_cart — قبل تغيير الحالة، ورفض السلة الممتلئة مش بيحسب.
+    // بنسجل الكمية المضافة **فعليًا** مش المطلوبة: لو المنتج موجود وسقف
+    // المخزون قريب، الإضافة الفعلية ممكن تكون أقل (مثال: stock 5 وcurrent 4
+    // وqty 3 → الفعلية 1). لو الإضافة الفعلية 0 مفيش event.
     const prevItems = itemsRef.current;
     const alreadyInCart = prevItems.some((i) => i.id === p.id);
     const rejectedByCap = !alreadyInCart && prevItems.length >= MAX_CART_ITEMS;
     if (!rejectedByCap) {
-      const maxStock = p.stock ?? 10;
-      const safeQty = Math.max(1, Math.min(qty, maxStock));
       const existingQty = alreadyInCart ? (prevItems.find((i) => i.id === p.id)?.qty ?? 0) : 0;
-      const actualAdded = Math.min(safeQty, maxStock - existingQty);
+      const actualAdded = Math.min(safeQty, stock - existingQty);
       if (actualAdded > 0) {
         trackAddToCart({
           id: p.id,
@@ -235,8 +246,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (prev.length >= MAX_CART_ITEMS && !prev.find((i) => i.id === p.id)) {
         return prev;
       }
-      const maxStock = p.stock ?? 10;
-      const safeQty = Math.max(1, Math.min(qty, maxStock));
       // النظام الجديد: سعر المنتج ثابت. الخصم يُحسب على إجمالي السلة في useMemo أدناه.
       const ex = prev.find((i) => i.id === p.id);
       if (ex) {
@@ -247,7 +256,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 slug: p.slug,
                 price: p.price,
                 originalPrice: p.price,
-                qty: Math.min(i.qty + safeQty, maxStock),
+                qty: Math.min(i.qty + safeQty, stock, MAX_QTY_PER_ITEM),
               }
             : i,
         );
@@ -263,7 +272,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           emoji: p.emoji,
           image: p.image ? p.image : undefined,
           qty: safeQty,
-          stock: maxStock,
+          stock,
         },
       ];
     });
@@ -277,17 +286,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((p) => p.filter((i) => i.id !== id));
   }, []);
 
-  const setQty = useCallback(
-    (id: string, qty: number) =>
-      setItems((p) =>
-        p.map((i) =>
-          i.id === id
-            ? { ...i, qty: Math.max(1, Math.min(qty, catalogStock(id) ?? i.stock ?? 10)) }
-            : i,
-        ),
+  const setQty = useCallback((id: string, qty: number) => {
+    // (2026-09-15) نفس قواعد التوحيد: stock نَفَد/مفيش بيانات → حذف
+    // العنصر بدل ما Math.max(1, Math.min(qty, 0)) يطلّع qty=1.
+    const stock = catalogStock(id);
+    if (stock === undefined || stock <= 0) {
+      setItems((p) => p.filter((i) => i.id !== id));
+      return;
+    }
+    setItems((p) =>
+      p.map((i) =>
+        i.id === id ? { ...i, qty: Math.max(1, Math.min(qty, stock, MAX_QTY_PER_ITEM)) } : i,
       ),
-    [],
-  );
+    );
+  }, []);
 
   const syncCatalog = useCallback((catalog: Product[]) => {
     if (!catalog.length) return;
