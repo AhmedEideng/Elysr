@@ -27,9 +27,11 @@ const RATE_LIMIT_MAX_REPORTS = 30;
 const MEMORY_CLEANUP_INTERVAL_MS = 5 * 60_000;
 const MAX_BODY_BYTES = 32_000;
 
+/** @type {Map<string, { start: number, count: number }>} */
 const rateLimitMap = new Map();
 let lastCleanup = Date.now();
 
+/** @param {string} ip */
 function hashIp(ip) {
   return createHash("sha256").update(String(ip)).digest("hex").slice(0, 16);
 }
@@ -43,6 +45,7 @@ function cleanupMemory() {
   }
 }
 
+/** @param {string} key */
 function checkRateLimit(key) {
   cleanupMemory();
   const now = Date.now();
@@ -58,6 +61,7 @@ function checkRateLimit(key) {
 
 // 🔒 Sanitization ضد Log Injection + truncation لمنع حشر سجلات ضخمة.
 // القيم كلها من المتصفح — حتى لو "بنية داخلية" بنعتبرها معادية.
+/** @param {unknown} value @param {number} max */
 function cleanStr(value, max) {
   return String(value ?? "")
     .replace(/[\u0000-\u001f\u007f]/g, " ")
@@ -68,6 +72,10 @@ function cleanStr(value, max) {
 
 const ALLOWED_ORIGINS = new Set(["https://elysrmedical.store", "https://www.elysrmedical.store"]);
 
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ */
 export default async function handler(req, res) {
   const origin = req.headers.origin;
   const allowedOrigin =
@@ -83,10 +91,14 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
   // IP موثوق: x-vercel-ip (Vercel) ثم آخر قيمة XFF (self-hosted)
+  // (2026-09-16) XFF نوعه string | string[] حسب الـ proxy — نتعامل مع
+  // الحالتين بدل افتراض string (اكتشاف من الـ typecheck الجديد).
   const vercelIp = req.headers["x-vercel-ip"];
+  const xff = req.headers["x-forwarded-for"];
+  const xffString = Array.isArray(xff) ? xff.join(",") : xff;
   const clientIp =
     (typeof vercelIp === "string" && vercelIp.trim()) ||
-    req.headers["x-forwarded-for"]
+    xffString
       ?.split(",")
       .map((p) => p.trim())
       .filter(Boolean)
@@ -130,7 +142,7 @@ export default async function handler(req, res) {
       connectionType: cleanStr(browser.connectionType, 20),
       deviceMemory: cleanStr(browser.deviceMemory, 20),
       breadcrumbs: Array.isArray(body.breadcrumbs)
-        ? body.breadcrumbs.slice(-10).map((b) => ({
+        ? /** @type {Array<Record<string, unknown>>} */ (body.breadcrumbs).slice(-10).map((b) => ({
             type: cleanStr(b?.type, 20),
             message: cleanStr(b?.message, 200),
             data:
@@ -153,7 +165,8 @@ export default async function handler(req, res) {
     console.error("[frontend-error]", JSON.stringify(report));
     return res.status(200).json({ ok: true });
   } catch (err) {
-    console.error("[errors] parse error:", err.message);
+    // (2026-09-16) catch variables are unknown under strict — narrow before use
+    console.error("[errors] parse error:", err instanceof Error ? err.message : String(err));
     return res.status(400).end();
   }
 }

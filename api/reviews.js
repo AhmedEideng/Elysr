@@ -30,12 +30,13 @@ const PRODUCTS_DB_PATH = join(__dirname, "lib", "products-db.json");
 // معرفات المنتجات المعتمدة — للتحقق قبل أي اتصال بـ Sheets أو كاش
 // (يمنع استخدام الـ endpoint لضخ معرِّفات عشوائية تملأ الكاش
 // وتستهلك حصة Apps Script بلا فائدة)
+/** @type {Set<string> | null} */
 let knownProductIds = null;
 function knownProducts() {
   if (!knownProductIds) {
     try {
       const db = JSON.parse(readFileSync(PRODUCTS_DB_PATH, "utf-8"));
-      knownProductIds = new Set(db.map((p) => p.id));
+      knownProductIds = new Set(/** @type {Array<{ id: string }>} */ (db).map((p) => p.id));
     } catch {
       knownProductIds = new Set();
     }
@@ -60,9 +61,13 @@ const FETCH_TIMEOUT_MS = 6_000;
 const CACHE_TTL_MS = 5 * 60_000; // كاش ذاكرة لكل عملية: يحمي حصة Apps Script
 const MAX_REVIEWS = 20;
 
-// مخزن ذاكرة مؤقتة: productId → { at, reviews }
+/**
+ * مخزن ذاكرة مؤقتة: productId → { at, reviews }
+ * @type {Map<string, { at: number, reviews: Array<{ name: string, rating: number, date: string, text: string, verified: boolean }> }>}
+ */
 const cache = new Map();
 
+/** @param {number} now */
 function cleanCache(now) {
   if (cache.size > 500) cache.clear(); // سقف أمان
   for (const [key, entry] of cache) {
@@ -72,6 +77,7 @@ function cleanCache(now) {
 
 const rateLimiter = createRateLimiter({ ...RATE_LIMIT, prefix: "reviews-read" });
 
+/** @param {import("express").Request} req */
 function getClientIp(req) {
   // 🛡️ IP موثوق: Vercel بيبعت x-vercel-ip (IP العميل الحقيقي من الـ edge —
   // مش قابل للتزوير من الـ client). في self-hosted: آخر قيمة في
@@ -89,7 +95,10 @@ function getClientIp(req) {
   return req.socket?.remoteAddress || "unknown";
 }
 
-/** تطبيع المراجعة القادمة من Apps Script — يرفض أي شكل غير متوقع */
+/**
+ * تطبيع المراجعة القادمة من Apps Script — يرفض أي شكل غير متوقع
+ * @param {Record<string, unknown> | null | undefined} raw
+ */
 function normalizeReview(raw) {
   if (!raw || typeof raw !== "object") return null;
   const rating = Number(raw.rating);
@@ -105,6 +114,7 @@ function normalizeReview(raw) {
   };
 }
 
+/** @param {string} productId */
 export async function fetchApprovedReviews(productId) {
   const now = Date.now();
   cleanCache(now);
@@ -123,6 +133,7 @@ export async function fetchApprovedReviews(productId) {
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  /** @type {Array<{ name: string, rating: number, date: string, text: string, verified: boolean }>} */
   let reviews = [];
   try {
     // توقيع HMAC قصير العمر: (ts, nonce, sig) — السر نفسه لا يُرسل
@@ -161,7 +172,7 @@ export async function fetchApprovedReviews(productId) {
       } else {
         const data = await response.json();
         if (data && Array.isArray(data.reviews)) {
-          reviews = data.reviews
+          reviews = /** @type {Array<Record<string, unknown> | null>} */ (data.reviews)
             .map((r) => normalizeReview(r))
             .filter((r) => r !== null)
             .slice(0, MAX_REVIEWS);
@@ -179,6 +190,10 @@ export async function fetchApprovedReviews(productId) {
   return reviews;
 }
 
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ */
 export default async function handler(req, res) {
   const origin = req.headers.origin;
   const corsOrigin = origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://elysrmedical.store";

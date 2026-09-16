@@ -23,13 +23,16 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PRODUCTS_DB_PATH = join(__dirname, "lib", "products-db.json");
 
 // مخزن ذاكرة مؤقتة لتسريع الأداء وتجنب القراءة المتكررة من القرص الصلب
+/** @type {Array<Record<string, any>> | null} */
 let cachedProductsDb = null;
 
+/** @returns {Array<Record<string, any>>} */
 function getProductsDb() {
   if (cachedProductsDb) return cachedProductsDb;
   try {
-    cachedProductsDb = JSON.parse(readFileSync(PRODUCTS_DB_PATH, "utf-8"));
-    return cachedProductsDb;
+    const parsed = JSON.parse(readFileSync(PRODUCTS_DB_PATH, "utf-8"));
+    cachedProductsDb = parsed;
+    return parsed;
   } catch (err) {
     console.error("Failed to load products-db.json:", err);
     return [];
@@ -66,6 +69,7 @@ const rateLimiter = createRateLimiter({
   prefix: "submit-review",
 });
 
+/** @param {import("express").Request} req */
 function getClientIp(req) {
   // 🛡️ IP موثوق: Vercel بيبعت x-vercel-ip (IP العميل الحقيقي من الـ edge —
   // مش قابل للتزوير من الـ client). في self-hosted: آخر قيمة في
@@ -83,6 +87,7 @@ function getClientIp(req) {
   return req.socket?.remoteAddress || "unknown";
 }
 
+/** @param {import("express").Request} req */
 function getRequestOrigin(req) {
   const origin = req.headers.origin;
   if (typeof origin === "string" && origin) return origin;
@@ -97,6 +102,7 @@ function getRequestOrigin(req) {
   return undefined;
 }
 
+/** @param {import("express").Request} req */
 function isAllowedOrigin(req) {
   const origin = getRequestOrigin(req);
   if (origin && ALLOWED_ORIGINS.has(origin)) return true;
@@ -110,6 +116,7 @@ function isAllowedOrigin(req) {
   );
 }
 
+/** @param {import("express").Request} req */
 function readPayload(req) {
   const contentLength = parseInt(req.headers["content-length"] || "0", 10);
   if (contentLength > MAX_BODY_SIZE_BYTES) throw new Error("Payload too large");
@@ -122,6 +129,7 @@ function readPayload(req) {
 
 /**
  * التحقق الصارم من payload المراجعة — تُصدَّر للاختبار.
+ * @param {Record<string, any> | null} payload
  * @returns {string | undefined} رسالة الخطأ أو undefined إذا كان صالحاً.
  */
 export function validateReviewPayload(payload) {
@@ -176,6 +184,10 @@ export function validateReviewPayload(payload) {
   return undefined;
 }
 
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ */
 export default async function handler(req, res) {
   const origin = req.headers.origin;
   const corsOrigin = origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://elysrmedical.store";
@@ -199,12 +211,16 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: "Too many requests" });
   }
 
-  let payload;
+  /** @type {Record<string, any> | null} */
+  let payload = null;
   try {
     payload = readPayload(req);
   } catch {
     return res.status(400).json({ error: "Invalid JSON payload" });
   }
+  // (2026-09-16) تحوط إضافي + تضييق النوع بعد الـ try/catch (نفس نمط
+  // submit-order) — نفس رسالة validateReviewPayload(null) = سلوك موحد.
+  if (!payload) return res.status(400).json({ error: "Invalid payload" });
 
   const payloadError = validateReviewPayload(payload);
   if (payloadError) return res.status(400).json({ error: payloadError });
@@ -226,6 +242,12 @@ export default async function handler(req, res) {
 
   // 🔒 اسم المنتج من الـ catalog المعتمد — لا نمرر أي اسم من العميل
   const product = getProductsDb().find((p) => p && p.id === payload.productId.trim());
+  // (2026-09-16) defense-in-depth (اكتشاف من الـ typecheck): validateReviewPayload
+  // بيأكد وجود المنتج، بس إعادة التحقق هنا أرخص من أي crash — وكمان بيضيّق
+  // النوع. (لا يتغير سلوك أي طلب صالح: المنتج كان متحقق منه أصلاً.)
+  if (!product) {
+    return res.status(400).json({ error: "Product not found in official catalog" });
+  }
   const { createHash } = await import("node:crypto");
   const hashedIp =
     clientIp !== "unknown"

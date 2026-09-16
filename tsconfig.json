@@ -1,11 +1,29 @@
 {
-  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "eslint.config.js"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "vite.config.ts",
+    "eslint.config.js",
+    "api/**/*.js",
+    "server/**/*.js"
+  ],
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
+
+    /* Backend (api/ + server/) تحت الـ typecheck — 2026-09-16 (P1 #17)
+       الخطوة الأولى: فحص الكود الحالي (checkJs) قبل التحويل التدريجي
+       .js → .ts. ملاحظات:
+       - ملفات الـ .d.ts القديمة (api/*.d.ts) اتشالت لأنها كانت بتكبت
+         الفحص (TS بيستخدمها بدل ما يفحص الـ .js) والـ allowJs بيدي
+         الاختبارات أنواع مستنتجة من الكود نفسه.
+       - نضيف أنواع جوه الكود (JSDoc/تصريحات) مش @ts-ignore — الهدف
+         إن TS يكشف مشاكل حقيقية مش يتجاهل. */
+    "allowJs": true,
+    "checkJs": true,
 
     /* Bundler mode */
     "moduleResolution": "Bundler",

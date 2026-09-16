@@ -8,10 +8,12 @@
 
 import { createHash } from "node:crypto";
 
+/** @type {Map<string, { start: number, count: number }>} */
 const memoryStore = new Map();
 const MEMORY_CLEANUP_INTERVAL_MS = 5 * 60_000;
 let lastMemoryCleanup = Date.now();
 
+/** @param {number} now @param {number} maxAge */
 function cleanupMemory(now, maxAge) {
   if (now - lastMemoryCleanup < MEMORY_CLEANUP_INTERVAL_MS) return;
   lastMemoryCleanup = now;
@@ -20,6 +22,7 @@ function cleanupMemory(now, maxAge) {
   }
 }
 
+/** @param {string} prefix @param {string} identifier */
 function hashKey(prefix, identifier) {
   const hash = createHash("sha256").update(String(identifier)).digest("hex").slice(0, 16);
   return `${prefix}:${hash}`;

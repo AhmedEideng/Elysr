@@ -135,8 +135,14 @@ describe("submit-order payload validation", () => {
     expect(payload.governorate).toBe("القاهرة");
   });
 
+  // (2026-09-16) validateOrderPayload is defensively typed for the expected
+  // shape, but its whole job is to REJECT malformed runtime input (raw
+  // JSON). So we deliberately pass non-conforming values via a cast — this
+  // is the contract under test, not a type error.
   it.each([null, [], "text", 42])("rejects null, arrays and JSON primitives: %p", (payload) => {
-    expect(validateOrderPayload(payload)).toBe("Invalid payload");
+    expect(validateOrderPayload(payload as unknown as Record<string, unknown> | null)).toBe(
+      "Invalid payload",
+    );
   });
 
   it("rejects fractional quantities", () => {

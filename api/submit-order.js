@@ -14,6 +14,7 @@ const BUNDLES_DB_PATH = join(__dirname, "lib", "bundles-db.json");
 // بـ 500 configuration بدل fallback صامت لقيمة ممكن تكون قديمة —
 // fallback صامت = الفرونت يعرض نسبة جديدة والسيرفر يحسب قديمة
 // = drift صامت في أسعار الخصم.
+/** @returns {number} */
 function getBundleDiscountRate() {
   const configDb = getConfigDb();
   if (typeof configDb.BUNDLE_DISCOUNT_RATE === "number") {
@@ -25,16 +26,30 @@ function getBundleDiscountRate() {
 }
 
 // مخازن ذاكرة مؤقتة (In-memory Caching) لتسريع أداء السيرفر السحابي وتجنب القراءة المتكررة من القرص الصلب
+/**
+ * @typedef {{
+ *   GOVERNORATE_SHIPPING: Array<{ name: string, shipping: number }>,
+ *   FREE_SHIPPING_THRESHOLD: number,
+ *   PROMO_TIERS: Array<{ threshold: number, discount: number }>,
+ *   BUNDLE_DISCOUNT_RATE?: number
+ * }} ConfigDb
+ */
+
+/** @type {Array<Record<string, any>> | null} */
 let cachedProductsDb = null;
+/** @type {ConfigDb | null} */
 let cachedConfigDb = null;
+/** @type {Record<string, string[]> | null} */
 let cachedBundlesDb = null;
 
 // جلب كتالوج المنتجات المعتمد المولد تلقائياً وقت البناء للتحقق الخلفي (Server-side Price Lookup)
+/** @returns {Array<Record<string, any>>} */
 function getProductsDb() {
   if (cachedProductsDb) return cachedProductsDb;
   try {
-    cachedProductsDb = JSON.parse(readFileSync(PRODUCTS_DB_PATH, "utf-8"));
-    return cachedProductsDb;
+    const parsed = JSON.parse(readFileSync(PRODUCTS_DB_PATH, "utf-8"));
+    cachedProductsDb = parsed;
+    return parsed;
   } catch (err) {
     console.error("Failed to load products-db.json:", err);
     return [];
@@ -43,11 +58,13 @@ function getProductsDb() {
 
 // جلب خريطة الباقات المعتمدة (مولّدة وقت البناء من نفس محرك cross-sell)
 // للتحقق الخلفي من خصم الباقة — لا نثق بقيمة العميل إطلاقاً.
+/** @returns {Record<string, string[]>} */
 function getBundlesDb() {
   if (cachedBundlesDb) return cachedBundlesDb;
   try {
-    cachedBundlesDb = JSON.parse(readFileSync(BUNDLES_DB_PATH, "utf-8"));
-    return cachedBundlesDb;
+    const parsed = JSON.parse(readFileSync(BUNDLES_DB_PATH, "utf-8"));
+    cachedBundlesDb = parsed;
+    return parsed;
   } catch (err) {
     // بدون خريطة باكات لا يوجد خصم باقة ممكن (fail-closed): الأمان قبل التوفير.
     console.error("Failed to load bundles-db.json:", err);
@@ -56,11 +73,13 @@ function getBundlesDb() {
 }
 
 // جلب إعدادات الشحن والعروض الترويجية المشتركة (Single Source of Truth) لمنع أي تضارب بين الفرونت والباك
+/** @returns {ConfigDb} */
 function getConfigDb() {
   if (cachedConfigDb) return cachedConfigDb;
   try {
-    cachedConfigDb = JSON.parse(readFileSync(CONFIG_DB_PATH, "utf-8"));
-    return cachedConfigDb;
+    const parsed = JSON.parse(readFileSync(CONFIG_DB_PATH, "utf-8"));
+    cachedConfigDb = parsed;
+    return parsed;
   } catch (err) {
     console.error("Failed to load config-db.json, using safe fallbacks:", err);
     return {
@@ -97,6 +116,7 @@ const rateLimiter = createRateLimiter({
   prefix: "submit-order",
 });
 
+/** @param {import("express").Request} req */
 function getClientIp(req) {
   // 🛡️ IP موثوق: Vercel بيبعت x-vercel-ip (IP العميل الحقيقي من الـ edge —
   // مش قابل للتزوير من الـ client). في self-hosted: آخر قيمة في
@@ -114,6 +134,7 @@ function getClientIp(req) {
   return req.socket?.remoteAddress || "unknown";
 }
 
+/** @param {import("express").Request} req */
 function getRequestOrigin(req) {
   const origin = req.headers.origin;
   if (typeof origin === "string" && origin) return origin;
@@ -128,6 +149,7 @@ function getRequestOrigin(req) {
   return undefined;
 }
 
+/** @param {import("express").Request} req */
 function isAllowedOrigin(req) {
   const origin = getRequestOrigin(req);
   if (origin && ALLOWED_ORIGINS.has(origin)) return true;
@@ -141,6 +163,7 @@ function isAllowedOrigin(req) {
   );
 }
 
+/** @param {import("express").Request} req */
 function readPayload(req) {
   const contentLength = parseInt(req.headers["content-length"] || "0", 10);
   if (contentLength > MAX_BODY_SIZE_BYTES) throw new Error("Payload too large");
@@ -151,10 +174,12 @@ function readPayload(req) {
   return req.body === undefined ? {} : req.body;
 }
 
+/** @param {unknown} value @param {number} maxLength */
 function isNonEmptyString(value, maxLength) {
   return typeof value === "string" && value.trim().length > 0 && value.length <= maxLength;
 }
 
+/** @param {string} governorate @param {number} [subtotal] */
 export function getShippingCost(governorate, subtotal = 0) {
   const config = getConfigDb();
   if (subtotal >= config.FREE_SHIPPING_THRESHOLD) return 0; // شحن مجاني عند تخطي الحد الأدنى
@@ -168,6 +193,7 @@ function isPromotionEnabled() {
   return true;
 }
 
+/** @param {number} subtotal */
 function calcDiscount(subtotal) {
   if (!isPromotionEnabled()) return 0;
   const config = getConfigDb();
@@ -180,13 +206,16 @@ function calcDiscount(subtotal) {
 // 🎁 إعادة حساب خصم الباقة من الكتالوج الرسمي (نفس خوارزمية الفرونت):
 // كل باقة = منتج رئيسي + مقترحاته؛ تكتمل إذا وُجد كل أعضائها بكمية ≥ 1.
 // يُعتمد أفضل باقة واحدة فقط (الأعلى قيمة) — حتمي ومحصّن ضد التلاعب.
+/** @param {Array<{ id: string, qty: number }>} items */
 function calcBundleDiscount(items) {
   const bundlesDb = getBundlesDb();
   const productsDb = getProductsDb();
   const qtyById = new Map(items.map((item) => [item.id, item.qty]));
   const bundleRate = getBundleDiscountRate();
   let best = 0;
-  for (const [mainId, memberIds] of Object.entries(bundlesDb)) {
+  // (2026-09-16) mainId مش مستخدمة (اكتشاف من الـ typecheck) — مُسماة بـ
+  // underscore prefix عشان تبقى الـ noUnusedLocals سعيدة
+  for (const [_mainId, memberIds] of Object.entries(bundlesDb)) {
     if (!memberIds.every((id) => (qtyById.get(id) ?? 0) >= 1)) continue;
     const unitSum = memberIds.reduce((sum, id) => {
       const official = productsDb.find((p) => p.id === id);
@@ -199,6 +228,7 @@ function calcBundleDiscount(items) {
 }
 
 // 🔒 دالة التحقق الأمني والرياضي الصارم من سلامة الأسعار ومحتويات الطلب
+/** @param {Record<string, any> | null | undefined} payload */
 export function validateOrderPayload(payload) {
   // JSON primitives, null and arrays are never valid order objects.
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
@@ -252,6 +282,7 @@ export function validateOrderPayload(payload) {
   // 🔒 تجميع الكميات لكل منتج (إصلاح 2026-09-15): فحص المخزون كان per-line
   // فيمكن تجاوز المخزون بسطرين من نفس المنتج (5000 + 5000 على stock 5000).
   // السلة الحقيقية لا تنتج سطوراً مكررة — أي تكرار = طلب مشبوه نرفضه فوراً.
+  /** @type {Map<string, number>} */
   const qtyByProduct = new Map();
   for (const item of payload.items) {
     if (!item || typeof item !== "object" || Array.isArray(item)) return "Invalid item structure";
@@ -290,7 +321,10 @@ export function validateOrderPayload(payload) {
   // 🔒 فحص المخزون على الإجمالي المجمّع لكل منتج (بعد منع التكرار أعلاه)
   for (const [productId, totalQty] of qtyByProduct) {
     const officialProduct = productsDb.find((p) => p.id === productId);
-    if (totalQty > officialProduct.stock) {
+    // (2026-09-16) guard صريح (اكتشاف من الـ typecheck): المنتج كان بيتأكد
+    // وجوده في الحلقة اللي فوق، بس الـ defense-in-depth هنا أرخص من أي
+    // crash مستقبلي لو اتعدل الترتيب.
+    if (!officialProduct || totalQty > officialProduct.stock) {
       return `Quantity exceeds stock for product: ${productId}`;
     }
   }
@@ -344,11 +378,16 @@ export function validateOrderPayload(payload) {
   return undefined;
 }
 
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ */
 export default async function handler(req, res) {
   const requestOrigin = getRequestOrigin(req);
-  const corsOrigin = ALLOWED_ORIGINS.has(requestOrigin)
-    ? requestOrigin
-    : "https://elysrmedical.store";
+  const corsOrigin =
+    requestOrigin && ALLOWED_ORIGINS.has(requestOrigin)
+      ? requestOrigin
+      : "https://elysrmedical.store";
 
   res.setHeader("Access-Control-Allow-Origin", corsOrigin);
   res.setHeader("Vary", "Origin");
@@ -364,12 +403,17 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: "Rate limit exceeded" });
   }
 
-  let payload;
+  /** @type {Record<string, any> | null} */
+  let payload = null;
   try {
     payload = readPayload(req);
   } catch {
     return res.status(400).json({ error: "Invalid JSON payload" });
   }
+  // (2026-09-16) readPayload ممكن يرجع null (body null من العميل) —
+  // الـ guard ده تحوط إضافي + يضيّق النوع بعد الـ try/catch (CFA ما
+  // يتتبعش عبره). نفس رسالة validateOrderPayload(null) = سلوك موحد.
+  if (!payload) return res.status(400).json({ error: "Invalid payload" });
 
   // 🔒 الأمان عبر CORS + Origin checking + Rate Limiting + Payload Validation
   // لم نعد نستخدم HMAC CSRF token بمفتاح مكشوف في الـ client bundle
@@ -379,7 +423,10 @@ export default async function handler(req, res) {
   } catch (err) {
     // (2026-09-15) فشل configuration (config-db تالف) = 500 صريحة بدل
     // throw غير معالج — fail-closed واضح للسيرفر بدل 500 عامي من المنصة.
-    console.error("Order validation configuration error:", err.message);
+    console.error(
+      "Order validation configuration error:",
+      err instanceof Error ? err.message : String(err),
+    );
     return res.status(500).json({ error: "Server configuration error" });
   }
   if (payloadError) return res.status(400).json({ error: payloadError });
@@ -422,6 +469,7 @@ export default async function handler(req, res) {
     "total",
     "promoApplied",
   ]);
+  /** @type {Record<string, unknown>} */
   const safePayload = {};
   for (const key of ALLOWED_ORDER_FIELDS) {
     if (payload[key] !== undefined) safePayload[key] = payload[key];

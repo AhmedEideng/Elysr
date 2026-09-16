@@ -15,11 +15,13 @@
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REPORTS = 50;
 const MEMORY_CLEANUP_INTERVAL_MS = 5 * 60_000; // كل 5 دقائق
+/** @type {Map<string, { start: number, count: number }>} */
 const rateLimitMap = new Map();
 let lastCleanup = Date.now();
 
 // Use hashed IP like submit-order to avoid storing raw IPs in memory
 import { createHash } from "node:crypto";
+/** @param {string} ip */
 function hashIp(ip) {
   return createHash("sha256").update(String(ip)).digest("hex").slice(0, 16);
 }
@@ -35,6 +37,7 @@ function cleanupMemory() {
   }
 }
 
+/** @param {string} key */
 function checkRateLimit(key) {
   cleanupMemory();
   const now = Date.now();
@@ -50,6 +53,10 @@ function checkRateLimit(key) {
 
 const ALLOWED_ORIGINS = new Set(["https://elysrmedical.store", "https://www.elysrmedical.store"]);
 
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ */
 export default async function handler(req, res) {
   const origin = req.headers.origin;
   const allowedOrigin =
@@ -65,10 +72,14 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
   // IP موثوق: x-vercel-ip (Vercel) ثم آخر قيمة XFF (self-hosted)
+  // (2026-09-16) XFF نوعه string | string[] حسب الـ proxy — نتعامل مع
+  // الحالتين بدل افتراض string (اكتشاف من الـ typecheck الجديد).
   const vercelIp = req.headers["x-vercel-ip"];
+  const xff = req.headers["x-forwarded-for"];
+  const xffString = Array.isArray(xff) ? xff.join(",") : xff;
   const clientIp =
     (typeof vercelIp === "string" && vercelIp.trim()) ||
-    req.headers["x-forwarded-for"]
+    xffString
       ?.split(",")
       .map((p) => p.trim())
       .filter(Boolean)
@@ -93,6 +104,7 @@ export default async function handler(req, res) {
     }
     // 🔒 ساسنة الحقول قبل التسجيل — هذه القيم قادمة من المتصفح (قد يزوّرها مهاجم)
     // لمنع Log Injection (حقن سطور/رموز تحكم في السجلات).
+    /** @param {unknown} s */
     const sanitize = (s) =>
       String(s ?? "")
         .replace(/[\r\n\t\0]/g, " ")
@@ -120,7 +132,8 @@ export default async function handler(req, res) {
 
     return res.status(200).end();
   } catch (err) {
-    console.error("[csp-report] parse error:", err.message);
+    // (2026-09-16) catch variables are unknown under strict — narrow before use
+    console.error("[csp-report] parse error:", err instanceof Error ? err.message : String(err));
     return res.status(400).end();
   }
 }
