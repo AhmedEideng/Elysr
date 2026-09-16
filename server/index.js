@@ -29,6 +29,10 @@ import compression from "compression";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+// (2026-09-16, P2 #12/#13) CSP و Report-To من مصدر واحد —
+// vercel.json نسخة منه والـ parity check (verify-security-headers.mjs)
+// بتضمن إن الاتنين ما يتفرقوش.
+import { CSP_POLICY, buildReportToHeader } from "../config/security-headers.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
@@ -163,10 +167,12 @@ app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   res.setHeader("Origin-Agent-Cluster", "?1");
   res.setHeader("X-XSS-Protection", "0");
-  res.setHeader(
-    "Report-To",
-    '{"group":"csp","max_age":10886400,"endpoints":[{"url":"https://elysrmedical.store/api/csp-report"}]}',
-  );
+  // (2026-09-16, P2 #12) نبني الـ endpoint من الأصل الفعلي اللي الطلب
+  // واصل منه (proxy-aware عبر trust proxy=1) بدل hardcode نطاق
+  // الإنتاج — النسخة self-hosted كانت بتبعت تقارير CSP الخاصة بيها
+  // لـ elysrmedical.store (trafics متبادلة + تقارير مش من نفس الأصل).
+  const reportOrigin = `${req.protocol}://${req.get("host") || "localhost"}`;
+  res.setHeader("Report-To", buildReportToHeader(reportOrigin));
   res.setHeader("NEL", '{"report_to":"csp","max_age":10886400}');
   // API routes should not be indexed
   if (req.path.startsWith("/api/")) {
@@ -174,28 +180,10 @@ app.use((req, res, next) => {
     res.setHeader("Cache-Control", "no-store");
   }
 
-  // Enterprise-grade strict Content Security Policy matching vercel.json exactly
-  res.setHeader(
-    "Content-Security-Policy",
-    [
-      "default-src 'self'",
-      "script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com",
-      "script-src-attr 'none'",
-      "style-src 'self' 'unsafe-inline'",
-      "font-src 'self' data:",
-      "img-src 'self' data: blob:",
-      "connect-src 'self' https://script.google.com https://script.googleusercontent.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com",
-      "worker-src 'self'",
-      "frame-ancestors 'self'",
-      "form-action 'self'",
-      "base-uri 'self'",
-      "object-src 'none'",
-      "manifest-src 'self'",
-      "media-src 'self'",
-      "upgrade-insecure-requests",
-      "report-uri /api/csp-report",
-    ].join("; "),
-  );
+  // (2026-09-16, P2 #13) CSP من مصدر واحد: config/security-headers.mjs.
+  // النسخة القديمة كانت مصفوفة مكررة هنا وفي vercel.json (خطر drift) —
+  // دلوقتي vercel.json نسخة ومن الـ parity check نفسه.
+  res.setHeader("Content-Security-Policy", CSP_POLICY);
 
   next();
 });
