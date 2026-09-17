@@ -18,10 +18,12 @@ import { render, act } from "@testing-library/react";
 import { useCart } from "@/hooks/use-cart";
 import {
   CartProvider,
+  CATALOG_BY_ID,
   normalizeCartItem,
   normalizeCartItems,
   type CartCtx,
   type CartItem,
+  type CatalogById,
 } from "@/contexts/cart";
 import { products } from "@/data/products";
 import type { Product } from "@/data/product-types";
@@ -59,45 +61,59 @@ const outOfStockProduct = { ...inStockProduct, id: "test-oos", stock: 0 } as Pro
 
 describe("normalizeCartItem — the single stock rule", () => {
   it("caps qty at min(catalog stock, 99)", () => {
-    const item = normalizeCartItem({
-      id: inStockProduct.id,
-      name: inStockProduct.name,
-      price: inStockProduct.price,
-      emoji: "💊",
-      qty: 9999,
-    });
+    const item = normalizeCartItem(
+      {
+        id: inStockProduct.id,
+        name: inStockProduct.name,
+        price: inStockProduct.price,
+        emoji: "💊",
+        qty: 9999,
+      },
+      CATALOG_BY_ID,
+    );
     expect(item).not.toBeNull();
     expect(item!.qty).toBe(Math.min(inStockProduct.stock, 99));
     expect(item!.stock).toBe(inStockProduct.stock);
   });
 
   it("keeps qty when it is within stock", () => {
-    const item = normalizeCartItem({
-      id: inStockProduct.id,
-      name: inStockProduct.name,
-      price: inStockProduct.price,
-      emoji: "💊",
-      qty: 2,
-    });
+    const item = normalizeCartItem(
+      {
+        id: inStockProduct.id,
+        name: inStockProduct.name,
+        price: inStockProduct.price,
+        emoji: "💊",
+        qty: 2,
+      },
+      CATALOG_BY_ID,
+    );
     expect(item!.qty).toBe(2);
   });
 
   it("drops products that are no longer in the catalog (deleted products)", () => {
     expect(
-      normalizeCartItem({ id: "no-such-id", name: "x", price: 1, emoji: "💊", qty: 1 }),
+      normalizeCartItem(
+        { id: "no-such-id", name: "x", price: 1, emoji: "💊", qty: 1 },
+        CATALOG_BY_ID,
+      ),
     ).toBeNull();
   });
 
   it("rejects malformed raw entries", () => {
-    expect(normalizeCartItem({ name: "x", price: 1, qty: 1, emoji: "💊" })).toBeNull();
     expect(
-      normalizeCartItem({
-        id: inStockProduct.id,
-        name: "x",
-        price: 1,
-        qty: "2" as unknown as number,
-        emoji: "💊",
-      }),
+      normalizeCartItem({ name: "x", price: 1, qty: 1, emoji: "💊" }, CATALOG_BY_ID),
+    ).toBeNull();
+    expect(
+      normalizeCartItem(
+        {
+          id: inStockProduct.id,
+          name: "x",
+          price: 1,
+          qty: "2" as unknown as number,
+          emoji: "💊",
+        },
+        CATALOG_BY_ID,
+      ),
     ).toBeNull();
   });
 
@@ -105,16 +121,19 @@ describe("normalizeCartItem — the single stock rule", () => {
   // localStorage entry (fake name/price/slug/emoji/image) must come
   // back with the CATALOG values — the storage copy is never rendered.
   it("ignores tampered name/price/slug/emoji/image and uses catalog data", () => {
-    const item = normalizeCartItem({
-      id: inStockProduct.id,
-      slug: "totally-fake-slug",
-      name: "اسم مزيف",
-      price: 1,
-      originalPrice: 1,
-      emoji: "🎩",
-      image: "/images/fake.webp",
-      qty: 2,
-    });
+    const item = normalizeCartItem(
+      {
+        id: inStockProduct.id,
+        slug: "totally-fake-slug",
+        name: "اسم مزيف",
+        price: 1,
+        originalPrice: 1,
+        emoji: "🎩",
+        image: "/images/fake.webp",
+        qty: 2,
+      },
+      CATALOG_BY_ID,
+    );
     expect(item).not.toBeNull();
     expect(item!.name).toBe(inStockProduct.name);
     expect(item!.price).toBe(inStockProduct.price);
@@ -159,10 +178,64 @@ describe("normalizeCartItems — dedupe + cap", () => {
     for (let i = 0; i < 60; i++) {
       raws.push({ ...base, id: products[i % products.length].id });
     }
-    const items = normalizeCartItems(raws);
+    const items = normalizeCartItems(raws, CATALOG_BY_ID);
     expect(items.filter((i) => i.id === p.id)).toHaveLength(1);
     expect(items.find((i) => i.id === p.id)!.qty).toBe(3);
     expect(items.length).toBeLessThanOrEqual(50);
+  });
+});
+
+// (2026-09-17) Catalog-driven normalization — the normalizer takes the
+// catalog as an explicit dependency (no hidden module state). The exact
+// divergence scenario: static catalog says 5000, a "remote" catalog
+// says 3 → the remote value wins for every path that passes it.
+describe("catalog-driven normalizer (divergence scenario)", () => {
+  const p = inStockProduct;
+  const remoteCatalog = (stock: number): CatalogById =>
+    new Map(CATALOG_BY_ID).set(p.id, { ...p, stock });
+
+  beforeEach(() => {
+    localStorage.clear();
+    cartHolder.current = null;
+  });
+
+  it("same entry + different catalogs → different results (remote stock wins)", () => {
+    const raw = { id: p.id, qty: 5 };
+    expect(normalizeCartItem(raw, CATALOG_BY_ID)!.stock).toBe(p.stock); // static (5000)
+    const fromRemote = normalizeCartItem(raw, remoteCatalog(3));
+    expect(fromRemote!.stock).toBe(3);
+    expect(fromRemote!.qty).toBe(3); // capped by the remote stock
+    // out of stock in the remote catalog → dropped
+    expect(normalizeCartItem(raw, remoteCatalog(0))).toBeNull();
+  });
+
+  it("syncCatalog applies the remote catalog through the SAME implementation", () => {
+    renderCart();
+    act(() => fresh().add(p, 5));
+    expect(fresh().items[0].qty).toBe(5);
+    expect(fresh().items[0].stock).toBe(p.stock); // static (5000)
+
+    // remote catalog with stock 2 → item re-normalized with it
+    act(() => fresh().syncCatalog([{ ...p, stock: 2 }]));
+    expect(fresh().items[0].qty).toBe(2); // capped to remote stock
+    expect(fresh().items[0].stock).toBe(2);
+  });
+
+  it("setQty caps at the item's SYNCED stock, not the stale static map", () => {
+    renderCart();
+    act(() => fresh().add(p, 1));
+    act(() => fresh().syncCatalog([{ ...p, stock: 2 }]));
+    // old implementation would have capped at min(50, static 5000, 99) = 50
+    act(() => fresh().setQty(p.id, 50));
+    expect(fresh().items[0].qty).toBe(2);
+    expect(fresh().items[0].stock).toBe(2);
+  });
+
+  it("syncCatalog with an empty catalog is a no-op (no data → keep cart)", () => {
+    renderCart();
+    act(() => fresh().add(p, 1));
+    act(() => fresh().syncCatalog([]));
+    expect(fresh().items).toHaveLength(1);
   });
 });
 

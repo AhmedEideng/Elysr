@@ -13,34 +13,44 @@ import type { Product } from "@/data/product-types";
 import { getPromoTier, type PromoTier } from "@/lib/promo";
 import { products } from "@/data/products";
 
-// 🛡️ (2026-09-16) مصدر الحقيقة للمنتج = الكتالوج الرسمي بالكامل.
-// localStorage بياخد منه بس **id + qty** — كل حاجة تانية (name/price/
-// slug/emoji/image/stock) بتتجاهل لو اتعدلت يدويًا. الـ snapshot في
-// الـ storage كان بيسمح باسم/سعر مزيفين يظهروا في السلة لحد ما
-// syncCatalog() يشتغل — دلوقتي مفيش سكة غير الكتالوج.
-const CATALOG_BY_ID = new Map(products.map((p) => [p.id, p]));
-const catalogProduct = (id: string) => CATALOG_BY_ID.get(id);
+// 🛡️ (2026-09-16 → 2026-09-17) مصدر الحقيقة للمنتج = الكتالوج الرسمي
+// بالكامل. localStorage بياخد منه بس **id + qty** — كل حاجة تانية
+// (name/price/slug/emoji/image/stock) بتتجاهل لو اتعدلت يدويًا.
+//
+// (2026-09-17) الـ normalizer دلوقتي **catalog-driven**: الـ catalog
+// dependency صريح في التوقيع (مش state خفي من الـ module). كل سكة
+// (hydration/storage/sync) بتمرر الكتالوج اللي عندها:
+//   • hydration + storage event → CATALOG_BY_ID (الكتالوج الثابت)
+//   • syncCatalog(catalog)      → الكتالوج اللي اتمرر (ممكن remote)
+// فمفيش تاني سيناريو "static 5000 / remote 3" — نفس الدالة، نفس
+// مصدر البيانات لكل سكة.
+export type CatalogById = ReadonlyMap<string, Product>;
+
+export const CATALOG_BY_ID: CatalogById = new Map(products.map((p) => [p.id, p]));
 
 // سقف كمية الصنف الواحد في السلة (مستقل عن المخزون — عميل حقيقي ما يطلبش
 // 100 وحدة من صنف واحد، والسيرفر عنده سقف إجمالي 100 وحدة للطلب كله).
 const MAX_QTY_PER_ITEM = 99;
 
-// ── (2026-09-15 → 2026-09-16) توحيد normalization عناصر السلة ──
+// ── (2026-09-15 → 2026-09-17) توحيد normalization عناصر السلة ──
 // كان الـ bug موجود في 4 implementations بقواعد مختلفة:
 //   hydration: 1..stock (مع ?? 10) · storage event: 1..99 من غير مخزون
 //   add: stock=0 → qty=1 (!) · setQty: stock=0 → qty=1 (!)
-// 2026-09-16: التوحيد اكتمل — دالة واحدة وبياناتها كلها من الكتالوج:
+// 2026-09-17: Implementation واحدة نقية + catalog كـ dependency:
 //   • منتج مش في الكتالوج → حذف
 //   • stock <= 0 (أو مفيش بيانات) → حذف
 //   • qty مقصورة على min(stock, 99)
 //   • name/price/slug/emoji/image/stock = من الكتالوج (مش من الـ storage)
 // exported for unit tests (التوحيد normalization — قواعد مخزون السلة)
-export function normalizeCartItem(raw: Partial<CartItem>): CartItem | null {
+export function normalizeCartItem(
+  raw: Partial<CartItem>,
+  catalogById: CatalogById,
+): CartItem | null {
   if (!raw.id || typeof raw.qty !== "number") {
     return null;
   }
 
-  const product = catalogProduct(raw.id);
+  const product = catalogById.get(raw.id);
 
   // المنتج غير موجود أو غير متاح
   if (!product || product.stock === undefined || product.stock <= 0) {
@@ -62,10 +72,13 @@ export function normalizeCartItem(raw: Partial<CartItem>): CartItem | null {
   };
 }
 
-export function normalizeCartItems(raws: Partial<CartItem>[]): CartItem[] {
+export function normalizeCartItems(
+  raws: Partial<CartItem>[],
+  catalogById: CatalogById,
+): CartItem[] {
   const byId = new Map<string, CartItem>();
   for (const raw of raws) {
-    const item = normalizeCartItem(raw);
+    const item = normalizeCartItem(raw, catalogById);
     if (item && !byId.has(item.id)) byId.set(item.id, item);
   }
   return [...byId.values()].slice(0, MAX_CART_ITEMS);
@@ -143,7 +156,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const parsed = safeGetJson<Partial<CartItem>[]>(STORAGE_KEY, []);
       // توحيد normalization: النافد/المحذوف يتحذف، والكميات مقصورة
       // بمخزون الكتالوج (نفس القواعد في كل مسارات السلة).
-      return normalizeCartItems(parsed);
+      return normalizeCartItems(parsed, CATALOG_BY_ID);
     } catch (err) {
       console.warn("Failed to read cart from localStorage:", err);
     }
@@ -212,7 +225,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // بـ return من غير مزامنة).
       try {
         const parsed = safeGetJson<Partial<CartItem>[]>(STORAGE_KEY, []);
-        setItems(normalizeCartItems(parsed));
+        setItems(normalizeCartItems(parsed, CATALOG_BY_ID));
       } catch {
         // Ignore parsing errors from other tabs
       }
@@ -300,48 +313,36 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setQty = useCallback((id: string, qty: number) => {
-    // (2026-09-15) نفس قواعد التوحيد: stock نَفَد/مفيش بيانات → حذف
-    // العنصر بدل ما Math.max(1, Math.min(qty, 0)) يطلّع qty=1.
-    const stock = catalogProduct(id)?.stock;
-    if (stock === undefined || stock <= 0) {
-      setItems((p) => p.filter((i) => i.id !== id));
-      return;
-    }
+    // (2026-09-17) الـ item نفسه هو اللي حامل الـ stock المتزامن من
+    // الكتالوج (normalizeCartItem/add/syncCatalog) — فقيده منه مش من
+    // static map: لو حصل remote sync بمخزون مختلف، كل عمليات الجلسة
+    // (setQty/limit) تبقى متسقة مع القيمة المتزامنة. القاعدة:
+    // stock نَفَد/مفيش بيانات → حذف العنصر (مش qty=1).
     setItems((p) =>
-      p.map((i) =>
-        i.id === id ? { ...i, qty: Math.max(1, Math.min(qty, stock, MAX_QTY_PER_ITEM)) } : i,
-      ),
+      p.flatMap((i): CartItem[] => {
+        if (i.id !== id) return [i];
+        const stock = i.stock;
+        if (stock === undefined || stock <= 0) return [];
+        return [{ ...i, qty: Math.max(1, Math.min(qty, stock, MAX_QTY_PER_ITEM)) }];
+      }),
     );
   }, []);
 
   const syncCatalog = useCallback((catalog: Product[]) => {
+    // (2026-09-17) Implementation واحدة: بدل إعادة بناء القواعد يدويًا
+    // هنا (وكانت نسخة ثانية من منطق normalizeCartItem — نفس فخ
+    // "4 implementations" اللي بدأ منه الـ bug الأصلي)، بنمرر
+    // الكتالوج اللي اتمرر لـ normalizeCartItems مباشرة.
+    // كتالوج فاضي = مفيش بيانات موثوقة → السلة بتفضل زي ما هي.
     if (!catalog.length) return;
-    const byId = new Map(catalog.map((p) => [p.id, p]));
-    // نحسب من itemsRef (قيمة لحظة الاستدعاء — الاستدعاء الوحيد في
-    // useEffect تحميل الكاتالوج بعد الـ mount) عشان نقدر نبلّغ العميل
-    // لو اتحذف منتج — updater دالة نقية مش مكانه side effects.
+    const catalogById: CatalogById = new Map(catalog.map((p) => [p.id, p]));
+    // نحسب من itemsRef (قيمة لحظة الاستدعاء) — بنمرر id + qty بس
+    // (القاعدة: من الـ cart بنثق في id + qty فقط، وكل حاجة من الـ catalog).
     const prev = itemsRef.current;
-    const kept = prev.flatMap((item): CartItem[] => {
-      const product = byId.get(item.id);
-      if (!product) return []; // منتج اتحذف من الكتالوج
-      // (2026-09-16) مخزون ناقص/ناصفر = مشكلة data integrity → حذف
-      // العنصر (مش fallback قديم `?? 10` كان بيخبي المشكلة).
-      const stock = product.stock;
-      if (stock === undefined || stock <= 0) return [];
-      return [
-        {
-          ...item,
-          slug: product.slug,
-          name: product.name,
-          price: product.price,
-          originalPrice: product.price,
-          emoji: product.emoji ?? item.emoji,
-          image: product.image ? product.image : undefined,
-          qty: Math.min(item.qty, stock, MAX_QTY_PER_ITEM),
-          stock,
-        },
-      ];
-    });
+    const kept = normalizeCartItems(
+      prev.map((item) => ({ id: item.id, qty: item.qty })),
+      catalogById,
+    );
     setItems(kept);
     if (kept.length !== prev.length) {
       toast.error("تمت إزالة منتجات غير متوفرة من سلتك.", { duration: 5000 });
