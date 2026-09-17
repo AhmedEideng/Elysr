@@ -417,7 +417,11 @@ async function generateSitemap() {
         path: `/education/${a.slug}`,
         priority: "0.7",
         changefreq: "monthly",
-        lastmod: freshLastmod("src/data/articles.ts", a.updatedAt || a.publishedAt || today),
+        // (2026-09-17) lastmod حقيقي **لكل مقال** (updatedAt/ publishedAt)
+        // — قبل كده كان git-lastmod لملف articles.ts كله، فأي تعديل على
+        // مقال واحد كان يحدّث lastmod لكل المقالات دفعة واحدة (signal خادع).
+        // git-lastmod بقى fallback أخير فقط.
+        lastmod: a.updatedAt || a.publishedAt || freshLastmod("src/data/articles.ts", today),
         image: a.image,
         imageTitle: a.title,
       })),

@@ -205,6 +205,8 @@ export const productSchema = (p: {
   id: string;
   slug: string;
   name: string;
+  nameEn?: string;
+  brand?: string;
   description: string;
   price: number;
   rating: number;
@@ -249,7 +251,8 @@ export const productSchema = (p: {
       },
       shippingDetails: merchantShippingDetails(),
     },
-    brand: { "@type": "Brand", name: "Elysr Medical" },
+    // (2026-09-17) البراند الفعلي للمنتج مش اسم المتجر: brand ?? nameEn ?? name.
+    brand: { "@type": "Brand", name: p.brand ?? p.nameEn ?? p.name },
   };
 };
 
@@ -262,8 +265,10 @@ export const articleSchema = (a: {
   image?: string;
   author?: { name: string; role: string; credentials: string };
   reviewer?: { name: string; role: string; credentials: string };
-  publishedAt?: string;
-  updatedAt?: string;
+  // (2026-09-17) إلزامي بلا fallback: تاريخ ناقص = الحقل بيختفي من
+  // الـ schema (JSON بيحذف undefined) — أفضل من تاريخ مزيف (Trust).
+  publishedAt: string;
+  updatedAt: string;
   sources?: { title: string; url: string; publisher: string }[];
 }) => ({
   "@context": "https://schema.org",
@@ -278,8 +283,11 @@ export const articleSchema = (a: {
     "@type": "WebPage",
     "@id": `${SITE_URL}/education/${a.slug}`,
   },
-  datePublished: a.publishedAt ?? "2025-01-01",
-  dateModified: a.updatedAt ?? new Date().toISOString().slice(0, 10),
+  // (2026-09-17) مفيش أي fallback مزيف: التاريخ حق المقال الحقيقي
+  // (data-integrity بتتأكد منه) — و لو ناقص، الحقل بيختفي من الـ schema
+  // بدل ما نطبع 2025-01-01 أو "اليوم" (Trust issue في الـ YMYL niche).
+  datePublished: a.publishedAt,
+  dateModified: a.updatedAt,
   author: {
     "@type": "Person",
     // (2026-09-16) ربط هوكلية بذات كيان المؤسس في /about (نفس الـ @id) —

@@ -112,6 +112,11 @@ function buildHtml(template, opts) {
     type = "website",
     noindex = false,
     heroPreload = false,
+    // (2026-09-17) بيانات الصورة لمشاركة الـ OG — الأبعاد الحقيقية للملف
+    // (مش أبعاد العرض) + alt وصفية (SEO + accessibility + معاينة المشاركة).
+    imageAlt,
+    imageWidth = 1200,
+    imageHeight = 631,
   } = opts;
 
   let html = template;
@@ -159,6 +164,20 @@ function buildHtml(template, opts) {
     /<meta property="og:image"[^>]*>/,
     `<meta property="og:image" content="${safeImg}" />`,
   );
+  // (2026-09-17) أبعاد + alt للصورة — الأبعاد الحقيقية للملف (مش العرض)
+  const safeImgAlt = esc(imageAlt || title);
+  replaceOrInsert(
+    /<meta property="og:image:width"[^>]*>/,
+    `<meta property="og:image:width" content="${imageWidth}" />`,
+  );
+  replaceOrInsert(
+    /<meta property="og:image:height"[^>]*>/,
+    `<meta property="og:image:height" content="${imageHeight}" />`,
+  );
+  replaceOrInsert(
+    /<meta property="og:image:alt"[^>]*>/,
+    `<meta property="og:image:alt" content="${safeImgAlt}" />`,
+  );
   replaceOrInsert(
     /<meta property="og:site_name"[^>]*>/,
     `<meta property="og:site_name" content="${esc(SITE_NAME)}" />`,
@@ -178,6 +197,10 @@ function buildHtml(template, opts) {
   replaceOrInsert(
     /<meta name="twitter:image"[^>]*>/,
     `<meta name="twitter:image" content="${safeImg}" />`,
+  );
+  replaceOrInsert(
+    /<meta name="twitter:image:alt"[^>]*>/,
+    `<meta name="twitter:image:alt" content="${safeImgAlt}" />`,
   );
 
   // canonical
@@ -335,6 +358,8 @@ async function prerender() {
         canonical: `${SITE_URL}/`,
         type: "website",
         heroPreload: true,
+        // (2026-09-17) og-default 1200×631 (الأبعاد الافتراضية في buildHtml)
+        imageAlt: "اليسر ميديكال — منتجات الصحة الزوجية الأصلية في مصر | شحن سري",
         jsonLd: [
           {
             "@context": "https://schema.org",
@@ -732,6 +757,8 @@ async function prerender() {
         type: "website",
         noindex: Boolean(r.noindex),
         jsonLd,
+        // (2026-09-17) og-default 1200×631 (الأبعاد الافتراضية في buildHtml)
+        imageAlt: r.title,
         bodyContent: `<h1>${esc(r.h1)}</h1><p>${esc(r.desc)}</p>${r.body ? r.body : ""}${productLinksBody}${articleLinksBody}${faqBody}`,
       });
 
@@ -779,7 +806,8 @@ async function prerender() {
               },
             }
           : {}),
-        brand: { "@type": "Brand", name: "Elysr Medical" },
+        // (2026-09-17) البراند الفعلي للمنتج مش اسم المتجر: brand ?? nameEn ?? name
+        brand: { "@type": "Brand", name: product.brand ?? product.nameEn ?? product.name },
         offers: {
           "@type": "Offer",
           price: product.price,
@@ -876,6 +904,10 @@ async function prerender() {
         noindex: isNoindexProduct(product),
         jsonLd: isNoindexProduct(product) ? [breadcrumb] : [productJsonLd, breadcrumb],
         bodyContent: body,
+        // (2026-09-17) أبعاد حقيقية + alt وصفية (صور المنتجات 800×800)
+        imageAlt: product.name,
+        imageWidth: 800,
+        imageHeight: 800,
       });
 
       writeFileSync(resolve(DIST, "products", `${product.slug}.html`), html);
@@ -942,8 +974,10 @@ async function prerender() {
             logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` },
           },
           citation: (article.sources || []).map((source) => source.url),
-          datePublished: article.publishedAt || "2025-01-01",
-          dateModified: article.updatedAt || new Date().toISOString().slice(0, 10),
+          // (2026-09-17) مفيش fallback مزيف: التاريخ الحقيقي من بيانات
+          // المقال — لو ناقص الحقل بيختفي (undefined) بدل 2025-01-01.
+          datePublished: article.publishedAt,
+          dateModified: article.updatedAt,
         };
 
         const breadcrumb = {
@@ -999,6 +1033,10 @@ async function prerender() {
           type: "article",
           jsonLd: [articleJsonLd, breadcrumb],
           bodyContent: body,
+          // (2026-09-17) أبعاد حقيقية + alt بوصية (صور المقالات 800×800)
+          imageAlt: article.title,
+          imageWidth: 800,
+          imageHeight: 800,
         });
 
         writeFileSync(resolve(DIST, "education", `${article.slug}.html`), html);
@@ -1117,6 +1155,8 @@ async function prerender() {
           noindex: Boolean(page.noindex),
           jsonLd: [webPageJsonLd, breadcrumb, faqJsonLd, itemList],
           bodyContent: body,
+          // (2026-09-17) og-default 1200×631 (الأبعاد الافتراضية في buildHtml)
+          imageAlt: page.metaTitle,
         });
 
         writeFileSync(resolve(guidesDir, `${page.slug}.html`), html);

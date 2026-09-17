@@ -7,6 +7,15 @@ export interface Product {
   slug: string;
   name: string;
   nameEn: string;
+  /**
+   * (2026-09-17) العلامة التجارية الفعلية للمنتج (اختياري).
+   * في الـ Product schema: brand = product.brand ?? nameEn ?? name.
+   * قبل كده كل المنتجات كان براند "Elysr Medical" (اسم المتجر مش البراند).
+   * TODO (تحرير للمالك): ضبط brand لكل منتج معروف برانده (Konsa، SAWFT،
+   * Golden Horse، بلاك هورس...) — لحد ما يتضبط، بيُستخدم الاسم الإنجليزي
+   * لخط المنتج وهو تحسين موضوعي على اسم المتجر.
+   */
+  brand?: string;
   category: ProductCategory;
   price: number; // EGP
 
