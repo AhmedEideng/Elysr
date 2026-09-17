@@ -247,6 +247,87 @@ try {
     assert.deepEqual(b.sources, a.sources, `body ${a.slug}.sources stale; run npm run build`);
   }
   assert.equal(bodyBySlug.size, articles.length, "articleBodies has extra/unknown slugs");
+
+  // ── Topic Authority: assignments لازم تطابق الكاتالوج الحقيقي (2026-09-17) ──
+  // أي slug/ID مش موجود (rename/delete) أو pillar غير موجود = فشل فورًا
+  // بدل ما الروابط تيبقى مكسورة في الـ bundles والـ static HTML.
+  {
+    const topicsMod = await vite.ssrLoadModule("/src/data/topics.ts");
+    const { TOPICS, pillarPath } = topicsMod;
+    assert.ok(Array.isArray(TOPICS) && TOPICS.length >= 5, "TOPICS missing/empty");
+    const articleSlugs = new Set(articles.map((a) => a.slug));
+    const guideSlugs = new Map(seoLandingPages.map((p) => [p.slug, p]));
+    const productIds = new Set(products.map((p) => p.id));
+    const seenArticle = new Set();
+    const seenGuide = new Set();
+    const seenProduct = new Set();
+    for (const t of TOPICS) {
+      // pillar موجود فعليًا (مقال أو دليل)
+      if (t.pillarKind === "article") {
+        assert.ok(
+          articleSlugs.has(t.pillarSlug),
+          `topic ${t.id}: pillar article "${t.pillarSlug}" not in articles.ts`,
+        );
+      } else {
+        const g = guideSlugs.get(t.pillarSlug);
+        assert.ok(g, `topic ${t.id}: pillar guide "${t.pillarSlug}" not in landing-pages`);
+        assert.ok(!g.noindex, `topic ${t.id}: pillar guide "${t.pillarSlug}" is noindex`);
+      }
+      // كل membership موجود فعليًا
+      for (const s of t.articleSlugs) {
+        assert.ok(articleSlugs.has(s), `topic ${t.id}: unknown article "${s}"`);
+        assert.ok(!seenArticle.has(s), `article "${s}" assigned to two topics`);
+        seenArticle.add(s);
+      }
+      for (const s of t.guideSlugs) {
+        assert.ok(guideSlugs.has(s), `topic ${t.id}: unknown guide "${s}"`);
+        assert.ok(!seenGuide.has(s), `guide "${s}" assigned to two topics`);
+        seenGuide.add(s);
+      }
+      for (const id of t.productIds) {
+        assert.ok(productIds.has(id), `topic ${t.id}: unknown product "${id}"`);
+        assert.ok(!seenProduct.has(id), `product "${id}" assigned to two topics`);
+        seenProduct.add(id);
+      }
+    }
+    // كل topic ليه pillar مختلف (مفيش shared pillar)
+    const pillarPaths = TOPICS.map((t) => pillarPath(t));
+    assert.equal(duplicates(pillarPaths).length, 0, "two topics share the same pillar path");
+    console.log(
+      `✓ topics: ${TOPICS.length} topics, ${seenArticle.size} articles + ${seenGuide.size} guides + ${seenProduct.size} products assigned`,
+    );
+  }
+
+  // ── Drift guard: landing-pages-meta.generated.ts (خفيف للـ bundles) ──
+  assert.ok(
+    existsSync(resolve(ROOT, "src/data/landing-pages-meta.generated.ts")),
+    "src/data/landing-pages-meta.generated.ts missing; run npm run build",
+  );
+  {
+    const lpMeta = await vite.ssrLoadModule("/src/data/landing-pages-meta.generated.ts");
+    assert.equal(
+      lpMeta.SEO_LANDING_PAGE_COUNT,
+      seoLandingPages.length,
+      "SEO_LANDING_PAGE_COUNT stale; run npm run build",
+    );
+    assert.equal(
+      lpMeta.landingPagesMeta.length,
+      seoLandingPages.length,
+      "landingPagesMeta count stale; run npm run build",
+    );
+    const lpBySlug = new Map(lpMeta.landingPagesMeta.map((m) => [m.slug, m]));
+    for (const p of seoLandingPages) {
+      const m = lpBySlug.get(p.slug);
+      assert.ok(m, `landingPagesMeta ${p.slug} missing; run npm run build`);
+      assert.equal(m.title, p.title, `landingPagesMeta ${p.slug}.title stale; run npm run build`);
+      assert.equal(
+        m.noindex ?? false,
+        Boolean(p.noindex),
+        `landingPagesMeta ${p.slug}.noindex stale`,
+      );
+    }
+  }
+
   // ── وعود مطلقة في المحتوى الطبي: ممنوعة (سلامة + التزام "لا وعود علاجية") ──
   // القائمة مقصودة بدقة: لا تشمل "يعالج"/"100%" لأنهما يظهران سياقات
   // تفنيد مشروعة (خرافة: "الطبيعي آمن 100%" / "ادعاءات أنه يعالج... لا يدعمها دليل")

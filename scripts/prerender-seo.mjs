@@ -346,6 +346,105 @@ async function prerender() {
       /* no landing pages */
     }
 
+    // (2026-09-17) Topic Authority: روابط الموضوعات في الـ HTML الثابت
+    // (قابل للزحف من غير JS) — نفس محتوى TopicHub في الـ SPA.
+    let TOPICS = [];
+    let topicForArticle = () => undefined;
+    let topicForGuide = () => undefined;
+    let topicForProduct = () => undefined;
+    let pillarPath = (t) =>
+      t.pillarKind === "article"
+        ? `/education/${t.pillarSlug}`
+        : `/products/guides/${t.pillarSlug}`;
+    let isPillarPath = (p) => false;
+    try {
+      const topicsMod = await vite.ssrLoadModule("/src/data/topics.ts");
+      TOPICS = topicsMod.TOPICS || [];
+      topicForArticle = topicsMod.topicForArticle;
+      topicForGuide = topicsMod.topicForGuide;
+      topicForProduct = topicsMod.topicForProduct;
+      pillarPath = topicsMod.pillarPath;
+      isPillarPath = topicsMod.isPillarPath;
+    } catch {
+      /* topics غير متاح — صفحات من غير روابط موضوعات */
+    }
+
+    const articleTitleOf = (slug) => (articles.find((a) => a.slug === slug) || {}).title || slug;
+    const guideTitleOf = (slug) =>
+      (seoLandingPages.find((p) => p.slug === slug) || {}).title || slug;
+    const productNameOf = (id) => (products.find((p) => p.id === id) || {}).name || id;
+    const productSlugOf = (id) => (products.find((p) => p.id === id) || {}).slug;
+
+    /**
+     * يبني HTML روابط الموضوعات للصفحة الحالية (static/crawler):
+     *  • الـ pillar  ← "موضوع كامل": مقالات + أدلة + منتجات
+     *  • satellite   ← "ارجع للدليل الشامل"
+     *  • كلهم       ← "مواضيع مرتبطة" (3)
+     */
+    function topicLinksHtml(selfKind, selfSlug) {
+      if (TOPICS.length === 0) return "";
+      let topic;
+      if (selfKind === "article") topic = topicForArticle(selfSlug);
+      else if (selfKind === "guide") topic = topicForGuide(selfSlug);
+      else if (selfKind === "product") topic = topicForProduct(selfSlug);
+      if (!topic) return "";
+      // مسار الصفحة الحالية (لسه مش pillarPath(topic) — ده كان دايماً
+      // true: كان بيقارن الـ pillar بنفسه!)
+      const selfPath =
+        selfKind === "article"
+          ? `/education/${selfSlug}`
+          : selfKind === "guide"
+            ? `/products/guides/${selfSlug}`
+            : `/products/${productSlugOf(selfSlug) || selfSlug}`;
+      const isPillar = isPillarPath(selfPath);
+      const parts = [];
+
+      if (!isPillar) {
+        parts.push(
+          `<h2>الدليل الشامل للموضوع</h2>` +
+            `<p><a href="${SITE_URL}${pillarPath(topic)}">ارجع للدليل الشامل: ${esc(topic.pillarTitle)}</a></p>`,
+        );
+      } else {
+        const cols = [];
+        const aLinks = topic.articleSlugs
+          .filter((s) => s !== selfSlug)
+          .map((s) => `<li><a href="${SITE_URL}/education/${s}">${esc(articleTitleOf(s))}</a></li>`)
+          .join("");
+        const gLinks = topic.guideSlugs
+          .filter((s) => s !== selfSlug)
+          .map(
+            (s) =>
+              `<li><a href="${SITE_URL}/products/guides/${s}">${esc(guideTitleOf(s))}</a></li>`,
+          )
+          .join("");
+        const pLinks = topic.productIds
+          .filter((id) => id !== selfSlug)
+          .map((id) => {
+            const slug = productSlugOf(id);
+            return slug
+              ? `<li><a href="${SITE_URL}/products/${slug}">${esc(productNameOf(id))}</a></li>`
+              : "";
+          })
+          .slice(0, 8)
+          .join("");
+        if (aLinks) cols.push(`<div><h3>مقالات موثقة</h3><ul>${aLinks}</ul></div>`);
+        if (gLinks) cols.push(`<div><h3>أدلة عملية</h3><ul>${gLinks}</ul></div>`);
+        if (pLinks) cols.push(`<div><h3>منتجات مختارة</h3><ul>${pLinks}</ul></div>`);
+        if (cols.length) {
+          parts.push(`<h2>موضوع ${esc(topic.name)} كامل</h2>${cols.join("")}`);
+        }
+      }
+
+      const related = TOPICS.filter((t) => t.id !== topic.id).slice(0, 3);
+      if (related.length) {
+        const items = related
+          .map((t) => `<li><a href="${SITE_URL}${pillarPath(t)}">${esc(t.pillarTitle)}</a></li>`)
+          .join("");
+        parts.push(`<h2>مواضيع مرتبطة</h2><ul>${items}</ul>`);
+      }
+      return `<section>${parts.join("\n")}</section>`;
+    }
+
     /* ========== 1) Home page ========== */
     {
       const title = "اليسر — منتجات الصحة الزوجية الأصلية في مصر | شحن سري";
@@ -893,6 +992,7 @@ async function prerender() {
         ${productReviews > 0 ? `<h2>تقييمات العملاء</h2><p>التقييم العام: ${productRating} من 5 (${productReviews} تقييم)</p>` : ""}
         <p><a href="${categoryUrl}">تصفح كل ${esc(categoryName)}</a></p>
         ${relatedBody}
+        ${topicLinksHtml("product", product.id)}
       `;
 
       const html = buildHtml(template, {
@@ -1022,6 +1122,7 @@ async function prerender() {
               <ul>${sourcesBody}</ul>
             </section>
             <p><a href="${SITE_URL}/education">← تصفح جميع المقالات التوعوية</a></p>
+            ${topicLinksHtml("article", article.slug)}
           </article>
         `;
 
@@ -1143,6 +1244,7 @@ async function prerender() {
             <ul>${productsBody}</ul>
             <h2>أسئلة شائعة</h2>
             ${faqs}
+            ${topicLinksHtml("guide", page.slug)}
           </article>
         `;
 

@@ -6,6 +6,8 @@ import { ShareButton } from "@/components/ShareButton";
 import { shareGuideText } from "@/lib/share";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryFAQ } from "@/components/CategoryFAQ";
+import { TopicHub } from "@/components/TopicHub";
+import { topicForGuide, isPillarPath } from "@/data/topics";
 import type { SeoLandingPage } from "@/data/landing-pages";
 import {
   breadcrumbSchema,
@@ -217,6 +219,14 @@ function SeoLandingPageComponent() {
         title={`أسئلة شائعة عن ${page.primaryKeyword}`}
         description="إجابات مختصرة لتقليل الحيرة قبل اختيار المنتج المناسب من الأقسام الحالية."
         items={page.faqs}
+      />
+
+      {/* (2026-09-17) Topic Authority: ربط الدليل بموضوعه (pillar hub +
+          مواضيع مرتبطة) — نفس الروابط في الـ HTML الثابت للزاحف */}
+      <TopicHub
+        topic={topicForGuide(page.slug)}
+        isPillar={isPillarPath(`/products/guides/${page.slug}`)}
+        selfGuideSlug={page.slug}
       />
     </div>
   );

@@ -38,6 +38,8 @@ import { CustomerReviews } from "@/features/product/components/CustomerReviews";
 import { ProductImage } from "@/features/product/components/ProductImage";
 import { buildOrderMessage, waLink } from "@/lib/whatsapp";
 import { ShareButton } from "@/components/ShareButton";
+import { TopicHub } from "@/components/TopicHub";
+import { topicForProduct } from "@/data/topics";
 import { shareProductText, waShareUrl } from "@/lib/share";
 import { getProductBySlug, getProductsByCategory, getCrossSellsForProduct } from "@/data/products";
 import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
@@ -681,6 +683,10 @@ function ProductPage() {
           </div>
         </section>
       )}
+
+      {/* (2026-09-17) Topic Authority: ربط المنتج بموضوعه (روابط صاعدة
+          للـ pillar + مواضيع مرتبطة) — compact للمنتجات */}
+      <TopicHub topic={topicForProduct(product.id)} isPillar={false} selfProductId={product.id} />
 
       {quickOrderOpen && (
         <div

@@ -18,6 +18,8 @@ import { type Article } from "@/data/articles";
 import { type ArticleMeta } from "@/data/articles-meta.generated";
 import { ArticleContentWithAds } from "@/components/sections/ArticleContentWithAds";
 import { ProductCard } from "@/components/ProductCard";
+import { TopicHub } from "@/components/TopicHub";
+import { topicForArticle, isPillarPath } from "@/data/topics";
 
 export const Route = createFileRoute("/education_/$slug")({
   loader: async ({ params }) => {
@@ -300,6 +302,14 @@ function ArticlePage() {
           ))}
         </div>
       </section>
+
+      {/* (2026-09-17) Topic Authority: ربط المقال بموضوعه (pillar hub +
+          مواضيع مرتبطة) — نفس الروابط في الـ HTML الثابت للزاحف */}
+      <TopicHub
+        topic={topicForArticle(article.slug)}
+        isPillar={isPillarPath(`/education/${article.slug}`)}
+        selfArticleSlug={article.slug}
+      />
     </article>
   );
 }
