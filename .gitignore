@@ -57,3 +57,7 @@ dist/
 # Browser test artifacts
 playwright-report/
 test-results/
+
+# GSC data dumps (private performance data) — samples stay tracked
+scripts/gsc/*.csv
+!scripts/gsc/sample-*.csv
