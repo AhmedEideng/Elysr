@@ -165,6 +165,30 @@ function ArticlePage() {
         </div>
       </PageHero>
 
+      {/* (2026-09-17, Phase C) Answer-first: الإجابة في 10 ثواني قبل
+          القراءة العميقة — يخدم القارئ وأيضًا AI Overviews/الـ snippets */}
+      {article.keyTakeaways && article.keyTakeaways.length > 0 && (
+        <section
+          aria-label="أهم النقاط"
+          className="mb-8 rounded-3xl border border-primary/20 bg-primary/5 p-5 md:p-6"
+        >
+          <h2 className="mb-3 flex items-center gap-2 text-lg font-black">
+            <span aria-hidden>🔑</span> أهم النقاط
+          </h2>
+          <ul className="grid gap-2 md:grid-cols-2">
+            {article.keyTakeaways.map((point) => (
+              <li
+                key={point}
+                className="flex items-start gap-2 text-sm leading-6 text-foreground/90"
+              >
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+                {point}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section className="mb-8 grid gap-3 md:grid-cols-2">
         <TrustCard
           icon={<UserCheck className="h-5 w-5" />}

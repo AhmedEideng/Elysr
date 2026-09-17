@@ -125,6 +125,18 @@ function validateGeneratedArticle(data) {
     problems.push(`emoji invalid: ${JSON.stringify(data.emoji)}`);
   }
   const srcs = Array.isArray(data.sources) ? data.sources : [];
+  // (2026-09-17, Phase C) Answer-first standard: كل مقال جديد لازم
+  // يكون فيه 3-6 نقاط مفتاحية (بتتعرض كـ box تحت الـ hero + في
+  // الـ HTML الثابت) — المحتوى من غير خلاصة = مش معيار.
+  const tks = Array.isArray(data.keyTakeaways) ? data.keyTakeaways : [];
+  if (tks.length < 3 || tks.length > 6) {
+    problems.push(`keyTakeaways must have 3-6 items (got ${tks.length})`);
+  }
+  tks.forEach((tk, i) => {
+    if (!isStr(tk) || tk.length < 20 || tk.length > 220) {
+      problems.push(`keyTakeaways[${i}] invalid (20-220 chars)`);
+    }
+  });
   if (srcs.length < 2) problems.push(`sources too few: ${srcs.length}`);
   srcs.forEach((sr, i) => {
     if (!isStr(sr?.title) || sr.title.length > 200) problems.push(`sources[${i}].title invalid`);
@@ -201,7 +213,8 @@ STRICT HUMAN WRITING DIRECTIVES FOR 100% PLAIN-TEXT HUMAN LAYOUT:
 8. ⚠️ STRICT RULE FOR FORMATTING: Do NOT use ANY markdown formatting symbols like "#" (hashtags for headers) or "*" (asterisks for bold/italic/lists) in the article body. The output article text must be written in normal, clean plain Arabic with regular spaces and paragraphs (double newlines to separate paragraphs) so it looks 100% human-written and completely professional.
 9. Also generate a highly detailed, unique, and strictly G-rated English image prompt for the AI image generator that visually represents this article. WARNING: The image prompt MUST be completely G-rated, extremely safe, and neutral. NEVER use any words related to sex, intimacy, gender, anatomy, body parts, or clinical conditions. Instead, describe beautiful natural scenes, elegant herbal tea, pure honey dripping from a wooden spoon, abstract organic shapes, a clean apothecary glass bottle on a wooden table, fresh mint leaves, or premium cardboard packaging boxes under warm morning sunlight. Use only beautiful, professional, safe keywords. No text, letters, or human faces.
 10. Include at least 3 distinct sources. Every URL must be a real, directly relevant HTTPS page from WHO, NIH/NCBI/MedlinePlus, CDC, NHS, Mayo Clinic, Cleveland Clinic, Cochrane, BMJ, JAMA, NEJM, The Lancet, Nature, Springer, Wiley, ScienceDirect, Frontiers, Harvard, or Johns Hopkins. Never invent a title, publisher, paper, or URL.
-11. Output MUST be strictly in JSON format matching the following schema. Return pure raw JSON without any markdown code block wrappers (do not wrap in triple backticks).
+11. ANSWER-FIRST (mandatory): the FIRST paragraph must answer the reader's core question directly (2-4 sentences, plain and direct) before any background. Then, after the first 1-2 sections, include a short "أهم النقاط" (key takeaways) list with 3-5 plain-text points, each starting with "• " and written as a complete, self-contained sentence (no markdown asterisks or hashes — use the literal bullet character • only).
+12. Output MUST be strictly in JSON format matching the following schema. Return pure raw JSON without any markdown code block wrappers (do not wrap in triple backticks).
 
 JSON Schema:
 {
@@ -212,7 +225,12 @@ JSON Schema:
   "readMin": integer (estimated reading time in minutes, e.g. 5, 6, 7),
   "emoji": "🌿" or "🍯" or "🌸" or another relevant emoji,
   "imagePrompt": "Detailed G-rated English image prompt. MUST NOT contain intimate, physical, or anatomical words. Focus on herbs, honey, clean clinical glass bottles, professional medical packaging, or natural aesthetics. No text/letters, no human faces.",
-  "content": "A highly comprehensive article body in elegant Arabic. Use normal Arabic text, regular spacing, and clean paragraphs. DO NOT include any '#' or '*' characters. Must be at least 600 words. Add a supportive, reassuring conclusion. Recommend Elysr Medical products and direct WhatsApp consultation smoothly.",
+  "keyTakeaways": [
+    "First key point (20-220 chars, complete sentence, answer-first tone)",
+    "Second key point",
+    "Third key point"
+  ],
+  "content": "A highly comprehensive article body in elegant Arabic. ANSWER-FIRST: start with a direct 2-4 sentence answer to the core question. Use normal Arabic text, regular spacing, and clean paragraphs. DO NOT include any '#' or '*' characters. Must be at least 600 words. After the first sections, include the same key takeaways as a short 'أهم النقاط' list using literal '• ' bullets. Add a supportive, reassuring conclusion. Recommend Elysr Medical products and direct WhatsApp consultation smoothly.",
   "sources": [
     { "title": "Title of medical paper or organization (e.g. Mayo Clinic, NHS, NIH)", "url": "https://...", "publisher": "Organization name" },
     { "title": "Title of medical paper or organization", "url": "https://...", "publisher": "Organization name" },
@@ -583,6 +601,8 @@ JSON Schema:
     readMin: articleData.readMin || 5,
     emoji: articleData.emoji || "🌿",
     content: articleData.content,
+    // (2026-09-17, Phase C) Answer-first: نقاط مفتاحية للـ box تحت الـ hero
+    keyTakeaways: articleData.keyTakeaways,
     // 🛡️ Vibe موحّد: نفس صياغة articleAuthor/articleReviewer في
     // src/data/articles.ts (العرض هيبقى متطابق بين المقالات القديمة
     // والجديدة — صدق من غير قلق على القارئ). flag autoReviewed

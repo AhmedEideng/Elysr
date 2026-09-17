@@ -340,6 +340,10 @@ export const TOPICS: Topic[] = [
       "buying-first-product-guide",
       "exercise-sexual-performance",
       "sexual-health-during-ramadan",
+      // (2026-09-17, Phase C) Linkable assets: صفحات مرجعية قابلة
+      // للاستشهاد (محرك الـ backlinks الطبيعية)
+      "sexual-health-glossary",
+      "product-safety-checklist",
     ],
     guideSlugs: [
       "doctor-consultation-before-products",

@@ -1110,6 +1110,13 @@ async function prerender() {
             <p><em>${esc(article.category)} — ${article.readMin} دقائق قراءة — آخر تحديث: ${esc(article.updatedAt || "")}</em></p>
             ${article.image ? `<img src="${article.image.startsWith("http") ? article.image : assetUrl(article.image)}" alt="${esc(article.title)}" width="800" height="450" loading="eager" style="width:100%;height:auto;border-radius:16px;margin:16px 0" />` : ""}
             <p><strong>${esc(article.excerpt)}</strong></p>
+            ${
+              Array.isArray(article.keyTakeaways) && article.keyTakeaways.length > 0
+                ? `<section><h2>أهم النقاط</h2><ul>${article.keyTakeaways
+                    .map((p) => `<li>${esc(p)}</li>`)
+                    .join("")}</ul></section>`
+                : ""
+            }
             <section>
               <h2>بيانات الثقة والمراجعة</h2>
               <p>إعداد: ${esc(article.author?.name || "فريق المحتوى الصحي — اليسر ميديكال")}</p>
