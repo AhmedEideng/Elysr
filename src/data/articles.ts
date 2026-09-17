@@ -3241,8 +3241,8 @@ export const articles: Article[] = [
         publisher: "MedlinePlus / U.S. National Library of Medicine",
       },
       {
-        title: "Low Sex Drive (Hypoactive Sexual Desire Disorder) — Cleveland Clinic",
-        url: "https://my.clevelandclinic.org/health/diseases/14505-low-sex-drive",
+        title: "Low Libido (Low Sex Drive): Causes, Symptoms & Treatment — Cleveland Clinic",
+        url: "https://my.clevelandclinic.org/health/diseases/15216-low-libido-low-sex-drive",
         publisher: "Cleveland Clinic",
       },
       {
@@ -3276,13 +3276,13 @@ export const articles: Article[] = [
     updatedAt: "2026-09-17",
     sources: [
       {
-        title: "Drug Interactions — MedlinePlus",
-        url: "https://medlineplus.gov/druginfo/interactions.html",
+        title: "Drug Reactions: Interactions & Side Effects — MedlinePlus",
+        url: "https://medlineplus.gov/drugreactions.html",
         publisher: "MedlinePlus / U.S. National Library of Medicine",
       },
       {
-        title: "Erectile Dysfunction — Drugs and Nitrates Warning — Cleveland Clinic",
-        url: "https://my.clevelandclinic.org/health/drugs/20000-sildenafil-viagra-revatio",
+        title: "Sildenafil (Viagra) — Nitrates & Interactions Warning — Cleveland Clinic",
+        url: "https://my.clevelandclinic.org/health/drugs/20690-sildenafil-tablets-erectile-dysfunction",
         publisher: "Cleveland Clinic",
       },
       {
