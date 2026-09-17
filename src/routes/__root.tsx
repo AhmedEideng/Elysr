@@ -20,6 +20,7 @@ import { CartProvider } from "@/contexts/cart";
 import { Layout } from "@/components/layout/Layout";
 import { applySeo } from "@/lib/seo";
 import { installErrorTracking } from "@/lib/error-tracking";
+import { trackPageView } from "@/lib/analytics";
 
 // 🛡️ تفعيل تتبع الأخطاء العالمي — يلتقط أي uncaught error أو promise rejection
 installErrorTracking();
@@ -27,35 +28,6 @@ installErrorTracking();
 // ----------------------------------------------------------------
 // Google Analytics page_view tracking
 // ----------------------------------------------------------------
-
-interface TrackingWindow extends Window {
-  gtag?: (...args: unknown[]) => void;
-  dataLayer?: unknown[];
-}
-
-function trackPageView(url: string) {
-  if (typeof window === "undefined") return;
-  const w = window as TrackingWindow;
-
-  try {
-    if (typeof w.gtag === "function") {
-      w.gtag("event", "page_view", {
-        page_path: url,
-        page_location: window.location.href,
-        page_title: document.title,
-      });
-    } else if (Array.isArray(w.dataLayer)) {
-      w.dataLayer.push({
-        event: "page_view",
-        page_path: url,
-        page_location: window.location.href,
-        page_title: document.title,
-      });
-    }
-  } catch {
-    // Ignore GA tracking errors
-  }
-}
 
 function NotFoundComponent() {
   useEffect(() => {
@@ -177,8 +149,9 @@ function RouteHeadSync() {
     }
 
     applySeo({ title, description, image, type, noindex });
-    // Google Analytics page tracking
-    trackPageView(window.location.pathname);
+    // Google Analytics page tracking — العنوان من head() مش document.title
+    // (حماية من auto-translate المتصفح — انظر trackPageView)
+    trackPageView(window.location.pathname, title);
   }, [matches, router]);
 
   return null;

@@ -3,6 +3,7 @@ import {
   GA_CURRENCY,
   trackAddToCart,
   trackBeginCheckout,
+  trackPageView,
   trackPurchase,
   trackRemoveFromCart,
   trackViewItem,
@@ -103,5 +104,54 @@ describe("analytics event plumbing", () => {
 
   it("currency is EGP everywhere", () => {
     expect(GA_CURRENCY).toBe("EGP");
+  });
+});
+
+describe("trackPageView — stable page_title (anti auto-translate)", () => {
+  it("prefers the intended route title over a translated document.title", () => {
+    w.dataLayer = [];
+    // Simulate the browser having auto-translated the page into Russian
+    const original = document.title;
+    document.title = "Профессиональный цифровой вакуумный насос для мужчин";
+    try {
+      trackPageView(
+        "/products/digital-vacuum-pump",
+        "مضخة تفريغ رقمية احترافية للرجال (Digital Vacuum Pump)",
+      );
+    } finally {
+      document.title = original;
+    }
+    const entry = lastDataLayerEntry() as Record<string, unknown>;
+    expect(entry.event).toBe("page_view");
+    // The Arabic route title is what GA records — NOT the translated DOM title
+    expect(entry.page_title).toBe("مضخة تفريغ رقمية احترافية للرجال (Digital Vacuum Pump)");
+    expect(String(entry.page_title)).not.toContain("Профессиональный");
+    expect(entry.page_path).toBe("/products/digital-vacuum-pump");
+  });
+
+  it("falls back to document.title when no intended title is provided", () => {
+    w.dataLayer = [];
+    const original = document.title;
+    document.title = "Title From DOM";
+    try {
+      trackPageView("/some-path");
+    } finally {
+      document.title = original;
+    }
+    const entry = lastDataLayerEntry() as Record<string, unknown>;
+    expect(entry.page_title).toBe("Title From DOM");
+  });
+
+  it("ignores blank intended titles and uses the DOM title", () => {
+    w.dataLayer = [];
+    const original = document.title;
+    document.title = "DOM Fallback Title";
+    try {
+      trackPageView("/some-path", "   ");
+    } finally {
+      document.title = original;
+    }
+    const entry = lastDataLayerEntry() as Record<string, unknown>;
+    expect(entry.page_title).toBe("DOM Fallback Title");
   });
 });

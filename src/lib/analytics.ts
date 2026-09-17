@@ -82,6 +82,24 @@ export function trackBeginCheckout(items: TrackItem[], value: number, shipping: 
 }
 
 /**
+ * page_view — (2026-09-17) page_title مستقر ضد auto-translate:
+ * نبعث العنوان **المقصود من بيانات الـ route** مش `document.title`.
+ * لما متصفح الزائر يترجم الصفحة (روسية/إنجليزية...) المتصفح بيكتب
+ * الـ `<title>` بالترجمة، وكان GA4 بيسجل العنوان المترجم كـ
+ * "Page class" (artifact معروف) — فصفحة عربية كانت بتظهر بلغات
+ * غريبة في التقارير. `document.title` fallback بس لو مفيش عنوان.
+ */
+export function trackPageView(url: string, title?: string) {
+  if (typeof window === "undefined") return;
+  const stableTitle = title && title.trim() ? title : document.title;
+  emit("page_view", {
+    page_path: url,
+    page_location: window.location.href,
+    page_title: stableTitle,
+  });
+}
+
+/**
  * purchase = الإيراد في GA4. value = إجمالي الطلب (شامل الشحن)،
  * shipping/discount بيسنوا فراديتهم للتحليل.
  */
