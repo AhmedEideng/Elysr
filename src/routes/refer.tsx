@@ -3,11 +3,7 @@ import { useEffect, useState } from "react";
 import { Share2, Gift, Users, Copy, Check } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 import { toast } from "sonner";
-import {
-  getOwnReferralCode,
-  buildReferralLink,
-  buildReferralShareText,
-} from "@/lib/referral";
+import { getOwnReferralCode, buildReferralLink, buildReferralShareText } from "@/lib/referral";
 import { waShareUrl } from "@/lib/share";
 import { trackCtaClick, trackViewPromotion } from "@/lib/analytics";
 
@@ -26,12 +22,13 @@ export const Route = createFileRoute("/refer")({
 });
 
 function ReferPage() {
-  const [code, setCode] = useState<string>("");
+  const [code] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    return getOwnReferralCode();
+  });
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const c = getOwnReferralCode();
-    setCode(c);
     trackViewPromotion("referral_program", "referral_page");
   }, []);
 
@@ -70,7 +67,9 @@ function ReferPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <div className="flex-1 rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 px-5 py-4 text-center">
                   <div className="text-xs font-bold text-muted-foreground">كودك</div>
-                  <div className="mt-1 text-3xl font-black tracking-widest text-primary">{code}</div>
+                  <div className="mt-1 text-3xl font-black tracking-widest text-primary">
+                    {code}
+                  </div>
                 </div>
                 <button
                   onClick={handleCopy}
@@ -91,7 +90,9 @@ function ReferPage() {
                   href={waShareUrl(shareText)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => trackCtaClick("share_referral_whatsapp", "/refer", { referral_code: code })}
+                  onClick={() =>
+                    trackCtaClick("share_referral_whatsapp", "/refer", { referral_code: code })
+                  }
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3.5 text-sm font-black text-white shadow-lg transition-smooth hover:bg-[#1ebd57]"
                 >
                   <Share2 className="h-5 w-5" />
@@ -107,7 +108,9 @@ function ReferPage() {
               </div>
             </>
           ) : (
-            <div className="text-center text-sm text-muted-foreground">جاري تجهيز كود الإحالة...</div>
+            <div className="text-center text-sm text-muted-foreground">
+              جاري تجهيز كود الإحالة...
+            </div>
           )}
         </div>
 
@@ -134,7 +137,8 @@ function ReferPage() {
         </div>
 
         <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-center text-xs leading-6 text-amber-900">
-          🔒 كود الإحالة لا يحتوي أي بيانات شخصية — مجرد رمز عشوائي. الخصوصية محفوظة 100% وكل الطلبات بتغليف سري محايد.
+          🔒 كود الإحالة لا يحتوي أي بيانات شخصية — مجرد رمز عشوائي. الخصوصية محفوظة 100% وكل
+          الطلبات بتغليف سري محايد.
         </div>
       </div>
     </div>

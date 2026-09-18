@@ -129,7 +129,11 @@ function SearchResultsPage() {
           ) : null}
           <div className="grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {items.map((p) => (
-              <ProductCard key={p.id} product={p} listName={query ? `search_${query}` : "search_all"} />
+              <ProductCard
+                key={p.id}
+                product={p}
+                listName={query ? `search_${query}` : "search_all"}
+              />
             ))}
           </div>
         </>

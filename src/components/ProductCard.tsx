@@ -8,7 +8,12 @@ import { toast } from "sonner";
 import { isPromotionEnabled } from "@/lib/promo";
 import { ProductCardImage } from "@/features/product/components/ProductCardImage";
 import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
-import { trackSelectItem, trackCtaClick, trackAddToWishlist, trackRemoveFromWishlist } from "@/lib/analytics";
+import {
+  trackSelectItem,
+  trackCtaClick,
+  trackAddToWishlist,
+  trackRemoveFromWishlist,
+} from "@/lib/analytics";
 
 type UseBadge = { label: string; className: string };
 
@@ -67,13 +72,7 @@ function getUseBadge(product: Product): UseBadge {
   return { label: "طاقة وحيوية", className: "bg-amber-400 text-amber-950" };
 }
 
-export function ProductCard({
-  product,
-  listName,
-}: {
-  product: Product;
-  listName?: string;
-}) {
+export function ProductCard({ product, listName }: { product: Product; listName?: string }) {
   const { add } = useCart();
   const nofollow = GOOGLE_SHOPPING_BLOCKED.has(product.id) ? "nofollow" : undefined;
   const { has: hasInWishlist, toggle: toggleWishlist } = useWishlist();
@@ -99,10 +98,20 @@ export function ProductCard({
           const wasAdded = !wishlisted;
           toggleWishlist(product);
           if (wasAdded) {
-            trackAddToWishlist({ id: product.id, name: product.name, price: product.price, qty: 1 });
+            trackAddToWishlist({
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              qty: 1,
+            });
             trackCtaClick("add_to_wishlist", effectiveListName, { product_id: product.id });
           } else {
-            trackRemoveFromWishlist({ id: product.id, name: product.name, price: product.price, qty: 1 });
+            trackRemoveFromWishlist({
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              qty: 1,
+            });
           }
           toast.success(wasAdded ? "أضيف للمفضلة ❤️" : "أزيل من المفضلة", {
             duration: 1500,

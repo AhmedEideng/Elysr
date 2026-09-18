@@ -47,7 +47,10 @@ function secureToken(chars: number): string {
       .toUpperCase();
   } catch {
     // fallback
-    return Math.random().toString(36).slice(2, 2 + chars).toUpperCase();
+    return Math.random()
+      .toString(36)
+      .slice(2, 2 + chars)
+      .toUpperCase();
   }
 }
 
@@ -115,7 +118,8 @@ export function clearReferrerCode(): void {
 }
 
 export function buildReferralLink(code: string): string {
-  const base = typeof window !== "undefined" ? window.location.origin : "https://elysrmedical.store";
+  const base =
+    typeof window !== "undefined" ? window.location.origin : "https://elysrmedical.store";
   return `${base}/?ref=${code}`;
 }
 

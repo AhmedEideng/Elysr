@@ -18,12 +18,14 @@ export const Route = createFileRoute("/order-confirmed")({
 });
 
 function OrderConfirmedPage() {
-  const [referralCode, setReferralCode] = useState("");
+  const [referralCode] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return getOwnReferralCode();
+  });
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setReferralCode(getOwnReferralCode());
   }, []);
 
   const referralLink = referralCode ? buildReferralLink(referralCode) : "";
@@ -34,7 +36,9 @@ function OrderConfirmedPage() {
       await navigator.clipboard.writeText(referralLink);
       setCopied(true);
       toast.success("تم نسخ رابط الإحالة!");
-      trackCtaClick("copy_referral_from_confirmed", "/order-confirmed", { referral_code: referralCode });
+      trackCtaClick("copy_referral_from_confirmed", "/order-confirmed", {
+        referral_code: referralCode,
+      });
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error("فشل النسخ");
@@ -106,7 +110,11 @@ function OrderConfirmedPage() {
               href={waShareUrl(shareText)}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => trackCtaClick("share_referral_from_confirmed", "/order-confirmed", { referral_code: referralCode })}
+              onClick={() =>
+                trackCtaClick("share_referral_from_confirmed", "/order-confirmed", {
+                  referral_code: referralCode,
+                })
+              }
               className="flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3.5 text-sm font-black text-white shadow-lg hover:bg-[#1ebd57]"
             >
               <Share2 className="h-5 w-5" /> مشاركة واتساب

@@ -157,7 +157,11 @@ function CategoryPage() {
       ) : (
         <div className="grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {items.map((p) => (
-            <ProductCard key={p.id} product={p} listName={query ? `men_search_${query}` : "men_category"} />
+            <ProductCard
+              key={p.id}
+              product={p}
+              listName={query ? `men_search_${query}` : "men_category"}
+            />
           ))}
         </div>
       )}

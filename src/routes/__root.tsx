@@ -163,8 +163,7 @@ function RouteHeadSync() {
     // أدق مصدر: loaderData من الـ matches (product.id أو slug)
     for (let i = matches.length - 1; i >= 0; i--) {
       const ld = matches[i].loaderData as
-        | { product?: { id: string }; article?: { slug: string } }
-        | undefined;
+        { product?: { id: string }; article?: { slug: string } } | undefined;
       if (!ld) continue;
       if (ld.product?.id) {
         topic = topicForProduct(ld.product.id)?.name;
