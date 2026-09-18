@@ -30,7 +30,8 @@ import {
   FREE_SHIPPING_THRESHOLD,
   qualifiesForFreeShipping,
 } from "@/lib/governorates";
-import { trackBeginCheckout, trackCtaClick, trackPurchase } from "@/lib/analytics";
+import { trackBeginCheckout, trackCtaClick, trackPurchase, trackViewCart } from "@/lib/analytics";
+import { getReferrerCode } from "@/lib/referral";
 import { toast } from "sonner";
 import { getNextTier, PROMO_TAGLINE, isPromotionEnabled } from "@/lib/promo";
 
@@ -97,6 +98,16 @@ function CartPage() {
     };
   }, [items, syncCatalog]);
 
+  // GA4: view_cart — كل مرة السلة تتغير أو الصفحة تتفتح
+  useEffect(() => {
+    if (items.length > 0) {
+      trackViewCart(
+        items.map((i) => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
+        total,
+      );
+    }
+  }, [items, total]);
+
   const checkout = async () => {
     if (items.length === 0) {
       toast.error("السلة فارغة");
@@ -147,6 +158,7 @@ function CartPage() {
       price: i.price,
       originalPrice: i.originalPrice,
     }));
+    const referralCode = getReferrerCode();
     const payload = {
       orderId,
       orderType: "cart",
@@ -166,6 +178,7 @@ function CartPage() {
       total: grandTotal,
       // الخصم الفعلي = شريحة أو باقة — promoApplied يعكس أي خصم تم تطبيقه
       promoApplied: discount > 0 || bundleDiscount > 0,
+      referralCode: referralCode || undefined,
     };
 
     // GA: cta + begin_checkout — اتقدم الطلب (مشاع للطريقتين)

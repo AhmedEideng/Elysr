@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { ProductCard } from "@/components/ProductCard";
 import {
@@ -8,6 +8,7 @@ import {
   HOMEPAGE_EXCLUDED_PRODUCT_IDS,
 } from "@/data/products";
 import { ArrowLeft } from "lucide-react";
+import { trackViewItemList } from "@/lib/analytics";
 
 export function ProductsTabs() {
   const [activeTab, setActiveTab] = useState<"men" | "women" | "devices">("men");
@@ -48,6 +49,15 @@ export function ProductsTabs() {
       .filter((p) => !allHomepageIds.has(p.id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(p.id))
       .slice(0, 4);
   }, [activeTab]);
+
+  useEffect(() => {
+    if (products.length > 0) {
+      trackViewItemList(
+        `home_tab_${activeTab}`,
+        products.map((p) => ({ id: p.id, name: p.name, price: p.price, qty: 1 })),
+      );
+    }
+  }, [products, activeTab]);
 
   return (
     <section className="py-8 bg-white">
@@ -96,7 +106,7 @@ export function ProductsTabs() {
         {/* Products Grid */}
         <div className="grid gap-5 grid-cols-2 lg:grid-cols-4">
           {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p.id} product={p} listName={`home_tab_${activeTab}`} />
           ))}
         </div>
 

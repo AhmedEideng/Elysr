@@ -2,16 +2,24 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   GA_CURRENCY,
   trackAddToCart,
+  trackAddToWishlist,
   trackBeginCheckout,
   trackCtaClick,
   trackOutboundClick,
   trackPageView,
   trackPurchase,
+  trackReferralApplied,
   trackRemoveFromCart,
+  trackRemoveFromWishlist,
   trackScrollMilestone,
+  trackSelectItem,
+  trackSelectPromotion,
   trackShareClick,
   trackSiteSearch,
+  trackViewCart,
   trackViewItem,
+  trackViewItemList,
+  trackViewPromotion,
   trackWebVital,
 } from "@/lib/analytics";
 
@@ -263,5 +271,76 @@ describe("share_click, outbound_click, search, cta_click, web_vital", () => {
     expect(e.metric_name).toBe("LCP");
     expect(e.metric_value).toBe(1234.568); // rounded to 3 decimals
     expect(e.metric_rating).toBe("good");
+  });
+});
+
+describe("v3 ecommerce — view_item_list, select_item, view_cart, wishlist, promotion, referral", () => {
+  it("view_item_list captures list name + items", () => {
+    w.dataLayer = [];
+    trackViewItemList("men_category", [{ id: "m-01", name: "A", price: 100, qty: 1 }]);
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("view_item_list");
+    expect(e.item_list_name).toBe("men_category");
+    expect((e.items as unknown[]).length).toBe(1);
+  });
+
+  it("view_item_list skips empty lists (no spam)", () => {
+    w.dataLayer = [];
+    trackViewItemList("empty", []);
+    expect(w.dataLayer).toHaveLength(0);
+  });
+
+  it("select_item captures list + item", () => {
+    w.dataLayer = [];
+    trackSelectItem("search_عسل", { id: "m-01", name: "A", price: 100, qty: 1 });
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("select_item");
+    expect(e.item_list_name).toBe("search_عسل");
+  });
+
+  it("view_cart captures value + items", () => {
+    w.dataLayer = [];
+    trackViewCart([{ id: "m-01", name: "A", price: 100, qty: 2 }], 200);
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("view_cart");
+    expect(e.value).toBe(200);
+  });
+
+  it("view_cart skips empty cart", () => {
+    w.dataLayer = [];
+    trackViewCart([], 0);
+    expect(w.dataLayer).toHaveLength(0);
+  });
+
+  it("wishlist add/remove", () => {
+    w.dataLayer = [];
+    trackAddToWishlist({ id: "m-01", name: "A", price: 100, qty: 1 });
+    let e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("add_to_wishlist");
+    w.dataLayer = [];
+    trackRemoveFromWishlist({ id: "m-01", name: "A", price: 100, qty: 1 });
+    e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("remove_from_wishlist");
+  });
+
+  it("view/select promotion", () => {
+    w.dataLayer = [];
+    trackViewPromotion("referral_program", "referral_page");
+    let e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("view_promotion");
+    expect(e.promotion_name).toBe("referral_program");
+    w.dataLayer = [];
+    trackSelectPromotion("diamond_promo", "diamond_25");
+    e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("select_promotion");
+  });
+
+  it("referral_applied captures code + source", () => {
+    w.dataLayer = [];
+    trackReferralApplied("EL-ABC123", "url_param");
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("referral_applied");
+    expect(e.referral_code).toBe("EL-ABC123");
+    expect(e.referral_source).toBe("url_param");
   });
 });

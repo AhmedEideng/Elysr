@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { isPromotionEnabled } from "@/lib/promo";
 import { ProductCardImage } from "@/features/product/components/ProductCardImage";
 import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
+import { trackSelectItem, trackCtaClick, trackAddToWishlist, trackRemoveFromWishlist } from "@/lib/analytics";
 
 type UseBadge = { label: string; className: string };
 
@@ -66,7 +67,13 @@ function getUseBadge(product: Product): UseBadge {
   return { label: "طاقة وحيوية", className: "bg-amber-400 text-amber-950" };
 }
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  listName,
+}: {
+  product: Product;
+  listName?: string;
+}) {
   const { add } = useCart();
   const nofollow = GOOGLE_SHOPPING_BLOCKED.has(product.id) ? "nofollow" : undefined;
   const { has: hasInWishlist, toggle: toggleWishlist } = useWishlist();
@@ -74,6 +81,7 @@ export function ProductCard({ product }: { product: Product }) {
   const useBadge = getUseBadge(product);
   const wishlisted = hasInWishlist(product.id);
   const showImage = Boolean(product.image);
+  const effectiveListName = listName ?? "general_product_list";
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-primary/10 bg-gradient-to-br from-white via-[#f0f9ff] to-[#fefce8] shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(0,109,166,0.2)] hover:border-primary/30">
@@ -90,11 +98,16 @@ export function ProductCard({ product }: { product: Product }) {
           event.stopPropagation();
           const wasAdded = !wishlisted;
           toggleWishlist(product);
-          if (wasAdded)
-            toast.success(wasAdded ? "أضيف للمفضلة ❤️" : "أزيل من المفضلة", {
-              duration: 1500,
-              className: "rounded-2xl font-bold",
-            });
+          if (wasAdded) {
+            trackAddToWishlist({ id: product.id, name: product.name, price: product.price, qty: 1 });
+            trackCtaClick("add_to_wishlist", effectiveListName, { product_id: product.id });
+          } else {
+            trackRemoveFromWishlist({ id: product.id, name: product.name, price: product.price, qty: 1 });
+          }
+          toast.success(wasAdded ? "أضيف للمفضلة ❤️" : "أزيل من المفضلة", {
+            duration: 1500,
+            className: "rounded-2xl font-bold",
+          });
         }}
         className={`group/heart absolute right-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ease-out hover:scale-110 active:scale-90 ${
           wishlisted
@@ -129,6 +142,14 @@ export function ProductCard({ product }: { product: Product }) {
         rel={nofollow}
         className="block"
         aria-label={`عرض تفاصيل ${product.name}`}
+        onClick={() =>
+          trackSelectItem(effectiveListName, {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            qty: 1,
+          })
+        }
       >
         {showImage ? (
           <ProductCardImage
@@ -154,6 +175,14 @@ export function ProductCard({ product }: { product: Product }) {
           params={{ slug: product.slug }}
           rel={nofollow}
           className="line-clamp-2 font-bold text-foreground/90 hover:text-primary transition-colors duration-300 leading-snug"
+          onClick={() =>
+            trackSelectItem(effectiveListName, {
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              qty: 1,
+            })
+          }
         >
           {product.name}
         </Link>
@@ -170,6 +199,7 @@ export function ProductCard({ product }: { product: Product }) {
           <button
             onClick={() => {
               if (product.stock <= 0) return;
+              trackCtaClick("add_to_cart", effectiveListName, { product_id: product.id });
               add(product);
               toast.success(promoOn ? "تمت الإضافة للسلة ☀️" : "تمت الإضافة للسلة", {
                 duration: 1500,

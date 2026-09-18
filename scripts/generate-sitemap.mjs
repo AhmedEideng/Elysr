@@ -416,6 +416,12 @@ async function generateSitemap() {
         changefreq: "yearly",
         lastmod: freshLastmod("src/routes/privacy.tsx", today),
       },
+      {
+        path: "/refer",
+        priority: "0.7",
+        changefreq: "weekly",
+        lastmod: freshLastmod("src/routes/refer.tsx", today),
+      },
     ];
 
     const urls = [

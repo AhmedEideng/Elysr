@@ -12,6 +12,7 @@ import {
   faqSchema,
 } from "@/lib/seo";
 import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
+import { trackViewItemList } from "@/lib/analytics";
 
 const PAGE_TITLE = "منتجات الصحة الزوجية للنساء";
 
@@ -92,6 +93,10 @@ function CategoryPage() {
       ]),
     );
     injectJsonLd("faq", faqSchema(WOMEN_CATEGORY_FAQS));
+    trackViewItemList(
+      "women_category",
+      items.map((p) => ({ id: p.id, name: p.name, price: p.price, qty: 1 })),
+    );
     return () => {
       clearJsonLd("itemlist");
       clearJsonLd("breadcrumb");
@@ -109,7 +114,7 @@ function CategoryPage() {
 
       <div className="grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {items.map((p) => (
-          <ProductCard key={p.id} product={p} />
+          <ProductCard key={p.id} product={p} listName="women_category" />
         ))}
       </div>
 

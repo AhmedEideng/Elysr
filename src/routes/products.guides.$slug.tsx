@@ -17,6 +17,8 @@ import {
   injectJsonLd,
   itemListSchema,
 } from "@/lib/seo";
+import { useScrollTracking } from "@/hooks/use-scroll-tracking";
+import { trackViewItemList } from "@/lib/analytics";
 
 export const Route = createFileRoute("/products/guides/$slug")({
   loader: async ({ params }) => {
@@ -74,6 +76,7 @@ export const Route = createFileRoute("/products/guides/$slug")({
 
 function SeoLandingPageComponent() {
   const { page, selectedProducts, linkedArticles } = Route.useLoaderData();
+  useScrollTracking(page.title);
 
   useEffect(() => {
     clearPrerenderJsonLd();
@@ -99,6 +102,12 @@ function SeoLandingPageComponent() {
         page.title,
       ),
     );
+    if (selectedProducts.length > 0) {
+      trackViewItemList(
+        `guide_${page.slug}`,
+        selectedProducts.map((p) => ({ id: p.id, name: p.name, price: p.price, qty: 1 })),
+      );
+    }
 
     return () => {
       clearJsonLd("breadcrumb");
@@ -184,7 +193,7 @@ function SeoLandingPageComponent() {
           </div>
           <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
             {selectedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} listName={`guide_${page.slug}`} />
             ))}
           </div>
         </section>

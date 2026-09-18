@@ -20,9 +20,10 @@ import { CartProvider } from "@/contexts/cart";
 import { Layout } from "@/components/layout/Layout";
 import { applySeo } from "@/lib/seo";
 import { installErrorTracking } from "@/lib/error-tracking";
-import { trackPageView } from "@/lib/analytics";
+import { trackPageView, trackReferralApplied } from "@/lib/analytics";
 import { GlobalTrackers } from "@/components/GlobalTrackers";
 import { topicForArticle, topicForGuide, topicForProduct } from "@/data/topics";
+import { getReferrerFromUrl, saveReferrerCode } from "@/lib/referral";
 
 // 🛡️ تفعيل تتبع الأخطاء العالمي — يلتقط أي uncaught error أو promise rejection
 installErrorTracking();
@@ -192,6 +193,17 @@ function RouteHeadSync() {
       search: search || undefined,
       topic,
     });
+
+    // (2026-09-18 v3) Referral detection — ?ref=CODE
+    try {
+      const refCode = getReferrerFromUrl();
+      if (refCode) {
+        saveReferrerCode(refCode);
+        trackReferralApplied(refCode, "url_param");
+      }
+    } catch {
+      /* referral tracking failure — لا نمنع الصفحة */
+    }
   }, [matches, router]);
 
   return null;

@@ -12,8 +12,15 @@
  * الأحداث:
  *   page_view        — visit (manual SPA + Enhanced Measurement)
  *   view_item        — زيارة صفحة منتج
+ *   view_item_list   — عرض قائمة منتجات (فئة / بحث / دليل)
+ *   select_item      — اختيار منتج من قائمة
+ *   view_cart        — عرض السلة
  *   add_to_cart      — إضافة للسلة
  *   remove_from_cart — حذف من السلة
+ *   add_to_wishlist  — إضافة للمفضلة
+ *   remove_from_wishlist — حذف من المفضلة
+ *   view_promotion   — عرض بانر/عرض ترويجي
+ *   select_promotion — الضغط على بانر/عرض
  *   begin_checkout   — تقديم الطلب (قبل التسجيل)
  *   purchase         — الطلب اتسجل فعلياً في الشيت (أو إرسال beacon)
  *   scroll_milestone — قراءة 50%/90% (event مخصص لتجنب التصادم مع
@@ -23,11 +30,16 @@
  *   search           — بحث الموقع (مخصص)
  *   outbound_click   — outbound link click
  *   file_download    — download click
+ *   referral_applied — استخدام كود إحالة (viral loop)
  *
  * (2026-09-18) GA4 Audit:
  *   - page_title artifact (متزامن مع الـ fix بتاع useErrorTracking)
  *   - scroll event clash مع Enhanced Measurement
  *   - ما فيش debug_mode / ما فيش page_referrer tracking
+ * (2026-09-18 v3) Complete coverage:
+ *   - view_item_list + select_item لكل قوائم المنتجات
+ *   - view_cart + wishlist events
+ *   - view/select_promotion
  * ============================================================
  */
 
@@ -221,5 +233,68 @@ export function trackWebVital(
     metric_name: name,
     metric_value: Math.round(value * 1000) / 1000,
     metric_rating: rating,
+  });
+}
+
+// ── (2026-09-18 v3) E-commerce List & Promotion Events ──
+
+export function trackViewItemList(listName: string, items: TrackItem[]) {
+  if (items.length === 0) return;
+  emit("view_item_list", {
+    item_list_name: listName,
+    items: gaItems(items),
+  });
+}
+
+export function trackSelectItem(listName: string, item: TrackItem) {
+  emit("select_item", {
+    item_list_name: listName,
+    items: gaItems([item]),
+  });
+}
+
+export function trackViewCart(items: TrackItem[], value: number) {
+  if (items.length === 0) return;
+  emit("view_cart", {
+    currency: GA_CURRENCY,
+    value: Math.round(value),
+    items: gaItems(items),
+  });
+}
+
+export function trackAddToWishlist(item: TrackItem) {
+  emit("add_to_wishlist", {
+    currency: GA_CURRENCY,
+    value: Math.round(item.price),
+    items: gaItems([item]),
+  });
+}
+
+export function trackRemoveFromWishlist(item: TrackItem) {
+  emit("remove_from_wishlist", {
+    currency: GA_CURRENCY,
+    value: Math.round(item.price),
+    items: gaItems([item]),
+  });
+}
+
+export function trackViewPromotion(promoName: string, promoId?: string) {
+  emit("view_promotion", {
+    promotion_name: promoName,
+    promotion_id: promoId ?? promoName,
+  });
+}
+
+export function trackSelectPromotion(promoName: string, promoId?: string) {
+  emit("select_promotion", {
+    promotion_name: promoName,
+    promotion_id: promoId ?? promoName,
+  });
+}
+
+export function trackReferralApplied(code: string, source: string) {
+  emit("referral_applied", {
+    referral_code: code,
+    referral_source: source,
   });
 }

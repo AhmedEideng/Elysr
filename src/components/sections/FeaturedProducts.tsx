@@ -1,11 +1,21 @@
 import { ProductCard } from "@/components/ProductCard";
 import { getFeaturedProducts } from "@/data/products";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { trackViewItemList } from "@/lib/analytics";
 
 export function FeaturedProducts() {
   // البيانات محلية ثابتة — نحسبها مرة واحدة عبر useMemo.
   // لا حاجة لـ lazy loading أو effects هنا، فالحساب فوري ورخيص.
   const featured = useMemo(() => getFeaturedProducts(), []);
+
+  useEffect(() => {
+    if (featured.length > 0) {
+      trackViewItemList(
+        "featured_home",
+        featured.map((p) => ({ id: p.id, name: p.name, price: p.price, qty: 1 })),
+      );
+    }
+  }, [featured]);
 
   return (
     <section id="featured-products" className="scroll-mt-20 bg-gradient-soft py-5 md:py-6">
@@ -20,7 +30,7 @@ export function FeaturedProducts() {
         </div>
         <div className="grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {featured.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p.id} product={p} listName="featured_home" />
           ))}
         </div>
       </div>

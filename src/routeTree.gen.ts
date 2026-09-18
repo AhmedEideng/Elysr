@@ -17,6 +17,7 @@ import { Route as EducationRouteImport } from './routes/education'
 import { Route as MedicalReviewBoardRouteImport } from './routes/medical-review-board'
 import { Route as OrderConfirmedRouteImport } from './routes/order-confirmed'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ReferRouteImport } from './routes/refer'
 import { Route as ReturnsRouteImport } from './routes/returns'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShippingRouteImport } from './routes/shipping'
@@ -67,6 +68,11 @@ const OrderConfirmedRoute = OrderConfirmedRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReferRoute = ReferRouteImport.update({
+  id: '/refer',
+  path: '/refer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReturnsRoute = ReturnsRouteImport.update({
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/medical-review-board': typeof MedicalReviewBoardRoute
   '/order-confirmed': typeof OrderConfirmedRoute
   '/privacy': typeof PrivacyRoute
+  '/refer': typeof ReferRoute
   '/returns': typeof ReturnsRoute
   '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/medical-review-board': typeof MedicalReviewBoardRoute
   '/order-confirmed': typeof OrderConfirmedRoute
   '/privacy': typeof PrivacyRoute
+  '/refer': typeof ReferRoute
   '/returns': typeof ReturnsRoute
   '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/medical-review-board': typeof MedicalReviewBoardRoute
   '/order-confirmed': typeof OrderConfirmedRoute
   '/privacy': typeof PrivacyRoute
+  '/refer': typeof ReferRoute
   '/returns': typeof ReturnsRoute
   '/search': typeof SearchRoute
   '/shipping': typeof ShippingRoute
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/medical-review-board'
     | '/order-confirmed'
     | '/privacy'
+    | '/refer'
     | '/returns'
     | '/search'
     | '/shipping'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/medical-review-board'
     | '/order-confirmed'
     | '/privacy'
+    | '/refer'
     | '/returns'
     | '/search'
     | '/shipping'
@@ -242,6 +253,7 @@ export interface FileRouteTypes {
     | '/medical-review-board'
     | '/order-confirmed'
     | '/privacy'
+    | '/refer'
     | '/returns'
     | '/search'
     | '/shipping'
@@ -264,6 +276,7 @@ export interface RootRouteChildren {
   MedicalReviewBoardRoute: typeof MedicalReviewBoardRoute
   OrderConfirmedRoute: typeof OrderConfirmedRoute
   PrivacyRoute: typeof PrivacyRoute
+  ReferRoute: typeof ReferRoute
   ReturnsRoute: typeof ReturnsRoute
   SearchRoute: typeof SearchRoute
   ShippingRoute: typeof ShippingRoute
@@ -333,6 +346,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refer': {
+      id: '/refer'
+      path: '/refer'
+      fullPath: '/refer'
+      preLoaderRoute: typeof ReferRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/returns': {
@@ -424,6 +444,7 @@ const rootRouteChildren: RootRouteChildren = {
   MedicalReviewBoardRoute: MedicalReviewBoardRoute,
   OrderConfirmedRoute: OrderConfirmedRoute,
   PrivacyRoute: PrivacyRoute,
+  ReferRoute: ReferRoute,
   ReturnsRoute: ReturnsRoute,
   SearchRoute: SearchRoute,
   ShippingRoute: ShippingRoute,

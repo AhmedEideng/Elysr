@@ -70,7 +70,9 @@ import {
   trackPurchase,
   trackShareClick,
   trackViewItem,
+  trackViewItemList,
 } from "@/lib/analytics";
+import { getReferrerCode } from "@/lib/referral";
 
 export const Route = createFileRoute("/products/$slug")({
   component: ProductPage,
@@ -182,9 +184,22 @@ function ProductPage() {
   }, [product.id, trackRecentlyViewed, product]);
 
   // GA: view_item — كل زيارة لصفحة منتج (سعر من الكتالوج الرسمي)
+  // + view_item_list للمنتجات المرتبطة (cross-sell)
   useEffect(() => {
     trackViewItem({ id: product.id, name: product.name, price: product.price, qty: 1 });
-  }, [product.id, product.name, product.price]);
+    if (related.length > 0) {
+      trackViewItemList(
+        `related_${product.id}`,
+        related.map((p) => ({ id: p.id, name: p.name, price: p.price, qty: 1 })),
+      );
+    }
+    if (crossSells.length > 0) {
+      trackViewItemList(
+        `cross_sell_${product.id}`,
+        crossSells.map((p) => ({ id: p.id, name: p.name, price: p.price, qty: 1 })),
+      );
+    }
+  }, [product.id, product.name, product.price, related, crossSells]);
 
   useEffect(() => {
     // أزل نسخ الـ prerender أولاً حتى لا يتكرر أي schema بعد الـ hydration
@@ -291,6 +306,7 @@ function ProductPage() {
         },
       ];
 
+      const referralCode = getReferrerCode();
       const payload = {
         orderId,
         orderType: "شراء فوري",
@@ -309,6 +325,7 @@ function ProductPage() {
         shipping,
         total: grandTotal,
         promoApplied: discount > 0,
+        referralCode: referralCode || undefined,
       };
 
       // GA: cta + begin_checkout — اتقدم الطلب
@@ -648,7 +665,7 @@ function ProductPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {related.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard key={p.id} product={p} listName={`related_${product.id}`} />
             ))}
           </div>
         </section>

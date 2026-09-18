@@ -12,6 +12,7 @@ import {
   faqSchema,
 } from "@/lib/seo";
 import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
+import { trackViewItemList } from "@/lib/analytics";
 
 const PAGE_TITLE = "منتجات الصحة الزوجية للرجال";
 
@@ -111,12 +112,17 @@ function CategoryPage() {
       ]),
     );
     injectJsonLd("faq", faqSchema(MEN_CATEGORY_FAQS));
+    // GA4: view_item_list — كل عرض لقائمة منتجات الرجال
+    trackViewItemList(
+      query ? `men_search_${query}` : "men_category",
+      items.map((p) => ({ id: p.id, name: p.name, price: p.price, qty: 1 })),
+    );
     return () => {
       clearJsonLd("itemlist");
       clearJsonLd("breadcrumb");
       clearJsonLd("faq");
     };
-  }, [items]);
+  }, [items, query]);
 
   return (
     <div className="container mx-auto px-4 py-10 md:py-12">
@@ -151,7 +157,7 @@ function CategoryPage() {
       ) : (
         <div className="grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {items.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p.id} product={p} listName={query ? `men_search_${query}` : "men_category"} />
           ))}
         </div>
       )}
