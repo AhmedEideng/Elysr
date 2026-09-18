@@ -571,6 +571,7 @@ async function prerender() {
   <section data-prerender-static-hero><div><img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" width="1200" height="663" loading="eager" fetchpriority="high" decoding="async"></div></section>
   ${staticPromoShell()}
   ${staticRecentlyViewedShell()}
+  <script src="/scripts/recently-viewed-shell.js?v=${CACHE_VERSION}"></script>
   ${staticProductSection(homeFeatured, { description: "باقة مختارة بعناية من أفضل المنتجات والمكملات لدعم صحتك وحيويتك الزوجية بأمان وثقة" })}
 </div>`;
       let html = buildHtml(template, {
