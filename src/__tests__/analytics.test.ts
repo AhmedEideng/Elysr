@@ -3,10 +3,16 @@ import {
   GA_CURRENCY,
   trackAddToCart,
   trackBeginCheckout,
+  trackCtaClick,
+  trackOutboundClick,
   trackPageView,
   trackPurchase,
   trackRemoveFromCart,
+  trackScrollMilestone,
+  trackShareClick,
+  trackSiteSearch,
   trackViewItem,
+  trackWebVital,
 } from "@/lib/analytics";
 
 type W = typeof window & { gtag?: (...args: unknown[]) => void; dataLayer?: unknown[] };
@@ -153,5 +159,109 @@ describe("trackPageView — stable page_title (anti auto-translate)", () => {
     }
     const entry = lastDataLayerEntry() as Record<string, unknown>;
     expect(entry.page_title).toBe("DOM Fallback Title");
+  });
+});
+
+describe("trackPageView — referrer + search + topic (audit 2026-09-18)", () => {
+  it("includes page_referrer in every page_view", () => {
+    w.dataLayer = [];
+    trackPageView("/x", "T", { referrer: "https://google.com/" });
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.page_referrer).toBe("https://google.com/");
+  });
+
+  it("includes page_search when search string is non-empty", () => {
+    w.dataLayer = [];
+    trackPageView("/search", "T", { search: "عسل ملكي" });
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.page_search).toBe("عسل ملكي");
+  });
+
+  it("omits page_search when search string is empty", () => {
+    w.dataLayer = [];
+    trackPageView("/x", "T", { search: "" });
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.page_search).toBeUndefined();
+  });
+
+  it("tags the page with its topic when provided", () => {
+    w.dataLayer = [];
+    trackPageView("/education/erectile-dysfunction", "T", { topic: "ضعف الانتصاب ودعم الأداء" });
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.page_topic).toBe("ضعف الانتصاب ودعم الأداء");
+  });
+});
+
+describe("trackScrollMilestone — anti-clash with Enhanced Measurement", () => {
+  it("emits scroll_milestone (NOT scroll — that would clash with GA4 built-in)", () => {
+    w.dataLayer = [];
+    trackScrollMilestone(50, "Page Title");
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("scroll_milestone");
+    expect(e.percent_scrolled).toBe(50);
+    expect(e.page_title).toBe("Page Title");
+    expect(e.page_path).toBeDefined();
+  });
+
+  it("falls back to document.title when pageTitle is missing", () => {
+    w.dataLayer = [];
+    const original = document.title;
+    document.title = "Scroll Test";
+    try {
+      trackScrollMilestone(90);
+    } finally {
+      document.title = original;
+    }
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.page_title).toBe("Scroll Test");
+  });
+});
+
+describe("share_click, outbound_click, search, cta_click, web_vital", () => {
+  it("trackShareClick captures kind + path", () => {
+    w.dataLayer = [];
+    trackShareClick("article", "/education/erectile-dysfunction");
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("share_click");
+    expect(e.share_kind).toBe("article");
+    expect(e.share_from).toBe("/education/erectile-dysfunction");
+  });
+
+  it("trackOutboundClick captures url + label", () => {
+    w.dataLayer = [];
+    trackOutboundClick("https://wa.me/201098088206", "whatsapp");
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("outbound_click");
+    expect(e.outbound_url).toBe("https://wa.me/201098088206");
+    expect(e.outbound_label).toBe("whatsapp");
+  });
+
+  it("trackSiteSearch captures term + count", () => {
+    w.dataLayer = [];
+    trackSiteSearch("كريم تأخير", 5);
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("search");
+    expect(e.search_term).toBe("كريم تأخير");
+    expect(e.results_count).toBe(5);
+  });
+
+  it("trackCtaClick captures name + location + extra", () => {
+    w.dataLayer = [];
+    trackCtaClick("add_to_cart", "/products/m-01", { product_id: "m-01" });
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("cta_click");
+    expect(e.cta_name).toBe("add_to_cart");
+    expect(e.cta_location).toBe("/products/m-01");
+    expect(e.product_id).toBe("m-01");
+  });
+
+  it("trackWebVital captures metric + rating", () => {
+    w.dataLayer = [];
+    trackWebVital("LCP", 1234.5678, "good");
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.event).toBe("web_vital");
+    expect(e.metric_name).toBe("LCP");
+    expect(e.metric_value).toBe(1234.568); // rounded to 3 decimals
+    expect(e.metric_rating).toBe("good");
   });
 });

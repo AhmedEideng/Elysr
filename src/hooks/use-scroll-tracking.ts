@@ -1,35 +1,24 @@
 import { useEffect, useRef } from "react";
+import { trackScrollMilestone } from "@/lib/analytics";
 
-// 📊 إبلاغ GA4 بميلstone القراءة (50%/90%) — قارئ عالي النية.
-// يُرسل كحدث "scroll" مخصص (مع page_title/percent) ليعمل مع أي GA4 property.
-function trackScrollMilestone(pct: number) {
-  if (typeof window === "undefined") return;
-  const w = window as unknown as {
-    gtag?: (...args: unknown[]) => void;
-    dataLayer?: unknown[];
-  };
-  const payload = {
-    page_title: document.title,
-    page_location: window.location.href,
-    percent_scrolled: pct,
-  };
-  try {
-    if (typeof w.gtag === "function") {
-      w.gtag("event", "scroll", payload);
-    } else if (Array.isArray(w.dataLayer)) {
-      w.dataLayer.push({ event: "scroll", ...payload });
-    }
-  } catch {
-    // لا نسمح لتتبع التمرير بإعاقة الصفحة
-  }
-}
-
-export function useScrollTracking(pageName: string) {
+/**
+ * (2026-09-18) إبلاغ GA4 بميـلستون القراءة (50%/90%) — قارئ عالي النية.
+ * يرسل event مخصص `scroll_milestone` (ليس `scroll` المتعارض مع
+ * GA4's built-in Enhanced Measurement) + عنوان مستقر من الـ route
+ * (مقاومة auto-translate — نفس الـ fix بتاع trackPageView).
+ *
+ * ⚠️ الـ scroll restore للراوتر (`window.scrollTo(0)`) بيطلق
+ * `scroll` event بعد mount بدون أي تصرف من المستخدم — ده متعالج
+ * من حقيقة أن الـ useEffect بيشتغل مرة واحدة بس في أول mount
+ * (الـ refs مبتعمل reset لما الـ effect يتشال).
+ */
+export function useScrollTracking(pageTitle: string) {
   const tracked50 = useRef(false);
   const tracked90 = useRef(false);
 
   useEffect(() => {
-    // Reset refs on page change
+    // Reset refs on page change (effect runs on each route change because
+    // pageTitle prop changes — but we also reset inside the deps)
     tracked50.current = false;
     tracked90.current = false;
 
@@ -38,36 +27,29 @@ export function useScrollTracking(pageName: string) {
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          // Calculate scroll percentage
           const winHeight = window.innerHeight;
           const docHeight = document.documentElement.scrollHeight;
           const scrollTop = window.scrollY;
           const trackLength = docHeight - winHeight;
           const pctScrolled = trackLength > 0 ? Math.floor((scrollTop / trackLength) * 100) : 0;
 
-          // Track 50%
           if (pctScrolled >= 50 && !tracked50.current) {
             tracked50.current = true;
-            trackScrollMilestone(50);
+            trackScrollMilestone(50, pageTitle);
           }
-
-          // Track 90%
           if (pctScrolled >= 90 && !tracked90.current) {
             tracked90.current = true;
-            trackScrollMilestone(90);
+            trackScrollMilestone(90, pageTitle);
           }
-
           ticking = false;
         });
-
         ticking = true;
       }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [pageName]);
+  }, [pageTitle]);
 }

@@ -21,6 +21,7 @@ import { Layout } from "@/components/layout/Layout";
 import { applySeo } from "@/lib/seo";
 import { installErrorTracking } from "@/lib/error-tracking";
 import { trackPageView } from "@/lib/analytics";
+import { GlobalTrackers } from "@/components/GlobalTrackers";
 
 // 🛡️ تفعيل تتبع الأخطاء العالمي — يلتقط أي uncaught error أو promise rejection
 installErrorTracking();
@@ -149,9 +150,46 @@ function RouteHeadSync() {
     }
 
     applySeo({ title, description, image, type, noindex });
-    // Google Analytics page tracking — العنوان من head() مش document.title
-    // (حماية من auto-translate المتصفح — انظر trackPageView)
-    trackPageView(window.location.pathname, title);
+
+    // (2026-09-18) page_view GA4 محسّن: مع الـ referrer + الـ search
+    // params + موضوع الصفحة (topic) — بيغذي التقارير ببيانات تحليل
+    // أعمق بدون أي PII. الـ async topic lookup متأخر شوية عن الـ track
+    // (الـ GA queue بيتحفظ في dataLayer)، فمفيش race.
+    const url = window.location.pathname;
+    const search = window.location.search.replace(/^\?/, "");
+    trackPageView(url, title, {
+      referrer: document.referrer,
+      search: search || undefined,
+    });
+    // async topic — مش متاح في الـ sync effect path، فيتعالج هنا:
+    void (async () => {
+      try {
+        const { topicForArticle, topicForGuide, topicForProduct } = await import("@/data/topics");
+        const { products } = await import("@/data/products");
+        const path = url.replace(/\/$/, "");
+        const slug = path.split("/").pop() || "";
+        let topic: string | undefined;
+        if (path.startsWith("/education/")) topic = topicForArticle(slug)?.name;
+        else if (path.startsWith("/products/guides/")) topic = topicForGuide(slug)?.name;
+        else if (path.startsWith("/products/")) {
+          const item = products.find((p) => p.slug === slug);
+          if (item) topic = topicForProduct(item.id)?.name;
+        }
+        if (topic) {
+          // emit page_topic additively (نفس الـ event مايتدفعش مرتين)
+          const w = window as unknown as {
+            gtag?: (...a: unknown[]) => void;
+            dataLayer?: unknown[];
+          };
+          const payload = { page_topic: topic, page_path: url };
+          if (typeof w.gtag === "function") w.gtag("event", "page_topic_set", payload);
+          else if (Array.isArray(w.dataLayer))
+            w.dataLayer.push({ event: "page_topic_set", ...payload });
+        }
+      } catch {
+        /* topics غير متاح — صامت */
+      }
+    })();
   }, [matches, router]);
 
   return null;
@@ -190,6 +228,7 @@ function RootComponent() {
     <CartProvider>
       <ScrollRestoration />
       <RouteHeadSync />
+      <GlobalTrackers />
       <ToastCleanupOnVisible />
       <Layout>
         <Outlet />

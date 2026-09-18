@@ -133,7 +133,8 @@ function ArticlePage() {
   const [isMainImageError, setIsMainImageError] = useState(false);
 
   // Track if user reads 50% or 90% of the article (High intent reader!)
-  useScrollTracking(`Article_${article.slug}`);
+  // (2026-09-18) title مقصود (route data) — مقاوم للترجمة التلقائية
+  useScrollTracking(article.title);
 
   useEffect(() => {
     clearPrerenderJsonLd();

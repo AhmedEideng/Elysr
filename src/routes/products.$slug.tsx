@@ -157,7 +157,8 @@ function ProductPage() {
     setQty(1);
   }
 
-  useScrollTracking(`Product_${product.slug}`);
+  // (2026-09-18) title مقصود (route data) — مقاوم للترجمة التلقائية
+  useScrollTracking(product.name);
   const [isOrdering, setIsOrdering] = useState(false);
   const [quickOrderOpen, setQuickOrderOpen] = useState(false);
   const [quickCustomer, setQuickCustomer] = useState({

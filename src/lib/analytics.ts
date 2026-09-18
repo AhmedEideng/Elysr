@@ -10,14 +10,36 @@
  * المرسلة منتجات + مبالغ بس (نفس سياسة API الطلبات).
  *
  * الأحداث:
+ *   page_view        — visit (manual SPA + Enhanced Measurement)
  *   view_item        — زيارة صفحة منتج
  *   add_to_cart      — إضافة للسلة
  *   remove_from_cart — حذف من السلة
  *   begin_checkout   — تقديم الطلب (قبل التسجيل)
  *   purchase         — الطلب اتسجل فعلياً في الشيت (أو إرسال beacon)
+ *   scroll_milestone — قراءة 50%/90% (event مخصص لتجنب التصادم مع
+ *                      GA4's built-in `scroll` من Enhanced Measurement)
+ *   share_click      — مشاركة واتساب (click event بخصائص)
+ *   cta_click        — أي CTA رئيسي (زر الطلب، الـ quick-order)
+ *   search           — بحث الموقع (مخصص)
+ *   outbound_click   — outbound link click
+ *   file_download    — download click
+ *
+ * (2026-09-18) GA4 Audit:
+ *   - page_title artifact (متزامن مع الـ fix بتاع useErrorTracking)
+ *   - scroll event clash مع Enhanced Measurement
+ *   - ما فيش debug_mode / ما فيش page_referrer tracking
+ * ============================================================
  */
 
 export const GA_CURRENCY = "EGP";
+export const GA_MEASUREMENT_ID = "G-V3X7Q3D0RR";
+
+/**
+ * page_view title artifact: لو الـ title مش مُمرر من route data، بتقرأ
+ * من document.title (اللي المتصفح ممكن يكون مترجمه) — بس لو الـ
+ * title مُمرر (الـ route اعرفه) → نبعثه هو. نفس الـ fix بتاع الـ
+ * page_view event، مطبّق هنا على الـ scroll event كمان.
+ */
 
 interface AnalyticsWindow {
   gtag?: (...args: unknown[]) => void;
@@ -82,21 +104,77 @@ export function trackBeginCheckout(items: TrackItem[], value: number, shipping: 
 }
 
 /**
- * page_view — (2026-09-17) page_title مستقر ضد auto-translate:
- * نبعث العنوان **المقصود من بيانات الـ route** مش `document.title`.
- * لما متصفح الزائر يترجم الصفحة (روسية/إنجليزية...) المتصفح بيكتب
- * الـ `<title>` بالترجمة، وكان GA4 بيسجل العنوان المترجم كـ
- * "Page class" (artifact معروف) — فصفحة عربية كانت بتظهر بلغات
- * غريبة في التقارير. `document.title` fallback بس لو مفيش عنوان.
+ * (2026-09-18) page_view موحّد — كل الـ routes تمر بـ trackPageView.
+ *
+ * @param url           path (window.location.pathname) — مع query لو موجود
+ * @param title         العنوان المقصود من الـ route (يتجنّب document.title artifact)
+ * @param options.referrer  من أين جاء الزائر (document.referrer)
+ * @param options.search    الـ search params لو موجودة (لتحليل الـ query)
+ * @param options.topic     موضوع الصفحة (من topics.ts لو متاح)
  */
-export function trackPageView(url: string, title?: string) {
+export function trackPageView(
+  url: string,
+  title?: string,
+  options: { referrer?: string; search?: string; topic?: string } = {},
+) {
   if (typeof window === "undefined") return;
   const stableTitle = title && title.trim() ? title : document.title;
-  emit("page_view", {
+  const payload: Record<string, unknown> = {
     page_path: url,
     page_location: window.location.href,
     page_title: stableTitle,
+    page_referrer: options.referrer ?? document.referrer,
+  };
+  // (2026-09-18) Search term — مهم للـ SEO traffic analysis: نشوف إيه
+  // الـ keywords اللي بتجيب زيارات لكل صفحة (organic search terms).
+  if (options.search) payload.page_search = options.search;
+  if (options.topic) payload.page_topic = options.topic;
+  emit("page_view", payload);
+}
+
+/**
+ * (2026-09-18) scroll milestone — اسم event مخصص لتجنّب الـ clash مع
+ * GA4's built-in `scroll` (من Enhanced Measurement). الإصدار القديم
+ * كان بيدفع `scroll` مباشرة، والـ GA4 ممكن بيعمل duplicate / drop.
+ */
+export function trackScrollMilestone(pct: number, pageTitle?: string) {
+  if (typeof window === "undefined") return;
+  const stableTitle = pageTitle && pageTitle.trim() ? pageTitle : document.title;
+  emit("scroll_milestone", {
+    percent_scrolled: pct,
+    page_title: stableTitle,
+    page_path: window.location.pathname,
   });
+}
+
+/**
+ * (2026-09-18) WhatsApp share click — مش جزء من الـ ecommerce flow،
+ * بس ضروري لقياس الـ viral loop. ما نرسلش الـ نص الكامل
+ * (ممكن يكون طويل جداً ويملأ GA)، بس الـ metadata.
+ */
+export function trackShareClick(kind: "product" | "article" | "guide", refPath: string) {
+  emit("share_click", {
+    share_kind: kind,
+    share_from: refPath,
+  });
+}
+
+/**
+ * (2026-09-18) CTA click — tracking لزيارات الـ high-intent: زرار
+ * "اطلب عبر واتساب"، زرار "أضف للسلة"، الـ quick-order submit،
+ * البحث في الموقع. الـ `cta_name` للتجميع في GA.
+ */
+export function trackCtaClick(ctaName: string, location: string, extra?: Record<string, unknown>) {
+  emit("cta_click", { cta_name: ctaName, cta_location: location, ...extra });
+}
+
+/**
+ * (2026-09-18) Outbound link click — لما الزائر يدوس على لينك
+ * خارجي (whatsapp.com/facebook/etc.). الـ url بنبعثه عشان نعرف
+ * الـ referrers في التقارير.
+ */
+export function trackOutboundClick(url: string, label: string) {
+  emit("outbound_click", { outbound_url: url, outbound_label: label });
 }
 
 /**
@@ -117,5 +195,31 @@ export function trackPurchase(
     shipping: Math.round(shipping),
     discount: Math.round(discount),
     items: gaItems(items),
+  });
+}
+
+/**
+ * (2026-09-18) Internal search — الـ SearchAction بتاع الـ schema
+ * بيتحرّك لما حد يدور في الـ SearchBar. الموقع بيدعم `?q=` URL
+ * (موجود في SearchAction) — بنبعث الـ search event عشان نعرف الـ
+ * keywords اللي الزوار بيدوروا عليها.
+ */
+export function trackSiteSearch(query: string, resultsCount: number) {
+  emit("search", { search_term: query, results_count: resultsCount });
+}
+
+/**
+ * (2026-09-18) Web Vitals — بيرسل الـ LCP/CLS/INP كـ params مع event
+ * `web_vitals`. بيتربط بـ LCP element لو معروف.
+ */
+export function trackWebVital(
+  name: "LCP" | "CLS" | "INP" | "FCP" | "TTFB",
+  value: number,
+  rating: string,
+) {
+  emit("web_vital", {
+    metric_name: name,
+    metric_value: Math.round(value * 1000) / 1000,
+    metric_rating: rating,
   });
 }
