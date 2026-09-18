@@ -17,7 +17,7 @@
  * without booting a full dev server.
  * ============================================================
  */
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
@@ -45,10 +45,23 @@ function assetUrl(path) {
  * React replaces them as soon as the app is ready, but users still see the
  * real navigation, offer, and first product cards while JavaScript is loading.
  */
+function builtAssetUrl(prefix, fallback) {
+  try {
+    const file = readdirSync(resolve(DIST, "assets")).find((name) => name.startsWith(prefix));
+    if (file) return `/assets/${file}`;
+  } catch {
+    /* The fallback keeps the shell valid when this helper is inspected before build. */
+  }
+  return fallback;
+}
+
 function staticHeaderShell() {
+  const logoUrl = builtAssetUrl("logo-mono-", "/assets/logo-mono.webp");
   return `<div data-prerender-header-shell aria-hidden="true">
   <div data-prerender-header-inner>
-    <a href="/" data-prerender-brand>اليسر ميديكال</a>
+    <a href="/" data-prerender-brand aria-label="اليسر ميديكال">
+      <img src="${logoUrl}" alt="اليسر ميديكال — Elysr Medical Group" width="250" height="94" decoding="async" />
+    </a>
     <nav data-prerender-header-nav aria-label="القائمة الرئيسية">
       <a href="/">الرئيسية</a>
       <a href="/products/men">منتجات الرجال</a>
@@ -58,11 +71,19 @@ function staticHeaderShell() {
       <a href="/contact">تواصل معنا</a>
       <a href="/about">من نحن</a>
     </nav>
-    <div data-prerender-header-actions aria-hidden="true">
-      <span title="بحث">⌕</span>
-      <span title="المفضلة">♡</span>
-      <span title="السلة">🛒</span>
-      <span data-prerender-menu title="القائمة">☰</span>
+    <div data-prerender-header-actions>
+      <button type="button" aria-label="بحث (Ctrl+K)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+      </button>
+      <a href="/wishlist" aria-label="المفضلة">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.8-3-3.2-3-5.5"></path></svg>
+      </a>
+      <a href="/cart" aria-label="السلة">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
+      </a>
+      <button type="button" data-prerender-menu aria-label="القائمة">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"></path><path d="M4 12h16"></path><path d="M4 19h16"></path></svg>
+      </button>
     </div>
   </div>
 </div>
@@ -101,6 +122,15 @@ function staticProductCard(product) {
     <div data-prerender-product-bottom><strong>${esc(product.price)} ج.م</strong><span data-prerender-cart>🛒</span></div>
   </div>
 </article>`;
+}
+
+function staticRecentlyViewedShell() {
+  return `<section data-prerender-recently-viewed aria-hidden="true">
+  <div data-prerender-recent-inner>
+    <div data-prerender-recent-heading><h2>👀 شاهدتها مؤخراً</h2><span>مسح السجل</span></div>
+    <div data-prerender-recent-list></div>
+  </div>
+</section>`;
 }
 
 function staticProductSection(products, { title = "✨ اخترنا لك", description = "" } = {}) {
@@ -540,6 +570,7 @@ async function prerender() {
   ${staticHeaderShell()}
   <section data-prerender-static-hero><div><img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" width="1200" height="663" loading="eager" fetchpriority="high" decoding="async"></div></section>
   ${staticPromoShell()}
+  ${staticRecentlyViewedShell()}
   ${staticProductSection(homeFeatured, { description: "باقة مختارة بعناية من أفضل المنتجات والمكملات لدعم صحتك وحيويتك الزوجية بأمان وثقة" })}
 </div>`;
       let html = buildHtml(template, {
