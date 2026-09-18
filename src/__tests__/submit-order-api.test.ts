@@ -135,6 +135,22 @@ describe("submit-order payload validation", () => {
     expect(payload.governorate).toBe("القاهرة");
   });
 
+  it("accepts and normalizes a referral code for attribution", () => {
+    const payload = validPayload() as Record<string, unknown>;
+    payload.referralCode = " el-ab12cd ";
+    expect(validateOrderPayload(payload)).toBeUndefined();
+    expect(payload.referralCode).toBe("EL-AB12CD");
+  });
+
+  it.each(["EL-1", "not-a-code", "EL-TOO-LONG-CODE", 123])(
+    "rejects malformed referral code: %p",
+    (referralCode) => {
+      const payload = validPayload() as Record<string, unknown>;
+      payload.referralCode = referralCode;
+      expect(validateOrderPayload(payload)).toBe("Invalid referralCode");
+    },
+  );
+
   // (2026-09-16) validateOrderPayload is defensively typed for the expected
   // shape, but its whole job is to REJECT malformed runtime input (raw
   // JSON). So we deliberately pass non-conforming values via a cast — this

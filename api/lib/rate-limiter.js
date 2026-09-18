@@ -11,6 +11,7 @@ import { createHash } from "node:crypto";
 /** @type {Map<string, { start: number, count: number }>} */
 const memoryStore = new Map();
 const MEMORY_CLEANUP_INTERVAL_MS = 5 * 60_000;
+const MAX_MEMORY_ENTRIES = 20_000;
 let lastMemoryCleanup = Date.now();
 
 /** @param {number} now @param {number} maxAge */
@@ -39,6 +40,10 @@ export function createRateLimiter({ windowMs, max, prefix }) {
       const now = Date.now();
       cleanupMemory(now, Math.max(windowMs, 5 * 60_000));
       const key = hashKey(prefix, identifier);
+      if (!memoryStore.has(key) && memoryStore.size >= MAX_MEMORY_ENTRIES) {
+        const oldest = memoryStore.keys().next().value;
+        if (oldest) memoryStore.delete(oldest);
+      }
       const entry = memoryStore.get(key);
 
       if (!entry || now - entry.start >= windowMs) {

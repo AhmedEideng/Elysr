@@ -16,15 +16,14 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { useEffect } from "react";
 import { render, act } from "@testing-library/react";
 import { useCart } from "@/hooks/use-cart";
+import { CartProvider, type CartCtx } from "@/contexts/cart";
 import {
-  CartProvider,
   CATALOG_BY_ID,
   normalizeCartItem,
   normalizeCartItems,
-  type CartCtx,
   type CartItem,
   type CatalogById,
-} from "@/contexts/cart";
+} from "@/lib/cart-normalization";
 import { products } from "@/data/products";
 import type { Product } from "@/data/product-types";
 

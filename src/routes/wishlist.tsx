@@ -23,7 +23,7 @@ export const Route = createFileRoute("/wishlist")({
   component: WishlistPage,
 });
 
-type SortKey = "newest" | "price-asc" | "price-desc" | "rating";
+type SortKey = "newest" | "price-asc" | "price-desc";
 
 function WishlistPage() {
   const { items, count, clear } = useWishlist();
@@ -48,9 +48,6 @@ function WishlistPage() {
         break;
       case "price-desc":
         arr.sort((a, b) => (b.product?.price ?? 0) - (a.product?.price ?? 0));
-        break;
-      case "rating":
-        arr.sort((a, b) => (b.product?.rating ?? 0) - (a.product?.rating ?? 0));
         break;
       case "newest":
       default:
@@ -243,7 +240,6 @@ function WishlistPage() {
               <option value="newest">الأحدث إضافة</option>
               <option value="price-asc">السعر: من الأقل</option>
               <option value="price-desc">السعر: من الأعلى</option>
-              <option value="rating">الأعلى تقييماً</option>
             </select>
           </div>
         </div>
@@ -311,10 +307,6 @@ function WishlistPage() {
 
                   {/* Meta row */}
                   <div className="flex items-center gap-2 text-[11px]">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 font-black text-amber-700">
-                      ⭐ {product.rating}
-                    </span>
-                    <span className="text-muted-foreground">({product.reviews})</span>
                     {inStock && product.stock <= 5 && (
                       <span className="rounded-full bg-orange-50 px-2 py-0.5 font-bold text-orange-700">
                         باقي {product.stock}

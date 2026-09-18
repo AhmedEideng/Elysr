@@ -519,10 +519,22 @@ try {
     assert.deepEqual(duplicates(ids), [], "Duplicate @id in index.html JSON-LD graph");
   }
 
-  const kreva = products.find((product) => product.id === "m-60");
-  assert.equal(kreva?.price, 300, "Kreva price must be 300 EGP");
-  assert.equal(kreva?.rating, 5, "Kreva rating must be 5/5");
-  assert.equal(kreva?.reviews, 73, "Kreva must show 73 historical ratings");
+  // Product ratings/counts are not catalog facts. They may only come from
+  // owner-approved reviews returned by /api/reviews at runtime. Keep the
+  // build artifact free of both legacy fields so fake aggregates cannot
+  // silently return through a data edit.
+  for (const product of products) {
+    assert.equal(
+      Object.hasOwn(product, "rating"),
+      false,
+      `Synthetic rating field in ${product.id}`,
+    );
+    assert.equal(
+      Object.hasOwn(product, "reviews"),
+      false,
+      `Synthetic review count in ${product.id}`,
+    );
+  }
 
   // Verify every product-bearing homepage section, not only the top featured grid.
   const featuredProducts = getFeaturedProducts();
@@ -559,7 +571,6 @@ try {
     assert.match(product.slug, /^[a-z0-9-]+$/, `Invalid slug: ${product.id}`);
     assert.ok(product.price > 0, `Invalid price: ${product.id}`);
     assert.ok(product.stock >= 0, `Invalid stock: ${product.id}`);
-    assert.ok(product.rating >= 0 && product.rating <= 5, `Invalid rating: ${product.id}`);
     assert.ok(product.description.length >= 80, `Short description: ${product.id}`);
     assert.ok(product.benefits.length >= 3, `Too few benefits: ${product.id}`);
 
@@ -766,7 +777,18 @@ try {
 
   const sitemap = readFileSync(resolve(ROOT, "public/sitemap.xml"), "utf-8");
   const imageSitemap = readFileSync(resolve(ROOT, "public/sitemap-images.xml"), "utf-8");
+  const sitemapIndex = readFileSync(resolve(ROOT, "public/sitemap-index.xml"), "utf-8");
   const catalogFeed = readFileSync(resolve(ROOT, "public/catalog-feed.xml"), "utf-8");
+  assert.equal(
+    sitemapIndex.includes("catalog-feed.xml"),
+    false,
+    "Product feed must not be listed as a sitemap",
+  );
+  assert.equal(
+    (imageSitemap.match(/<image:loc>/g) || []).length,
+    (imageSitemap.match(/<image:image>/g) || []).length,
+    "Each image sitemap entry must contain exactly one image location",
+  );
   for (const product of products.filter((item) => GOOGLE_SHOPPING_BLOCKED.has(item.id))) {
     const productUrl = `https://elysrmedical.store/products/${product.slug}`;
     assert.equal(sitemap.includes(productUrl), false, `Blocked product in sitemap: ${product.id}`);

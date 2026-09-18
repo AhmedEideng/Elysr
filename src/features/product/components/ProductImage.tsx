@@ -58,10 +58,6 @@ export function ProductImage({
         )}
       </div>
 
-      <div className="absolute left-3 top-3 z-10 rounded-full bg-white/90 px-3 py-1 text-[11px] font-bold text-amber-700 shadow-sm backdrop-blur-sm">
-        ⭐ {product.rating} / 5
-      </div>
-
       <img
         ref={imgRef}
         src={assetUrl(product.image)}

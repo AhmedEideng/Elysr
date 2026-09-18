@@ -89,10 +89,11 @@ function OrderConfirmedPage() {
         {referralCode && (
           <div className="rounded-[2rem] border-2 border-dashed border-primary/30 bg-gradient-soft p-6 text-right space-y-4">
             <h2 className="flex items-center justify-center gap-2 text-xl font-black">
-              <Gift className="h-5 w-5 text-primary" /> شارك واكسب خصم — كودك: {referralCode}
+              <Gift className="h-5 w-5 text-primary" /> شارك رابط اليسر — كودك: {referralCode}
             </h2>
             <p className="text-center text-sm leading-6 text-muted-foreground">
-              انسخ رابطك وشاركه واتساب مع أصدقائك. كل طلب عبر رابطك يمنحك خصم في طلبك القادم!
+              انسخ رابطك وشاركه عبر واتساب؛ ويُسجّل الكود مع أي طلب لمتابعة الإحالة وفق سياسة
+              المتجر.
             </p>
             <div className="flex flex-col gap-2 sm:flex-row">
               <div className="flex-1 rounded-2xl border bg-card px-4 py-3 text-xs font-mono break-all">

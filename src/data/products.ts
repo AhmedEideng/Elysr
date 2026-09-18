@@ -77,12 +77,9 @@ export const getProductsByCategory = (cat: ProductCategory) => {
     const bFeatured = b.featured || b.badge ? 1 : 0;
     if (aFeatured !== bFeatured) return bFeatured - aFeatured;
 
-    // 4. Popularity score
-    const aPop = (a.rating || 0) * (a.reviews || 0);
-    const bPop = (b.rating || 0) * (b.reviews || 0);
-    if (Math.abs(aPop - bPop) > 50) return bPop - aPop;
-
-    // 5. Lower price first
+    // 4. Lower price first. Customer ratings are loaded only from the
+    // approved reviews API; they are intentionally not part of the catalog
+    // ranking or product data.
     return a.price - b.price;
   });
 };

@@ -2,7 +2,6 @@ import { useScrollTracking } from "@/hooks/use-scroll-tracking";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import {
-  Star,
   ShoppingCart,
   ShieldCheck,
   Truck,
@@ -33,7 +32,6 @@ import {
 import { ProductCard } from "@/components/ProductCard";
 import { CrossSellBundle } from "@/components/sections/CrossSellBundle";
 import { FAQ } from "@/components/FAQ";
-import { ProductReviews } from "@/features/product/components/ProductReviews";
 import { CustomerReviews } from "@/features/product/components/CustomerReviews";
 import { ProductImage } from "@/features/product/components/ProductImage";
 import { buildOrderMessage, waLink } from "@/lib/whatsapp";
@@ -92,10 +90,7 @@ export const Route = createFileRoute("/products/$slug")({
 
     const related = getProductsByCategory(product.category)
       .filter((p) => p.id !== product.id && !crossSells.find((c) => c.id === p.id))
-      .sort((a, b) => {
-        if (b.rating !== a.rating) return b.rating - a.rating;
-        return a.id.localeCompare(b.id);
-      })
+      .sort((a, b) => a.id.localeCompare(b.id))
       .slice(0, 4);
 
     return { product, related, crossSells };
@@ -463,10 +458,6 @@ function ProductPage() {
           ) : null}
 
           <div className="mt-4 flex flex-wrap gap-2 text-xs sm:text-sm">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 font-bold text-amber-700 border border-amber-200">
-              <Star className="h-4 w-4 fill-current" />
-              {product.rating} ({product.reviews} تقييم)
-            </div>
             <div className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1.5 font-bold text-sky-700 border border-sky-200">
               <Truck className="h-4 w-4" />
               شحن سري لكل المحافظات
@@ -640,14 +631,6 @@ function ProductPage() {
       {crossSells.length > 0 && (
         <CrossSellBundle mainProduct={product} suggestedProducts={crossSells} />
       )}
-
-      {/* 🚀 تقييمات العملاء */}
-      <ProductReviews
-        rating={product.rating}
-        reviewsCount={product.reviews}
-        category={product.category}
-        slug={product.slug}
-      />
 
       {/* 📝 المراجعات الحقيقية (معتمدة فقط) + نموذج المشاركة */}
       <CustomerReviews productId={product.id} />

@@ -1,4 +1,5 @@
 import { createRateLimiter } from "./lib/rate-limiter.js";
+import { getClientIp } from "./lib/request-ip.js";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -115,24 +116,6 @@ const rateLimiter = createRateLimiter({
   max: 30,
   prefix: "submit-order",
 });
-
-/** @param {import("express").Request} req */
-function getClientIp(req) {
-  // 🛡️ IP موثوق: Vercel بيبعت x-vercel-ip (IP العميل الحقيقي من الـ edge —
-  // مش قابل للتزوير من الـ client). في self-hosted: آخر قيمة في
-  // X-Forwarded-For (اللي ضافها الـ proxy الموثوق — الأولى قابلة للتزوير).
-  const vercelIp = req.headers["x-vercel-ip"];
-  if (typeof vercelIp === "string" && vercelIp.trim()) return vercelIp.trim();
-  const forwardedFor = req.headers["x-forwarded-for"];
-  if (typeof forwardedFor === "string") {
-    const parts = forwardedFor
-      .split(",")
-      .map((p) => p.trim())
-      .filter(Boolean);
-    if (parts.length) return parts[parts.length - 1];
-  }
-  return req.socket?.remoteAddress || "unknown";
-}
 
 /** @param {import("express").Request} req */
 function getRequestOrigin(req) {
@@ -260,6 +243,15 @@ export function validateOrderPayload(payload) {
   )
     return "Invalid notes";
   if (typeof payload.promoApplied !== "boolean") return "Invalid promoApplied";
+  if (
+    payload.referralCode !== undefined &&
+    (!isNonEmptyString(payload.referralCode, 11) ||
+      !/^EL-[A-Z0-9]{4,8}$/.test(payload.referralCode.trim().toUpperCase()))
+  ) {
+    return "Invalid referralCode";
+  }
+  if (payload.referralCode !== undefined)
+    payload.referralCode = payload.referralCode.trim().toUpperCase();
   if (typeof payload.bundleDiscount !== "number" || !Number.isFinite(payload.bundleDiscount)) {
     return "Invalid bundleDiscount";
   }
@@ -468,6 +460,7 @@ export default async function handler(req, res) {
     "shipping",
     "total",
     "promoApplied",
+    "referralCode",
   ]);
   /** @type {Record<string, unknown>} */
   const safePayload = {};

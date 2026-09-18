@@ -381,7 +381,7 @@ function CartPage() {
               </div>
               <div className="min-w-0">
                 <h3 className="text-sm sm:text-base font-bold text-violet-950 mb-1 flex items-center gap-1.5">
-                  تغليف سري ومحكم 100%
+                  تغليف سري ومحايد
                 </h3>
                 <p className="text-xs text-violet-900/70 leading-6">
                   يتم شحن جميع الطلبات داخل{" "}

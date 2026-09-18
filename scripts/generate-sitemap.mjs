@@ -19,26 +19,25 @@ function assetUrl(path) {
   return `${base}?v=${CACHE_VERSION}`;
 }
 
-function getGitLastmod(filePath, fallback) {
+function getGitLastmod(filePath) {
   try {
     const out = execSync(`git log -1 --format=%cs -- ${filePath}`, {
       cwd: ROOT,
       stdio: ["ignore", "pipe", "ignore"],
       encoding: "utf-8",
     }).trim();
-    return /^\d{4}-\d{2}-\d{2}$/.test(out) ? out : fallback;
+    return /^\d{4}-\d{2}-\d{2}$/.test(out) ? out : null;
   } catch {
-    return fallback;
+    // A shallow/non-Git deployment must not manufacture a lastmod date.
+    return null;
   }
 }
 
-// 🗓️ الـ lastmod يجب أن يعكس "آخر تعديل حقيقي" للملف، لا تاريخ اليوم دائماً.
-// لو رجعنا دائماً "النهاردة" (حتى بدون تعديل)، ستلاحظ Google ذلك وتتجاهل
-// إشارة lastmod للموقع كله — مما يقلل كفاءة إعادة الزحف.
-// نستخدم تاريخ آخر commit حقيقي للملف عبر git log، ونستخدم اليوم فقط
-// كـ fallback للملفات الجديدة التي ليس لها تاريخ commit بعد.
-function freshLastmod(filePath, fallback) {
-  return getGitLastmod(filePath, fallback);
+// 🗓️ لا نضع lastmod إلا عندما نعرف آخر تعديل حقيقي للملف.
+// تاريخ البناء ليس تاريخ تعديل المحتوى؛ ترك الوسم غائباً أفضل من إرسال
+// إشارة زائفة تجعل Google تعيد الزحف بلا داعٍ أو تفقد الثقة في الإشارة.
+function freshLastmod(filePath) {
+  return getGitLastmod(filePath);
 }
 
 const esc = (s = "") =>
@@ -326,101 +325,96 @@ async function generateSitemap() {
       );
     }
 
-    const today = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Africa/Cairo",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(new Date());
-
-    const productLastmod = [
-      freshLastmod("src/data/products.ts", today),
-      freshLastmod("src/data/products/men.ts", today),
-      freshLastmod("src/data/products/women.ts", today),
-      freshLastmod("src/data/products/devices.ts", today),
-    ]
-      .sort()
-      .pop(); // أحدث تعديل حقيقي لأي ملف من ملفات الكتالوج
-    const landingLastmod = freshLastmod("src/data/landing-pages.ts", today);
+    const productLastmod =
+      [
+        freshLastmod("src/data/products.ts"),
+        freshLastmod("src/data/products/men.ts"),
+        freshLastmod("src/data/products/women.ts"),
+        freshLastmod("src/data/products/devices.ts"),
+      ]
+        .filter(Boolean)
+        .sort()
+        .pop() || null; // أحدث تعديل حقيقي لأي ملف من ملفات الكتالوج
+    const landingLastmod = freshLastmod("src/data/landing-pages.ts");
 
     const staticRoutes = [
       {
         path: "/",
         priority: "1.0",
         changefreq: "daily",
-        lastmod: freshLastmod("src/routes/index.tsx", today),
+        lastmod: freshLastmod("src/routes/index.tsx"),
       },
       {
         path: "/products/men",
         priority: "0.9",
         changefreq: "weekly",
-        lastmod: freshLastmod("src/routes/products.men.tsx", productLastmod),
+        lastmod: freshLastmod("src/routes/products.men.tsx") || productLastmod,
       },
       {
         path: "/products/women",
         priority: "0.9",
         changefreq: "weekly",
-        lastmod: freshLastmod("src/routes/products.women.tsx", productLastmod),
+        lastmod: freshLastmod("src/routes/products.women.tsx") || productLastmod,
       },
       {
         path: "/products/devices",
         priority: "0.9",
         changefreq: "weekly",
-        lastmod: freshLastmod("src/routes/products.devices.tsx", productLastmod),
+        lastmod: freshLastmod("src/routes/products.devices.tsx") || productLastmod,
       },
       {
         path: "/education",
         priority: "0.8",
         changefreq: "weekly",
-        lastmod: freshLastmod("src/routes/education.tsx", today),
+        lastmod: freshLastmod("src/routes/education.tsx"),
       },
       {
         path: "/about",
         priority: "0.5",
         changefreq: "monthly",
-        lastmod: freshLastmod("src/routes/about.tsx", today),
+        lastmod: freshLastmod("src/routes/about.tsx"),
       },
       {
         path: "/contact",
         priority: "0.6",
         changefreq: "monthly",
-        lastmod: freshLastmod("src/routes/contact.tsx", today),
+        lastmod: freshLastmod("src/routes/contact.tsx"),
       },
       {
         path: "/medical-review-board",
         priority: "0.5",
         changefreq: "monthly",
-        lastmod: freshLastmod("src/routes/medical-review-board.tsx", today),
+        lastmod: freshLastmod("src/routes/medical-review-board.tsx"),
       },
       {
         path: "/shipping",
         priority: "0.4",
         changefreq: "yearly",
-        lastmod: freshLastmod("src/routes/shipping.tsx", today),
+        lastmod: freshLastmod("src/routes/shipping.tsx"),
       },
       {
         path: "/returns",
         priority: "0.4",
         changefreq: "yearly",
-        lastmod: freshLastmod("src/routes/returns.tsx", today),
+        lastmod: freshLastmod("src/routes/returns.tsx"),
       },
       {
         path: "/terms",
         priority: "0.3",
         changefreq: "yearly",
-        lastmod: freshLastmod("src/routes/terms.tsx", today),
+        lastmod: freshLastmod("src/routes/terms.tsx"),
       },
       {
         path: "/privacy",
         priority: "0.3",
         changefreq: "yearly",
-        lastmod: freshLastmod("src/routes/privacy.tsx", today),
+        lastmod: freshLastmod("src/routes/privacy.tsx"),
       },
       {
         path: "/refer",
         priority: "0.7",
         changefreq: "weekly",
-        lastmod: freshLastmod("src/routes/refer.tsx", today),
+        lastmod: freshLastmod("src/routes/refer.tsx"),
       },
     ];
 
@@ -440,11 +434,8 @@ async function generateSitemap() {
         path: `/education/${a.slug}`,
         priority: "0.7",
         changefreq: "monthly",
-        // (2026-09-17) lastmod حقيقي **لكل مقال** (updatedAt/ publishedAt)
-        // — قبل كده كان git-lastmod لملف articles.ts كله، فأي تعديل على
-        // مقال واحد كان يحدّث lastmod لكل المقالات دفعة واحدة (signal خادع).
-        // git-lastmod بقى fallback أخير فقط.
-        lastmod: a.updatedAt || a.publishedAt || freshLastmod("src/data/articles.ts", today),
+        // لا نستخدم تاريخ commit للملف كله: تعديل مقال واحد لا يعني تعديل بقية المقالات.
+        lastmod: a.updatedAt || a.publishedAt || null,
         image: a.image,
         imageTitle: a.title,
       })),
@@ -479,9 +470,9 @@ ${urls
       <image:title>${esc(u.imageTitle)}</image:title>
     </image:image>`
       : "";
+    const lastmod = u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : "";
     return `  <url>
-    <loc>${SITE_URL}${u.path}</loc>
-    <lastmod>${u.lastmod}</lastmod>
+    <loc>${SITE_URL}${u.path}</loc>${lastmod}
     <changefreq>${u.changefreq}</changefreq>
     <priority>${u.priority}</priority>
 ${imageBlock}
@@ -529,15 +520,9 @@ ${articleImageEntries}
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>${SITE_URL}/sitemap.xml</loc>
-    <lastmod>${today}</lastmod>
   </sitemap>
   <sitemap>
     <loc>${SITE_URL}/sitemap-images.xml</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>${SITE_URL}/catalog-feed.xml</loc>
-    <lastmod>${today}</lastmod>
   </sitemap>
 </sitemapindex>
 `;
@@ -638,21 +623,21 @@ ${catalogProducts
       return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     // BOM UTF-8 في بداية الـ CSV حتى لا تتخرب العربية عند الفتح في Excel على
-    // ويندوز (Google Merchant يتعامل مع BOM بشكل قياسي)
+    // Google Merchant يتعامل مع BOM في CSV بشكل قياسي؛ نستخدم أسطر LF ثابتة في artifacts.
     const csvContent =
       "\uFEFF" +
       [
         FEED_COLUMNS.join(","),
         ...feedRows.map((row) => FEED_COLUMNS.map((c) => csvEscape(row[c])).join(",")),
-      ].join("\r\n") +
-      "\r\n";
+      ].join("\n") +
+      "\n";
     const txtContent =
       [
         FEED_COLUMNS.join("\t"),
         ...feedRows.map((row) =>
           FEED_COLUMNS.map((c) => String(row[c] ?? "").replace(/[\t\r\n]+/g, " ")).join("\t"),
         ),
-      ].join("\r\n") + "\r\n";
+      ].join("\n") + "\n";
 
     const robots = `# robots.txt — Elysr Medical Group
 # ${SITE_URL}
@@ -691,7 +676,6 @@ Allow: /apple-touch-icon.png
 Sitemap: ${SITE_URL}/sitemap-index.xml
 Sitemap: ${SITE_URL}/sitemap.xml
 Sitemap: ${SITE_URL}/sitemap-images.xml
-Sitemap: ${SITE_URL}/catalog-feed.xml
 `;
 
     const outDir = resolve(ROOT, "public");

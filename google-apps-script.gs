@@ -134,6 +134,7 @@ const COLUMNS = [
   { header: "طريقة الطلب", key: "orderMethod", width: 100 },
   { header: "نوع الطلب", key: "orderType", width: 90 },
   { header: "تم تطبيق خصم", key: "promoApplied", width: 90 },
+  { header: "كود الإحالة", key: "referralCode", width: 110 },
   { header: "IP العميل", key: "clientIp", width: 120 },
 ];
 
@@ -147,6 +148,7 @@ const MAX_TEXT = {
   notes: 300,
   itemName: 150,
   orderMethod: 30,
+  referralCode: 11,
   clientIp: 64,
 };
 
@@ -210,6 +212,10 @@ function doPost(e) {
     var orderType = normalizeOrderType(data.orderType);
     var clientIp = clean(data.clientIp, MAX_TEXT.clientIp);
     var promoApplied = data.promoApplied ? "نعم" : "لا";
+    var referralCode = clean(data.referralCode, MAX_TEXT.referralCode).toUpperCase();
+    if (referralCode && !/^EL-[A-Z0-9]{4,8}$/.test(referralCode)) {
+      throw new Error("Invalid referral code");
+    }
 
     if (!customerName) throw new Error("Missing customer name");
     if (!governorate) throw new Error("Missing governorate");
@@ -278,6 +284,7 @@ function doPost(e) {
       orderMethod: orderMethod,
       orderType: orderType,
       promoApplied: promoApplied,
+      referralCode: referralCode,
       clientIp: clientIp,
     };
 

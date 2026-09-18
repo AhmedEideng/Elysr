@@ -25,7 +25,7 @@ export function makeMetaDescription(text = "", maxLength = 155): string {
 
 /**
  * 🎯 وصف منتج مخصص لـ Google لا يتم إعادة كتابته
- * يبني وصف غني بالبيانات الفريدة (السعر، التقييم، الشحن) لمنع Google من
+ * يبني وصف غني بالبيانات الفريدة (السعر، الشحن، ومعلومات المنتج) لمنع Google من
  * استبداله بوصف الموقع العام. جوجل يعيد كتابة الـ meta descriptions
  * التي تعتبرها مكررة أو مبالغ فيها، لكن الوصف الغني بالبيانات الفريدة
  * يتم الاحتفاظ به.
@@ -34,20 +34,17 @@ export function makeProductMetaDescription(p: {
   name: string;
   description: string;
   price: number;
-  rating: number;
-  reviews: number;
   benefits?: string[];
 }): string {
   const firstBenefit = p.benefits?.[0] ? ` - ${p.benefits[0].slice(0, 50)}` : "";
-  const ratingPart = p.reviews > 0 ? ` ⭐${p.rating}/5 (${p.reviews} تقييم)` : "";
   const pricePart = ` - ${p.price} ج.م - شحن سري، دفع عند الاستلام`;
-  // حاول استخدام وصف المنتج أولاً، لو طويل اقتطعه
+  // لا نضع أي aggregate rating هنا؛ التقييمات المعتمدة تُجلب من API وقت التشغيل.
   const baseDesc = String(p.description).split("。")[0].split(".")[0].slice(0, 80);
-  const candidate = `${p.name}${firstBenefit}${ratingPart}${pricePart} - اليسر ميديكال`;
+  const candidate = `${p.name}${firstBenefit}${pricePart} - اليسر ميديكال`;
   // لو المرشح أطول من 155، استخدم الوصف المختصر
   if (candidate.length <= 155) return candidate;
-  // Fallback: اسم + سعر + تقييم + شحن (مضمون قصير وفريد)
-  const short = `${p.name} - ${baseDesc}${ratingPart} - ${p.price} ج.م - شحن سري - اليسر ميديكال`;
+  // Fallback: اسم + وصف + سعر + شحن (قصير وفريد)
+  const short = `${p.name} - ${baseDesc} - ${p.price} ج.م - شحن سري - اليسر ميديكال`;
   return makeMetaDescription(short, 155);
 }
 const DEFAULT_OG = `${SITE_URL}/og-default.webp`;
@@ -97,7 +94,7 @@ export function applySeo(meta: SeoMeta = {}) {
   const title = meta.title ?? "اليسر — منتجات الصحة الزوجية الأصلية في مصر | شحن سري";
   const description =
     meta.description ??
-    "اليسر أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. شحن سري وتغليف محايد ودفع عند الاستلام مع دعم متخصص عبر واتساب.";
+    "اليسر ميديكال متجر مصري لمنتجات الصحة الزوجية للرجال والنساء. شحن سري وتغليف محايد ودفع عند الاستلام مع دعم عبر واتساب.";
   const image = absoluteUrl(meta.image);
 
   document.title = title;
@@ -209,9 +206,8 @@ export const productSchema = (p: {
   brand?: string;
   description: string;
   price: number;
-  rating: number;
-  reviews: number;
   stock: number;
+  approvedReviewSummary?: { ratingValue: number; reviewCount: number };
   image?: string;
 }) => {
   return {
@@ -222,12 +218,17 @@ export const productSchema = (p: {
     sku: p.id,
     mpn: p.id,
     image: absoluteUrl(p.image),
-    ...(p.reviews > 0
+    ...(p.approvedReviewSummary &&
+    Number.isFinite(p.approvedReviewSummary.ratingValue) &&
+    p.approvedReviewSummary.ratingValue >= 1 &&
+    p.approvedReviewSummary.ratingValue <= 5 &&
+    Number.isInteger(p.approvedReviewSummary.reviewCount) &&
+    p.approvedReviewSummary.reviewCount >= 1
       ? {
           aggregateRating: {
             "@type": "AggregateRating",
-            ratingValue: Math.max(0, Math.min(5, Number(p.rating ?? 0))),
-            reviewCount: Math.max(1, Math.floor(p.reviews)),
+            ratingValue: p.approvedReviewSummary.ratingValue,
+            reviewCount: p.approvedReviewSummary.reviewCount,
             bestRating: 5,
             worstRating: 1,
           },
@@ -303,12 +304,6 @@ export const articleSchema = (a: {
       name: "اليسر ميديكال",
       url: SITE_URL,
     },
-  },
-  reviewedBy: {
-    "@type": "Organization",
-    name: a.reviewer?.name ?? "المراجعة الداخلية — اليسر ميديكال",
-    description: a.reviewer?.credentials,
-    url: `${SITE_URL}/medical-review-board`,
   },
   citation:
     a.sources?.map((source) => ({

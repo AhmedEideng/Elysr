@@ -21,10 +21,12 @@
  */
 
 import { createHash } from "node:crypto";
+import { getClientIp } from "./lib/request-ip.js";
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REPORTS = 30;
 const MEMORY_CLEANUP_INTERVAL_MS = 5 * 60_000;
+const MAX_MEMORY_ENTRIES = 20_000;
 const MAX_BODY_BYTES = 32_000;
 
 /** @type {Map<string, { start: number, count: number }>} */
@@ -50,6 +52,12 @@ function checkRateLimit(key) {
   cleanupMemory();
   const now = Date.now();
   const hashed = hashIp(key);
+  if (!rateLimitMap.has(hashed) && rateLimitMap.size >= MAX_MEMORY_ENTRIES) {
+    // Evict the oldest window rather than allowing attacker-controlled keys
+    // to grow this process without bound.
+    const oldest = rateLimitMap.keys().next().value;
+    if (oldest) rateLimitMap.delete(oldest);
+  }
   const entry = rateLimitMap.get(hashed);
   if (!entry || now - entry.start > RATE_LIMIT_WINDOW_MS) {
     rateLimitMap.set(hashed, { start: now, count: 1 });
@@ -90,20 +98,7 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).end();
 
-  // IP موثوق: x-vercel-ip (Vercel) ثم آخر قيمة XFF (self-hosted)
-  // (2026-09-16) XFF نوعه string | string[] حسب الـ proxy — نتعامل مع
-  // الحالتين بدل افتراض string (اكتشاف من الـ typecheck الجديد).
-  const vercelIp = req.headers["x-vercel-ip"];
-  const xff = req.headers["x-forwarded-for"];
-  const xffString = Array.isArray(xff) ? xff.join(",") : xff;
-  const clientIp =
-    (typeof vercelIp === "string" && vercelIp.trim()) ||
-    xffString
-      ?.split(",")
-      .map((p) => p.trim())
-      .filter(Boolean)
-      .pop() ||
-    "unknown";
+  const clientIp = getClientIp(req);
 
   if (!checkRateLimit(clientIp)) {
     return res.status(429).end();

@@ -3,7 +3,7 @@
 # Elysr Medical Group
 
 **أصلي — شحن سري لكل محافظات مصر**
-*Original marital & sexual-health products for Egypt — discreet shipping to all 27 governorates*
+_Original marital & sexual-health products for Egypt — discreet shipping to all 27 governorates_
 
 [![Live](https://img.shields.io/badge/Live-elysrmedical.store-0085ca?style=for-the-badge)](https://elysrmedical.store)
 [![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/201098088206)
@@ -31,18 +31,18 @@ entirely on static pre-rendered pages — no database, no server runtime require
 Orders flow through a hardened serverless API into Google Sheets; customer reviews
 flow through the same webhook into a moderated reviews sheet.
 
-| Metric                 | Value                                                                                          |
-| ---------------------- | ---------------------------------------------------------------------------------------------- |
-| Products               | **78** (49 men · 22 women · 7 devices) — 9 items permanently deleted; **zero prescription products remain** |
-| Eligible (feed/sitemap)| **78** — every catalog product is eligible in every channel (no blocked items remain)             |
-| Articles               | **56** educational health articles with trusted medical sources (NIH/Mayo/NHS/…)                |
-| SEO landing pages      | **93** long-form guide pages — all indexed (the 2 legacy noindex pages disappeared with the 2026-09-07 deletions) |
-| Pre-rendered pages     | **244** (17 static + 78 products + 56 articles + 93 guides)                                     |
-| Sitemap URLs           | **237** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)     |
-| Catalog feed           | **78** items (Google Shopping RSS, price + availability per product)                            |
-| Redirects              | **174** permanent 301s (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)   |
-| Images                 | **138** WebP (8–55 KB, avg 26 KB) + 84 thumbnails                                               |
-| Tests                  | **172** unit (Vitest) + **19** E2E (Playwright) + data-integrity + schema validation            |
+| Metric                  | Value                                                                                                             |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Products                | **78** (49 men · 22 women · 7 devices) — 9 items permanently deleted; **zero prescription products remain**       |
+| Eligible (feed/sitemap) | **78** — every catalog product is eligible in every channel (no blocked items remain)                             |
+| Articles                | **58** educational health articles with trusted medical sources (NIH/Mayo/NHS/…)                                  |
+| SEO landing pages       | **93** long-form guide pages — all indexed (the 2 legacy noindex pages disappeared with the 2026-09-07 deletions) |
+| Pre-rendered pages      | **246** (17 static + 78 products + 58 articles + 93 guides)                                                       |
+| Sitemap URLs            | **240** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)                       |
+| Catalog feed            | **78** items (Google Shopping RSS, price + availability per product)                                              |
+| Redirects               | **174** permanent 301s (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                     |
+| Images                  | **138** WebP (8–55 KB, avg 26 KB) + 84 thumbnails                                                                 |
+| Tests                   | **257** unit (Vitest) + **19** E2E (Playwright) + data-integrity + schema validation                              |
 
 ---
 
@@ -51,7 +51,7 @@ flow through the same webhook into a moderated reviews sheet.
 ```
 Browser ──→ Vercel Edge CDN (static dist/)
                 │
-                ├── index.html / 244 pre-rendered pages (full SEO meta + JSON-LD)
+                ├── index.html / 246 pre-rendered pages (full SEO meta + JSON-LD)
                 ├── /search?q=…          (SPA — client-side catalog search)
                 │
                 ├── /api/submit-order  ──┐
@@ -92,18 +92,18 @@ the same API handlers — identical behavior, no Vercel dependency.
 
 ## Tech Stack
 
-| Layer     | Technology                                                                                       |
-| --------- | ------------------------------------------------------------------------------------------------ |
-| Framework | React 19 + TypeScript 6                                                                          |
-| Build     | Vite 8 (code-split: vendor-react / router / icons / search / toast + per-catalog data chunks)    |
-| Routing   | TanStack Router (file-based, 21 routes)                                                          |
-| Styling   | Tailwind CSS 4 (Oklch colors, full RTL)                                                          |
-| Search    | Fuse.js (fuzzy, lazy-loaded) + Egyptian dialect synonyms (نقط ⇄ قطرات)                          |
-| Tests     | Vitest (172 unit) + Playwright (19 E2E) + data-integrity + JSON-LD schema validator              |
-| Hosting   | Vercel Edge CDN (primary) · self-hosted Express + Docker (supported)                             |
-| Orders    | Google Apps Script → Google Sheets (ScriptLock, full duplicate scan, intl phones)                 |
-| SEO       | 244 pre-rendered pages · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps + feed |
-| Images    | WebP only (sharp pipeline, 700–800 px, q45–55) + descriptive alt/title                           |
+| Layer     | Technology                                                                                                                   |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Framework | React 19 + TypeScript 6                                                                                                      |
+| Build     | Vite 8 (code-split: vendor-react / router / icons / search / toast + per-catalog data chunks)                                |
+| Routing   | TanStack Router (file-based, 21 routes)                                                                                      |
+| Styling   | Tailwind CSS 4 (Oklch colors, full RTL)                                                                                      |
+| Search    | Fuse.js (fuzzy, lazy-loaded) + Egyptian dialect synonyms (نقط ⇄ قطرات)                                                       |
+| Tests     | Vitest (257 unit) + Playwright (19 E2E) + data-integrity + JSON-LD schema validator                                          |
+| Hosting   | Vercel Edge CDN (primary) · self-hosted Express + Docker (supported)                                                         |
+| Orders    | Google Apps Script → Google Sheets (ScriptLock, full duplicate scan, intl phones)                                            |
+| SEO       | 246 pre-rendered pages · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps + feed                           |
+| Images    | WebP only (sharp pipeline, 700–800 px, q45–55) + descriptive alt/title                                                       |
 | Security  | CSP · HSTS · COOP/COEP · Report-To · NEL · CORS strict · hashed-IP rate limits · HMAC review reads · PII-safe error tracking |
 
 ---
@@ -120,11 +120,11 @@ the same API handlers — identical behavior, no Vercel dependency.
 │   │   ├── SearchBar.tsx       # Fuzzy product search (Ctrl/Cmd+K) + "show all results" → /search
 │   │   └── Accessibility.tsx   # Skip-to-content + ARIA live regions + focus trap
 │   ├── features/product/
-│   │   └── components/         # ProductReviews (approved live reviews), ProductImage, …
+│   │   └── components/         # CustomerReviews (approved live reviews), ProductImage, …
 │   ├── data/
 │   │   ├── products.ts         # 78 products (49 men · 22 women · 7 devices) + search helpers
 │   │   ├── products/           # men.ts · women.ts · devices.ts (catalog source of truth)
-│   │   ├── articles.ts         # 56 articles with trusted sources
+│   │   ├── articles.ts         # 58 articles with trusted sources
 │   │   ├── landing-pages.ts    # 93 SEO guide pages (build-time source; served as per-slug JSON at runtime)
 │   │   ├── product-types.ts    # TypeScript interfaces
 │   │   └── product-faqs.ts     # Shared product FAQ schema
@@ -135,10 +135,10 @@ the same API handlers — identical behavior, no Vercel dependency.
 │   │   ├── promo.ts            # Diamond Care tiered discount (15/20/25%)
 │   │   ├── governorates.ts     # 27 governorates + shipping + submitToGoogleSheets
 │   │   ├── search-terms.ts     # Dialect synonym expansion (نقط ⇄ قطرات)
-│   │   ├── product-reviews.ts  # Deterministic display reviews per product
 │   │   ├── error-tracking.ts   # PII-safe error sink (allowlist context, hashed correlation)
 │   │   ├── internal-links.ts   # Cross-linking engine (products ↔ articles ↔ guides)
 │   │   ├── cache.ts            # Centralized asset cache version (config/cache-version.json)
+│   │   ├── cart-normalization.ts # Single source of truth for stock-safe cart items
 │   │   └── whatsapp.ts         # Order message builder (full PII for chat, minimal for URL)
 │   ├── routes/                 # 21 file-based routes (incl. /search, /order-confirmed)
 │   ├── hooks/                  # use-cart · use-wishlist · use-recently-viewed · use-scroll-tracking
@@ -151,10 +151,12 @@ the same API handlers — identical behavior, no Vercel dependency.
 │   ├── reviews.js              # Approved-reviews read (HMAC-verified upstream, fail-soft,
 │   │                           # product-id validation, in-process cache)
 │   ├── csp-report.js           # CSP violation sink (hashed IP, origin whitelist, 4KB cap)
-│   └── lib/rate-limiter.js     # In-process hashed-IP rate limiter with cleanup
+│   └── lib/
+│       ├── rate-limiter.js     # In-process hashed-IP rate limiter with cleanup
+│       └── request-ip.js       # Trusted platform IP extraction
 ├── scripts/
-│   ├── prerender-seo.mjs       # 244 static HTML pages + Product/ItemList/FAQ/Breadcrumb JSON-LD
-│   ├── generate-sitemap.mjs    # sitemap.xml (237) + sitemap-images.xml + catalog feed +
+│   ├── prerender-seo.mjs       # 246 static HTML pages + Product/ItemList/FAQ/Breadcrumb JSON-LD
+│   ├── generate-sitemap.mjs    # sitemap.xml (240) + sitemap-images.xml + catalog feed +
 │   │                           # robots.txt + security.txt
 │   ├── check-source-links.mjs  # Corpus-wide source liveness (3-attempt backoff, flaky-authority class)
 │   ├── validate-schemas.mjs    # JSON-LD validator (every schema in every pre-rendered page)
@@ -167,15 +169,15 @@ the same API handlers — identical behavior, no Vercel dependency.
 │   ├── sync-vercel-redirects.mjs # vercel.json ⇄ catalog redirect sync
 │   └── health-check.mjs        # Bundle + image size audit
 ├── e2e/
-│   └── checkout.spec.ts        # 18 Playwright E2E tests (checkout, search, reviews, 404s)
+│   └── checkout.spec.ts        # 19 Playwright E2E tests (checkout, search, reviews, 404s)
 ├── server/
 │   └── index.js                # Self-hosted Express server (same dist/ + same API handlers)
 ├── .github/workflows/ci.yml    # 5 CI jobs (see Testing & CI)
 ├── public/
 │   ├── images/                 # 138 WebP + thumbs/ + thumbs-180/
 │   ├── landing-pages/          # 93 per-slug JSON (runtime data source for guide pages)
-│   ├── sitemap.xml             # 237 URLs
-│   ├── sitemap-images.xml      # 134 image URLs
+│   ├── sitemap.xml             # 240 URLs
+│   ├── sitemap-images.xml      # 136 image URLs
 │   ├── sitemap-index.xml       # Sitemap index
 │   ├── catalog-feed.xml        # Google Shopping feed (78 items) + .csv/.txt mirrors
 │   ├── sw.js                   # PWA migration kill-switch (self-unregistering, network-only)
@@ -235,7 +237,7 @@ the same API handlers — identical behavior, no Vercel dependency.
   results, "100%" efficacy, no-side-effects, complete-safety, medical-team claims)
   is scanned across **all articles, all products, and all landing pages** on every
   build; any regression fails CI.
-- **Source liveness CI** — all 54 unique article source URLs are re-checked on every
+- **Source liveness CI** — all 60 unique article source URLs are re-checked on every
   push (3-attempt backoff; flaky primary authorities classified, true 404s fail).
 
 ---
@@ -257,32 +259,32 @@ No Redis or external rate-limit service is required: the API applies in-process
 hashed-IP limits, and Google Apps Script applies a second per-phone limit before
 writing an order.
 
-| Variable                         | Required | Purpose                                                            |
-| -------------------------------- | -------- | ------------------------------------------------------------------ |
-| `GOOGLE_SHEETS_WEBHOOK_URL`      | ✅       | Apps Script Web App `/exec` URL (orders + reviews)                  |
-| `SITE_URL`                       | ✅       | Canonical origin (canonicals, feeds, OG tags)                       |
-| `GOOGLE_SHEETS_REVIEWS_TOKEN`    | ⚠️ revs  | HMAC key for the reviews read endpoint (must match `REVIEW_READ_TOKEN` in the script; unset = reviews section silently off) |
-| `GOOGLE_SHEETS_WEBHOOK_SECRET`   | **required** | Shared write-secret (must match `WEBHOOK_SECRET` in the Apps Script). Fail-closed: with no secret, the script rejects **all** writes — set both or the site takes no orders |
-| `VITE_ERROR_SINK_URL`            | optional | Sentry-compatible error sink (console-only in dev)                  |
+| Variable                       | Required     | Purpose                                                                                                                                                                     |
+| ------------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GOOGLE_SHEETS_WEBHOOK_URL`    | ✅           | Apps Script Web App `/exec` URL (orders + reviews)                                                                                                                          |
+| `SITE_URL`                     | ✅           | Canonical origin (canonicals, feeds, OG tags)                                                                                                                               |
+| `GOOGLE_SHEETS_REVIEWS_TOKEN`  | ⚠️ revs      | HMAC key for the reviews read endpoint (must match `REVIEW_READ_TOKEN` in the script; unset = reviews section silently off)                                                 |
+| `GOOGLE_SHEETS_WEBHOOK_SECRET` | **required** | Shared write-secret (must match `WEBHOOK_SECRET` in the Apps Script). Fail-closed: with no secret, the script rejects **all** writes — set both or the site takes no orders |
+| `VITE_ERROR_SINK_URL`          | optional     | Sentry-compatible error sink (console-only in dev)                                                                                                                          |
 
 ### Commands
 
-| Command                    | Description                                                        |
-| -------------------------- | ------------------------------------------------------------------ |
-| `npm run dev`              | Development server (port 8080)                                     |
-| `npm run build`            | Production build + sitemaps/feeds + 244-page prerender             |
-| `npm run preview`          | Preview the production build locally                                |
-| `npm run build:ssr`        | Build + prerender for the self-hosted Express server                |
-| `npm start` / `start:dev`  | Run the self-hosted server (production / watch)                     |
-| `npm run test`             | Data-integrity guard (catalog, compliance, claims, redirect graph)  |
-| `npm run test:unit`        | Vitest unit + API security tests (172)                              |
-| `npm run test:e2e`         | Playwright E2E suite (19)                                           |
-| `npm run test:schemas`     | JSON-LD validator over every pre-rendered page                      |
-| `npm run test:sources`     | New-article claim→source support check                              |
-| `npm run test:all`         | integrity + unit + build + schemas                                  |
-| `npm run ci`               | lint + typecheck + test:all                                         |
-| `npm run audit:deps`       | `npm audit --audit-level=high`                                      |
-| `npm run release`          | Version + cache-version bump workflow                               |
+| Command                   | Description                                                        |
+| ------------------------- | ------------------------------------------------------------------ |
+| `npm run dev`             | Development server (port 8080)                                     |
+| `npm run build`           | Production build + sitemaps/feeds + 246-page prerender             |
+| `npm run preview`         | Preview the production build locally                               |
+| `npm run build:ssr`       | Build + prerender for the self-hosted Express server               |
+| `npm start` / `start:dev` | Run the self-hosted server (production / watch)                    |
+| `npm run test`            | Data-integrity guard (catalog, compliance, claims, redirect graph) |
+| `npm run test:unit`       | Vitest unit + API security tests (257)                             |
+| `npm run test:e2e`        | Playwright E2E suite (19)                                          |
+| `npm run test:schemas`    | JSON-LD validator over every pre-rendered page                     |
+| `npm run test:sources`    | New-article claim→source support check                             |
+| `npm run test:all`        | integrity + unit + build + schemas                                 |
+| `npm run ci`              | lint + typecheck + test:all                                        |
+| `npm run audit:deps`      | `npm audit --audit-level=high`                                     |
+| `npm run release`         | Version + cache-version bump workflow                              |
 
 ---
 
@@ -305,8 +307,6 @@ writing an order.
   usage: "طريقة الاستخدام + تحذيرات…",
   image: "/images/your-product-slug.webp",  // slug-based (must match slug)
   stock: 100,
-  rating: 0,                                // 0 until genuine order-backed reviews exist
-  reviews: 0,
   // searchAliases?: ["كلمة محلية شائعة"],   // optional: dialect/search synonyms
 }
 ```
@@ -335,7 +335,7 @@ a(
 );
 ```
 
-Every article needs **≥ 2 trusted https sources**; `npm run test:sources` validates
+Every article needs **≥ 3 trusted https sources**; `npm run test:sources` validates
 claim→source support, and the corpus-wide liveness CI re-checks every source URL on
 every push.
 
@@ -345,13 +345,13 @@ every push.
 
 Five jobs on every push (plus a weekly Saturday source-liveness cron):
 
-| Job                          | Gate                                                                    |
-| ---------------------------- | ----------------------------------------------------------------------- |
-| 🔗 Corpus Source Liveness    | All 54 article source URLs alive (3-attempt backoff, flaky-authority class) |
-| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc --noEmit` · 172 unit/API tests · catalog+compliance+claims+redirect-graph guard |
-| 🛡 Security Audit            | `npm audit --audit-level=high` on the locked tree                        |
-| 🏗 Build • Prerender • Sitemaps | Vite build + 244-page prerender + sitemaps/feeds artifacts             |
-| 🚦 Lighthouse Performance Budget | LHCI performance budgets on the built site                          |
+| Job                                         | Gate                                                                                          |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 🔗 Corpus Source Liveness                   | All 60 unique article source URLs checked (bot-blocked authorities are classified separately) |
+| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc --noEmit` · 257 unit/API tests · catalog+compliance+claims+redirect-graph guard |
+| 🛡 Security Audit                            | `npm audit --audit-level=high` on the locked tree                                             |
+| 🏗 Build • Prerender • Sitemaps              | Vite build + 246-page prerender + sitemaps/feeds artifacts                                    |
+| 🚦 Lighthouse Performance Budget            | LHCI performance budgets on the built site                                                    |
 
 Local equivalents: `npm run ci` (lint + typecheck + test:all) and `npm run test:e2e`.
 
@@ -364,9 +364,9 @@ Local equivalents: `npm run ci` (lint + typecheck + test:all) and `npm run test:
 Automatic CI/CD on every push to `main`. The build pipeline:
 
 1. `vite build` → optimized, code-split `dist/`
-2. `generate-sitemap.mjs` → sitemaps (237 URLs), 78-item catalog feed,
+2. `generate-sitemap.mjs` → sitemaps (240 URLs), 78-item catalog feed,
    robots.txt, security.txt, per-slug landing JSON
-3. `prerender-seo.mjs` → 244 pre-rendered pages with full SEO meta + JSON-LD
+3. `prerender-seo.mjs` → 246 pre-rendered pages with full SEO meta + JSON-LD
 4. Vercel serves `dist/` from the Edge CDN with 12 security header sets
    (HSTS, CSP, COOP, Report-To, NEL, …) + 174 legacy redirects
 

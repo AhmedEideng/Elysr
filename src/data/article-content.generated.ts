@@ -282,7 +282,7 @@ export const articleBodies: Record<string, ArticleBody> = {
     sources: [
       {
         title: "Women's sexual health: Talking about your sexual needs — Mayo Clinic",
-        url: "https://mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/art-20047771",
+        url: "https://www.mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/womens-sexual-health/art-20047771",
         publisher: "Mayo Clinic",
       },
       {
@@ -534,7 +534,7 @@ export const articleBodies: Record<string, ArticleBody> = {
     sources: [
       {
         title: "Women's sexual health: Talking about your sexual needs — Mayo Clinic",
-        url: "https://mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/art-20047771",
+        url: "https://www.mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/womens-sexual-health/art-20047771",
         publisher: "Mayo Clinic",
       },
       {
@@ -606,7 +606,7 @@ export const articleBodies: Record<string, ArticleBody> = {
     sources: [
       {
         title: "Women's sexual health: Talking about your sexual needs — Mayo Clinic",
-        url: "https://mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/art-20047771",
+        url: "https://www.mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/womens-sexual-health/art-20047771",
         publisher: "Mayo Clinic",
       },
       {
@@ -894,7 +894,7 @@ export const articleBodies: Record<string, ArticleBody> = {
     sources: [
       {
         title: "Women's sexual health: Talking about your sexual needs — Mayo Clinic",
-        url: "https://mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/art-20047771",
+        url: "https://www.mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/womens-sexual-health/art-20047771",
         publisher: "Mayo Clinic",
       },
       {
@@ -930,7 +930,7 @@ export const articleBodies: Record<string, ArticleBody> = {
     sources: [
       {
         title: "Women's sexual health: Talking about your sexual needs — Mayo Clinic",
-        url: "https://mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/art-20047771",
+        url: "https://www.mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/womens-sexual-health/art-20047771",
         publisher: "Mayo Clinic",
       },
       {
@@ -1249,7 +1249,7 @@ export const articleBodies: Record<string, ArticleBody> = {
     sources: [
       {
         title: "Women's sexual health: Talking about your sexual needs — Mayo Clinic",
-        url: "https://mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/art-20047771",
+        url: "https://www.mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/womens-sexual-health/art-20047771",
         publisher: "Mayo Clinic",
       },
       {
@@ -1285,7 +1285,7 @@ export const articleBodies: Record<string, ArticleBody> = {
     sources: [
       {
         title: "Women's sexual health: Talking about your sexual needs — Mayo Clinic",
-        url: "https://mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/art-20047771",
+        url: "https://www.mayoclinic.org/healthy-lifestyle/sexual-health/in-depth/womens-sexual-health/art-20047771",
         publisher: "Mayo Clinic",
       },
       {

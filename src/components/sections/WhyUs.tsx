@@ -5,16 +5,14 @@ import { products } from "@/data/products";
 // العدد ديناميكي من الكتالوج حتى لا يبتعد عن الحقيقة عند إضافة/حذف منتجات
 // (كان "87" hardcoded بينما الكتالوج 82 — أرقام قديمة كانت تظهر في الهوم)
 const stats = [
-  { value: "50,000+", label: "عميل يثق بنا" },
   { value: "27", label: "محافظة نغطيها" },
-  { value: String(products.length), label: "منتج أصلي" },
-  { value: "10+", label: "سنوات خبرة" },
+  { value: String(products.length), label: "منتج في الكتالوج" },
 ];
 
 const features = [
   {
     icon: ShieldCheck,
-    title: "أصلي 100%",
+    title: "منتجات مختارة",
     desc: "مستورد من المصنع مباشرة",
     color: "text-emerald-600",
     bg: "bg-emerald-50",

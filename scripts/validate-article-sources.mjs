@@ -3,8 +3,23 @@ import { resolve } from "node:path";
 import { createServer } from "vite";
 
 const ROOT = process.cwd();
-const slug =
-  process.argv[2] || readFileSync(resolve(ROOT, ".generated-article-slug"), "utf8").trim();
+const markerPath = resolve(ROOT, ".generated-article-slug");
+let slug = process.argv[2]?.trim();
+if (!slug) {
+  try {
+    slug = readFileSync(markerPath, "utf8").trim();
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+    console.log(
+      "ℹ️ No generated article marker found; pass an article slug to run this validator.",
+    );
+    process.exit(0);
+  }
+}
+if (!slug) {
+  console.log("ℹ️ Generated article marker is empty; pass an article slug to run this validator.");
+  process.exit(0);
+}
 const MIN_SOURCES = 3;
 const FETCH_TIMEOUT_MS = 12_000;
 const MAX_BODY_CHARS = 500_000;

@@ -18,6 +18,7 @@
     "test:e2e": "playwright test",
     "test:schemas": "node scripts/validate-schemas.mjs",
     "gsc": "node scripts/gsc-report.mjs",
+    "check-source-links": "node scripts/check-source-links.mjs",
     "test:sources": "node scripts/validate-article-sources.mjs",
     "test:all": "npm run test && npm run test:unit && npm run build && npm run test:schemas",
     "prepare": "husky || true",

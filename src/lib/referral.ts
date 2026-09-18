@@ -125,5 +125,5 @@ export function buildReferralLink(code: string): string {
 
 export function buildReferralShareText(code: string): string {
   const link = buildReferralLink(code);
-  return `جربت منتجات اليسر ميديكال وكانت ممتازة 👌\nخصم خاص لأول طلب عبر رابطي:\n${link}\n\nكود الإحالة: ${code}\nشحن سري لكل مصر 🚚`;
+  return `رابط مشاركة من اليسر ميديكال 👌\nيمكن لفريق المتجر متابعة الإحالة عبر هذا الرابط:\n${link}\n\nكود الإحالة: ${code}\nشحن سري لكل مصر 🚚`;
 }
