@@ -106,6 +106,16 @@
         overflow-x: hidden !important;
         width: 100% !important;
       }
+      /* Keep the pre-rendered hero at the same vertical origin as the
+         hydrated Layout, whose fixed header reserves this spacer. */
+      [data-prerender-header-spacer] {
+        height: 56px;
+      }
+      @media (min-width: 768px) {
+        [data-prerender-header-spacer] {
+          height: 64px;
+        }
+      }
     </style>
 
     <!-- 🏢 Organization (brand) + LocalBusiness (physical store) schema.
