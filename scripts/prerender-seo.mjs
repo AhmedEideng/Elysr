@@ -269,6 +269,18 @@ function buildHtml(template, opts) {
       <img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" class="block h-full w-full object-cover" style="display:block;width:100%;height:100%;object-fit:cover;" loading="eager" fetchpriority="high" decoding="async" width="1200" height="663">
     </div>
   </section>
+  <div data-prerender-promo-shell aria-hidden="true">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;max-width:1200px;margin:0 auto;">
+      <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+        <span style="font-size:18px;line-height:1;">💎</span>
+        <span style="font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">مبادرة الرعاية الماسية</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <span style="border-radius:999px;background:rgba(255,255,255,.2);padding:5px 9px;font-size:10px;font-weight:900;">15% · 20% · 25%</span>
+        <span style="border-radius:999px;background:#fff;color:#134e5e;padding:7px 12px;font-size:10px;font-weight:900;">تسوّق العرض</span>
+      </div>
+    </div>
+  </div>
   <div data-prerender-content-skeleton aria-hidden="true">
     <div style="max-width:1200px;margin:0 auto;">
       <div style="width:120px;height:14px;border-radius:999px;background:#d8eaf2;"></div>

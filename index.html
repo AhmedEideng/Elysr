@@ -114,6 +114,14 @@
       [data-prerender-header-spacer] {
         height: 56px;
       }
+      [data-prerender-promo-shell] {
+        display: flex;
+        min-height: 58px;
+        align-items: center;
+        padding: 10px 12px;
+        color: #ffffff;
+        background: linear-gradient(135deg, #0f172a 0%, #134e5e 50%, #1c2e4a 100%);
+      }
       [data-prerender-content-skeleton] {
         background: #f9fcfe;
         padding: 24px 16px 64px;
@@ -134,6 +142,10 @@
         [data-prerender-header-shell],
         [data-prerender-header-spacer] {
           height: 64px;
+        }
+        [data-prerender-promo-shell] {
+          min-height: 64px;
+          padding: 12px 16px;
         }
         [data-prerender-skeleton-grid] {
           grid-template-columns: repeat(4, minmax(0, 1fr));
