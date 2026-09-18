@@ -57,7 +57,7 @@ export function RecentlyViewed({ currentSlug }: { currentSlug?: string }) {
         </button>
       </div>
 
-      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-4 [scrollbar-width:thin] sm:gap-4">
+      <div className="recently-viewed-scroller -mx-4 flex gap-3 overflow-x-auto px-4 pb-4 sm:gap-4">
         {filtered.map(({ item, product }) => (
           // Use a plain anchor for slug-based links since TanStack Router's
           // typed `to` prop requires literal route paths only. The Link
