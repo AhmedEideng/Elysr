@@ -1024,7 +1024,10 @@ async function prerender() {
         jsonLd,
         // (2026-09-17) og-default 1200×631 (الأبعاد الافتراضية في buildHtml)
         imageAlt: r.title,
-        bodyContent: `<h1>${esc(r.h1)}</h1><p>${esc(r.desc)}</p>${r.body ? r.body : ""}${productLinksBody}${articleLinksBody}${faqBody}`,
+        // Category pages also receive a visible prerender shell outside #root
+        // with the canonical H1. Use H2 in the hidden crawler body there so
+        // raw HTML contains one H1 rather than duplicating the same heading.
+        bodyContent: `<${categoryType ? "h2" : "h1"}>${esc(r.h1)}</${categoryType ? "h2" : "h1"}><p>${esc(r.desc)}</p>${r.body ? r.body : ""}${productLinksBody}${articleLinksBody}${faqBody}`,
         loadingShell: categoryLoadingShell,
       });
 
