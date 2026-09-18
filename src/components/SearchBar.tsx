@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Search, X } from "lucide-react";
 import { formatPrice, type Product } from "@/data/product-types";
 import { expandSearchTerm } from "@/lib/search-terms";
+import { thumbUrl } from "@/lib/cache";
 import Fuse from "fuse.js";
 
 /**
@@ -138,7 +139,7 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
                     {p.image ? (
                       <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md border bg-gradient-soft">
                         <img
-                          src={p.image}
+                          src={thumbUrl(p.image, "thumbs-120")}
                           alt={p.name}
                           width={40}
                           height={40}

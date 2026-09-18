@@ -138,6 +138,8 @@ function notFoundResponse(res) {
 
 // ── Express app ──
 const app = express();
+// Do not advertise the framework in every response header.
+app.disable("x-powered-by");
 
 // Gzip/brotli
 app.use(compression());
@@ -150,6 +152,23 @@ app.use(
     type: ["application/json", "application/csp-report", "application/reports+json"],
   }),
 );
+
+// Keep malformed/oversized API bodies machine-readable and avoid Express's
+// default HTML error page. The serverless handlers perform their own stricter
+// validation after parsing.
+/** @type {import("express").ErrorRequestHandler} */
+const handleBodyParserError = (err, req, res, next) => {
+  if (
+    req.path.startsWith("/api/") &&
+    (err?.type === "entity.too.large" || err instanceof SyntaxError)
+  ) {
+    return res.status(err?.type === "entity.too.large" ? 413 : 400).json({
+      error: err?.type === "entity.too.large" ? "Payload too large" : "Invalid JSON payload",
+    });
+  }
+  return next(err);
+};
+app.use(handleBodyParserError);
 
 // Trust proxy
 // (2026-09-15) التووبولوجيا المفترضة: عميل → proxy موثوق واحد → Express
@@ -183,7 +202,12 @@ app.use((req, res, next) => {
   // الإنتاج مش بيعتمد على Host header: SITE_URL مضبوطة أصلاً
   // (CORS/feeds) فالتقارير هتمشي للنطاق الرسمي حتى لو حد ضارب
   // على الـ VPS مباشرة بـ Host تاني.
-  const reportOrigin = `${req.protocol}://${req.get("host") || "localhost"}`;
+  const reportOrigin =
+    process.env.NODE_ENV === "production" &&
+    !process.env.CSP_REPORT_ENDPOINT &&
+    !process.env.SITE_URL
+      ? "https://elysrmedical.store"
+      : `${req.protocol}://${req.get("host") || "localhost"}`;
   res.setHeader("Report-To", buildReportToHeader(reportOrigin));
   res.setHeader("NEL", '{"report_to":"csp","max_age":10886400}');
   // API routes should not be indexed

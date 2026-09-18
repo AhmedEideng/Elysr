@@ -151,8 +151,16 @@ function readPayload(req) {
   const contentLength = parseInt(req.headers["content-length"] || "0", 10);
   if (contentLength > MAX_BODY_SIZE_BYTES) throw new Error("Payload too large");
   if (typeof req.body === "string") {
-    if (req.body.length > MAX_BODY_SIZE_BYTES) throw new Error("Payload too large");
+    if (Buffer.byteLength(req.body, "utf8") > MAX_BODY_SIZE_BYTES)
+      throw new Error("Payload too large");
     return JSON.parse(req.body || "{}");
+  }
+  if (req.body !== undefined) {
+    // Vercel supplies an already-parsed object, so content-length is not
+    // sufficient when the request used chunked transfer encoding.
+    const serialized = JSON.stringify(req.body);
+    if (Buffer.byteLength(serialized, "utf8") > MAX_BODY_SIZE_BYTES)
+      throw new Error("Payload too large");
   }
   return req.body === undefined ? {} : req.body;
 }

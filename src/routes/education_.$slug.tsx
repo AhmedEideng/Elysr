@@ -20,6 +20,7 @@ import { ArticleContentWithAds } from "@/components/sections/ArticleContentWithA
 import { ProductCard } from "@/components/ProductCard";
 import { TopicHub } from "@/components/TopicHub";
 import { topicForArticle, isPillarPath } from "@/data/topics";
+import { assetUrl, thumbUrl } from "@/lib/cache";
 
 export const Route = createFileRoute("/education_/$slug")({
   loader: async ({ params }) => {
@@ -109,7 +110,7 @@ function RelatedCard({ a }: { a: ArticleMeta }) {
       {a.image && !isError ? (
         <div className="h-32 -mx-5 -mt-5 mb-4 overflow-hidden border-b">
           <img
-            src={a.image}
+            src={a.image ? assetUrl(a.image) : undefined}
             alt={a.title}
             width={800}
             height={450}
@@ -208,7 +209,7 @@ function ArticlePage() {
       {article.image && !isMainImageError ? (
         <div className="aspect-video bg-gradient-soft rounded-3xl overflow-hidden mb-8 border shadow-card">
           <img
-            src={article.image}
+            src={article.image ? assetUrl(article.image) : undefined}
             alt={article.title}
             width={800}
             height={450}
@@ -286,7 +287,7 @@ function ArticlePage() {
               >
                 {p.image && (
                   <img
-                    src={p.image}
+                    src={p.image ? thumbUrl(p.image, "thumbs-120") : undefined}
                     alt={p.name}
                     className="w-16 h-16 object-cover rounded-lg"
                     loading="lazy"

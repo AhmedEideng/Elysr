@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PageHero } from "@/components/PageHero";
 import type { ArticleMeta } from "@/data/articles-meta.generated";
 import { ARTICLE_COUNT } from "@/data/articles-cards.generated";
+import { assetUrl } from "@/lib/cache";
 
 export const Route = createFileRoute("/education")({
   loader: async () => {
@@ -35,7 +36,7 @@ function ArticleCard({ a }: { a: ArticleMeta }) {
       {a.image && !isError ? (
         <div className="aspect-video bg-gradient-soft overflow-hidden">
           <img
-            src={a.image}
+            src={a.image ? assetUrl(a.image) : undefined}
             alt={a.title}
             width={640}
             height={360}

@@ -328,6 +328,19 @@ describe("submit-order HTTP handler", () => {
     vi.restoreAllMocks();
   });
 
+  it("rejects an oversized already-parsed request body", async () => {
+    const res = mockResponse();
+    await handler(
+      mockRequest({
+        body: { ...validPayload(), extra: "x".repeat(65_000) },
+        headers: { origin: "https://elysrmedical.store", "x-forwarded-for": "203.0.113.250" },
+      }) as never,
+      res as never,
+    );
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: "Invalid JSON payload" });
+  });
+
   it("rejects unsupported methods", async () => {
     const res = mockResponse();
     await handler(mockRequest({ method: "GET" }) as never, res as never);

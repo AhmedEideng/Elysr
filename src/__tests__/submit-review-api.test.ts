@@ -120,6 +120,20 @@ describe("submit-review handler", () => {
     vi.unstubAllGlobals();
   });
 
+  it("rejects an oversized already-parsed request body", async () => {
+    const res = mockResponse();
+    const { body } = validPayload("203.0.113.250");
+    await handler(
+      mockRequest({
+        ip: "203.0.113.250",
+        body: { ...body, extra: "x".repeat(8_000) },
+      }) as never,
+      res as never,
+    );
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: "Invalid JSON payload" });
+  });
+
   it("rejects a disallowed origin with 403", async () => {
     const res = mockResponse();
     const { body } = validPayload();

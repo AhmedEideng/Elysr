@@ -41,6 +41,7 @@ import { topicForProduct } from "@/data/topics";
 import { shareProductText, waShareUrl } from "@/lib/share";
 import { getProductBySlug, getProductsByCategory, getCrossSellsForProduct } from "@/data/products";
 import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
+import { assetUrl } from "@/lib/cache";
 
 interface LinkedArticle {
   slug: string;
@@ -672,7 +673,7 @@ function ProductPage() {
                 {a.image ? (
                   <div className="h-32 w-full overflow-hidden bg-muted relative">
                     <img
-                      src={a.image}
+                      src={a.image ? assetUrl(a.image) : undefined}
                       alt={a.title}
                       loading="lazy"
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

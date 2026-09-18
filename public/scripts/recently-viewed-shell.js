@@ -6,6 +6,15 @@
   "use strict";
 
   var STORAGE_KEY = "elysr_recently_viewed_v1";
+  var bootstrapScript = document.currentScript;
+  var cacheVersion = "";
+  try {
+    cacheVersion =
+      new URL(bootstrapScript && bootstrapScript.src, window.location.href).searchParams.get("v") ||
+      "";
+  } catch (_) {
+    cacheVersion = "";
+  }
   var section = document.querySelector("[data-prerender-recently-viewed]");
   if (!section) return;
 
@@ -42,7 +51,12 @@
 
     if (item.image) {
       var image = document.createElement("img");
-      image.src = String(item.image).split("?")[0];
+      var imagePath = String(item.image).split("?")[0];
+      if (imagePath.indexOf("/images/") === 0) {
+        imagePath = imagePath.replace(/^\/images\//, "/images/thumbs/");
+        if (cacheVersion) imagePath += "?v=" + encodeURIComponent(cacheVersion);
+      }
+      image.src = imagePath;
       image.alt = item.name;
       image.width = 480;
       image.height = 480;

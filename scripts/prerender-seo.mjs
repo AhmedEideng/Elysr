@@ -1126,7 +1126,7 @@ async function prerender() {
           ? `<h2>منتجات مشابهة</h2><ul>${relatedProducts
               .map(
                 (p) =>
-                  `<li><a href="${SITE_URL}/products/${p.slug}"><img src="${SITE_URL}${assetUrl(p.image)}" alt="${esc(p.name)}" title="${esc(p.name)}" width="240" height="240" loading="lazy" />${esc(p.name)}</a></li>`,
+                  `<li><a href="${SITE_URL}/products/${p.slug}"><img src="${assetUrl(p.image)}" alt="${esc(p.name)}" title="${esc(p.name)}" width="240" height="240" loading="lazy" />${esc(p.name)}</a></li>`,
               )
               .join("")}</ul>`
           : "";
@@ -1374,7 +1374,7 @@ async function prerender() {
         const productsBody = selectedProducts
           .map(
             (product) =>
-              `<li><a href="${SITE_URL}/products/${product.slug}"><img src="${SITE_URL}${assetUrl(product.image)}" alt="${esc(product.name)}" title="${esc(product.name)}" width="240" height="240" loading="lazy" />${esc(product.name)}</a> — ${esc(makeMetaDescription(product.description))}</li>`,
+              `<li><a href="${SITE_URL}/products/${product.slug}"><img src="${assetUrl(product.image)}" alt="${esc(product.name)}" title="${esc(product.name)}" width="240" height="240" loading="lazy" />${esc(product.name)}</a> — ${esc(makeMetaDescription(product.description))}</li>`,
           )
           .join("");
 

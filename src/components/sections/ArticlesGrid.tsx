@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { BookOpen, Clock } from "lucide-react";
 import { ARTICLE_COUNT, featuredArticleCards } from "@/data/articles-cards.generated";
+import { assetUrl } from "@/lib/cache";
 
 // 🚀 البطاقات مولّدة وقت البناء من نفس المصدر (src/data/articles.ts) في
 // module صغير بلا حقل content — عشان الـ chunk الكامل data-articles (~78KB)
@@ -37,7 +38,7 @@ export function ArticlesGrid() {
               {article.image && (
                 <div className="relative h-44 w-full shrink-0 overflow-hidden bg-muted">
                   <img
-                    src={article.image}
+                    src={article.image ? assetUrl(article.image) : undefined}
                     alt={article.title}
                     loading="lazy"
                     decoding="async"

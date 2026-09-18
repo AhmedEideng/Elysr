@@ -34,6 +34,7 @@ import { trackBeginCheckout, trackCtaClick, trackPurchase, trackViewCart } from 
 import { getReferrerCode } from "@/lib/referral";
 import { toast } from "sonner";
 import { getNextTier, PROMO_TAGLINE, isPromotionEnabled } from "@/lib/promo";
+import { assetUrl } from "@/lib/cache";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -317,7 +318,7 @@ function CartPage() {
                     <div className="h-12 w-12 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-xl border bg-muted">
                       {it.image ? (
                         <img
-                          src={it.image}
+                          src={it.image ? assetUrl(it.image) : undefined}
                           alt={it.name}
                           className="h-full w-full object-cover"
                           width={48}
