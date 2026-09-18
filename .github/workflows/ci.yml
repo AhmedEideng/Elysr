@@ -26,7 +26,7 @@ jobs:
   # ─────────────────────────────────────────────────────────
   source-links:
     name: 🔗 Corpus Source Liveness (all articles)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
@@ -48,7 +48,7 @@ jobs:
   # ─────────────────────────────────────────────────────────
   static:
     name: 🔍 Lint • Typecheck • Unit • Data Integrity
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
         with:
@@ -81,7 +81,7 @@ jobs:
   # ─────────────────────────────────────────────────────────
   audit:
     name: 🛡 Security Audit (high+)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
@@ -103,7 +103,7 @@ jobs:
   # ─────────────────────────────────────────────────────────
   build:
     name: 🏗 Build • Prerender • Sitemaps
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: static
     steps:
       - uses: actions/checkout@v5
@@ -141,7 +141,7 @@ jobs:
   # ─────────────────────────────────────────────────────────
   lighthouse:
     name: 🚦 Lighthouse Performance Budget
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     steps:
       - uses: actions/checkout@v5
@@ -197,7 +197,7 @@ jobs:
   # ─────────────────────────────────────────────────────────
   e2e:
     name: 🧪 Browser Checkout Flow
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     steps:
       - uses: actions/checkout@v5

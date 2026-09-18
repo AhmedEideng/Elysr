@@ -3,7 +3,7 @@ name: 💎 Auto Publish Weekly Medical Article
 on:
   schedule:
     # Every Monday at 09:00 UTC — Cairo: 11:00 (winter, UTC+2) or 12:00 (summer, UTC+3).
-# Egypt reinstated DST in 2023 (abolished in 2014) — the comment said "permanently UTC+2" which was wrong.
+    # Egypt reinstated DST in 2023 (abolished in 2014) — the comment said "permanently UTC+2" which was wrong.
     - cron: "0 9 * * 1"
   workflow_dispatch:
 
@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   publish-article:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     steps:
