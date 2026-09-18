@@ -15,10 +15,19 @@ describe("API client IP extraction", () => {
     expect(getClientIp(req as never)).toBe("203.0.113.7");
   });
 
-  it("uses the platform client address inside Vercel", () => {
+  it("uses Vercel's documented x-real-ip inside Vercel", () => {
     vi.stubEnv("VERCEL", "1");
     const req = {
-      headers: { "x-vercel-ip": "198.51.100.8", "x-forwarded-for": "198.51.100.9" },
+      headers: { "x-real-ip": "198.51.100.8", "x-forwarded-for": "198.51.100.9" },
+      socket: { remoteAddress: "203.0.113.7" },
+    };
+    expect(getClientIp(req as never)).toBe("198.51.100.8");
+  });
+
+  it("falls back to the first x-forwarded-for address on Vercel", () => {
+    vi.stubEnv("VERCEL", "1");
+    const req = {
+      headers: { "x-forwarded-for": "198.51.100.8, 198.51.100.9" },
       socket: { remoteAddress: "203.0.113.7" },
     };
     expect(getClientIp(req as never)).toBe("198.51.100.8");

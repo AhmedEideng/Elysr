@@ -41,6 +41,9 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server ./server
 COPY --from=build /app/api ./api
+# server/index.js imports CSP config and reads vercel.json for redirect parity.
+COPY --from=build /app/config ./config
+COPY --from=build /app/vercel.json ./vercel.json
 COPY --from=build /app/package.json ./
 
 # Security: drop root

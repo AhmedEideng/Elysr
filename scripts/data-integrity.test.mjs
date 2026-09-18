@@ -38,6 +38,17 @@ try {
   const { GOOGLE_SHOPPING_BLOCKED } = await vite.ssrLoadModule("/src/lib/product-compliance.ts");
   const siteConfig = await vite.ssrLoadModule("/src/lib/site-config.ts");
   const vercel = JSON.parse(readFileSync(resolve(ROOT, "vercel.json"), "utf-8"));
+  const dockerfile = readFileSync(resolve(ROOT, "Dockerfile"), "utf-8");
+  assert.match(
+    dockerfile,
+    /COPY --from=build \/app\/config \.\/config/,
+    "Docker runtime must include config/ because server/index.js imports security-headers.mjs",
+  );
+  assert.match(
+    dockerfile,
+    /COPY --from=build \/app\/vercel\.json \.\/vercel\.json/,
+    "Docker runtime must include vercel.json for self-hosted redirect parity",
+  );
   const productsDb = JSON.parse(readFileSync(resolve(ROOT, "api/lib/products-db.json"), "utf-8"));
   const configDb = JSON.parse(readFileSync(resolve(ROOT, "api/lib/config-db.json"), "utf-8"));
   const cacheConfig = JSON.parse(readFileSync(resolve(ROOT, "config/cache-version.json"), "utf-8"));
