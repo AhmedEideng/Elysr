@@ -40,6 +40,92 @@ function assetUrl(path) {
   return `${base}?v=${CACHE_VERSION}`;
 }
 
+/**
+ * Visible first-paint shell helpers. These are deliberately small and static:
+ * React replaces them as soon as the app is ready, but users still see the
+ * real navigation, offer, and first product cards while JavaScript is loading.
+ */
+function staticHeaderShell() {
+  return `<div data-prerender-header-shell aria-hidden="true">
+  <div data-prerender-header-inner>
+    <a href="/" data-prerender-brand>اليسر ميديكال</a>
+    <nav data-prerender-header-nav aria-label="القائمة الرئيسية">
+      <a href="/">الرئيسية</a>
+      <a href="/products/men">منتجات الرجال</a>
+      <a href="/products/women">منتجات النساء</a>
+      <a href="/products/devices">الأجهزة الطبية</a>
+      <a href="/education">النصائح الطبية</a>
+      <a href="/contact">تواصل معنا</a>
+      <a href="/about">من نحن</a>
+    </nav>
+    <div data-prerender-header-actions aria-hidden="true">
+      <span title="بحث">⌕</span>
+      <span title="المفضلة">♡</span>
+      <span title="السلة">🛒</span>
+      <span data-prerender-menu title="القائمة">☰</span>
+    </div>
+  </div>
+</div>
+<div data-prerender-header-spacer aria-hidden="true"></div>`;
+}
+
+function staticPromoShell() {
+  return `<div data-prerender-promo-shell aria-hidden="true">
+  <div data-prerender-promo-mobile>
+    <div data-prerender-promo-mobile-top>
+      <div data-prerender-promo-title><span>💎</span><span><small>رعاية طبية متكاملة.. بتوفير استثنائي!</small><strong>مبادرة الرعاية الماسية</strong></span></div>
+      <div data-prerender-promo-actions><span>👑 25%</span><span>تسوّق</span></div>
+    </div>
+    <div data-prerender-promo-countdown>◷ &nbsp; تتجدد الدورة خلال: &nbsp; 00:05:00:00</div>
+  </div>
+  <div data-prerender-promo-desktop>
+    <div data-prerender-promo-title><span>💎</span><span><small>رعاية طبية متكاملة.. بتوفير استثنائي!</small><strong>مبادرة الرعاية الماسية</strong></span></div>
+    <i></i>
+    <div data-prerender-promo-tiers><span>👑 25%</span><span>⚡ 20%</span><span>✨ 15%</span></div>
+    <i></i>
+    <div data-prerender-promo-countdown>◷ &nbsp; تتجدد الدورة خلال &nbsp; 02 : 05 : 00 : 00</div>
+    <a href="/products/men">تسوّق العرض</a>
+  </div>
+</div>`;
+}
+
+function staticProductCard(product) {
+  const image = product.image
+    ? `<img src="${assetUrl(product.image)}" alt="${esc(product.name)}" width="800" height="800" loading="eager" decoding="async" />`
+    : `<span data-prerender-product-emoji>${esc(product.emoji || "🛍️")}</span>`;
+  return `<article data-prerender-product-card>
+  <a href="/products/${esc(product.slug)}" data-prerender-product-image>${image}</a>
+  <div data-prerender-product-details>
+    <span data-prerender-product-badge>${esc(product.badge || "منتج مختار")}</span>
+    <a href="/products/${esc(product.slug)}" data-prerender-product-name>${esc(product.name)}</a>
+    <div data-prerender-product-bottom><strong>${esc(product.price)} ج.م</strong><span data-prerender-cart>🛒</span></div>
+  </div>
+</article>`;
+}
+
+function staticProductSection(products, { title = "✨ اخترنا لك", description = "" } = {}) {
+  return `<section data-prerender-product-section aria-hidden="true">
+  <div data-prerender-product-section-inner>
+    <div data-prerender-product-heading><span>${esc(title)}</span>${description ? `<p>${esc(description)}</p>` : ""}</div>
+    <div data-prerender-product-grid>${products.map(staticProductCard).join("")}</div>
+  </div>
+</section>`;
+}
+
+function staticCategoryShell({ eyebrow, title, description, products }) {
+  return `<div data-prerender-category-shell aria-hidden="true">
+  ${staticHeaderShell()}
+  <main data-prerender-category-main>
+    <div data-prerender-page-hero>
+      <small>${esc(eyebrow)}</small>
+      <h1>${esc(title)}</h1>
+      <p>${esc(description)}</p>
+    </div>
+    <div data-prerender-product-grid>${products.map(staticProductCard).join("")}</div>
+  </main>
+</div>`;
+}
+
 /** HTML-escape */
 function esc(str = "") {
   return String(str)
@@ -111,6 +197,7 @@ function buildHtml(template, opts) {
     type = "website",
     noindex = false,
     heroPreload = false,
+    loadingShell = "",
     // (2026-09-17) بيانات الصورة لمشاركة الـ OG — الأبعاد الحقيقية للملف
     // (مش أبعاد العرض) + alt وصفية (SEO + accessibility + معاينة المشاركة).
     imageAlt,
@@ -247,60 +334,18 @@ function buildHtml(template, opts) {
   // Inject crawler-friendly content right inside #root (will be replaced
   // by React when JS boots — but bots see it instantly).
   if (bodyContent) {
-    // ⚡ LCP: نسخة ظاهرة من الـ hero قبل hydration — عنصر الـ LCP (صورة
-    // الـ hero) بيبقى مكتشف في الـ HTML الأول من غير ما نستنى JS.
-    // نفس markup/فئات Hero.tsx بالظبط (critical CSS بيشكلها فورًا)، مع spacer
-    // الهيدر الثابت نفسه حتى يبدأ الهيرو من نفس الموضع قبل وبعد استبدال React.
-    // حاوية aspect-ratio ثابتة = نفس أبعاد الهيرو النهائي → مفيش CLS عند
-    // استبدال React للكتلة. الصورة نفسها من الـ preload (نفس الـ URL) → من الكاش.
-    // التدرج الخلفي inline (مش critical CSS) يمنع فلش أبيض لو الصورة تأخرت.
-    const visibleHero = heroPreload
-      ? `<div data-prerender-hero>
-  <div data-prerender-header-shell aria-hidden="true" style="position:fixed;inset:0 0 auto;z-index:40;width:100%;background:rgba(249,252,254,.96);border-bottom:1px solid #d8e3e9;box-shadow:0 2px 8px rgba(0,24,60,.06);backdrop-filter:blur(12px);">
-    <div style="height:100%;max-width:1200px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
-      <span style="display:block;width:112px;height:13px;border-radius:999px;background:#d8eaf2;"></span>
-      <span style="display:block;width:38%;height:10px;border-radius:999px;background:#e5edf1;"></span>
-      <span style="display:block;width:96px;height:32px;border-radius:999px;background:#e5edf1;"></span>
-    </div>
-  </div>
-  <div data-prerender-header-spacer aria-hidden="true"></div>
-  <section class="relative w-full overflow-hidden">
-    <div class="relative w-full overflow-hidden" style="aspect-ratio:1200 / 663;background:linear-gradient(to bottom right,#f0f9ff,#eff6ff,#ecfeff);">
-      <img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" class="block h-full w-full object-cover" style="display:block;width:100%;height:100%;object-fit:cover;" loading="eager" fetchpriority="high" decoding="async" width="1200" height="663">
-    </div>
-  </section>
-  <div data-prerender-promo-shell aria-hidden="true">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;max-width:1200px;margin:0 auto;">
-      <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-        <span style="font-size:18px;line-height:1;">💎</span>
-        <span style="font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">مبادرة الرعاية الماسية</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-        <span style="border-radius:999px;background:rgba(255,255,255,.2);padding:5px 9px;font-size:10px;font-weight:900;">15% · 20% · 25%</span>
-        <span style="border-radius:999px;background:#fff;color:#134e5e;padding:7px 12px;font-size:10px;font-weight:900;">تسوّق العرض</span>
-      </div>
-    </div>
-  </div>
-  <div data-prerender-content-skeleton aria-hidden="true">
-    <div style="max-width:1200px;margin:0 auto;">
-      <div style="width:120px;height:14px;border-radius:999px;background:#d8eaf2;"></div>
-      <div data-prerender-skeleton-grid>
-        <div data-prerender-skeleton-card></div>
-        <div data-prerender-skeleton-card></div>
-        <div data-prerender-skeleton-card></div>
-        <div data-prerender-skeleton-card></div>
-      </div>
-    </div>
-  </div>
-</div>`
+    // الـ shell المرئي هنا يحافظ على محتوى أول viewport ومقاساته حتى يركب React.
+    const prerenderShell = loadingShell
+      ? `<div id="elysr-prerender-shell">${loadingShell}</div>`
       : "";
+    // يبقى الـ shell خارج #root حتى لا يمسحه createRoot أثناء تحميل route chunks.
+    // Layout.tsx يزيله بعد تركيب واجهة React كاملة؛ لذلك لا توجد لحظة بيضاء
+    // بين أول paint ووصول الهيدر/الكروت الحقيقية.
     html = html.replace(
       '<div id="root"></div>',
-      // 🎭 إخفاء المحتوى بدون left:-9999px — الإحداثي السلبي الضخم كان
-      // يكسر paint viewport كامل (hero مش ظاهر) على بعض builds Chromium
-      // (headless). نمط sr-only/clip المعتمد: مخفي بصريًا، موجود في DOM و
-      // accessibility tree (Googlebot يقرأه)، ومفيش scroll region غريبة.
-      `<div id="root">${visibleHero}<div data-prerender-content style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">${bodyContent}</div></div>`,
+      // 🎭 إخفاء المحتوى SEO بدون left:-9999px — الإحداثي السلبي الضخم كان
+      // يكسر paint viewport كامل (hero مش ظاهر) على بعض builds Chromium.
+      `<div id="root"${prerenderShell ? ' data-prerender-pending="true"' : ""}><div data-prerender-content style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">${bodyContent}</div></div>${prerenderShell}`,
     );
   }
 
@@ -331,7 +376,8 @@ async function prerender() {
   let staticCount = 0;
 
   try {
-    const { products } = await vite.ssrLoadModule("/src/data/products.ts");
+    const { products, getPublicProductsByCategory } =
+      await vite.ssrLoadModule("/src/data/products.ts");
     const { GOVERNORATE_SHIPPING } = await vite.ssrLoadModule("/src/lib/site-config.ts");
     const shippingBands = new Map();
     for (const entry of GOVERNORATE_SHIPPING) {
@@ -487,9 +533,19 @@ async function prerender() {
       const title = "اليسر — منتجات الصحة الزوجية الأصلية في مصر | شحن سري";
       const desc =
         "اليسر ميديكال متجر مصري لمنتجات الصحة الزوجية للرجال والنساء. شحن سري وتغليف محايد ودفع عند الاستلام مع دعم عبر واتساب.";
+      const homeFeatured = ["m-11", "m-01", "m-44", "m-60", "w-15", "w-13"]
+        .map((id) => products.find((p) => p.id === id))
+        .filter(Boolean);
+      const homeLoadingShell = `<div data-prerender-hero>
+  ${staticHeaderShell()}
+  <section data-prerender-static-hero><div><img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" width="1200" height="663" loading="eager" fetchpriority="high" decoding="async"></div></section>
+  ${staticPromoShell()}
+  ${staticProductSection(homeFeatured, { description: "باقة مختارة بعناية من أفضل المنتجات والمكملات لدعم صحتك وحيويتك الزوجية بأمان وثقة" })}
+</div>`;
       let html = buildHtml(template, {
         title,
         description: desc,
+        loadingShell: homeLoadingShell,
         image: `${SITE_URL}/og-default.webp`,
         canonical: `${SITE_URL}/`,
         type: "website",
@@ -810,6 +866,36 @@ async function prerender() {
             ? products.filter((p) => p.category === "devices")
             : [];
 
+      const categoryType = r.path.endsWith("/men")
+        ? "men"
+        : r.path.endsWith("/women")
+          ? "women"
+          : r.path.endsWith("/devices")
+            ? "devices"
+            : null;
+      const categoryItems = categoryType
+        ? getPublicProductsByCategory(categoryType).slice(0, 8)
+        : [];
+      const categoryLoadingShell =
+        categoryType && categoryItems.length > 0
+          ? staticCategoryShell({
+              eyebrow:
+                categoryType === "men"
+                  ? "صحة الرجل"
+                  : categoryType === "women"
+                    ? "صحة المرأة"
+                    : "الأجهزة الطبية",
+              title: r.h1,
+              description:
+                categoryType === "men"
+                  ? "مكمّلات غذائية، عسل ملكي، بخاخات، كريمات وجل موضعي مختارة بعناية لدعم الصحة الزوجية للرجال مع الخصوصية والشحن السري داخل مصر."
+                  : categoryType === "women"
+                    ? "منتجات مختارة بعناية لدعم الراحة، الترطيب، الحيوية والثقة في العلاقة الزوجية للمرأة مع التزام كامل بالخصوصية وسرية التوصيل."
+                    : "أجهزة ومستلزمات طبية موثوقة مختارة بعناية، مع جودة عالية وشحن سري لكل المحافظات لتجربة أكثر أماناً واحترافية.",
+              products: categoryItems,
+            })
+          : "";
+
       const jsonLd = [];
       jsonLd.push({
         "@context": "https://schema.org",
@@ -907,6 +993,7 @@ async function prerender() {
         // (2026-09-17) og-default 1200×631 (الأبعاد الافتراضية في buildHtml)
         imageAlt: r.title,
         bodyContent: `<h1>${esc(r.h1)}</h1><p>${esc(r.desc)}</p>${r.body ? r.body : ""}${productLinksBody}${articleLinksBody}${faqBody}`,
+        loadingShell: categoryLoadingShell,
       });
 
       // Write to dist/<path>.html (cleanUrls handles trailing-slash routing)

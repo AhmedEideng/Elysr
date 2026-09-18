@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { SkipToContent } from "@/components/Accessibility";
@@ -13,6 +13,13 @@ const BackToTop = lazy(() =>
 );
 
 export function Layout({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    // The static first-paint shell lives outside #root so createRoot cannot
+    // expose a blank interval while route chunks are still loading.
+    document.getElementById("elysr-prerender-shell")?.remove();
+    document.getElementById("root")?.removeAttribute("data-prerender-pending");
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col overflow-hidden">
       {/* WCAG 2.4.1 — keyboard users can bypass the header */}
