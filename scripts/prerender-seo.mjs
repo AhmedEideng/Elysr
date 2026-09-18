@@ -255,7 +255,32 @@ function buildHtml(template, opts) {
     // استبدال React للكتلة. الصورة نفسها من الـ preload (نفس الـ URL) → من الكاش.
     // التدرج الخلفي inline (مش critical CSS) يمنع فلش أبيض لو الصورة تأخرت.
     const visibleHero = heroPreload
-      ? `<div data-prerender-hero><div data-prerender-header-spacer aria-hidden="true"></div><section class="relative w-full overflow-hidden"><div class="relative w-full overflow-hidden" style="aspect-ratio: 1200 / 663; background: linear-gradient(to bottom right, #f0f9ff, #eff6ff, #ecfeff);"><img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" class="block h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async" width="1200" height="663"></div></section></div>`
+      ? `<div data-prerender-hero>
+  <div data-prerender-header-shell aria-hidden="true" style="position:fixed;inset:0 0 auto;z-index:40;width:100%;background:rgba(249,252,254,.96);border-bottom:1px solid #d8e3e9;box-shadow:0 2px 8px rgba(0,24,60,.06);backdrop-filter:blur(12px);">
+    <div style="height:100%;max-width:1200px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <span style="display:block;width:112px;height:13px;border-radius:999px;background:#d8eaf2;"></span>
+      <span style="display:block;width:38%;height:10px;border-radius:999px;background:#e5edf1;"></span>
+      <span style="display:block;width:96px;height:32px;border-radius:999px;background:#e5edf1;"></span>
+    </div>
+  </div>
+  <div data-prerender-header-spacer aria-hidden="true"></div>
+  <section class="relative w-full overflow-hidden">
+    <div class="relative w-full overflow-hidden" style="aspect-ratio:1200 / 663;background:linear-gradient(to bottom right,#f0f9ff,#eff6ff,#ecfeff);">
+      <img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" class="block h-full w-full object-cover" style="display:block;width:100%;height:100%;object-fit:cover;" loading="eager" fetchpriority="high" decoding="async" width="1200" height="663">
+    </div>
+  </section>
+  <div data-prerender-content-skeleton aria-hidden="true">
+    <div style="max-width:1200px;margin:0 auto;">
+      <div style="width:120px;height:14px;border-radius:999px;background:#d8eaf2;"></div>
+      <div data-prerender-skeleton-grid>
+        <div data-prerender-skeleton-card></div>
+        <div data-prerender-skeleton-card></div>
+        <div data-prerender-skeleton-card></div>
+        <div data-prerender-skeleton-card></div>
+      </div>
+    </div>
+  </div>
+</div>`
       : "";
     html = html.replace(
       '<div id="root"></div>',
