@@ -30,7 +30,7 @@ import {
   FREE_SHIPPING_THRESHOLD,
   qualifiesForFreeShipping,
 } from "@/lib/governorates";
-import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
+import { trackBeginCheckout, trackCtaClick, trackPurchase } from "@/lib/analytics";
 import { toast } from "sonner";
 import { getNextTier, PROMO_TAGLINE, isPromotionEnabled } from "@/lib/promo";
 
@@ -168,7 +168,11 @@ function CartPage() {
       promoApplied: discount > 0 || bundleDiscount > 0,
     };
 
-    // GA: begin_checkout — اتقدم الطلب (مشاع للطريقتين)
+    // GA: cta + begin_checkout — اتقدم الطلب (مشاع للطريقتين)
+    trackCtaClick(method === "whatsapp" ? "checkout_whatsapp" : "checkout_direct", "/cart", {
+      items_count: items.length,
+      value: grandTotal,
+    });
     trackBeginCheckout(orderItems, grandTotal, shipping);
 
     if (method === "whatsapp") {

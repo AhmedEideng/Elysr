@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SearchX } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
+import { useEffect } from "react";
+import { trackSiteSearch } from "@/lib/analytics";
 
 const PAGE_TITLE = "نتائج البحث";
 
@@ -54,6 +56,14 @@ export const Route = createFileRoute("/search")({
 
 function SearchResultsPage() {
   const { items, query, total } = Route.useLoaderData();
+
+  // (2026-09-18 v2) Search tracking دقيق: query + results_count الحقيقي
+  // يغذي GA4 ببيانات البحث الداخلي (إيه اللي الناس بتدور عليه)
+  useEffect(() => {
+    if (query && query.trim()) {
+      trackSiteSearch(query.trim(), items.length);
+    }
+  }, [query, items.length]);
 
   return (
     <div className="container mx-auto px-4 py-10 md:py-12">

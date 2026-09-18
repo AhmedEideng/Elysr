@@ -1,31 +1,28 @@
 /**
  * ============================================================
- * 📊 Global GA4 auto-trackers (2026-09-18) — تثبيت تلقائي
+ * 📊 Global GA4 auto-trackers (2026-09-18 v2) — تثبيت تلقائي
  * ============================================================
  * بيركب مرة واحدة من الـ root component — بيتتبع:
  *
  *  • outbound clicks (wa.me, facebook, twitter, x.com, etc.)
  *  • share clicks (الـ wa.me/?text= links — لقياس الـ viral loop)
- *  • internal search (الـ ?q= URL — لما حد يدور في الـ SearchBar)
  *  • Web Vitals (LCP, CLS, INP) — كـ web_vital event
  *
  * التصميم: passive listeners + delegation من document → مفيش
  * memory leak لما الـ routes تتغير. الـ web-vitals بيتسجل مرة
- * واحدة عند الـ mount الأول.
+ * واحدة عند الـ mount الأول مع cleanup صحيح.
+ *
+ * v2 changes:
+ *  - search tracking اتنقل لـ /search route نفسه (results_count دقيق)
+ *  - Web Vitals: listener واحد لـ visibilitychange يبعت LCP+CLS+INP
+ *  - إزالة items prop (كان دايمًا 0)
  * ============================================================
  */
 import { useEffect } from "react";
-import {
-  trackOutboundClick,
-  trackShareClick,
-  trackSiteSearch,
-  trackWebVital,
-  type TrackItem,
-} from "@/lib/analytics";
+import { trackOutboundClick, trackShareClick, trackWebVital } from "@/lib/analytics";
 
 const SHARE_PATTERNS = [/wa\.me\/?\?text=/, /\/share/];
 // قائمة الـ hosts اللي بنحسبها outbound (whatsapp/facebook/medical sources/etc).
-// الميزة: نقدر نخصص label مفيد في التقارير بدل الـ host الخام.
 const OUTBOUND_LABELERS: Array<{ test: RegExp; label: string }> = [
   { test: /^wa\.me/, label: "whatsapp" },
   { test: /^facebook\.com/, label: "facebook" },
@@ -48,7 +45,7 @@ function pickOutboundLabel(host: string): string {
   return host;
 }
 
-export function GlobalTrackers({ items }: { items?: TrackItem[] }) {
+export function GlobalTrackers() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -61,7 +58,6 @@ export function GlobalTrackers({ items }: { items?: TrackItem[] }) {
         const isShare = SHARE_PATTERNS.some((p) => p.test(a.href));
         if (isShare) {
           const refPath = window.location.pathname;
-          // (heuristic) share kind من الـ URL/المرجع
           let kind: "product" | "article" | "guide" = "product";
           if (refPath.startsWith("/education/")) kind = "article";
           else if (refPath.startsWith("/products/guides/")) kind = "guide";
@@ -77,102 +73,138 @@ export function GlobalTrackers({ items }: { items?: TrackItem[] }) {
     };
     document.addEventListener("click", onClick, { capture: true });
 
-    // ── 2) internal search (الـ ?q= URL) — بيتنادى مرتين: أول مرة
-    // بنشوف الـ query string، بعدين بنشيله من الـ URL عشان ما يبقيش
-    // مرئي للزائر. بس ده اختياري — بنسيبه للـ route. ──
-    const search = new URLSearchParams(window.location.search).get("q");
-    if (search) {
-      // results_count بيتبعت بعد load الـ route — بناديه بـ 0 أولاً
-      // ثم الـ route لو عندها hook (مثلاً SearchBar) بتقدر تعمل
-      // trackSiteSearch تاني بنتيجة بعد ما الـ results يجهز.
-      trackSiteSearch(search, items?.length ?? 0);
-    }
-
-    // ── 3) Web Vitals — using PerformanceObserver (no extra deps) ──
+    // ── 2) Web Vitals — PerformanceObserver with single visibility handler ──
     let lcpValue = 0;
-    try {
-      const lcp = new PerformanceObserver((list) => {
-        for (const e of list.getEntries())
-          lcpValue =
-            (e as { renderTime?: number; loadTime?: number; startTime?: number }).renderTime ??
-            (e as { loadTime?: number; startTime?: number }).loadTime ??
-            lcpValue;
-      });
-      lcp.observe({ type: "largest-contentful-paint", buffered: true });
-      // LCP final
-      const sendLCP = () => {
-        lcp.disconnect();
+    let clsValue = 0;
+    let worstINP = 0;
+    let lcpObserver: PerformanceObserver | null = null;
+    let clsObserver: PerformanceObserver | null = null;
+    let inpObserver: PerformanceObserver | null = null;
+    let lcpSent = false;
+    let clsSent = false;
+
+    const sendVitalsOnHidden = () => {
+      if (document.visibilityState !== "hidden") return;
+      if (!lcpSent && lcpValue > 0) {
+        lcpSent = true;
         trackWebVital(
           "LCP",
           lcpValue,
           lcpValue < 2500 ? "good" : lcpValue < 4000 ? "needs-improvement" : "poor",
         );
-      };
-      // report on hidden page
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "hidden") sendLCP();
-      });
-    } catch {
-      /* PerformanceObserver غير متاح */
-    }
-
-    let clsValue = 0;
-    try {
-      const cls = new PerformanceObserver((list) => {
-        for (const e of list.getEntries()) {
-          const entry = e as { value?: number; hadRecentInput?: boolean };
-          if (!entry.hadRecentInput) clsValue += entry.value ?? 0;
-        }
-      });
-      cls.observe({ type: "layout-shift", buffered: true });
-      const sendCLS = () => {
-        cls.disconnect();
+        lcpObserver?.disconnect();
+      }
+      if (!clsSent) {
+        clsSent = true;
         trackWebVital(
           "CLS",
           clsValue,
           clsValue < 0.1 ? "good" : clsValue < 0.25 ? "needs-improvement" : "poor",
         );
-      };
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "hidden") sendCLS();
+        clsObserver?.disconnect();
+      }
+      if (worstINP > 0) {
+        trackWebVital(
+          "INP",
+          worstINP,
+          worstINP < 200 ? "good" : worstINP < 500 ? "needs-improvement" : "poor",
+        );
+        // INP قد يتحدث بعد hidden مرة أخيرة — نسيبه مفتوح لحد unload
+      }
+    };
+
+    try {
+      lcpObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          const e = entry as PerformanceEntry & {
+            renderTime?: number;
+            loadTime?: number;
+          };
+          const v = e.renderTime ?? e.loadTime ?? e.startTime;
+          if (v > lcpValue) lcpValue = v;
+        }
       });
+      lcpObserver.observe({ type: "largest-contentful-paint", buffered: true });
     } catch {
-      /* PerformanceObserver غير متاح */
+      /* LCP not supported */
     }
 
-    // INP (Interaction to Next Paint) — experimental
     try {
-      const inp = new PerformanceObserver((list) => {
-        let worst = 0;
-        for (const e of list.getEntries()) {
-          const entry = e as { duration?: number };
-          if ((entry.duration ?? 0) > worst) worst = entry.duration ?? 0;
+      clsObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          const e = entry as PerformanceEntry & {
+            value?: number;
+            hadRecentInput?: boolean;
+          };
+          if (!e.hadRecentInput) clsValue += e.value ?? 0;
         }
-        if (worst > 0) {
-          trackWebVital(
-            "INP",
-            worst,
-            worst < 200 ? "good" : worst < 500 ? "needs-improvement" : "poor",
-          );
+      });
+      clsObserver.observe({ type: "layout-shift", buffered: true });
+    } catch {
+      /* CLS not supported */
+    }
+
+    try {
+      inpObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          const e = entry as PerformanceEntry & { duration?: number };
+          const d = e.duration ?? 0;
+          if (d > worstINP) {
+            worstINP = d;
+            // نرسل INP مباشرة عند التفاعل (مع throttling ضمني من worst check)
+            // + سيُرسل مرة أخيرة عند hidden
+            trackWebVital(
+              "INP",
+              worstINP,
+              worstINP < 200 ? "good" : worstINP < 500 ? "needs-improvement" : "poor",
+            );
+          }
         }
       });
       try {
-        inp.observe({
+        inpObserver.observe({
           type: "event",
           buffered: true,
           durationThreshold: 16,
         } as PerformanceObserverInit);
       } catch {
-        /* some browsers لا يدعم event timing */
+        /* event timing not supported */
       }
     } catch {
       /* ignore */
     }
 
+    document.addEventListener("visibilitychange", sendVitalsOnHidden);
+
+    // Fallback: لو المستخدم فضل في الصفحة 10 ثواني بدون hidden، ابعت LCP/CLS
+    const fallbackTimer = window.setTimeout(() => {
+      if (!lcpSent && lcpValue > 0) {
+        lcpSent = true;
+        trackWebVital(
+          "LCP",
+          lcpValue,
+          lcpValue < 2500 ? "good" : lcpValue < 4000 ? "needs-improvement" : "poor",
+        );
+      }
+      if (!clsSent) {
+        clsSent = true;
+        trackWebVital(
+          "CLS",
+          clsValue,
+          clsValue < 0.1 ? "good" : clsValue < 0.25 ? "needs-improvement" : "poor",
+        );
+      }
+    }, 10000);
+
     return () => {
       document.removeEventListener("click", onClick, { capture: true });
+      document.removeEventListener("visibilitychange", sendVitalsOnHidden);
+      window.clearTimeout(fallbackTimer);
+      lcpObserver?.disconnect();
+      clsObserver?.disconnect();
+      inpObserver?.disconnect();
     };
-  }, [items]);
+  }, []);
 
   return null;
 }

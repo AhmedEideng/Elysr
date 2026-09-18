@@ -64,7 +64,13 @@ import {
   submitToGoogleSheets,
   beaconOrderToSheets,
 } from "@/lib/governorates";
-import { trackBeginCheckout, trackPurchase, trackViewItem } from "@/lib/analytics";
+import {
+  trackBeginCheckout,
+  trackCtaClick,
+  trackPurchase,
+  trackShareClick,
+  trackViewItem,
+} from "@/lib/analytics";
 
 export const Route = createFileRoute("/products/$slug")({
   component: ProductPage,
@@ -218,6 +224,10 @@ function ProductPage() {
       toast.error("المنتج غير متوفر حالياً");
       return;
     }
+    trackCtaClick("add_to_cart", `/products/${product.slug}`, {
+      product_id: product.id,
+      qty,
+    });
     add(product, qty);
     toast.success("تمت الإضافة للسلة بنجاح!", {
       duration: 1500,
@@ -233,6 +243,9 @@ function ProductPage() {
       toast.error("المنتج غير متوفر حالياً");
       return;
     }
+    trackCtaClick("quick_order_open", `/products/${product.slug}`, {
+      product_id: product.id,
+    });
     setQuickOrderOpen(true);
   };
 
@@ -298,7 +311,11 @@ function ProductPage() {
         promoApplied: discount > 0,
       };
 
-      // GA: begin_checkout — اتقدم الطلب
+      // GA: cta + begin_checkout — اتقدم الطلب
+      trackCtaClick("quick_order_submit", `/products/${product.slug}`, {
+        product_id: product.id,
+        qty,
+      });
       trackBeginCheckout(orderItems, grandTotal, shipping);
 
       // 🔒 (2026-09-15) نفس إصلاح السلة: sendBeacon مش تأكيد وصول.
@@ -816,12 +833,24 @@ function ProductPage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="مشاركة المنتج عبر واتساب"
+              onClick={() => {
+                trackShareClick("product", `/products/${product.slug}`);
+                trackCtaClick("share_whatsapp", `/products/${product.slug}-mobile-bar`, {
+                  product_id: product.id,
+                });
+              }}
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#25D366]/40 bg-[#25D366]/10 text-[#128C3A] active:scale-[0.97]"
             >
               <Share2 className="h-5 w-5" />
             </a>
             <button
-              onClick={handleAddToCart}
+              onClick={() => {
+                trackCtaClick("add_to_cart", `/products/${product.slug}-mobile-bar`, {
+                  product_id: product.id,
+                  qty,
+                });
+                handleAddToCart();
+              }}
               className="flex-1 rounded-2xl bg-gradient-brand px-4 py-3.5 text-sm font-black text-primary-foreground shadow-lg active:scale-[0.98]"
             >
               <span className="inline-flex items-center justify-center gap-2">

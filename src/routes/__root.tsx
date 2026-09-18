@@ -22,6 +22,7 @@ import { applySeo } from "@/lib/seo";
 import { installErrorTracking } from "@/lib/error-tracking";
 import { trackPageView } from "@/lib/analytics";
 import { GlobalTrackers } from "@/components/GlobalTrackers";
+import { topicForArticle, topicForGuide, topicForProduct } from "@/data/topics";
 
 // 🛡️ تفعيل تتبع الأخطاء العالمي — يلتقط أي uncaught error أو promise rejection
 installErrorTracking();
@@ -151,45 +152,46 @@ function RouteHeadSync() {
 
     applySeo({ title, description, image, type, noindex });
 
-    // (2026-09-18) page_view GA4 محسّن: مع الـ referrer + الـ search
-    // params + موضوع الصفحة (topic) — بيغذي التقارير ببيانات تحليل
-    // أعمق بدون أي PII. الـ async topic lookup متأخر شوية عن الـ track
-    // (الـ GA queue بيتحفظ في dataLayer)، فمفيش race.
+    // (2026-09-18 v2) page_view GA4 كامل 100%: referrer + search + topic
+    // كلهم في نفس الـ event (synchronous) — لا حاجة لـ page_topic_set
+    // المنفصل. الـ topic بيتحسب من loaderData (أدق) + fallback من الـ URL.
     const url = window.location.pathname;
     const search = window.location.search.replace(/^\?/, "");
+    let topic: string | undefined;
+
+    // أدق مصدر: loaderData من الـ matches (product.id أو slug)
+    for (let i = matches.length - 1; i >= 0; i--) {
+      const ld = matches[i].loaderData as
+        | { product?: { id: string }; article?: { slug: string } }
+        | undefined;
+      if (!ld) continue;
+      if (ld.product?.id) {
+        topic = topicForProduct(ld.product.id)?.name;
+        if (topic) break;
+      }
+      // article loader قد يكون فيه article.slug
+      if ((ld as { article?: { slug: string } }).article?.slug) {
+        const s = (ld as { article: { slug: string } }).article.slug;
+        topic = topicForArticle(s)?.name;
+        if (topic) break;
+      }
+    }
+
+    // fallback من الـ URL لو loaderData لسه مش جاهز
+    if (!topic) {
+      const path = url.replace(/\/$/, "");
+      const slug = path.split("/").pop() || "";
+      if (path.startsWith("/education/")) topic = topicForArticle(slug)?.name;
+      else if (path.startsWith("/products/guides/")) topic = topicForGuide(slug)?.name;
+      // للمنتجات: topicForProduct يحتاج id، فـ fallback بالـ slug مش دقيق 100%
+      // لكن نحاول topicForGuide/Article فقط هنا — الـ id هيجي من loaderData
+    }
+
     trackPageView(url, title, {
       referrer: document.referrer,
       search: search || undefined,
+      topic,
     });
-    // async topic — مش متاح في الـ sync effect path، فيتعالج هنا:
-    void (async () => {
-      try {
-        const { topicForArticle, topicForGuide, topicForProduct } = await import("@/data/topics");
-        const { products } = await import("@/data/products");
-        const path = url.replace(/\/$/, "");
-        const slug = path.split("/").pop() || "";
-        let topic: string | undefined;
-        if (path.startsWith("/education/")) topic = topicForArticle(slug)?.name;
-        else if (path.startsWith("/products/guides/")) topic = topicForGuide(slug)?.name;
-        else if (path.startsWith("/products/")) {
-          const item = products.find((p) => p.slug === slug);
-          if (item) topic = topicForProduct(item.id)?.name;
-        }
-        if (topic) {
-          // emit page_topic additively (نفس الـ event مايتدفعش مرتين)
-          const w = window as unknown as {
-            gtag?: (...a: unknown[]) => void;
-            dataLayer?: unknown[];
-          };
-          const payload = { page_topic: topic, page_path: url };
-          if (typeof w.gtag === "function") w.gtag("event", "page_topic_set", payload);
-          else if (Array.isArray(w.dataLayer))
-            w.dataLayer.push({ event: "page_topic_set", ...payload });
-        }
-      } catch {
-        /* topics غير متاح — صامت */
-      }
-    })();
   }, [matches, router]);
 
   return null;
