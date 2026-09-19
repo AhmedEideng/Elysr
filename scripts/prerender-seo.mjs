@@ -448,8 +448,7 @@ function buildHtml(template, opts) {
   if (heroPreload) {
     html = html.replace(
       "</head>",
-      `  <link rel="preload" as="image" href="${assetUrl("/images/hero-banner-480.webp")}" media="(max-width: 480px)" fetchpriority="high" />
-  <link rel="preload" as="image" href="${assetUrl("/images/hero-banner.webp")}" imagesrcset="${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" imagesizes="100vw" media="(min-width: 481px)" fetchpriority="high" />
+      `  <link rel="preload" as="image" href="${assetUrl("/images/hero-banner-480.webp")}" imagesrcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" imagesizes="100vw" fetchpriority="high" />
 </head>`,
     );
   }
@@ -679,7 +678,7 @@ async function prerender() {
         .filter(Boolean);
       const homeLoadingShell = `<div data-prerender-hero>
   ${staticHeaderShell()}
-  <section data-prerender-static-hero><div><picture><source media="(max-width: 480px)" srcset="${assetUrl("/images/hero-banner-480.webp")}"><img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" width="1200" height="663" loading="eager" fetchpriority="high" decoding="async"></picture></div></section>
+  <section data-prerender-static-hero><div><img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" width="1200" height="663" loading="eager" fetchpriority="high" decoding="async"></div></section>
   ${staticPromoShell(promoShellData)}
   ${staticRecentlyViewedShell()}
   <script src="/scripts/recently-viewed-shell.js?v=${CACHE_VERSION}"></script>
