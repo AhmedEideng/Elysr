@@ -52,9 +52,9 @@ function ArticleCard({ a }: { a: ArticleMeta }) {
       )}
       <div className="p-5 flex flex-col flex-1">
         <span className="text-xs font-bold text-primary mb-2">{a.category}</span>
-        <h3 className="text-lg font-bold leading-snug mb-2 group-hover:text-primary transition-smooth">
+        <h2 className="text-lg font-bold leading-snug mb-2 group-hover:text-primary transition-smooth">
           {a.title}
-        </h3>
+        </h2>
         <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{a.excerpt}</p>
         <div className="mt-auto flex items-center gap-1.5 text-xs text-muted-foreground">
           <Clock className="h-3.5 w-3.5" /> {a.readMin} دقائق قراءة

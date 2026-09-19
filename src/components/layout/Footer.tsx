@@ -103,10 +103,10 @@ export function Footer() {
           {/* العمود الثاني: الأقسام والروابط المفيدة */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="mb-3 flex items-center gap-1.5 text-sm font-black">
+              <h2 className="mb-3 flex items-center gap-1.5 text-sm font-black">
                 <span className="h-4 w-1 rounded-full bg-primary-glow" />
                 أقسام المنتجات
-              </h3>
+              </h2>
               <ul className="space-y-2">
                 {shopLinks.map((link) => (
                   <li key={link.to}>
@@ -123,10 +123,10 @@ export function Footer() {
             </div>
 
             <div>
-              <h3 className="mb-3 flex items-center gap-1.5 text-sm font-black">
+              <h2 className="mb-3 flex items-center gap-1.5 text-sm font-black">
                 <span className="h-4 w-1 rounded-full bg-primary-glow" />
                 الدعم القانوني
-              </h3>
+              </h2>
               <ul className="space-y-2">
                 {supportLinks.map((link) => (
                   <li key={link.to}>
@@ -145,10 +145,10 @@ export function Footer() {
 
           {/* العمود الثالث: بيانات التواصل والموثوقية */}
           <div className="space-y-4">
-            <h3 className="flex items-center gap-1.5 text-sm font-black">
+            <h2 className="flex items-center gap-1.5 text-sm font-black">
               <span className="h-4 w-1 rounded-full bg-primary-glow" />
               معلومات الاتصال
-            </h3>
+            </h2>
             <ul className="space-y-2 text-xs">
               <ContactItem icon={<Mail className="h-3.5 w-3.5" />} text={COMPANY.email} />
               <ContactItem icon={<MapPin className="h-3.5 w-3.5" />} text={COMPANY.address} />

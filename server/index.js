@@ -305,7 +305,8 @@ app.use("/api", (_req, res) => res.status(404).json({ error: "API route not foun
 // (2026-09-16) req مش مستخدمة — _-prefix للـ noUnusedParameters
 app.get(/^\/_vercel\/(insights|speed-insights)\/script\.js$/, (_req, res) => {
   res.setHeader("Content-Type", "application/javascript; charset=utf-8");
-  res.setHeader("Cache-Control", "public, max-age=86400");
+  // The self-hosted fallback is a stable no-op; cache it like a fingerprinted asset.
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
   res.send("// no-op: Vercel Analytics is a platform feature (unavailable self-hosted)\n");
 });
 

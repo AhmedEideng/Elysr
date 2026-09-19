@@ -22,7 +22,7 @@ export const CSP_POLICY = [
   "script-src-attr 'none'",
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",
-  "img-src 'self' data: blob:",
+  "img-src 'self' data: blob: https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.g.doubleclick.net",
   "connect-src 'self' https://script.google.com https://script.googleusercontent.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com",
   "worker-src 'self'",
   "frame-ancestors 'self'",
