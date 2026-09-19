@@ -21,18 +21,21 @@ export function Hero() {
         className="relative w-full overflow-hidden bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50"
         style={{ aspectRatio: "1200 / 663" }}
       >
-        <img
-          src={assetUrl("/images/hero-banner.webp")}
-          srcSet={`${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w`}
-          sizes="100vw"
-          alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات"
-          className="block h-full w-full object-cover"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          width="1200"
-          height="663"
-        />
+        <picture>
+          <source media="(max-width: 480px)" srcSet={assetUrl("/images/hero-banner-480.webp")} />
+          <img
+            src={assetUrl("/images/hero-banner.webp")}
+            srcSet={`${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w`}
+            sizes="100vw"
+            alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات"
+            className="block h-full w-full object-cover"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            width="1200"
+            height="663"
+          />
+        </picture>
       </div>
     </section>
   );

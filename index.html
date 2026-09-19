@@ -58,7 +58,9 @@
     <!-- 🚀 Self-hosted font (no Google Fonts round-trip).
          Preload only the Arabic subset since the page is Arabic. -->
     <link rel="preload" href="/fonts/cairo.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/cairo-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- The Latin subset remains available through @font-face when needed, but
+         is not preloaded on the Arabic-first path so it cannot compete with
+         the home LCP image. -->
     <!-- Hero image is loaded eagerly with fetchpriority in the home Hero component.
          Avoid global preload here because this template is reused by every route,
          which causes unused-preload warnings on pages that do not render the hero. -->
@@ -1030,7 +1032,7 @@
     </script>
 
     <!-- 🚀 Third-Party Scripts — Google Analytics with cache-busting version -->
-    <script src="/scripts/ga-loader.js?v=60" defer></script>
+    <script src="/scripts/ga-loader.js?v=61" defer></script>
   </head>
   <body>
     <div id="root"></div>

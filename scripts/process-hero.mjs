@@ -10,7 +10,7 @@
  *   - Pick the smallest file (best compression at acceptable quality)
  *   - Use maximum encoder effort (6)
  *   - Strip all metadata
- *   - Generate 3 sizes: 480w, 768w, 1200w
+ *   - Generate 5 sizes: 480w, 640w, 768w, 960w, 1200w
  * ============================================================
  */
 import sharp from "sharp";
@@ -29,7 +29,8 @@ if (!existsSync(INPUT)) {
 }
 
 const SIZES = [
-  { width: 480, suffix: "" }, // will be hero-banner-480.webp
+  { width: 480, suffix: "-480" }, // hero-banner-480.webp (mobile)
+  { width: 640, suffix: "-640" }, // hero-banner-640.webp (mobile/tablet bridge)
   { width: 768, suffix: "-768" }, // hero-banner-768.webp
   { width: 960, suffix: "-960" }, // hero-banner-960.webp (لشاشات DPR عالية: 2.0-2.75)
   { width: 1200, suffix: "" }, // hero-banner.webp (main)

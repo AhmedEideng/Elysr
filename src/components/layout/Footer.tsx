@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { MessageCircle, Mail, MapPin, Sparkles } from "lucide-react";
-import logo from "@/assets/logo-mono.webp";
+import logo from "@/assets/logo-small.webp";
 import { COMPANY, waLink } from "@/lib/whatsapp";
 import { PROMO_TIERS } from "@/lib/promo";
 

@@ -17,7 +17,7 @@
  * without booting a full dev server.
  * ============================================================
  */
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
@@ -53,22 +53,12 @@ function thumbAssetUrl(path, directory = "thumbs") {
  * React replaces them as soon as the app is ready, but users still see the
  * real navigation, offer, and first product cards while JavaScript is loading.
  */
-function builtAssetUrl(prefix, fallback) {
-  try {
-    const file = readdirSync(resolve(DIST, "assets")).find((name) => name.startsWith(prefix));
-    if (file) return `/assets/${file}`;
-  } catch {
-    /* The fallback keeps the shell valid when this helper is inspected before build. */
-  }
-  return fallback;
-}
-
 function staticHeaderShell() {
-  const logoUrl = builtAssetUrl("logo-mono-", "/assets/logo-mono.webp");
+  const logoUrl = "/images/logo-mono-small.webp";
   return `<div data-prerender-header-shell aria-hidden="true">
   <div data-prerender-header-inner>
     <a href="/" data-prerender-brand aria-label="اليسر ميديكال">
-      <img src="${logoUrl}" alt="اليسر ميديكال — Elysr Medical Group" width="250" height="94" decoding="async" />
+      <img src="${logoUrl}" alt="اليسر ميديكال — Elysr Medical Group" width="128" height="48" fetchpriority="low" decoding="async" />
     </a>
     <nav data-prerender-header-nav aria-label="القائمة الرئيسية">
       <a href="/">الرئيسية</a>
@@ -458,7 +448,8 @@ function buildHtml(template, opts) {
   if (heroPreload) {
     html = html.replace(
       "</head>",
-      `  <link rel="preload" as="image" href="${assetUrl("/images/hero-banner-480.webp")}" imagesrcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" imagesizes="100vw" fetchpriority="high" />
+      `  <link rel="preload" as="image" href="${assetUrl("/images/hero-banner-480.webp")}" media="(max-width: 480px)" fetchpriority="high" />
+  <link rel="preload" as="image" href="${assetUrl("/images/hero-banner.webp")}" imagesrcset="${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" imagesizes="100vw" media="(min-width: 481px)" fetchpriority="high" />
 </head>`,
     );
   }
@@ -688,7 +679,7 @@ async function prerender() {
         .filter(Boolean);
       const homeLoadingShell = `<div data-prerender-hero>
   ${staticHeaderShell()}
-  <section data-prerender-static-hero><div><img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" width="1200" height="663" loading="eager" fetchpriority="high" decoding="async"></div></section>
+  <section data-prerender-static-hero><div><picture><source media="(max-width: 480px)" srcset="${assetUrl("/images/hero-banner-480.webp")}"><img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" width="1200" height="663" loading="eager" fetchpriority="high" decoding="async"></picture></div></section>
   ${staticPromoShell(promoShellData)}
   ${staticRecentlyViewedShell()}
   <script src="/scripts/recently-viewed-shell.js?v=${CACHE_VERSION}"></script>
