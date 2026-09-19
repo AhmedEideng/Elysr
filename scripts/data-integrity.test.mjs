@@ -135,8 +135,8 @@ try {
 
   assert.equal(
     products.length,
-    78,
-    "Expected 78 products (8 deleted permanently: 7 pharma + w-24, final batch 2026-09-07)",
+    79,
+    "Expected 79 products (8 deleted permanently: 7 pharma + w-24, plus the new Halpeno listing)",
   );
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
   // 🧭 Anti-drift: أرقام الكتالوج/المحتوى hardcoded في نصوص التسويق = درفت
@@ -491,8 +491,8 @@ try {
   }, {});
   assert.deepEqual(
     categories,
-    { men: 49, women: 22, devices: 7 },
-    "Unexpected category split (78 = 49 men / 22 women / 7 devices)",
+    { men: 50, women: 22, devices: 7 },
+    "Unexpected category split (79 = 50 men / 22 women / 7 devices)",
   );
 
   // (2026-09-15) JSON-LD OfferCatalog في index.html لازم يطابق كتالوج

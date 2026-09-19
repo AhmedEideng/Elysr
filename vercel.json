@@ -1076,6 +1076,11 @@
       "source": "/thank-you",
       "destination": "/order-confirmed",
       "permanent": true
+    },
+    {
+      "source": "/products/m-62",
+      "destination": "/products/halpeno-men-gel-50gm",
+      "permanent": true
     }
   ]
 }

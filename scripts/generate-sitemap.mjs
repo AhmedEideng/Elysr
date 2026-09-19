@@ -569,7 +569,7 @@ ${articleImageEntries}
       description: buildFeedDescription(p),
       link: `${SITE_URL}/products/${p.slug}`,
       image_link: `${SITE_URL}${assetUrl(p.image)}`,
-      brand: "اليسر ميديكال",
+      brand: p.brand ?? "اليسر ميديكال",
       condition: "new",
       availability: p.stock > 0 ? "in stock" : "out of stock",
       price: `${p.price} EGP`,

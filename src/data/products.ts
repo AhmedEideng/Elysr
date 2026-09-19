@@ -155,7 +155,7 @@ export const getProductById = (id: string) => products.find((p) => p.id === id);
  * منتجات ظاهرة للعامة في صفحات الفئات.
  * 8 منتجات اتحذفت نهائياً (7 أدوية: m-34,m-36,m-37,m-38,m-43,m-45,m-47 +
  * w-17، ومنتج w-24 Black Widow بقرار المالك 2026-09-07).
- * مفيش أي حظر: كل المنتجات (78) ظاهرة في الفئات عادي ومن غير
+ * مفيش أي حظر: كل المنتجات (79) ظاهرة في الفئات عادي ومن غير
  * noindex ولا استبعاد من feed/sitemap.
  */
 export const getPublicProductsByCategory = (cat: ProductCategory) => {
