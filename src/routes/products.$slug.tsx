@@ -452,12 +452,6 @@ function ProductPage() {
             {product.name}
           </h1>
           <p className="mt-2 text-sm md:text-base text-muted-foreground">{product.nameEn}</p>
-          {product.searchAliases?.length ? (
-            <p className="mt-1.5 text-xs text-muted-foreground">
-              يُبحث عنه أيضاً بـ: {product.searchAliases.map((a) => `«${a}»`).join("، ")}
-            </p>
-          ) : null}
-
           <div className="mt-4 flex flex-wrap gap-2 text-xs sm:text-sm">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1.5 font-bold text-sky-700 border border-sky-200">
               <Truck className="h-4 w-4" />
