@@ -147,9 +147,9 @@ function staticPromoShell({ title, tagline, tiers, values } = {}) {
   const promoTitle = title || "مبادرة الرعاية الماسية";
   const promoTagline = tagline || "رعاية طبية متكاملة.. بتوفير استثنائي!";
   const promoTiers = tiers || [
-    { icon: "💎", label: "15%" },
-    { icon: "⚡", label: "20%" },
-    { icon: "👑", label: "25%" },
+    { icon: "💎", label: "10%" },
+    { icon: "⚡", label: "15%" },
+    { icon: "👑", label: "20%" },
   ];
   const promoValues = values || ["00", "05", "00", "00"];
   const desktopTiers = [...promoTiers].reverse();
@@ -167,7 +167,7 @@ function staticPromoShell({ title, tagline, tiers, values } = {}) {
       </div>
       <div data-prerender-promo-spacer></div>
       <div data-prerender-promo-actions>
-        <span><span>👑</span><span>25%</span></span>
+        <span><span>👑</span><span>${esc(promoTiers[0]?.label || "")}</span></span>
         <a href="/products/men">تسوّق ${chevronLeftIcon(12)}</a>
       </div>
     </div>

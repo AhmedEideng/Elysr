@@ -132,7 +132,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 │   │   ├── seo.ts              # Meta tags, JSON-LD builders, canonical, meta descriptions
 │   │   ├── product-compliance.ts # Channel-level exclusions (feed/sitemap noindex policy)
 │   │   ├── bundle-discount.ts  # 20% bundle discount (exclusive with promo tiers)
-│   │   ├── promo.ts            # Diamond Care tiered discount (15/20/25%)
+│   │   ├── promo.ts            # Diamond Care tiered discount (10/15/20%)
 │   │   ├── governorates.ts     # 27 governorates + shipping + submitToGoogleSheets
 │   │   ├── search-terms.ts     # Dialect synonym expansion (نقط ⇄ قطرات)
 │   │   ├── error-tracking.ts   # PII-safe error sink (allowlist context, hashed correlation)
@@ -219,7 +219,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 
 ### 🏷️ Pricing & discounts
 
-- **Diamond Care Initiative** — tiered discount 15% / 20% / 25% at 1,000 / 1,500 /
+- **Diamond Care Initiative** — tiered discount 10% / 15% / 20% at 1,000 / 1,500 /
   2,000 EGP thresholds.
 - **Bundle discount 20%** — a completed cross-sell bundle gets a flat 20% off the
   bundle total; the two discounts are **mutually exclusive** (bundle wins).

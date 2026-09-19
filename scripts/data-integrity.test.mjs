@@ -866,9 +866,9 @@ try {
   );
 
   assert.equal(promo.calcDiscount(999, new Date("2026-06-01T12:00:00Z")), 0);
-  assert.equal(promo.calcDiscount(1000, new Date("2026-06-01T12:00:00Z")), 150);
-  assert.equal(promo.calcDiscount(1500, new Date("2026-06-01T12:00:00Z")), 300);
-  assert.equal(promo.calcDiscount(2000, new Date("2026-06-01T12:00:00Z")), 500);
+  assert.equal(promo.calcDiscount(1000, new Date("2026-06-01T12:00:00Z")), 100);
+  assert.equal(promo.calcDiscount(1500, new Date("2026-06-01T12:00:00Z")), 225);
+  assert.equal(promo.calcDiscount(2000, new Date("2026-06-01T12:00:00Z")), 400);
   assert.equal(promo.isPromotionEnabled(new Date("2026-06-26T00:00:00Z")), true);
   assert.equal(promo.isPromotionEnabled(new Date("2027-01-02T00:00:00Z")), true);
 

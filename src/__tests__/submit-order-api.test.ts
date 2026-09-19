@@ -13,11 +13,11 @@ function validPayload(qty = 1, governorate = "القاهرة") {
   const subtotalBeforeDiscount = product.price * qty;
   const discount =
     subtotalBeforeDiscount >= 2000
-      ? Math.round(subtotalBeforeDiscount * 0.25)
+      ? Math.round(subtotalBeforeDiscount * 0.2)
       : subtotalBeforeDiscount >= 1500
-        ? Math.round(subtotalBeforeDiscount * 0.2)
+        ? Math.round(subtotalBeforeDiscount * 0.15)
         : subtotalBeforeDiscount >= 1000
-          ? Math.round(subtotalBeforeDiscount * 0.15)
+          ? Math.round(subtotalBeforeDiscount * 0.1)
           : 0;
   const subtotal = subtotalBeforeDiscount - discount;
   const shipping =
@@ -249,9 +249,9 @@ describe("submit-order payload validation", () => {
   });
 
   it("recalculates and validates subtotal, tier discount, shipping and grand total", () => {
-    const payload = validPayload(2); // 1160 EGP => 15% discount
+    const payload = validPayload(2); // 1160 EGP => 10% discount
     expect(validateOrderPayload(payload)).toBeUndefined();
-    expect(payload.discount).toBe(174);
+    expect(payload.discount).toBe(116);
 
     for (const field of [
       "subtotalBeforeDiscount",
@@ -282,7 +282,7 @@ describe("submit-order payload validation", () => {
     it("rejects a tier discount on a complete-bundle order (only one discount applies)", () => {
       const payload = validBundlePayload();
       // العميل يحاول إضافة خصم شرائح فوق خصم الباقة → مرفوض
-      payload.discount = Math.round(payload.subtotalBeforeDiscount * 0.15);
+      payload.discount = Math.round(payload.subtotalBeforeDiscount * 0.1);
       expect(validateOrderPayload(payload)).toBe("Discount mismatch");
     });
 

@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { MessageCircle, Mail, MapPin, Sparkles } from "lucide-react";
 import logo from "@/assets/logo-mono.webp";
 import { COMPANY, waLink } from "@/lib/whatsapp";
+import { PROMO_TIERS } from "@/lib/promo";
 
 // ── أقسام الشركة الأساسية ──
 const shopLinks = [
@@ -31,7 +32,8 @@ export function Footer() {
               <Sparkles className="h-5 w-5 text-amber-200 shrink-0" />
               <div>
                 <div className="text-sm font-black md:text-base">
-                  💎 احصل على مبادرة الرعاية الماسية — خصم حتى 25%
+                  💎 احصل على مبادرة الرعاية الماسية — خصم حتى{" "}
+                  {PROMO_TIERS[0] ? PROMO_TIERS[0].label : ""}
                 </div>
               </div>
             </div>

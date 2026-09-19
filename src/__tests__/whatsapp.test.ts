@@ -54,7 +54,7 @@ describe("promo label in the order message — only when a discount actually app
   });
 
   it("shows the label for an order that earns a tier discount (>= 1000)", () => {
-    // 1200 ج.م → شريحة 1000 (15%) → خصم 180
+    // 1200 ج.م → شريحة 1000 (10%) → خصم 120
     const message = buildOrderMessage(
       [{ id: "m-60", slug: "kreva-gel-for-men", name: "كريفا", qty: 2, price: 600 }],
       customer,
@@ -63,7 +63,7 @@ describe("promo label in the order message — only when a discount actually app
       true,
     );
     expect(message).toContain("💎 مبادرة الرعاية الماسية");
-    expect(message).toMatch(/خصم 15%: -180 ج\.م/);
+    expect(message).toMatch(/خصم 10%: -120 ج\.م/);
   });
 
   it("shows the label for a bundle-discount order even under the tier threshold", () => {
@@ -80,6 +80,6 @@ describe("promo label in the order message — only when a discount actually app
     );
     expect(message).toContain("💎 مبادرة الرعاية الماسية");
     expect(message).toContain("خصم الباقة (20%): -120 ج.م");
-    expect(message).not.toContain("خصم 15%");
+    expect(message).not.toContain("خصم 10%");
   });
 });

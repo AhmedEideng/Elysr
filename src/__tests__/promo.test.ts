@@ -56,33 +56,33 @@ describe("getPromoTier", () => {
     expect(getPromoTier(999, ACTIVE_DATE)).toBeNull();
   });
 
-  it("شريحة 15% من 1000 ج.م", () => {
+  it("شريحة 10% من 1000 ج.م", () => {
     const tier = getPromoTier(1000, ACTIVE_DATE);
     expect(tier).not.toBeNull();
+    expect(tier!.discount).toBe(0.1);
+    expect(tier!.label).toBe("10%");
+  });
+
+  it("شريحة 10% عند 1499 ج.م (حدود عليا)", () => {
+    const tier = getPromoTier(1499, ACTIVE_DATE);
+    expect(tier!.discount).toBe(0.1);
+  });
+
+  it("شريحة 15% من 1500 ج.م", () => {
+    const tier = getPromoTier(1500, ACTIVE_DATE);
     expect(tier!.discount).toBe(0.15);
     expect(tier!.label).toBe("15%");
   });
 
-  it("شريحة 15% عند 1499 ج.م (حدود عليا)", () => {
-    const tier = getPromoTier(1499, ACTIVE_DATE);
-    expect(tier!.discount).toBe(0.15);
-  });
-
-  it("شريحة 20% من 1500 ج.م", () => {
-    const tier = getPromoTier(1500, ACTIVE_DATE);
+  it("شريحة 20% من 2000 ج.م", () => {
+    const tier = getPromoTier(2000, ACTIVE_DATE);
     expect(tier!.discount).toBe(0.2);
     expect(tier!.label).toBe("20%");
   });
 
-  it("شريحة 25% من 2000 ج.م", () => {
-    const tier = getPromoTier(2000, ACTIVE_DATE);
-    expect(tier!.discount).toBe(0.25);
-    expect(tier!.label).toBe("25%");
-  });
-
-  it("شريحة 25% لمبالغ كبيرة جداً", () => {
+  it("شريحة 20% لمبالغ كبيرة جداً", () => {
     const tier = getPromoTier(50000, ACTIVE_DATE);
-    expect(tier!.discount).toBe(0.25);
+    expect(tier!.discount).toBe(0.2);
   });
 
   it("الخصم نشط دائماً حتى في التواريخ المستقبلية بفضل التجديد التلقائي", () => {
@@ -117,29 +117,29 @@ describe("calcDiscount", () => {
     expect(calcDiscount(500, ACTIVE_DATE)).toBe(0);
   });
 
-  it("خصم 15% على 1000 = 150 ج.م", () => {
-    expect(calcDiscount(1000, ACTIVE_DATE)).toBe(150);
+  it("خصم 10% على 1000 = 100 ج.م", () => {
+    expect(calcDiscount(1000, ACTIVE_DATE)).toBe(100);
   });
 
-  it("خصم 20% على 1500 = 300 ج.م", () => {
-    expect(calcDiscount(1500, ACTIVE_DATE)).toBe(300);
+  it("خصم 15% على 1500 = 225 ج.م", () => {
+    expect(calcDiscount(1500, ACTIVE_DATE)).toBe(225);
   });
 
-  it("خصم 25% على 2000 = 500 ج.م", () => {
-    expect(calcDiscount(2000, ACTIVE_DATE)).toBe(500);
+  it("خصم 20% على 2000 = 400 ج.م", () => {
+    expect(calcDiscount(2000, ACTIVE_DATE)).toBe(400);
   });
 
   it("يُقرّب لأقرب عدد صحيح", () => {
-    // 1101 * 0.15 = 165.15 → 165
-    expect(calcDiscount(1101, ACTIVE_DATE)).toBe(165);
-    // 1501 * 0.20 = 300.2 → 300
-    expect(calcDiscount(1501, ACTIVE_DATE)).toBe(300);
+    // 1101 * 0.10 = 110.1 → 110
+    expect(calcDiscount(1101, ACTIVE_DATE)).toBe(110);
+    // 1501 * 0.15 = 225.15 → 225
+    expect(calcDiscount(1501, ACTIVE_DATE)).toBe(225);
   });
 });
 
 describe("applyPromoToSubtotal", () => {
-  it("1000 - 15% = 850", () => {
-    expect(applyPromoToSubtotal(1000, ACTIVE_DATE)).toBe(850);
+  it("1000 - 10% = 900", () => {
+    expect(applyPromoToSubtotal(1000, ACTIVE_DATE)).toBe(900);
   });
 
   it("بدون خصم تحت الحد", () => {

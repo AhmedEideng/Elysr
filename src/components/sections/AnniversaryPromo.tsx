@@ -47,6 +47,7 @@ export function AnniversaryPromo() {
 
   // Helper: تنسيق الرقم بصفرين
   const pad = (n: number) => String(n).padStart(2, "0");
+  const highestPromoLabel = PROMO_TIERS[0] ? PROMO_TIERS[0].label : "";
 
   return (
     <section
@@ -102,7 +103,7 @@ export function AnniversaryPromo() {
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 rounded-full bg-white/20 px-2 py-1 text-[10px] font-black backdrop-blur-sm">
               <span>👑</span>
-              <span>25%</span>
+              <span>{highestPromoLabel}</span>
             </div>
             <Link
               to="/products/men"
@@ -145,7 +146,7 @@ export function AnniversaryPromo() {
         {/* Divider */}
         <div className="h-8 w-px shrink-0 bg-white/30" />
 
-        {/* Middle: tier pills (15% / 20% / 25%) */}
+        {/* Middle: tier pills (10% / 15% / 20%) */}
         <div className="flex items-center gap-1.5">
           {[...PROMO_TIERS].reverse().map((tier) => (
             <div
