@@ -1,13 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { ShieldCheck, Truck, Lock, CreditCard } from "lucide-react";
-import { products } from "@/data/products";
-
-// العدد ديناميكي من الكتالوج حتى لا يبتعد عن الحقيقة عند إضافة/حذف منتجات
-// (كان "87" hardcoded بينما الكتالوج 82 — أرقام قديمة كانت تظهر في الهوم)
-const stats = [
-  { value: "27", label: "محافظة نغطيها" },
-  { value: String(products.length), label: "منتج في الكتالوج" },
-];
 
 const features = [
   {
@@ -44,16 +36,6 @@ export function WhyUs() {
   return (
     <section className="py-5 md:py-6">
       <div className="container mx-auto px-4">
-        {/* Stats Bar — أرقام ملفتة */}
-        <div className="grid grid-cols-4 gap-2 sm:gap-4 rounded-2xl bg-gradient-brand p-4 sm:p-5 text-primary-foreground mb-6">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <div className="text-xl sm:text-3xl font-black leading-none">{s.value}</div>
-              <div className="text-[10px] sm:text-xs font-medium opacity-80 mt-1">{s.label}</div>
-            </div>
-          ))}
-        </div>
-
         {/* Features — 4 أيقونات مدمجة في صف واحد */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mb-5">
           {features.map((f) => (
