@@ -40,6 +40,14 @@ function assetUrl(path) {
   return `${base}?v=${CACHE_VERSION}`;
 }
 
+/** Same thumbnail source used by ProductCardImage during hydration. */
+function thumbAssetUrl(path, directory = "thumbs") {
+  const base = String(path)
+    .split("?")[0]
+    .replace(/^\/images\//, `/images/${directory}/`);
+  return `${base}?v=${CACHE_VERSION}`;
+}
+
 /**
  * Visible first-paint shell helpers. These are deliberately small and static:
  * React replaces them as soon as the app is ready, but users still see the
@@ -90,36 +98,132 @@ function staticHeaderShell() {
 <div data-prerender-header-spacer aria-hidden="true"></div>`;
 }
 
-function staticPromoShell() {
+function sparklesIcon(size = 16) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>`;
+}
+
+function clockIcon(size = 14) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
+}
+
+function arrowLeftIcon(size = 14) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>`;
+}
+
+function chevronLeftIcon(size = 12) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>`;
+}
+
+function heartIcon() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"></path></svg>`;
+}
+
+function cartIcon() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>`;
+}
+
+function promoCountdown({ desktop = false, values = ["00", "05", "00", "00"] } = {}) {
+  if (!desktop) {
+    return `<div data-prerender-promo-countdown>
+      ${clockIcon(12)}
+      <span>تتجدد الدورة خلال:</span>
+      <div data-prerender-promo-digits dir="ltr">${values.map((value) => `<span>${value}</span>`).join(":")}</div>
+    </div>`;
+  }
+  const labels = ["يوم", "ساعة", "د", "ث"];
+  return `<div data-prerender-promo-countdown>
+    ${clockIcon(14)}
+    <span>تتجدد الدورة خلال</span>
+    <div data-prerender-promo-digits dir="ltr">${values
+      .map(
+        (value, index) =>
+          `<span data-prerender-promo-digit><b>${value}</b><small>${labels[index]}</small></span>`,
+      )
+      .join("<i>:</i>")}</div>
+  </div>`;
+}
+
+function staticPromoShell({ title, tagline, tiers, values } = {}) {
+  const promoTitle = title || "مبادرة الرعاية الماسية";
+  const promoTagline = tagline || "رعاية طبية متكاملة.. بتوفير استثنائي!";
+  const promoTiers = tiers || [
+    { icon: "💎", label: "15%" },
+    { icon: "⚡", label: "20%" },
+    { icon: "👑", label: "25%" },
+  ];
+  const promoValues = values || ["00", "05", "00", "00"];
+  const desktopTiers = [...promoTiers].reverse();
   return `<div data-prerender-promo-shell aria-hidden="true">
+  <div data-prerender-promo-shine></div>
+  <div data-prerender-promo-sparkles></div>
   <div data-prerender-promo-mobile>
-    <div data-prerender-promo-mobile-top>
-      <div data-prerender-promo-title><span>💎</span><span><small>رعاية طبية متكاملة.. بتوفير استثنائي!</small><strong>مبادرة الرعاية الماسية</strong></span></div>
-      <div data-prerender-promo-actions><span>👑 25%</span><span>تسوّق</span></div>
+    <div data-prerender-promo-mobile-row>
+      <div data-prerender-promo-mobile-left>
+        <div data-prerender-promo-mobile-icon>${sparklesIcon(16)}</div>
+        <div data-prerender-promo-copy>
+          <div data-prerender-promo-tagline>${esc(promoTagline)}</div>
+          <div data-prerender-promo-name>${esc(`💎 ${promoTitle}`)}</div>
+        </div>
+      </div>
+      <div data-prerender-promo-spacer></div>
+      <div data-prerender-promo-actions>
+        <span><span>👑</span><span>25%</span></span>
+        <a href="/products/men">تسوّق ${chevronLeftIcon(12)}</a>
+      </div>
     </div>
-    <div data-prerender-promo-countdown>◷ &nbsp; تتجدد الدورة خلال: &nbsp; 00:05:00:00</div>
+    ${promoCountdown({ values: promoValues })}
   </div>
   <div data-prerender-promo-desktop>
-    <div data-prerender-promo-title><span>💎</span><span><small>رعاية طبية متكاملة.. بتوفير استثنائي!</small><strong>مبادرة الرعاية الماسية</strong></span></div>
-    <i></i>
-    <div data-prerender-promo-tiers><span>👑 25%</span><span>⚡ 20%</span><span>✨ 15%</span></div>
-    <i></i>
-    <div data-prerender-promo-countdown>◷ &nbsp; تتجدد الدورة خلال &nbsp; 02 : 05 : 00 : 00</div>
-    <a href="/products/men">تسوّق العرض</a>
+    <div data-prerender-promo-desktop-left>
+      <div data-prerender-promo-desktop-icon>${sparklesIcon(16)}</div>
+      <div data-prerender-promo-copy>
+        <div data-prerender-promo-tagline>${esc(promoTagline)}</div>
+        <div data-prerender-promo-name>${esc(`💎 ${promoTitle}`)}</div>
+      </div>
+    </div>
+    <i data-prerender-promo-divider></i>
+    <div data-prerender-promo-tiers>${desktopTiers.map((tier) => `<span>${esc(tier.icon)}<b>${esc(tier.label)}</b></span>`).join("")}</div>
+    <i data-prerender-promo-divider></i>
+    ${promoCountdown({ desktop: true, values: promoValues })}
+    <div data-prerender-promo-spacer></div>
+    <a href="/products/men">تسوّق العرض ${arrowLeftIcon(14)}</a>
   </div>
 </div>`;
 }
 
-function staticProductCard(product) {
+function badgeStyle(className) {
+  if (className.includes("cyan")) return "background:#0e7490;color:#fff";
+  if (className.includes("violet")) return "background:#6d28d9;color:#fff";
+  if (className.includes("fuchsia")) return "background:#a21caf;color:#fff";
+  if (className.includes("rose")) return "background:#be123c;color:#fff";
+  if (className.includes("sky")) return "background:#0369a1;color:#fff";
+  if (className.includes("teal")) return "background:#0f766e;color:#fff";
+  if (className.includes("indigo")) return "background:#4338ca;color:#fff";
+  if (className.includes("emerald")) return "background:#047857;color:#fff";
+  if (className.includes("amber")) return "background:#fbbf24;color:#451a03";
+  return "background:#0f766e;color:#fff";
+}
+
+function staticProductCard(product, getProductBadge) {
   const image = product.image
-    ? `<img src="${assetUrl(product.image)}" alt="${esc(product.name)}" width="800" height="800" loading="eager" decoding="async" />`
+    ? `<img src="${thumbAssetUrl(product.image, "thumbs")}" srcset="${thumbAssetUrl(product.image, "thumbs-120")} 240w, ${thumbAssetUrl(product.image, "thumbs-180")} 360w, ${thumbAssetUrl(product.image, "thumbs")} 480w, ${assetUrl(product.image)} 800w" sizes="(max-width: 640px) 180px, (max-width: 1024px) 240px, 300px" alt="${esc(product.name)}" width="480" height="480" loading="eager" decoding="async" />`
     : `<span data-prerender-product-emoji>${esc(product.emoji || "🛍️")}</span>`;
+  const useBadge = getProductBadge(product);
+  const stockNotice =
+    product.stock > 0 && product.stock <= 5
+      ? `<span data-prerender-product-stock>باقي ${product.stock}</span>`
+      : "";
+  const soldOut =
+    product.stock <= 0 ? `<div data-prerender-product-sold-out><span>نفد المخزون</span></div>` : "";
   return `<article data-prerender-product-card>
+  <span data-prerender-product-badge style="${badgeStyle(useBadge.className)}">${esc(useBadge.label)}</span>
+  <button type="button" data-prerender-product-wishlist aria-label="إضافة للمفضلة">${heartIcon()}</button>
+  ${stockNotice}
+  ${soldOut}
   <a href="/products/${esc(product.slug)}" data-prerender-product-image>${image}</a>
   <div data-prerender-product-details>
-    <span data-prerender-product-badge>${esc(product.badge || "منتج مختار")}</span>
     <a href="/products/${esc(product.slug)}" data-prerender-product-name>${esc(product.name)}</a>
-    <div data-prerender-product-bottom><strong>${esc(product.price)} ج.م</strong><span data-prerender-cart>🛒</span></div>
+    <div data-prerender-product-bottom><strong>${esc(product.price)} ج.م</strong><span data-prerender-cart>${cartIcon()}</span></div>
   </div>
 </article>`;
 }
@@ -133,16 +237,20 @@ function staticRecentlyViewedShell() {
 </section>`;
 }
 
-function staticProductSection(products, { title = "✨ اخترنا لك", description = "" } = {}) {
+function staticProductSection(
+  products,
+  { title = "✨ اخترنا لك", description = "" } = {},
+  getProductBadge,
+) {
   return `<section data-prerender-product-section aria-hidden="true">
   <div data-prerender-product-section-inner>
     <div data-prerender-product-heading><span>${esc(title)}</span>${description ? `<p>${esc(description)}</p>` : ""}</div>
-    <div data-prerender-product-grid>${products.map(staticProductCard).join("")}</div>
+    <div data-prerender-product-grid>${products.map((product) => staticProductCard(product, getProductBadge)).join("")}</div>
   </div>
 </section>`;
 }
 
-function staticCategoryShell({ eyebrow, title, description, products }) {
+function staticCategoryShell({ eyebrow, title, description, products }, getProductBadge) {
   return `<div data-prerender-category-shell aria-hidden="true">
   ${staticHeaderShell()}
   <main data-prerender-category-main>
@@ -151,7 +259,7 @@ function staticCategoryShell({ eyebrow, title, description, products }) {
       <h1>${esc(title)}</h1>
       <p>${esc(description)}</p>
     </div>
-    <div data-prerender-product-grid>${products.map(staticProductCard).join("")}</div>
+    <div data-prerender-product-grid>${products.map((product) => staticProductCard(product, getProductBadge)).join("")}</div>
   </main>
 </div>`;
 }
@@ -408,6 +516,18 @@ async function prerender() {
   try {
     const { products, getPublicProductsByCategory } =
       await vite.ssrLoadModule("/src/data/products.ts");
+    const { getUseBadge: getProductBadge } = await vite.ssrLoadModule("/src/lib/product-badge.ts");
+    const { PROMO_TITLE, PROMO_TAGLINE, PROMO_TIERS, getTimeLeft } =
+      await vite.ssrLoadModule("/src/lib/promo.ts");
+    const promoTime = getTimeLeft();
+    const promoShellData = {
+      title: PROMO_TITLE,
+      tagline: PROMO_TAGLINE,
+      tiers: PROMO_TIERS,
+      values: [promoTime.days, promoTime.hours, promoTime.minutes, promoTime.seconds].map((value) =>
+        String(value).padStart(2, "0"),
+      ),
+    };
     const { GOVERNORATE_SHIPPING } = await vite.ssrLoadModule("/src/lib/site-config.ts");
     const shippingBands = new Map();
     for (const entry of GOVERNORATE_SHIPPING) {
@@ -569,10 +689,10 @@ async function prerender() {
       const homeLoadingShell = `<div data-prerender-hero>
   ${staticHeaderShell()}
   <section data-prerender-static-hero><div><img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" width="1200" height="663" loading="eager" fetchpriority="high" decoding="async"></div></section>
-  ${staticPromoShell()}
+  ${staticPromoShell(promoShellData)}
   ${staticRecentlyViewedShell()}
   <script src="/scripts/recently-viewed-shell.js?v=${CACHE_VERSION}"></script>
-  ${staticProductSection(homeFeatured, { description: "باقة مختارة بعناية من أفضل المنتجات والمكملات لدعم صحتك وحيويتك الزوجية بأمان وثقة" })}
+  ${staticProductSection(homeFeatured, { description: "باقة مختارة بعناية من أفضل المنتجات والمكملات لدعم صحتك وحيويتك الزوجية بأمان وثقة" }, getProductBadge)}
 </div>`;
       let html = buildHtml(template, {
         title,
@@ -910,22 +1030,25 @@ async function prerender() {
         : [];
       const categoryLoadingShell =
         categoryType && categoryItems.length > 0
-          ? staticCategoryShell({
-              eyebrow:
-                categoryType === "men"
-                  ? "صحة الرجل"
-                  : categoryType === "women"
-                    ? "صحة المرأة"
-                    : "الأجهزة الطبية",
-              title: r.h1,
-              description:
-                categoryType === "men"
-                  ? "مكمّلات غذائية، عسل ملكي، بخاخات، كريمات وجل موضعي مختارة بعناية لدعم الصحة الزوجية للرجال مع الخصوصية والشحن السري داخل مصر."
-                  : categoryType === "women"
-                    ? "منتجات مختارة بعناية لدعم الراحة، الترطيب، الحيوية والثقة في العلاقة الزوجية للمرأة مع التزام كامل بالخصوصية وسرية التوصيل."
-                    : "أجهزة ومستلزمات طبية موثوقة مختارة بعناية، مع جودة عالية وشحن سري لكل المحافظات لتجربة أكثر أماناً واحترافية.",
-              products: categoryItems,
-            })
+          ? staticCategoryShell(
+              {
+                eyebrow:
+                  categoryType === "men"
+                    ? "صحة الرجل"
+                    : categoryType === "women"
+                      ? "صحة المرأة"
+                      : "الأجهزة الطبية",
+                title: r.h1,
+                description:
+                  categoryType === "men"
+                    ? "مكمّلات غذائية، عسل ملكي، بخاخات، كريمات وجل موضعي مختارة بعناية لدعم الصحة الزوجية للرجال مع الخصوصية والشحن السري داخل مصر."
+                    : categoryType === "women"
+                      ? "منتجات مختارة بعناية لدعم الراحة، الترطيب، الحيوية والثقة في العلاقة الزوجية للمرأة مع التزام كامل بالخصوصية وسرية التوصيل."
+                      : "أجهزة ومستلزمات طبية موثوقة مختارة بعناية، مع جودة عالية وشحن سري لكل المحافظات لتجربة أكثر أماناً واحترافية.",
+                products: categoryItems,
+              },
+              getProductBadge,
+            )
           : "";
 
       const jsonLd = [];
