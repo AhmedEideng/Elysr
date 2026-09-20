@@ -30,6 +30,7 @@ try {
     getProductsByCategory,
     HOMEPAGE_EXCLUDED_PRODUCT_IDS,
     HOMEPAGE_CONCERN_CANDIDATES,
+    getOralSolidForm,
   } = await vite.ssrLoadModule("/src/data/products.ts");
   const { articles } = await vite.ssrLoadModule("/src/data/articles.ts");
   const { seoLandingPages } = await vite.ssrLoadModule("/src/data/landing-pages.ts");
@@ -489,6 +490,15 @@ try {
     for (const member of members) {
       assert.ok(productIds.has(member), `Bundle member missing: ${member} (of ${mainId})`);
     }
+    const forms = new Set(
+      members
+        .map((id) => getOralSolidForm(products.find((product) => product.id === id)))
+        .filter(Boolean),
+    );
+    assert.ok(
+      forms.size <= 1,
+      `Bundle mixes tablets and capsules: ${mainId} (${members.join(", ")})`,
+    );
   }
 
   for (const page of seoLandingPages) {

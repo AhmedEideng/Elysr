@@ -161,12 +161,48 @@ export const getPublicProductsByCategory = (cat: ProductCategory) => {
   return getProductsByCategory(cat);
 };
 
+/**
+ * يحدد الشكل الصلب الفموي من الاسم/الـ slug فقط، بدون اختلاق حقل جديد في بيانات
+ * المنتج. الهدف منع ظهور الأقراص والكبسولات داخل نفس باقة المنتج.
+ */
+export const getOralSolidForm = (product: Product): "tablet" | "capsule" | null => {
+  const text = `${product.name} ${product.nameEn} ${product.slug}`.toLowerCase();
+  const isCapsule = /كبسول|capsule/.test(text);
+  const isTablet = /أقراص|قرص|حبوب|tablet|pill/.test(text);
+  if (isCapsule && !isTablet) return "capsule";
+  if (isTablet && !isCapsule) return "tablet";
+  return null;
+};
+
+/**
+ * يحافظ على توافق أعضاء الباقة: يسمح بالمنتجات الموضعية/العسل مع أي شكل،
+ * لكنه لا يسمح بوجود tablet و capsule معاً في نفس الباقة.
+ */
+function filterCompatibleCrossSells(product: Product, suggestions: Product[]): Product[] {
+  const forms = new Set<"tablet" | "capsule">();
+  const mainForm = getOralSolidForm(product);
+  if (mainForm) forms.add(mainForm);
+
+  return suggestions.filter((suggestion) => {
+    const form = getOralSolidForm(suggestion);
+    if (!form) return true;
+    if (forms.size === 0) {
+      forms.add(form);
+      return true;
+    }
+    if (!forms.has(form)) return false;
+    forms.add(form);
+    return true;
+  });
+}
+
 /** محرك البيع المتقاطع (Cross Sell Engine) */
 export const getCrossSellsForProduct = (product: Product): Product[] => {
   if (product.crossSell && product.crossSell.length > 0) {
-    return product.crossSell
-      .map((id) => getProductById(id))
-      .filter((p): p is Product => Boolean(p));
+    return filterCompatibleCrossSells(
+      product,
+      product.crossSell.map((id) => getProductById(id)).filter((p): p is Product => Boolean(p)),
+    );
   }
 
   // خوارزمية ذكية لاقتراح باقة تلقائية لو لم يتم تحديدها:
@@ -194,11 +230,14 @@ export const getCrossSellsForProduct = (product: Product): Product[] => {
     suggestedIds = ["m-48", "m-32"]; // تيتان جل
   }
 
-  return suggestedIds
-    .filter((id) => id !== product.id)
-    .slice(0, 2) // اقترح منتجين فقط ليكوّنوا باقة ثلاثية مع المنتج الأصلي
-    .map((id) => getProductById(id))
-    .filter((p): p is Product => Boolean(p));
+  return filterCompatibleCrossSells(
+    product,
+    suggestedIds
+      .filter((id) => id !== product.id)
+      .slice(0, 2) // اقترح منتجين فقط ليكوّنوا باقة ثلاثية مع المنتج الأصلي
+      .map((id) => getProductById(id))
+      .filter((p): p is Product => Boolean(p)),
+  );
 };
 
 /** Look up a product by its URL slug (e.g. "hammer-of-thor-capsules"). */
