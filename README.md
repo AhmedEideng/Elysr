@@ -33,13 +33,13 @@ flow through the same webhook into a moderated reviews sheet.
 
 | Metric                  | Value                                                                                                             |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Products                | **79** (50 men · 22 women · 7 devices) — 9 items permanently deleted; **zero prescription products remain**       |
-| Eligible (feed/sitemap) | **79** — every catalog product is eligible in every channel (no blocked items remain)                             |
+| Products                | **84** (54 men · 23 women · 7 devices) — 4 legacy items remain deleted; five previously removed products restored by owner decision       |
+| Catalog coverage        | **84** — all current products are in the site catalog; Merchant/feed and Google Ads eligibility were not changed by this restoration                             |
 | Articles                | **58** educational health articles with trusted medical sources (NIH/Mayo/NHS/…)                                  |
 | SEO landing pages       | **93** long-form guide pages (**93 indexed**; drug-guide pages retain medical safety warnings) |
-| Pre-rendered pages      | **247** (17 static + 79 products + 58 articles + 93 guides)                                                       |
-| Sitemap URLs            | **243** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)                       |
-| Catalog feed            | **79** items (Google Shopping RSS, price + availability per product)                                              |
+| Pre-rendered pages      | **252** (17 static + 84 products + 58 articles + 93 guides)                                                       |
+| Sitemap URLs            | **248** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)                       |
+| Catalog feed            | **84** items (Google Shopping RSS, price + availability per product)                                              |
 | Redirects               | **176** permanent 301s (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                     |
 | Images                  | **139** WebP (8–55 KB, avg 26 KB) + 239 thumbnails                                                                 |
 | Tests                   | **268** unit (Vitest) + **19** E2E (Playwright) + data-integrity + schema validation                              |
@@ -51,7 +51,7 @@ flow through the same webhook into a moderated reviews sheet.
 ```
 Browser ──→ Vercel Edge CDN (static dist/)
                 │
-                ├── index.html / 247 pre-rendered pages (full SEO meta + JSON-LD)
+                ├── index.html / 252 pre-rendered pages (full SEO meta + JSON-LD)
                 ├── /search?q=…          (SPA — client-side catalog search)
                 │
                 ├── /api/submit-order  ──┐
@@ -72,12 +72,9 @@ the same API handlers — identical behavior, no Vercel dependency.
   discounts (including the 20% bundle discount) and bundle composition against
   build-time-generated `products-db.json` / `bundles-db.json` before anything is
   written to the sheet.
-- **Catalog is 100% non-prescription** — all 9 flagged items (8 pharma:
-  m-34, m-36, m-37, m-38, m-43, m-45, m-47, w-17 + w-24) were permanently deleted
-  per Merchant Center reports and owner decisions (2026-08/09); every remaining
-  product is eligible in every channel. The channel-level exclusion machinery
-  (`GOOGLE_SHOPPING_BLOCKED` → feed/sitemap/JSON-LD/homepage + layered noindex)
-  stays in place and is CI-guarded for any future re-addition.
+- **Catalog availability policy** — m-36, m-43, m-47 and w-24 remain permanently
+  deleted; m-34, m-37, m-38, m-45 and w-17 were restored by the owner. The restoration
+  changes on-site catalog visibility only; Merchant/feed policy and `GOOGLE_SHOPPING_BLOCKED` remain unchanged.
 - **Reviews are moderated by design** — submissions land in a "قيد المراجعة"
   (pending) state; only owner-approved rows are ever served. The read endpoint is
   signed with short-lived HMAC-SHA256 single-use nonces; the write path is
@@ -102,7 +99,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 | Tests     | Vitest (268 unit) + Playwright (19 E2E) + data-integrity + JSON-LD schema validator                                          |
 | Hosting   | Vercel Edge CDN (primary) · self-hosted Express + Docker (supported)                                                         |
 | Orders    | Google Apps Script → Google Sheets (ScriptLock, full duplicate scan, intl phones)                                            |
-| SEO       | 247 pre-rendered pages · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps + feed                           |
+| SEO       | 252 pre-rendered pages · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps + feed                           |
 | Images    | WebP only (sharp pipeline, 700–800 px, q45–55) + descriptive alt/title                                                       |
 | Security  | CSP · HSTS · COOP/OAC · Report-To · NEL · CORS strict · hashed-IP rate limits · HMAC review reads · PII-safe error tracking |
 
@@ -122,7 +119,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 │   ├── features/product/
 │   │   └── components/         # CustomerReviews (approved live reviews), ProductImage, …
 │   ├── data/
-│   │   ├── products.ts         # 79 products (50 men · 22 women · 7 devices) + search helpers
+│   │   ├── products.ts         # 84 products (54 men · 23 women · 7 devices) + search helpers
 │   │   ├── products/           # men.ts · women.ts · devices.ts (catalog source of truth)
 │   │   ├── articles.ts         # 58 articles with trusted sources
 │   │   ├── landing-pages.ts    # 93 SEO guide pages (build-time source; served as per-slug JSON at runtime)
@@ -155,8 +152,8 @@ the same API handlers — identical behavior, no Vercel dependency.
 │       ├── rate-limiter.js     # In-process hashed-IP rate limiter with cleanup
 │       └── request-ip.js       # Trusted platform IP extraction
 ├── scripts/
-│   ├── prerender-seo.mjs       # 247 static HTML pages + Product/ItemList/FAQ/Breadcrumb JSON-LD
-│   ├── generate-sitemap.mjs    # sitemap.xml (243) + sitemap-images.xml + catalog feed +
+│   ├── prerender-seo.mjs       # 252 static HTML pages + Product/ItemList/FAQ/Breadcrumb JSON-LD
+│   ├── generate-sitemap.mjs    # sitemap.xml (248) + sitemap-images.xml + catalog feed +
 │   │                           # robots.txt + security.txt
 │   ├── check-source-links.mjs  # Corpus-wide source liveness (3-attempt backoff, flaky-authority class)
 │   ├── validate-schemas.mjs    # JSON-LD validator (every schema in every pre-rendered page)
@@ -176,10 +173,10 @@ the same API handlers — identical behavior, no Vercel dependency.
 ├── public/
 │   ├── images/                 # 139 WebP + thumbs/ + thumbs-180/
 │   ├── landing-pages/          # 93 per-slug JSON (runtime data source for guide pages)
-│   ├── sitemap.xml             # 243 URLs
+│   ├── sitemap.xml             # 248 URLs
 │   ├── sitemap-images.xml      # 136 image URLs
 │   ├── sitemap-index.xml       # Sitemap index
-│   ├── catalog-feed.xml        # Google Shopping feed (79 items) + .csv/.txt mirrors
+│   ├── catalog-feed.xml        # Google Shopping feed (84 items) + .csv/.txt mirrors
 │   ├── sw.js                   # PWA migration kill-switch (self-unregistering, network-only)
 │   ├── scripts/ga-loader.js    # Delayed GA4 loader (2s + interaction, send_page_view:false)
 │   └── .well-known/security.txt # RFC 9116 security policy
@@ -271,7 +268,7 @@ writing an order.
 | Command                   | Description                                                        |
 | ------------------------- | ------------------------------------------------------------------ |
 | `npm run dev`             | Development server (port 8080)                                     |
-| `npm run build`           | Production build + sitemaps/feeds + 247-page prerender             |
+| `npm run build`           | Production build + sitemaps/feeds + 252-page prerender             |
 | `npm run preview`         | Preview the production build locally                               |
 | `npm run build:ssr`       | Build + prerender for the self-hosted Express server               |
 | `npm start` / `start:dev` | Run the self-hosted server (production / watch)                    |
@@ -348,7 +345,7 @@ Five jobs on every push (plus a weekly Saturday source-liveness cron):
 | 🔗 Corpus Source Liveness                   | All 60 unique article source URLs checked (bot-blocked authorities are classified separately) |
 | 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc --noEmit` · 268 unit/API tests · catalog+metadata+redirect-graph guard |
 | 🛡 Security Audit                            | `npm audit --audit-level=high` on the locked tree                                             |
-| 🏗 Build • Prerender • Sitemaps              | Vite build + 247-page prerender + sitemaps/feeds artifacts                                    |
+| 🏗 Build • Prerender • Sitemaps              | Vite build + 252-page prerender + sitemaps/feeds artifacts                                    |
 | 🚦 Lighthouse Performance Budget            | LHCI performance budgets on the built site                                                    |
 
 Local equivalents: `npm run ci` (lint + typecheck + test:all) and `npm run test:e2e`.
@@ -362,9 +359,9 @@ Local equivalents: `npm run ci` (lint + typecheck + test:all) and `npm run test:
 Automatic CI/CD on every push to `main`. The build pipeline:
 
 1. `vite build` → optimized, code-split `dist/`
-2. `generate-sitemap.mjs` → sitemaps (243 URLs), 79-item catalog feed,
+2. `generate-sitemap.mjs` → sitemaps (248 URLs), 84-item catalog feed,
    robots.txt, security.txt, per-slug landing JSON
-3. `prerender-seo.mjs` → 247 pre-rendered pages with full SEO meta + JSON-LD
+3. `prerender-seo.mjs` → 252 pre-rendered pages with full SEO meta + JSON-LD
 4. Vercel serves `dist/` from the Edge CDN with 12 security header sets
    (HSTS, CSP, COOP, Report-To, NEL, …) + 176 legacy redirects
 

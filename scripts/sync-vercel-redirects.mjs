@@ -154,21 +154,15 @@ async function syncRedirects() {
         permanent: true,
       },
       {
-        source: "/products/viagra-20-tablets",
-        // w-17 (Viagra For Women) اتحذفت نهائياً 2026-09-06 — slug المنتج
-        destination: "/products/women",
-        permanent: true,
-      },
-      {
         source: "/products/viagra-for-women-20-tablets",
         // slug أقدم لنفس المنتج — حذف نهائي
-        destination: "/products/women",
+        destination: "/products/viagra-20-tablets",
         permanent: true,
       },
       {
         source: "/products/w-17",
-        // product-id القديم — حذف نهائي
-        destination: "/products/women",
+        // product-id قديم — redirect إلى المنتج الحالي
+        destination: "/products/viagra-20-tablets",
         permanent: true,
       },
       {
@@ -247,26 +241,14 @@ async function syncRedirects() {
       },
       {
         source: "/products/m-38",
-        // Power 36 — حذف نهائي 2026-09-07
-        destination: "/products/men",
-        permanent: true,
-      },
-      {
-        source: "/products/power-36-power-control-for-36-hours",
-        // slug m-38 — حذف نهائي 2026-09-07
-        destination: "/products/men",
+        // Power 36 — restored by owner; product-id redirect إلى المنتج الحالي
+        destination: "/products/power-36-power-control-for-36-hours",
         permanent: true,
       },
       {
         source: "/products/m-45",
-        // Viagra Pfizer — حذف نهائي 2026-09-07
-        destination: "/products/men",
-        permanent: true,
-      },
-      {
-        source: "/products/viagra-pfizer-100mg",
-        // slug m-45 — حذف نهائي 2026-09-07
-        destination: "/products/men",
+        // Viagra Pfizer — restored by owner; product-id redirect إلى المنتج الحالي
+        destination: "/products/viagra-pfizer-100mg",
         permanent: true,
       },
       // Consolidated SEO guide aliases retained after thin pages were removed.
@@ -340,24 +322,22 @@ async function syncRedirects() {
         destination: "/products/guides/how-to-order-from-elysr",
         permanent: true,
       },
-      // ── منتجات دوائية محذوفة → فئتها (سياسة الالتزام) ──
-      { source: "/products/m-34", destination: "/products/men", permanent: true },
-      { source: "/products/m-36", destination: "/products/men", permanent: true },
-      { source: "/products/m-37", destination: "/products/men", permanent: true },
-      { source: "/products/m-47", destination: "/products/men", permanent: true },
-      { source: "/products/w-17", destination: "/products/women", permanent: true },
+      // ── product-id redirects للمنتجات المحذوفة أو المُعادة ──
       {
-        source: "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
-        destination: "/products/men",
+        source: "/products/m-34",
+        destination: "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
         permanent: true,
       },
+      { source: "/products/m-36", destination: "/products/men", permanent: true },
+      {
+        source: "/products/m-37",
+        destination: "/products/cialis-tadalafil-20mg-30-tablets",
+        permanent: true,
+      },
+      { source: "/products/m-47", destination: "/products/men", permanent: true },
+      { source: "/products/w-17", destination: "/products/viagra-20-tablets", permanent: true },
       {
         source: "/products/vegal-extra-sildenafil-130mg-cobra",
-        destination: "/products/men",
-        permanent: true,
-      },
-      {
-        source: "/products/cialis-tadalafil-20mg-30-tablets",
         destination: "/products/men",
         permanent: true,
       },

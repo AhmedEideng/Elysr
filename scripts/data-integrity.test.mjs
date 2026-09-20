@@ -94,19 +94,12 @@ try {
     },
     "config-db.json is stale; run npm run build",
   );
-  // slugs دوائية لازم يفضل عندها 301 قائم دائماً (نفس قائمة
-  // DELETED_PHARMA_FILES في scripts/validate-schemas.mjs): منتجات
-  // محذوفة نهائياً (منها 3 slugs لـ w-17 اللي اتحذفت نهائياً 2026-09-06).
+  // slugs دوائية للمنتجات المحذوفة فقط لازم يفضل عندها 301 قائم دائماً
+  // (نفس قائمة DELETED_PHARMA_FILES في scripts/validate-schemas.mjs).
   const deletedPharmaSlugs = [
-    "hard-on-sildenafil-130mg-dapoxetine-60mg", // m-34
     "vegal-extra-sildenafil-130mg-cobra", // m-36
-    "cialis-tadalafil-20mg-30-tablets", // m-37
     "levitra-100mg", // m-47
-    "viagra-for-women-20-tablets", // slug أقدم لـ w-17
-    "viagra-20-tablets", // slug المنتج w-17 (حذف نهائي 2026-09-06)
     "procomil-fort-tablet", // m-43 (حذف نهائي 2026-09-07)
-    "power-36-power-control-for-36-hours", // m-38 (حذف نهائي 2026-09-07)
-    "viagra-pfizer-100mg", // m-45 (حذف نهائي 2026-09-07)
     "black-widow-drops", // w-24 (حذف نهائي 2026-09-07)
     "viagra-1-2-3-2-10-tablets", // slug دوائي أقدم
   ];
@@ -135,8 +128,8 @@ try {
 
   assert.equal(
     products.length,
-    79,
-    "Expected 79 products (8 deleted permanently: 7 pharma + w-24, plus the new Halpeno listing)",
+    84,
+    "Expected 84 products (five previously deleted products restored; four deleted products remain)",
   );
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
   // 🧭 Anti-drift: أرقام الكتالوج/المحتوى hardcoded في نصوص التسويق = درفت
@@ -370,8 +363,8 @@ try {
   }, {});
   assert.deepEqual(
     categories,
-    { men: 50, women: 22, devices: 7 },
-    "Unexpected category split (79 = 50 men / 22 women / 7 devices)",
+    { men: 54, women: 23, devices: 7 },
+    "Unexpected category split (84 = 54 men / 23 women / 7 devices)",
   );
 
   // (2026-09-15) JSON-LD OfferCatalog في index.html لازم يطابق كتالوج
@@ -672,21 +665,20 @@ try {
       `Blocked product in catalog feed: ${product.id}`,
     );
   }
-  // 2026-09-06: قرار المالك بإلغاء حظر m-38/m-43/m-45 — قواعد noindex
-  // الخاصة بيه لازم تكون اتشالت بالكامل (مفيش نص-تطبيق في فك الحظر)
-  const noindexHeader = vercel.headers.find((entry) =>
-    entry.source.includes("power-36-power-control-for-36-hours"),
-  );
-  assert.equal(
-    noindexHeader,
-    undefined,
-    "Unblocked product (power-36) must not have noindex header rules anymore",
-  );
-
-  // w-17 (Viagra For Women) اتحذفت نهائياً 2026-09-06 — لازم تخرج من
-  // قاعدة noindex headers (مفيش صفحة تاني تحتها)
-  const w17Header = vercel.headers.find((entry) => entry.source.includes("viagra-20-tablets"));
-  assert.equal(w17Header, undefined, "Deleted w-17 must not appear in noindex header rules");
+  // المنتجات التي أعادها المالك يجب ألا تحمل قواعد noindex على مستوى headers.
+  for (const restoredSlug of [
+    "hard-on-sildenafil-130mg-dapoxetine-60mg",
+    "cialis-tadalafil-20mg-30-tablets",
+    "power-36-power-control-for-36-hours",
+    "viagra-pfizer-100mg",
+    "viagra-20-tablets",
+  ]) {
+    assert.equal(
+      vercel.headers.some((entry) => entry.source.includes(restoredSlug)),
+      false,
+      `Restored product must not have noindex header rules: ${restoredSlug}`,
+    );
+  }
 
   for (const blockedPath of ["/cart", "/thank-you", "/order-confirmed"]) {
     assert.equal(sitemap.includes(`<loc>https://elysrmedical.store${blockedPath}</loc>`), false);

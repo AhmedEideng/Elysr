@@ -12,8 +12,8 @@ import { isCatalogFeedEligible, GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-co
 
 describe("GOOGLE_SHOPPING_BLOCKED — يستبعد الأدوية المرفوضة من الخلاصة فقط", () => {
   it("فاضي بالكامل بعد قرار المالك بإلغاء الحظر (2026-09-06)", () => {
-    // الحالة (2026-09-07): مفيش أي حظر — مفيش أدوية مستبعدة من الكتالوج.
-    // (6 أدوية اتحذفت من الكتالوج نفسه: m-34,m-36,m-37,m-43,m-47,w-17.)
+    // الحالة الحالية: مفيش أي حظر نشط في Merchant feed؛ المنتجات الحالية
+    // مؤهلة ما دام المخزون متوفرًا.
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-38")).toBe(false); // Power 36 — اتحذف نهائيا (2026-09-07)
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-43")).toBe(false); // Procomil Fort — اتحذف نهائيا (2026-09-07)
     expect(GOOGLE_SHOPPING_BLOCKED.has("m-45")).toBe(false); // Viagra Pfizer — اتحذف نهائيا (2026-09-07)

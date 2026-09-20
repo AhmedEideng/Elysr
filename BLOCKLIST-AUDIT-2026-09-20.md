@@ -11,10 +11,10 @@
 | المجال | الحالة الحالية |
 |---|---|
 | حظر منتجات Google Merchant / feed | **لا توجد منتجات محظورة فعليًا**: `GOOGLE_SHOPPING_BLOCKED = []` |
-| المنتجات الحالية | 79 منتجًا: 50 رجال، 22 نساء، 7 أجهزة |
-| مخزون صفر مستبعد من feed/cart | لا يوجد حاليًا؛ المنتجات الـ79 كلها `stock > 0` |
+| المنتجات الحالية | 84 منتجًا: 54 رجال، 23 نساء، 7 أجهزة |
+| مخزون صفر مستبعد من feed/cart | لا يوجد حاليًا؛ المنتجات الـ84 كلها `stock > 0` |
 | استبعاد الصفحة الرئيسية | 3 منتجات فقط: `m-02`, `m-03`, `m-49` — استبعاد عرض، وليس حظر بيع أو SEO أو feed |
-| المنتجات الدوائية المحذوفة | 9 IDs غير موجودة في الكتالوج الحالي، وروابطها القديمة تعمل Redirect إلى القسم |
+| المنتجات الدوائية المحذوفة | 4 IDs غير موجودة في الكتالوج الحالي، وروابطها القديمة تعمل Redirect إلى القسم |
 | حظر Crawlers في robots.txt | `CCBot` و`Bytespider` فقط |
 | صفحات noindex ثابتة | 5 ملفات ناتجة: 404، cart، order-confirmed، search، wishlist؛ دليلا Cialis/Levitra قابلان للفهرسة بعد الإصلاح |
 | حظر المنتجات من noindex حاليًا | لا يوجد؛ القائمة النشطة فارغة |
@@ -42,7 +42,7 @@ export const GOOGLE_SHOPPING_BLOCKED = new Set<string>([]);
 - `src/components/ProductCard.tsx` — `rel="nofollow"` للروابط.
 - `scripts/validate-schemas.mjs` و`data-integrity.test.mjs` — فحص عدم تسرب المنتج إلى feed/sitemap/schema.
 
-**النتيجة:** لا يوجد أي ID داخل الحظر النشط الآن. كل المنتجات الـ79 تدخل feed وsitemap وتبقى قابلة للفهرسة حسب قواعد SEO العامة.
+**النتيجة:** لا يوجد أي ID داخل الحظر النشط الآن. لم تتغير قائمة Merchant/feed أو سياسة الإعلانات تلقائيًا؛ الكتالوج الحالي يولّد artifacts وفق السياسة القائمة، بينما نطاق الاستعادة هو العرض على الموقع.
 
 ### 2.2 الاستبعاد من الصفحة الرئيسية فقط
 
@@ -77,21 +77,16 @@ m-49  Power Fully Up Advanced
 - بطاقة المنتج تعطل الإضافة عند نفاد المخزون في `src/components/ProductCard.tsx`.
 - API الطلب يرفض المنتج غير الموجود أو الذي مخزونه أقل من 1 في `api/submit-order.js:301-308`.
 
-**الحالة الحالية:** `api/lib/products-db.json` يحتوي 79 منتجًا، وجميعها `stock > 0`؛ لذلك لا يوجد حاليًا منتج مستبعد بسبب المخزون.
+**الحالة الحالية:** `api/lib/products-db.json` يحتوي 84 منتجًا، وجميعها `stock > 0`؛ لذلك لا يوجد حاليًا منتج مستبعد بسبب المخزون.
 
 ### 2.4 المنتجات المحذوفة نهائيًا من الكتالوج
 
 هذه IDs غير موجودة ضمن الكتالوج الحالي، ولذلك لا يمكن طلبها من API ولا تظهر في feed أو sitemap:
 
 ```text
-m-34  Hard-On
 m-36  Vegal
-m-37  Cialis
-m-38  Power 36
 m-43  Procomil Fort
-m-45  Viagra Pfizer
 m-47  Levitra
-w-17  Viagra for Women
 w-24  Black Widow Drops
 ```
 
@@ -109,28 +104,22 @@ w-24  Black Widow Drops
 هذه ليست قائمة runtime تمنع الزائر، بل قائمة CI تمنع إعادة ظهور URL/Schema لمنتجات محذوفة:
 
 ```text
-products/hard-on-sildenafil-130mg-dapoxetine-60mg.html
 products/vegal-extra-sildenafil-130mg-cobra.html
-products/cialis-tadalafil-20mg-30-tablets.html
 products/levitra-100mg.html
-products/viagra-for-women-20-tablets.html
-products/viagra-20-tablets.html
 products/procomil-fort-tablet.html
-products/power-36-power-control-for-36-hours.html
-products/viagra-pfizer-100mg.html
 products/black-widow-drops.html
 products/viagra-1-2-3-2-10-tablets.html
 ```
 
-أي ظهور لها في ItemList أو Product JSON-LD يفشل `test:schemas`.
+أي ظهور لها في ItemList أو Product JSON-LD يفشل `test:schemas`. أما slugs المنتجات الخمسة المُعادة فأزيلت من هذه القائمة وأصبحت صفحات حية.
 
 ### 2.6 Redirects للروابط القديمة
 
-يوجد 176 redirect في `vercel.json`، منها:
+يوجد 171 redirect في `vercel.json`، منها:
 
 - IDs قديمة لكل المنتجات.
 - slugs لمنتجات محذوفة.
-- slugs تاريخية لأدوية مثل Cialis وLevitra وViagra وPower 36 وProcomil Fort وBlack Widow.
+- slugs تاريخية للمنتجات المحذوفة مثل Vegal وLevitra وProcomil Fort وBlack Widow، مع redirects product-ID للمنتجات المُعادة إلى صفحاتها الحية.
 - `/thank-you` إلى `/order-confirmed`.
 - مسارات `/blog` و`/articles` القديمة إلى `/education`.
 
@@ -567,25 +556,33 @@ segments تبدأ بنقطة
 
 ## 11. ملاحظات اتساق مهمة
 
-### 11.1 تعليقات `product-compliance.ts` أقدم من الحالة الفعلية — تم الإصلاح
+### 11.1 حالة الاستعادة الحالية
 
-هناك تعارض نصي في التعليقات التاريخية:
+أُعيدت المنتجات الخمسة التالية إلى الكتالوج والعرض العام من المصدر التاريخي الموثوق، دون اختلاق بيانات أو reviews:
 
-- تعليق قديم يذكر 5 منتجات دوائية.
-- تعليق آخر يذكر 8 أدوية + `w-24` التجاري.
-- المصدر التنفيذي الحالي هو `GOOGLE_SHOPPING_BLOCKED = []`، والكتالوج الحالي لا يحتوي IDs المحذوفة.
+```text
+m-34  Hard-On
+m-37  Cialis
+m-38  Power 36
+m-45  Viagra Pfizer
+w-17  Viagra for Women
+```
 
-تم تنظيف التعليقات في `src/lib/product-compliance.ts`، وأصبح السجل التاريخي منفصلًا صراحةً عن السياسة التنفيذية الحالية.
+واستُعيدت صورها الأصلية ونسخ thumbnails، وأصبحت صفحاتها مفهرسة بنيويًا دون قواعد noindex خاصة بها. لم تتغير `GOOGLE_SHOPPING_BLOCKED` أو سياسة Merchant/feed تلقائيًا، لأن عدم استخدام Google Ads قرار منفصل عن نطاق الاستعادة الحالي.
 
-### 11.2 `ANALYSIS.md` يحتوي نتائج تاريخية
+### 11.2 تعليقات `product-compliance.ts`
+
+تم فصل السجل التاريخي للمنتجات الأربعة المحذوفة حاليًا عن المنتجات الخمسة المُعادة في المصدر التنفيذي الحالي؛ `GOOGLE_SHOPPING_BLOCKED = []` بقيت كما هي.
+
+### 11.3 `ANALYSIS.md` يحتوي نتائج تاريخية
 
 تقرير `ANALYSIS.md` يذكر في مواضع قديمة وجود حظر نشط لبعض المنتجات، بينما المصدر الحالي والقوائم المولدة يقولان إن الحظر النشط فارغ. يجب اعتبار الكود وملفات build الحالية مصدر الحقيقة، لا التقرير القديم.
 
-### 11.3 `SECURITY.md` يذكر COEP — تم الإصلاح
+### 11.4 `SECURITY.md` يذكر COEP — تم الإصلاح
 
 تم تصحيح `SECURITY.md` وملفات README إلى `COOP + OAC`؛ لا يوجد ادعاء بوجود COEP غير مُرسل.
 
-### 11.4 CORS ليس رفضًا كاملًا لكل endpoints — تم الإصلاح
+### 11.5 CORS ليس رفضًا كاملًا لكل endpoints — تم الإصلاح
 
 `submit-order` و`submit-review` و`errors` و`csp-report` ترفض الآن Origin غير المسموح بـ403 عند وجوده. الطلبات بلا Origin تظل مسموحة لتقارير المتصفح server-to-server، مع استمرار rate limits وbody limits وsanitation وعدم إرجاع بيانات حساسة.
 
@@ -593,7 +590,7 @@ segments تبدأ بنقطة
 
 ## النتيجة النهائية
 
-لا يوجد حاليًا **حظر منتجات نشط** في Google Shopping أو sitemap أو feed. الحظر الفعلي الموجود في المشروع حاليًا ينقسم إلى:
+لا يوجد حاليًا **حظر منتجات نشط** في قائمة `GOOGLE_SHOPPING_BLOCKED` أو sitemap أو feed وفق سياسة المشروع الحالية؛ ولم يتخذ هذا التعديل قرارًا جديدًا بشأن Google Ads. الحظر الفعلي الموجود في المشروع حاليًا ينقسم إلى:
 
 1. حظر روبوتين في `robots.txt`.
 2. noindex لصفحات الحساب/البحث/التأكيد فقط؛ دليلا Cialis وLevitra قابلان للفهرسة مع تحذيرات طبية.
@@ -623,12 +620,12 @@ segments تبدأ بنقطة
 
 - `npm run lint` ✓
 - `npm run typecheck` ✓
-- `npm run build` ✓ — 93 landing pages، و247 صفحة prerendered
+- `npm run build` ✓ — 93 landing pages، و252 صفحة prerendered، والكتالوج 84 منتجًا
 - `npm test` ✓ — data integrity + security headers
 - `npm run test:unit` ✓ — 22 ملفًا، 268 اختبارًا
-- `npm run test:schemas` ✓ — 248 HTML، و1163 JSON-LD، صفر أخطاء/تحذيرات
-- `npm run health-check` ✓ — sitemap فيها 243 رابطًا وfeed فيها 79 منتجًا
+- `npm run test:schemas` ✓ — 253 HTML، و1183 JSON-LD، صفر أخطاء/تحذيرات
+- `npm run health-check` ✓ — sitemap فيها 248 رابطًا وfeed فيها 84 منتجًا
 - `npx playwright install --with-deps chromium` ✓ — تم تنزيل Chromium وتثبيت dependencies النظام.
-- `npm run test:e2e` ✓ — 19/19 اختبارًا ناجحًا بعد التثبيت.
+- `npm run test:e2e` ✓ — 19/19 اختبارًا ناجحًا بعد تحديث اختبارات redirects للمنتجات المُعادة.
 
 - تم إلغاء فحص قائمة عبارات الادعاءات الطبية وقاعدة كلمات الأدوية التي كانت تفرض noindex أو تحذيرًا طبيًا داخل `scripts/data-integrity.test.mjs`، مع إزالة اختبار العبارة المطلق المكرر من `src/__tests__/compliance.test.ts`.

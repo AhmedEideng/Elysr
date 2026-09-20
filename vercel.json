@@ -359,7 +359,7 @@
     },
     {
       "source": "/products/m-34",
-      "destination": "/products/men",
+      "destination": "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
       "permanent": true
     },
     {
@@ -374,12 +374,12 @@
     },
     {
       "source": "/products/m-37",
-      "destination": "/products/men",
+      "destination": "/products/cialis-tadalafil-20mg-30-tablets",
       "permanent": true
     },
     {
       "source": "/products/m-38",
-      "destination": "/products/men",
+      "destination": "/products/power-36-power-control-for-36-hours",
       "permanent": true
     },
     {
@@ -414,7 +414,7 @@
     },
     {
       "source": "/products/m-45",
-      "destination": "/products/men",
+      "destination": "/products/viagra-pfizer-100mg",
       "permanent": true
     },
     {
@@ -564,7 +564,7 @@
     },
     {
       "source": "/products/w-17",
-      "destination": "/products/women",
+      "destination": "/products/viagra-20-tablets",
       "permanent": true
     },
     {
@@ -909,7 +909,7 @@
     },
     {
       "source": "/products/viagra-for-women-20-tablets",
-      "destination": "/products/women",
+      "destination": "/products/viagra-20-tablets",
       "permanent": true
     },
     {
@@ -988,28 +988,13 @@
       "permanent": true
     },
     {
-      "source": "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
-      "destination": "/products/men",
-      "permanent": true
-    },
-    {
       "source": "/products/vegal-extra-sildenafil-130mg-cobra",
-      "destination": "/products/men",
-      "permanent": true
-    },
-    {
-      "source": "/products/cialis-tadalafil-20mg-30-tablets",
       "destination": "/products/men",
       "permanent": true
     },
     {
       "source": "/products/levitra-100mg",
       "destination": "/products/men",
-      "permanent": true
-    },
-    {
-      "source": "/products/viagra-20-tablets",
-      "destination": "/products/women",
       "permanent": true
     },
     {
@@ -1049,16 +1034,6 @@
     },
     {
       "source": "/products/procomil-fort-tablet",
-      "destination": "/products/men",
-      "permanent": true
-    },
-    {
-      "source": "/products/power-36-power-control-for-36-hours",
-      "destination": "/products/men",
-      "permanent": true
-    },
-    {
-      "source": "/products/viagra-pfizer-100mg",
       "destination": "/products/men",
       "permanent": true
     },

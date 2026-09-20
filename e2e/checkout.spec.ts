@@ -45,17 +45,37 @@ test("customer can add a product, update quantity, calculate shipping and submit
   });
 });
 
-test("power-36, viagra-pfizer, black-widow deleted: legacy URLs 301 to their category", async ({
-  baseURL,
-}) => {
-  // Owner decision 2026-09-07: m-38 Power 36, m-45 Viagra Pfizer and
-  // w-24 Black Widow Drops deleted permanently — every legacy URL must
-  // 301 to its category, and the product pages must be real 404s.
+test("restored products have live pages and legacy IDs 301 to those pages", async ({ baseURL }) => {
+  // Owner decision 2026-09-20: m-34, m-37, m-38, m-45 and w-17 are
+  // restored for normal on-site display. Their old ID URLs must resolve to
+  // the live product slug, while the live pages themselves must return 200.
   const cases: Array<[string, string]> = [
-    ["/products/m-38", "/products/men"],
-    ["/products/power-36-power-control-for-36-hours", "/products/men"],
-    ["/products/m-45", "/products/men"],
-    ["/products/viagra-pfizer-100mg", "/products/men"],
+    ["/products/m-34", "/products/hard-on-sildenafil-130mg-dapoxetine-60mg"],
+    ["/products/m-37", "/products/cialis-tadalafil-20mg-30-tablets"],
+    ["/products/m-38", "/products/power-36-power-control-for-36-hours"],
+    ["/products/m-45", "/products/viagra-pfizer-100mg"],
+    ["/products/w-17", "/products/viagra-20-tablets"],
+  ];
+  for (const [legacyPath, livePath] of cases) {
+    const redirect = await fetch(`${baseURL}${legacyPath}`, { redirect: "manual" });
+    expect(redirect.status, legacyPath).toBe(301);
+    expect(redirect.headers.get("location"), legacyPath).toBe(livePath);
+
+    const live = await fetch(`${baseURL}${livePath}`, { redirect: "manual" });
+    expect(live.status, livePath).toBe(200);
+    expect(await live.text(), livePath).toContain("application/ld+json");
+  }
+});
+
+test("deleted product legacy URLs 301 to their category section", async ({ baseURL }) => {
+  // The four products still deleted permanently must keep their category 301s.
+  const cases: Array<[string, string]> = [
+    ["/products/m-36", "/products/men"],
+    ["/products/vegal-extra-sildenafil-130mg-cobra", "/products/men"],
+    ["/products/m-43", "/products/men"],
+    ["/products/procomil-fort-tablet", "/products/men"],
+    ["/products/m-47", "/products/men"],
+    ["/products/levitra-100mg", "/products/men"],
     ["/products/w-24", "/products/women"],
     ["/products/black-widow-drops", "/products/women"],
   ];
@@ -66,30 +86,11 @@ test("power-36, viagra-pfizer, black-widow deleted: legacy URLs 301 to their cat
   }
 });
 
-test("deleted product legacy URLs 301 to their category section", async ({ baseURL }) => {
-  // Deleted pharma (Merchant report) must never 404: m-34 → men.
-  // Use fetch with redirect:"manual" — Playwright's request fixture follows
-  // redirects and would mask the 301.
-
-  const menResp = await fetch(`${baseURL}/products/m-34`, { redirect: "manual" });
-  expect(menResp.status).toBe(301);
-  expect(menResp.headers.get("location")).toBe("/products/men");
-});
-
-test("w-17 (Viagra For Women) deleted: all legacy URLs 301 to category, page is 404", async ({
-  baseURL,
-}) => {
-  // w-17 final deletion (2026-09-06, owner decision after MC "disapproved"
-  // evidence) — same treatment as the other 4 deleted pharma: every legacy
-  // URL must 301 to the category, and the product page must be a real 404.
-  for (const path of [
-    "/products/w-17",
-    "/products/viagra-20-tablets",
-    "/products/viagra-for-women-20-tablets",
-  ]) {
+test("restored Viagra for Women aliases point to the live product page", async ({ baseURL }) => {
+  for (const path of ["/products/viagra-for-women-20-tablets"]) {
     const resp = await fetch(`${baseURL}${path}`, { redirect: "manual" });
     expect(resp.status, path).toBe(301);
-    expect(resp.headers.get("location"), path).toBe("/products/women");
+    expect(resp.headers.get("location"), path).toBe("/products/viagra-20-tablets");
   }
 });
 
