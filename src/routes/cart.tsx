@@ -30,7 +30,15 @@ import {
   FREE_SHIPPING_THRESHOLD,
   qualifiesForFreeShipping,
 } from "@/lib/governorates";
-import { trackBeginCheckout, trackCtaClick, trackPurchase, trackViewCart } from "@/lib/analytics";
+import {
+  trackBeginCheckout,
+  trackCtaClick,
+  trackOrderFailed,
+  trackOrderSuccess,
+  trackPurchase,
+  trackViewCart,
+  trackWhatsAppClick,
+} from "@/lib/analytics";
 import { getReferrerCode } from "@/lib/referral";
 import { toast } from "sonner";
 import { getNextTier, PROMO_TAGLINE, isPromotionEnabled } from "@/lib/promo";
@@ -220,8 +228,10 @@ function CartPage() {
       if (submitResult.success) {
         // GA: purchase — سُجل فعلياً في الشيت
         trackPurchase(orderId, orderItems, grandTotal, shipping, discount + bundleDiscount);
+        trackOrderSuccess(orderId, "whatsapp");
         clear();
       } else {
+        trackOrderFailed(orderId, "whatsapp");
         beaconOrderToSheets(payload); // محاولة أخيرة best-effort
         toast.error(
           "⚠️ تعذر تسجيل الطلب آلياً، لكن طلبك أُرسل عبر واتساب. لو ما وصلك رد تأكيد خلال دقائق، تواصل معنا.",
@@ -229,6 +239,7 @@ function CartPage() {
         );
       }
       setSubmitting(false);
+      trackWhatsAppClick(url, "cart_checkout");
       window.location.assign(url);
       return;
     } else {
@@ -248,11 +259,13 @@ function CartPage() {
       if (result.success) {
         // GA: purchase — سُجل فعلياً في الشيت (فشل التسجيل = مفيش revenue)
         trackPurchase(orderId, orderItems, grandTotal, shipping, discount + bundleDiscount);
+        trackOrderSuccess(orderId, "direct");
         // سُجل بنجاح → نطهر السلة (العميل رايح لصفحة التأكيد)
         clear();
         toast.success("✅ تم استلام طلبك بنجاح!", { duration: 2500 });
         navigate({ to: "/order-confirmed" });
       } else {
+        trackOrderFailed(orderId, "direct");
         toast.error(
           "⚠️ تعذر تسجيل طلبك آلياً. سلّتك محفوظة لإعادة المحاولة، أو أكمل طلبك الآن عبر واتساب.",
           {
@@ -273,6 +286,7 @@ function CartPage() {
                 a.target = "_blank";
                 a.rel = "noopener noreferrer";
                 document.body.appendChild(a);
+                trackWhatsAppClick(a.href, "checkout_fallback");
                 a.click();
                 a.remove();
               },

@@ -402,6 +402,10 @@ function hasVerifiedPurchase(phone, productId, productName) {
       else if (h === "معرفات المنتجات") idsCol = i + 1;
     }
     if (phoneCol <= 0) return "لا";
+    // التحقق من شراء مؤكد يحتاج عمود الحالة أيضاً. لا نعتبر صفاً قديماً
+    // "مكتملًا" لمجرد غياب العمود؛ ذلك كان يسمح بتعليم أي طلب تاريخي
+    // كمشتري موثق قبل ترحيل بنية الشيت.
+    if (statusCol <= 0) return "لا";
     // لا يمكن التحقق بدون أي مصدر مطابقة (طلب من قبل إضافة العمودين معاً)
     if (itemsCol <= 0 && idsCol <= 0) return "لا";
 
@@ -661,33 +665,37 @@ function getOrCreateSheetWithColumns(name, columns, statusKey, statusOptions) {
     return createFreshSheet(ss, name, expectedHeaders, columns, statusKey, statusOptions);
   }
 
-  // تأكد من وجود كل الأعمدة المطلوبة
+  // تأكد من وجود كل الأعمدة المطلوبة حتى لو كان عدد الأعمدة الحالي
+  // مساوياً للعدد المتوقع. النسخة القديمة كانت تفحص العدد فقط؛ فإذا
+  // حُذف/تغيّر اسم عمود مع بقاء العدد نفسه، كانت الكتابات الجديدة تسقط
+  // بصمت من appendRowByHeaders.
   var currentCols = sheet.getLastColumn();
-  if (currentCols < expectedHeaders.length) {
-    var currentHeaders =
-      currentCols > 0
-        ? sheet
-            .getRange(1, 1, 1, currentCols)
-            .getValues()[0]
-            .map(function (h) {
-              return String(h).trim();
-            })
-        : [];
+  var currentHeaders =
+    currentCols > 0
+      ? sheet
+          .getRange(1, 1, 1, currentCols)
+          .getValues()[0]
+          .map(function (h) {
+            return String(h).trim();
+          })
+      : [];
+  var addedColumn = false;
 
-    // أضف الأعمدة الناقصة فقط
-    for (var i = 0; i < expectedHeaders.length; i++) {
-      if (currentHeaders.indexOf(expectedHeaders[i]) === -1) {
-        var newCol = sheet.getLastColumn() + 1;
-        sheet
-          .getRange(1, newCol)
-          .setValue(expectedHeaders[i])
-          .setFontWeight("bold")
-          .setBackground("#1a73e8")
-          .setFontColor("#ffffff");
-      }
+  // أضف الأعمدة الناقصة فقط
+  for (var i = 0; i < expectedHeaders.length; i++) {
+    if (currentHeaders.indexOf(expectedHeaders[i]) === -1) {
+      var newCol = sheet.getLastColumn() + 1;
+      sheet
+        .getRange(1, newCol)
+        .setValue(expectedHeaders[i])
+        .setFontWeight("bold")
+        .setBackground("#1a73e8")
+        .setFontColor("#ffffff");
+      currentHeaders.push(expectedHeaders[i]);
+      addedColumn = true;
     }
-    sheet.autoResizeColumns(1, sheet.getLastColumn());
   }
+  if (addedColumn) sheet.autoResizeColumns(1, sheet.getLastColumn());
 
   return sheet;
 }

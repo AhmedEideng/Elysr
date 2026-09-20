@@ -35,7 +35,7 @@
  * (2026-09-18) GA4 Audit:
  *   - page_title artifact (متزامن مع الـ fix بتاع useErrorTracking)
  *   - scroll event clash مع Enhanced Measurement
- *   - ما فيش debug_mode / ما فيش page_referrer tracking
+ *   - ما فيش debug_mode / page_referrer يُرسل بدون query/hash أو PII
  * (2026-09-18 v3) Complete coverage:
  *   - view_item_list + select_item لكل قوائم المنتجات
  *   - view_cart + wishlist events
@@ -44,7 +44,6 @@
  */
 
 export const GA_CURRENCY = "EGP";
-export const GA_MEASUREMENT_ID = "G-V3X7Q3D0RR";
 
 /**
  * page_view title artifact: لو الـ title مش مُمرر من route data، بتقرأ
@@ -66,6 +65,50 @@ function emit(event: string, params: Record<string, unknown>) {
   } else if (Array.isArray(w.dataLayer)) {
     w.dataLayer.push({ event, ...params });
   }
+}
+
+/** Keep analytics URLs free of query/hash data supplied by visitors. */
+function pathnameOnly(url: string): string {
+  if (!url) return "";
+  try {
+    const parsed = new URL(url, window.location.origin);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    return String(url).split(/[?#]/, 1)[0];
+  }
+}
+
+/** Remove query/hash data from outbound URLs before sending them to analytics. */
+function safeOutboundUrl(value: string): string {
+  try {
+    const raw = String(value).trim();
+    // GlobalTrackers supplies absolute anchor.href values. Reject relative or
+    // malformed caller input rather than treating it as a customer path.
+    if (!/^https?:\/\//i.test(raw)) return "";
+    const parsed = new URL(raw);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return "";
+    return `${parsed.origin}${parsed.pathname}`.slice(0, 300);
+  } catch {
+    // Invalid or non-URL values are not useful for analytics and may contain
+    // unstructured customer input; fail closed instead of forwarding them.
+    return "";
+  }
+}
+
+/**
+ * Search is useful for product insights, but it is still user input. Keep
+ * ordinary Arabic product terms while redacting obvious phone/email/URL data
+ * and bounding the payload before it reaches an analytics provider.
+ */
+function safeAnalyticsText(value: string): string {
+  const text = String(value).trim().slice(0, 100);
+  if (
+    /(?:https?:\/\/|www\.|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,})/i.test(text) ||
+    /(?:^|\D)\+?\d[\d\s().-]{6,}\d(?:$|\D)/.test(text)
+  ) {
+    return "[redacted]";
+  }
+  return text;
 }
 
 export interface TrackItem {
@@ -133,13 +176,16 @@ export function trackPageView(
   const stableTitle = title && title.trim() ? title : document.title;
   const payload: Record<string, unknown> = {
     page_path: url,
-    page_location: window.location.href,
+    page_location: pathnameOnly(window.location.href),
     page_title: stableTitle,
-    page_referrer: options.referrer ?? document.referrer,
+    page_referrer: options.referrer
+      ? pathnameOnly(options.referrer)
+      : pathnameOnly(document.referrer),
   };
   // (2026-09-18) Search term — مهم للـ SEO traffic analysis: نشوف إيه
   // الـ keywords اللي بتجيب زيارات لكل صفحة (organic search terms).
-  if (options.search) payload.page_search = options.search;
+  // Keep product terms, but never send an obvious phone/email/URL from input.
+  if (options.search) payload.page_search = safeAnalyticsText(options.search);
   if (options.topic) payload.page_topic = options.topic;
   emit("page_view", payload);
 }
@@ -186,7 +232,27 @@ export function trackCtaClick(ctaName: string, location: string, extra?: Record<
  * الـ referrers في التقارير.
  */
 export function trackOutboundClick(url: string, label: string) {
-  emit("outbound_click", { outbound_url: url, outbound_label: label });
+  // WhatsApp order links carry customer name/phone/address in ?text=.
+  // Never forward that query string to GA or another analytics provider.
+  emit("outbound_click", { outbound_url: safeOutboundUrl(url), outbound_label: label });
+}
+
+/** قياس نقرات WhatsApp كمرحلة مستقلة، بدون تمرير نص الطلب أو بيانات العميل. */
+export function trackWhatsAppClick(url: string, context: string) {
+  emit("whatsapp_click", {
+    outbound_url: safeOutboundUrl(url),
+    whatsapp_context: context,
+  });
+}
+
+/** نجاح تسجيل الطلب فعلياً في Sheets، منفصل عن purchase المالي القياسي في GA4. */
+export function trackOrderSuccess(orderId: string, method: "whatsapp" | "direct") {
+  emit("order_success", { order_id: orderId, order_method: method });
+}
+
+/** فشل التسجيل الآلي؛ لا نعدّه إيراداً ولا نرسل أي بيانات عميل. */
+export function trackOrderFailed(orderId: string, method: "whatsapp" | "direct") {
+  emit("order_failed", { order_id: orderId, order_method: method });
 }
 
 /**
@@ -217,7 +283,7 @@ export function trackPurchase(
  * keywords اللي الزوار بيدوروا عليها.
  */
 export function trackSiteSearch(query: string, resultsCount: number) {
-  emit("search", { search_term: query, results_count: resultsCount });
+  emit("search", { search_term: safeAnalyticsText(query), results_count: resultsCount });
 }
 
 /**

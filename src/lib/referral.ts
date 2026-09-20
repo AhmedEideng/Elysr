@@ -80,15 +80,23 @@ export function getReferrerCode(): string | null {
   try {
     const raw = safeGet(REFERRAL_STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as StoredReferral;
-    if (!parsed.code || !parsed.timestamp) return null;
+    const parsed = JSON.parse(raw) as Partial<StoredReferral>;
+    // localStorage is user-controlled. Re-validate data on read as well as
+    // on write; otherwise a malformed/stale value can be forwarded to the
+    // checkout API and block an otherwise valid order.
+    if (
+      typeof parsed.code !== "string" ||
+      !/^EL-[A-Z0-9]{4,8}$/.test(parsed.code) ||
+      typeof parsed.timestamp !== "number" ||
+      !Number.isFinite(parsed.timestamp) ||
+      parsed.timestamp > Date.now()
+    ) {
+      clearReferrerCode();
+      return null;
+    }
     const ageDays = (Date.now() - parsed.timestamp) / (1000 * 60 * 60 * 24);
     if (ageDays > REFERRAL_EXPIRY_DAYS) {
-      try {
-        localStorage.removeItem(REFERRAL_STORAGE_KEY);
-      } catch {
-        /* ignore */
-      }
+      clearReferrerCode();
       return null;
     }
     return parsed.code;

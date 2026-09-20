@@ -250,6 +250,19 @@ app.use((req, res, next) => {
   next();
 });
 
+// ── RFC 9116 security.txt ──
+// express.static intentionally ignores dotfiles by default. Keep the
+// well-known URL explicit so self-hosted deployments have parity with Vercel.
+app.get(["/security.txt", "/.well-known/security.txt"], (_req, res) => {
+  const securityPath = resolve(DIST, ".well-known", "security.txt");
+  if (!existsSync(securityPath)) return notFoundResponse(res);
+  res.type("text/plain");
+  setCache(res, "public, max-age=86400");
+  // sendFile applies the same dotfile protection as express.static. Read this
+  // explicitly-known file instead; the path is a fixed constant, not user input.
+  return res.send(readFileSync(securityPath, "utf8"));
+});
+
 // ── Static assets (dist/) with long-term caching ──
 // redirect: false — لا نريد تحويل express.static لمجلدات dist (مثل
 // /education حيث الملف والمجلد بنفس الاسم) إلى 301/؛ المعالج الرئيسي
@@ -272,6 +285,10 @@ app.use(
 // ── Health check ──
 // (2026-09-16) req مش مستخدمة — _-prefix (اكتشاف من الـ typecheck)
 app.get("/health", (_req, res) => {
+  // Keep self-hosted /health aligned with Vercel's /api/health rewrite:
+  // health status must not be cached or indexed by an intermediary/search bot.
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet");
   // 🔒 نبقي الاستجابة بأدنى قدر من المعلومات التشغيلية (لا mode/ssgReady/uptime)
   // حتى لا تكشف بنية النشر لأي شخص يستطلع الخادم.
   res.json({ status: "ok" });

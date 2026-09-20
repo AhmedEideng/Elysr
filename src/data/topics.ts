@@ -92,6 +92,7 @@ export const TOPICS: Topic[] = [
       "m-50",
       "m-55",
       "m-60",
+      "m-62",
     ],
   },
   {
@@ -219,6 +220,7 @@ export const TOPICS: Topic[] = [
       "foods-to-avoid",
       "aphrodisiacs-real",
       "natural-honey-dates-benefits",
+      "royal-honey-benefits",
       "fertility-supplements-guide",
       "best-selling-products-guide",
     ],
@@ -395,13 +397,4 @@ export function topicsForPage(ownTopic: Topic | undefined, limit = 4): Topic[] {
     if (t !== ownTopic) out.push(t);
   }
   return out;
-}
-
-/** روابط المحتوى الداعم للموضوع (للـ pillar hub) */
-export function topicSatellites(topic: Topic) {
-  return {
-    articleSlugs: topic.articleSlugs,
-    guideSlugs: topic.guideSlugs,
-    productIds: topic.productIds,
-  };
 }

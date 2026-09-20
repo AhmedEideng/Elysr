@@ -157,7 +157,9 @@ function RouteHeadSync() {
     // كلهم في نفس الـ event (synchronous) — لا حاجة لـ page_topic_set
     // المنفصل. الـ topic بيتحسب من loaderData (أدق) + fallback من الـ URL.
     const url = window.location.pathname;
-    const search = window.location.search.replace(/^\?/, "");
+    // Keep the useful product-search term, not the complete query string
+    // (which could contain arbitrary user input or tracking parameters).
+    const search = new URLSearchParams(window.location.search).get("q")?.trim() || undefined;
     let topic: string | undefined;
 
     // أدق مصدر: loaderData من الـ matches (product.id أو slug)

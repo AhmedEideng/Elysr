@@ -19,7 +19,12 @@
  * ============================================================
  */
 import { useEffect } from "react";
-import { trackOutboundClick, trackShareClick, trackWebVital } from "@/lib/analytics";
+import {
+  trackOutboundClick,
+  trackShareClick,
+  trackWebVital,
+  trackWhatsAppClick,
+} from "@/lib/analytics";
 
 const SHARE_PATTERNS = [/wa\.me\/?\?text=/, /\/share/];
 // قائمة الـ hosts اللي بنحسبها outbound (whatsapp/facebook/medical sources/etc).
@@ -65,7 +70,9 @@ export function GlobalTrackers() {
           return;
         }
         if (!sameOrigin(u, new URL(window.location.href))) {
-          trackOutboundClick(u.href, pickOutboundLabel(u.host));
+          const label = pickOutboundLabel(u.host);
+          if (label === "whatsapp") trackWhatsAppClick(u.href, "outbound_link");
+          else trackOutboundClick(u.href, label);
         }
       } catch {
         /* invalid href — ignore */

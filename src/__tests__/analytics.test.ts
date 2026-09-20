@@ -5,6 +5,8 @@ import {
   trackAddToWishlist,
   trackBeginCheckout,
   trackCtaClick,
+  trackOrderFailed,
+  trackOrderSuccess,
   trackOutboundClick,
   trackPageView,
   trackPurchase,
@@ -16,6 +18,7 @@ import {
   trackSelectPromotion,
   trackShareClick,
   trackSiteSearch,
+  trackWhatsAppClick,
   trackViewCart,
   trackViewItem,
   trackViewItemList,
@@ -192,6 +195,32 @@ describe("trackPageView — referrer + search + topic (audit 2026-09-18)", () =>
     expect(e.page_search).toBeUndefined();
   });
 
+  it("strips query strings from analytics location and referrer", () => {
+    w.dataLayer = [];
+    const originalUrl = window.location.href;
+    window.history.pushState({}, "", "/search?q=01012345678&utm_source=test");
+    try {
+      trackPageView("/search", "T", {
+        referrer: "https://google.com/search?q=private-value",
+      });
+    } finally {
+      window.history.replaceState({}, "", originalUrl);
+    }
+    const e = lastDataLayerEntry() as Record<string, unknown>;
+    expect(e.page_location).toBe(`${window.location.origin}/search`);
+    expect(e.page_referrer).toBe("https://google.com/search");
+    expect(JSON.stringify(e)).not.toContain("01012345678");
+  });
+
+  it("redacts obvious PII from search analytics while keeping product terms", () => {
+    w.dataLayer = [];
+    trackSiteSearch("كريم تأخير", 5);
+    expect((lastDataLayerEntry() as Record<string, unknown>).search_term).toBe("كريم تأخير");
+    w.dataLayer = [];
+    trackSiteSearch("01012345678", 0);
+    expect((lastDataLayerEntry() as Record<string, unknown>).search_term).toBe("[redacted]");
+  });
+
   it("tags the page with its topic when provided", () => {
     w.dataLayer = [];
     trackPageView("/education/erectile-dysfunction", "T", { topic: "ضعف الانتصاب ودعم الأداء" });
@@ -235,13 +264,52 @@ describe("share_click, outbound_click, search, cta_click, web_vital", () => {
     expect(e.share_from).toBe("/education/erectile-dysfunction");
   });
 
-  it("trackOutboundClick captures url + label", () => {
+  it("trackOutboundClick captures only the URL path, never WhatsApp order text", () => {
     w.dataLayer = [];
-    trackOutboundClick("https://wa.me/201098088206", "whatsapp");
+    trackOutboundClick(
+      "https://wa.me/201098088206?text=%D8%A7%D9%84%D8%A7%D8%B3%D9%85%3A%20%D8%A3%D8%AD%D9%85%D8%AF%20%D8%A7%D9%84%D9%87%D8%A7%D8%AA%D9%81%3A01012345678",
+      "whatsapp",
+    );
     const e = lastDataLayerEntry() as Record<string, unknown>;
     expect(e.event).toBe("outbound_click");
     expect(e.outbound_url).toBe("https://wa.me/201098088206");
+    expect(JSON.stringify(e)).not.toContain("01012345678");
     expect(e.outbound_label).toBe("whatsapp");
+
+    w.dataLayer = [];
+    trackOutboundClick("not a valid url 01012345678", "unknown");
+    const invalid = lastDataLayerEntry() as Record<string, unknown>;
+    expect(invalid.outbound_url).toBe("");
+    expect(JSON.stringify(invalid)).not.toContain("01012345678");
+  });
+
+  it("tracks WhatsApp and order outcome events without customer data", () => {
+    w.dataLayer = [];
+    trackWhatsAppClick(
+      "https://wa.me/201098088206?text=%D8%A7%D9%84%D8%A7%D8%B3%D9%85%3A%20%D8%A3%D8%AD%D9%85%D8%AF%20%D8%A7%D9%84%D9%87%D8%A7%D8%AA%D9%81%3A01012345678",
+      "cart_checkout",
+    );
+    const whatsapp = lastDataLayerEntry() as Record<string, unknown>;
+    expect(whatsapp.event).toBe("whatsapp_click");
+    expect(whatsapp.outbound_url).toBe("https://wa.me/201098088206");
+    expect(whatsapp.whatsapp_context).toBe("cart_checkout");
+    expect(JSON.stringify(whatsapp)).not.toContain("01012345678");
+
+    w.dataLayer = [];
+    trackOrderSuccess("#EL-TEST123", "direct");
+    expect(lastDataLayerEntry()).toMatchObject({
+      event: "order_success",
+      order_id: "#EL-TEST123",
+      order_method: "direct",
+    });
+
+    w.dataLayer = [];
+    trackOrderFailed("#EL-TEST124", "whatsapp");
+    expect(lastDataLayerEntry()).toMatchObject({
+      event: "order_failed",
+      order_id: "#EL-TEST124",
+      order_method: "whatsapp",
+    });
   });
 
   it("trackSiteSearch captures term + count", () => {

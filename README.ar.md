@@ -45,11 +45,11 @@
 | 📚 المقالات               | **58** مقالًا توعويًا بمصادر طبية موثوقة (NIH/Mayo/NHS/…)                                            |
 | 🎯 صفحات الدليل           | **93** صفحة هبوط (91 مفهرسة + 2 noindex)                                                             |
 | 📄 الصفحات المولّدة       | **247** (17 ثابتة + 79 منتج + 58 مقال + 93 دليل)                                                     |
-| 🗺️ روابط sitemap          | **240** (البحث الشامل مشمول عبر `SearchAction` في JSON-LD، مش قالب sitemap)                          |
+| 🗺️ روابط sitemap          | **241** (البحث الشامل مشمول عبر `SearchAction` في JSON-LD، مش قالب sitemap)                          |
 | 🛍️ كتالوج التجار          | **79** منتجًا (RSS + CSV + TXT)                                                                      |
 | ↪️ Redirects              | **176** قاعدة 301 دائمة (معرّفات قديمة + منتجات محذوفة + slugs معاد تسميتها + 404s اللي طلعت من GSC) |
 | 🖼️ الصور                  | **139** WebP (8–55 KB، متوسط 26 KB) + 239 مصغّرة                                                      |
-| 🧪 الاختبارات             | **260** وحدة (Vitest) + **19** E2E (Playwright) + data-integrity + schema validation                 |
+| 🧪 الاختبارات             | **265** وحدة (Vitest) + **19** E2E (Playwright) + data-integrity + schema validation                 |
 
 ---
 
@@ -228,7 +228,7 @@ Elysr/
 │       └── request-ip.js     # استخراج IP موثوق من المنصة
 ├── scripts/
 │   ├── prerender-seo.mjs           # 247 صفحة HTML + JSON-LD (Product/ItemList/FAQ/Breadcrumb)
-│   ├── generate-sitemap.mjs        # sitemaps (240) + feed (79) + robots + security.txt
+│   ├── generate-sitemap.mjs        # sitemaps (241) + feed (79) + robots + security.txt
 │   ├── check-source-links.mjs      # حيوية المصادر الكاملة (3 محاولات + تصنيف السلطات)
 │   ├── validate-schemas.mjs        # مجرّب JSON-LD لكل مخططات كل الصفحات
 │   ├── validate-article-sources.mjs # فحص دعم الادعاءات بالمصادر (مقالات جديدة)
@@ -238,14 +238,14 @@ Elysr/
 │   ├── process-hero.mjs            # معالجة صور الهيرو
 │   ├── release.mjs                 # سير bump الإصدار
 │   ├── sync-vercel-redirects.mjs   # مزامنة redirects مع الكتالوج
-│   └── health-check.mjs            # تدقيق أحجام الحزم والصور
+│   └── health-check.mjs           # تدقيق الحزم/الصور والروابط وSEO head المولّد
 ├── e2e/checkout.spec.ts      # 19 اختبار Playwright (checkout، بحث، مراجعات، 404s، حذفات)
 ├── server/index.js           # خادم Express للنشر الذاتي (نفس dist/ + نفس الـ API)
 ├── .github/workflows/ci.yml  # 5 وظائف CI (أدناه)
 ├── public/
 │   ├── images/               # 139 WebP + thumbs/ + thumbs-180/
 │   ├── landing-pages/        # 93 JSON لكل slug (مصدر بيانات وقت التشغيل)
-│   ├── sitemap.xml           # 240 رابط
+│   ├── sitemap.xml           # 241 رابط
 │   ├── sitemap-images.xml    # 137 رابط صورة
 │   ├── sitemap-index.xml
 │   ├── catalog-feed.xml      # Google Shopping (79) + مرآة CSV/TXT
@@ -269,7 +269,7 @@ Elysr/
 | الوظيفة                                     | البوابة                                                                               |
 | ------------------------------------------- | ------------------------------------------------------------------------------------- |
 | 🔗 Corpus Source Liveness                   | 54 رابط مصدر فريدًا (3 محاولات بتراجع + تصنيف السلطات غير المستقرة)                   |
-| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 260 اختبار وحدة/API · حارس الكتالوج+الامتثال+العبارات+شبكة redirects |
+| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 265 اختبار وحدة/API · حارس الكتالوج+الامتثال+العبارات+شبكة redirects |
 | 🛡 Security Audit                            | `npm audit --audit-level=high` على الشجرة المقفلة                                     |
 | 🏗 Build • Prerender • Sitemaps              | Vite + 247 صفحة مولّدة + sitemaps/feeds                                               |
 | 🚦 Lighthouse Performance Budget            | موازِن أداء LHCI على الموقع المبنى                                                    |
@@ -285,7 +285,7 @@ Elysr/
 CI/CD تلقائي على كل push إلى `main`:
 
 1. `vite build` → `dist/` محسّن ومقسّم
-2. `generate-sitemap.mjs` → sitemaps (240) + feed (79) + robots + security.txt + landing JSON
+2. `generate-sitemap.mjs` → sitemaps (241) + feed (79) + robots + security.txt + landing JSON
 3. `prerender-seo.mjs` → 247 صفحة مولّدة بـ SEO meta + JSON-LD كامل
 4. Vercel يقدّم `dist/` من Edge CDN مع 12 مجموعة headers أمان + 176 redirect
 

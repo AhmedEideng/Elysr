@@ -66,8 +66,11 @@ import {
 import {
   trackBeginCheckout,
   trackCtaClick,
+  trackOrderFailed,
+  trackOrderSuccess,
   trackPurchase,
   trackShareClick,
+  trackWhatsAppClick,
   trackViewItem,
   trackViewItemList,
 } from "@/lib/analytics";
@@ -275,6 +278,7 @@ function ProductPage() {
     }
 
     setIsOrdering(true);
+    let orderId: string | undefined;
 
     try {
       const sc = {
@@ -284,7 +288,7 @@ function ProductPage() {
         address: quickCustomer.address ? sanitizeInput(quickCustomer.address, 200) : "",
       };
 
-      const orderId = generateOrderId();
+      orderId = generateOrderId();
       const subtotal = product.price * qty;
       const tier = isPromotionEnabled() ? getPromoTier(subtotal) : null;
       const discount = tier ? Math.round(subtotal * tier.discount) : 0;
@@ -340,7 +344,9 @@ function ProductPage() {
       if (submitResult.success) {
         // GA: purchase — سُجل فعلياً في الشيت
         trackPurchase(orderId, orderItems, grandTotal, shipping, discount);
+        trackOrderSuccess(orderId, "whatsapp");
       } else {
+        trackOrderFailed(orderId, "whatsapp");
         beaconOrderToSheets(payload); // محاولة أخيرة best-effort
         toast.error(
           "⚠️ تعذر تسجيل الطلب آلياً، لكن طلبك أُرسل عبر واتساب. لو ما وصلك رد تأكيد خلال دقائق، تواصل معنا.",
@@ -357,10 +363,13 @@ function ProductPage() {
       }
 
       setQuickOrderOpen(false);
-      window.location.assign(
-        waLink(buildOrderMessage(orderItems, sc, orderId, shipping, shipping === 0)),
+      const quickWhatsAppUrl = waLink(
+        buildOrderMessage(orderItems, sc, orderId, shipping, shipping === 0),
       );
+      trackWhatsAppClick(quickWhatsAppUrl, "product_quick_order");
+      window.location.assign(quickWhatsAppUrl);
     } catch (err) {
+      if (orderId) trackOrderFailed(orderId, "whatsapp");
       console.error("Quick WhatsApp order error:", err);
       toast.error("حدث خطأ أثناء تجهيز الطلب، حاول مرة أخرى");
     } finally {

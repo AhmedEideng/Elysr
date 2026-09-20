@@ -10,15 +10,19 @@ if (!slug) {
     slug = readFileSync(markerPath, "utf8").trim();
   } catch (error) {
     if (error?.code !== "ENOENT") throw error;
-    console.log(
-      "ℹ️ No generated article marker found; pass an article slug to run this validator.",
+    console.error(
+      "❌ No generated article marker found; pass an article slug to run this validator. " +
+        "Refusing a successful no-op so source validation cannot be mistaken for a passed gate.",
     );
-    process.exit(0);
+    process.exit(2);
   }
 }
 if (!slug) {
-  console.log("ℹ️ Generated article marker is empty; pass an article slug to run this validator.");
-  process.exit(0);
+  console.error(
+    "❌ Generated article marker is empty; pass an article slug to run this validator. " +
+      "Refusing a successful no-op so source validation cannot be mistaken for a passed gate.",
+  );
+  process.exit(2);
 }
 const MIN_SOURCES = 3;
 const FETCH_TIMEOUT_MS = 12_000;

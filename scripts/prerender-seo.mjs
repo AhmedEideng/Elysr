@@ -344,11 +344,15 @@ function buildHtml(template, opts) {
   html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${safeTitle}</title>`);
 
   // description
-  if (html.match(/<meta name="description"[^>]*>/)) {
-    html = html.replace(
-      /<meta name="description"[^>]*>/,
-      `<meta name="description" content="${safeDesc}" />`,
-    );
+  // The template keeps this tag formatted across multiple lines. Match the
+  // complete meta element by attributes rather than assuming a one-line tag;
+  // otherwise every prerendered route receives a second description and search
+  // engines may pick the generic template text instead of the route-specific
+  // description.
+  const descriptionMeta =
+    /<meta\b(?=[^>]*\bname=["']description["'])(?=[^>]*\bcontent=["'][^"']*["'])[^>]*>/i;
+  if (descriptionMeta.test(html)) {
+    html = html.replace(descriptionMeta, `<meta name="description" content="${safeDesc}" />`);
   } else {
     html = html.replace("</head>", `  <meta name="description" content="${safeDesc}" />\n</head>`);
   }

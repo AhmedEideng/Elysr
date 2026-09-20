@@ -301,6 +301,22 @@ try {
         seenProduct.add(id);
       }
     }
+    // كل المقالات والمنتجات القابلة للربط يجب أن تدخل شبكة الموضوعات؛
+    // بدون هذا الحارس يمكن إضافة منتج/مقال جديد في الكتالوج ثم يظل معزولاً
+    // عن الـ hubs والروابط الداخلية رغم نجاح build وsitemap.
+    const unassignedArticles = articles.filter((article) => !seenArticle.has(article.slug));
+    assert.equal(
+      unassignedArticles.length,
+      0,
+      `articles missing topic assignment: ${unassignedArticles.map((article) => article.slug).join(", ")}`,
+    );
+    const unassignedProducts = products.filter((product) => !seenProduct.has(product.id));
+    assert.equal(
+      unassignedProducts.length,
+      0,
+      `products missing topic assignment: ${unassignedProducts.map((product) => product.id).join(", ")}`,
+    );
+
     // كل topic ليه pillar مختلف (مفيش shared pillar)
     const pillarPaths = TOPICS.map((t) => pillarPath(t));
     assert.equal(duplicates(pillarPaths).length, 0, "two topics share the same pillar path");
@@ -768,6 +784,22 @@ try {
       `Redirect chain/loop: ${source} -> ${destination} (destination must not be another rule's source)`,
     );
   }
+  const sourceValidator = readFileSync(
+    resolve(ROOT, "scripts/validate-article-sources.mjs"),
+    "utf-8",
+  );
+  assert.match(
+    sourceValidator,
+    /No generated article marker found[\s\S]*process\.exit\(2\)/,
+    "Article source validation must fail instead of silently passing without a generated slug",
+  );
+  const serverSource = readFileSync(resolve(ROOT, "server/index.js"), "utf-8");
+  assert.match(
+    serverSource,
+    /app\.get\("\/health"[\s\S]*?Cache-Control.*?no-store[\s\S]*?X-Robots-Tag/,
+    "Self-hosted health endpoint must be non-cacheable and non-indexable",
+  );
+
   const appsScript = readFileSync(resolve(ROOT, "google-apps-script.gs"), "utf-8");
   assert.match(
     appsScript,
@@ -785,6 +817,16 @@ try {
     "Apps Script must accept canonical international phone numbers",
   );
   assert.doesNotMatch(appsScript, /Invalid Egyptian phone/, "Stale Egypt-only validation");
+  assert.match(
+    appsScript,
+    /if \(statusCol <= 0\) return "لا"/,
+    "Verified reviews must fail closed when the order-status column is missing",
+  );
+  assert.match(
+    appsScript,
+    /currentHeaders\.indexOf\(expectedHeaders\[i\]\) === -1/,
+    "Apps Script must repair missing headers even when the sheet column count matches",
+  );
 
   const sitemap = readFileSync(resolve(ROOT, "public/sitemap.xml"), "utf-8");
   const imageSitemap = readFileSync(resolve(ROOT, "public/sitemap-images.xml"), "utf-8");

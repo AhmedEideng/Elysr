@@ -28,6 +28,7 @@ if (!existsSync(DIST)) {
 }
 
 const SITE_URL = "https://elysrmedical.store";
+const problems = [];
 
 function walk(dir, ext = null) {
   const out = [];
@@ -41,8 +42,10 @@ function walk(dir, ext = null) {
 }
 
 const htmlFiles = walk(DIST, ".html");
-const imageFiles = walk(resolve(DIST, "images"), ".webp");
-const thumbFiles = walk(resolve(DIST, "images", "thumbs"), ".webp");
+const imagesDir = resolve(DIST, "images");
+const thumbsDir = resolve(DIST, "images", "thumbs");
+const imageFiles = existsSync(imagesDir) ? walk(imagesDir, ".webp") : [];
+const thumbFiles = existsSync(thumbsDir) ? walk(thumbsDir, ".webp") : [];
 const sitemapPath = resolve(DIST, "sitemap.xml");
 const catalogPath = resolve(DIST, "catalog-feed.xml");
 
@@ -113,14 +116,19 @@ console.log();
 const imageNames = new Set(imageFiles.map((f) => f.path.split("/").pop()));
 const thumbNames = new Set(thumbFiles.map((f) => f.path.split("/").pop()));
 const missingThumbs = [...imageNames].filter(
-  (n) => !n.startsWith("article-") && !n.startsWith("hero-") && !thumbNames.has(n),
+  (n) =>
+    !n.startsWith("article-") &&
+    !n.startsWith("hero-") &&
+    !n.startsWith("logo") &&
+    !n.startsWith("og-default") &&
+    !thumbNames.has(n),
 );
 if (missingThumbs.length > 0) {
   console.log(`⚠️  Missing thumbnails (${missingThumbs.length}):`);
   missingThumbs.slice(0, 10).forEach((n) => console.log(`   ${n}`));
   if (missingThumbs.length > 10) console.log(`   … and ${missingThumbs.length - 10} more`);
 } else {
-  console.log("✅ All product images have thumbnails.");
+  console.log("✅ All product images have thumbnails (brand/OG images are exempt).");
 }
 console.log();
 
@@ -153,7 +161,114 @@ const total = totalBytes(DIST);
 console.log(`📦 Total dist/ size: ${(total / 1024 / 1024).toFixed(2)} MB`);
 
 // ─────────────────────────────────────────────────────────
+// 8) Internal-link and generated-head integrity
+// ─────────────────────────────────────────────────────────
+// The old checker documented this scan but never executed it. Resolve clean
+// URLs against the actual dist artifact so this gate works without a running
+// server and catches both broken route links and missing static assets.
+function localPathFromReference(raw, pageFile) {
+  const value = String(raw || "").trim();
+  if (!value || value.startsWith("#") || /^(?:data|blob|mailto|tel|javascript):/i.test(value)) {
+    return null;
+  }
+
+  let parsed;
+  try {
+    const pageRel = relative(DIST, pageFile)
+      .replace(/\\/g, "/")
+      .replace(/\.html$/, "");
+    const pageUrl = `${SITE_URL}/${pageRel === "index" ? "" : pageRel}`;
+    parsed = new URL(value, pageUrl);
+  } catch {
+    return null;
+  }
+  if (![SITE_URL, "https://www.elysrmedical.store"].includes(parsed.origin)) return null;
+
+  const path = decodeURIComponent(parsed.pathname || "/");
+  if (path.startsWith("/api/") || path.startsWith("/_vercel/")) return null;
+  return path;
+}
+
+function resolveDistReference(pathname) {
+  const cleanPath = pathname.length > 1 ? pathname.replace(/\/$/, "") : "/";
+  if (cleanPath === "/") return resolve(DIST, "index.html");
+  const parts = cleanPath.split("/").filter(Boolean);
+  if (parts.some((part) => part === ".." || part === ".")) return null;
+
+  const candidates = [
+    resolve(DIST, ...parts),
+    resolve(DIST, ...parts) + ".html",
+    resolve(DIST, ...parts, "index.html"),
+  ];
+  return candidates.find((candidate) => existsSync(candidate)) ?? null;
+}
+
+const references = new Map();
+const attrPattern = /\b(?:href|src|poster)=["']([^"']+)["']/gi;
+const srcsetPattern = /\bsrcset=["']([^"']+)["']/gi;
+for (const htmlFile of htmlFiles) {
+  const html = readFileSync(htmlFile.path, "utf-8");
+  for (const match of html.matchAll(attrPattern)) {
+    const path = localPathFromReference(match[1], htmlFile.path);
+    if (path) {
+      const current = references.get(path) ?? [];
+      current.push(relative(DIST, htmlFile.path));
+      references.set(path, current);
+    }
+  }
+  for (const match of html.matchAll(srcsetPattern)) {
+    for (const candidate of match[1].split(",")) {
+      const path = localPathFromReference(candidate.trim().split(/\\s+/)[0], htmlFile.path);
+      if (path) {
+        const current = references.get(path) ?? [];
+        current.push(relative(DIST, htmlFile.path));
+        references.set(path, current);
+      }
+    }
+  }
+}
+
+const brokenReferences = [];
+for (const [pathname, from] of references) {
+  if (!resolveDistReference(pathname)) {
+    brokenReferences.push({ pathname, from: [...new Set(from)].slice(0, 3) });
+  }
+}
+if (brokenReferences.length > 0) {
+  console.error(`❌ Broken internal references (${brokenReferences.length}):`);
+  for (const item of brokenReferences.slice(0, 30)) {
+    console.error(`   ${item.pathname} ← ${item.from.join(", ")}`);
+  }
+  if (brokenReferences.length > 30) {
+    console.error(`   … and ${brokenReferences.length - 30} more`);
+  }
+  problems.push(`${brokenReferences.length} broken internal references`);
+} else {
+  console.log(`✅ Internal references: ${references.size} unique route/asset targets checked.`);
+}
+
+const descriptionMeta = /<meta\b(?=[^>]*\bname=["']description["'])[^>]*>/gi;
+const duplicateDescriptionPages = htmlFiles
+  .map((file) => ({
+    file: relative(DIST, file.path),
+    count: [...readFileSync(file.path, "utf-8").matchAll(descriptionMeta)].length,
+  }))
+  .filter((item) => item.count !== 1 && item.file !== "404.html");
+if (duplicateDescriptionPages.length > 0) {
+  console.error("❌ Every indexable generated page must contain exactly one meta description:");
+  for (const item of duplicateDescriptionPages) console.error(`   ${item.file}: ${item.count}`);
+  problems.push(`${duplicateDescriptionPages.length} pages with invalid description metadata`);
+} else {
+  console.log("✅ Generated pages contain exactly one meta description.");
+}
+
+// ─────────────────────────────────────────────────────────
 // Summary
 // ─────────────────────────────────────────────────────────
 console.log("\n" + "─".repeat(50));
-console.log("✅ Health check complete.");
+if (problems.length > 0) {
+  console.error(`❌ Health check failed: ${problems.join("; ")}`);
+  process.exitCode = 1;
+} else {
+  console.log("✅ Health check complete.");
+}
