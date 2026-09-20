@@ -31,7 +31,7 @@ build/CI + data + assets). Implemented (verified: typecheck · lint ·
   (owner decision) — the 3-day cycle is a UI countdown, not an
   activation state. Renamed across frontend, API and tests.
 - **Dead code**: `RED_PRODUCT_IDS` removed (empty set whose only
-  consumer was a test asserting it is empty; `GOOGLE_SHOPPING_BLOCKED`
+  consumer was a test asserting it is empty; `former channel blocklist`
   is the set with real behavior).
 - **About page perf**: the whole `landing-pages.ts` (538 KB) was
   imported for `.length` — replaced by a generated
@@ -213,7 +213,7 @@ injection), CI build-time reduction.
 - **Second external audit — architecture & process fixes (2026-09-15)**:
   - **SSOT made real (config architecture)**: shared settings had two
     sources of truth — `config-db.json` for shipping/promos (read by the
-    TS bridge) while `BUNDLE_DISCOUNT_RATE` / `GOOGLE_SHOPPING_BLOCKED`
+    TS bridge) while `BUNDLE_DISCOUNT_RATE` / `former channel blocklist`
     came from TS and were copied into the JSON at build (a misleading
     "cycle": idempotent, but two sources for one direction). Now
     `src/lib/site-config.ts` is the single source for ALL shared

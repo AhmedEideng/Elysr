@@ -40,7 +40,6 @@ import { TopicHub } from "@/components/TopicHub";
 import { topicForProduct } from "@/data/topics";
 import { shareProductText, waShareUrl } from "@/lib/share";
 import { getProductBySlug, getProductsByCategory, getCrossSellsForProduct } from "@/data/products";
-import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
 import { assetUrl } from "@/lib/cache";
 
 interface LinkedArticle {
@@ -113,9 +112,6 @@ export const Route = createFileRoute("/products/$slug")({
           name: "description",
           content: loaderData?.product ? makeProductMetaDescription(loaderData.product) : "",
         },
-        ...(loaderData?.product && GOOGLE_SHOPPING_BLOCKED.has(loaderData.product.id)
-          ? [{ name: "robots", content: "noindex,follow,noarchive,nosnippet,noimageindex" }]
-          : []),
         { property: "og:type", content: "product" },
         { property: "og:image", content: absImg },
         { name: "twitter:image", content: absImg },
@@ -203,9 +199,7 @@ function ProductPage() {
   useEffect(() => {
     // أزل نسخ الـ prerender أولاً حتى لا يتكرر أي schema بعد الـ hydration
     clearPrerenderJsonLd();
-    if (!GOOGLE_SHOPPING_BLOCKED.has(product.id)) {
-      injectJsonLd("product", productSchema(product));
-    }
+    injectJsonLd("product", productSchema(product));
     injectJsonLd(
       "breadcrumb",
       breadcrumbSchema([

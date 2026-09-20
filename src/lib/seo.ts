@@ -5,7 +5,6 @@
  */
 
 import { GOVERNORATE_SHIPPING } from "@/lib/site-config";
-import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
 
 const SITE_URL = "https://elysrmedical.store";
 
@@ -358,7 +357,7 @@ export const itemListSchema = (
   items: { id?: string; name: string; slug: string; image?: string; price: number }[],
   listName: string,
 ) => {
-  const indexableItems = items.filter((item) => !item.id || !GOOGLE_SHOPPING_BLOCKED.has(item.id));
+  const indexableItems = items;
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",

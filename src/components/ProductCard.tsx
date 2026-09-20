@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { isPromotionEnabled } from "@/lib/promo";
 import { ProductCardImage } from "@/features/product/components/ProductCardImage";
 import { getUseBadge } from "@/lib/product-badge";
-import { GOOGLE_SHOPPING_BLOCKED } from "@/lib/product-compliance";
 import {
   trackSelectItem,
   trackCtaClick,
@@ -18,7 +17,6 @@ import {
 
 export function ProductCard({ product, listName }: { product: Product; listName?: string }) {
   const { add } = useCart();
-  const nofollow = GOOGLE_SHOPPING_BLOCKED.has(product.id) ? "nofollow" : undefined;
   const { has: hasInWishlist, toggle: toggleWishlist } = useWishlist();
   const promoOn = isPromotionEnabled();
   const useBadge = getUseBadge(product);
@@ -92,7 +90,6 @@ export function ProductCard({ product, listName }: { product: Product; listName?
       <Link
         to="/products/$slug"
         params={{ slug: product.slug }}
-        rel={nofollow}
         className="block"
         aria-label={`عرض تفاصيل ${product.name}`}
         onClick={() =>
@@ -126,7 +123,6 @@ export function ProductCard({ product, listName }: { product: Product; listName?
         <Link
           to="/products/$slug"
           params={{ slug: product.slug }}
-          rel={nofollow}
           className="line-clamp-2 font-bold text-foreground/90 hover:text-primary transition-colors duration-300 leading-snug"
           onClick={() =>
             trackSelectItem(effectiveListName, {

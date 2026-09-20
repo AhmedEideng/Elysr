@@ -92,23 +92,15 @@ async function generateSitemap() {
     );
     const { PROMO_TIERS } = await vite.ssrLoadModule("/src/lib/promo.ts");
     const { BUNDLE_DISCOUNT_RATE } = await vite.ssrLoadModule("/src/lib/bundle-discount.ts");
-    const { isCatalogFeedEligible, GOOGLE_SHOPPING_BLOCKED } = await vite.ssrLoadModule(
-      "/src/lib/product-compliance.ts",
-    );
-    // حفظ إعدادات الشحن والعروض الترويجية المشتركة للسيرفر (Single Source of Truth):
-    // BUNDLE_DISCOUNT_RATE + GOOGLE_SHOPPING_BLOCKED بيقروا من نفس مصادر TS
-    // عشان ما يبقىش ثابت مكرر في api/submit-order.js ولا قائمة يدوية في
-    // scripts/validate-schemas.mjs.
+    // حفظ إعدادات الشحن والعروض الترويجية المشتركة للسيرفر (Single Source of Truth).
     const configDb = {
       GOVERNORATE_SHIPPING,
       FREE_SHIPPING_THRESHOLD,
       PROMO_TIERS,
-      // نسبة خصم الباقة + المنتجات المحظورة — من نفس مصدر الفرونت (SSOT)
       BUNDLE_DISCOUNT_RATE,
-      GOOGLE_SHOPPING_BLOCKED: [...GOOGLE_SHOPPING_BLOCKED],
     };
     writeFileSync(resolve(apiLibDir, "config-db.json"), JSON.stringify(configDb, null, 2), "utf-8");
-    const catalogProducts = products.filter(isCatalogFeedEligible);
+    const catalogProducts = products.filter((p) => (p.stock ?? 0) > 0);
 
     let articles = [];
     try {
@@ -420,16 +412,14 @@ async function generateSitemap() {
 
     const urls = [
       ...staticRoutes,
-      ...products
-        .filter((p) => !GOOGLE_SHOPPING_BLOCKED.has(p.id)) // الأدوية المرفوضة خارج sitemap (لا تُفهرس)
-        .map((p) => ({
-          path: `/products/${p.slug}`,
-          priority: "0.8",
-          changefreq: "weekly",
-          lastmod: productLastmod,
-          image: p.image,
-          imageTitle: p.name,
-        })),
+      ...products.map((p) => ({
+        path: `/products/${p.slug}`,
+        priority: "0.8",
+        changefreq: "weekly",
+        lastmod: productLastmod,
+        image: p.image,
+        imageTitle: p.name,
+      })),
       ...articles.map((a) => ({
         path: `/education/${a.slug}`,
         priority: "0.7",
@@ -500,7 +490,6 @@ ${imageBlock}
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${products
-  .filter((p) => !GOOGLE_SHOPPING_BLOCKED.has(p.id))
   .map(
     (p) => `  <url>
     <loc>${SITE_URL}/products/${p.slug}</loc>
@@ -527,7 +516,7 @@ ${articleImageEntries}
 </sitemapindex>
 `;
 
-    // 4. بناء ملفات الكتالوج (XML + CSV + TXT) للـ 84 منتجاً المؤهل فقط
+    // 4. بناء ملفات الكتالوج (XML + CSV + TXT) للمنتجات المتاحة في المخزون
     // 🛒 Google Merchant Center يطلب المكونات داخل الوصف.
     // نضيف المكونات فقط إن لم تكن موجودة (منع تكرار النص).
     // ملاحظة (GSC 2026-09-13): "طريقة الاستخدام" مقصود إن مش في وصف الـ feed —

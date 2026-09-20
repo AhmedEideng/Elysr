@@ -125,7 +125,7 @@ Browser ──→ Vercel CDN (dist/ ثابتة مسبقاً)
 ### 3.8 صفحة المنتج `products.$slug.tsx` (892 سطراً — قلب المتجر)
 
 - `loader`: جلب المنتج بالـ slug + crossSells + 4 منتجات مشابهة (مرتبة تقييم/ID).
-- `head`: title = اسم المنتج، description من `makeProductMetaDescription` (غني بالسعر/التقييم لمنع Google إعادة كتابته)، **`robots noindex` تلقائياً إذا المنتج في GOOGLE_SHOPPING_BLOCKED**، og:type=product + og:image مطلق.
+- `head`: title = اسم المنتج، description من `makeProductMetaDescription` (غني بالسعر/التقييم لمنع Google إعادة كتابته)، **`robots noindex` تلقائياً إذا المنتج في former channel blocklist**، og:type=product + og:image مطلق.
 - في الـ component:
   - `clearPrerenderJsonLd()` ثم `injectJsonLd("product", productSchema(product))` (يُتخطى للمحظور) + breadcrumb.
   - تتبع recently-viewed، scroll tracking (`Product_slug`)، lazy import للمقالات المرتبطة.
@@ -181,10 +181,10 @@ Browser ──→ Vercel CDN (dist/ ثابتة مسبقاً)
 - `itemListSchema`: **يستبعد المحظورين** من ItemList.
 - `clearPrerenderJsonLd`: يزيل `data-prerender` schemas قبل إعادة الحقن (يمنع التكرار بعد hydration).
 
-### 3.16 `src/lib/product-compliance.ts`
+### 3.16 `former channel policy module`
 
-- `GOOGLE_SHOPPING_BLOCKED = {m-38, m-43, m-45}` (Power 36 / Procomil Fort / Viagra Pfizer).
-- `isCatalogFeedEligible`: غير محظور وstock>0.
+- `former channel blocklist = {m-38, m-43, m-45}` (Power 36 / Procomil Fort / Viagra Pfizer).
+- stock-based catalog eligibility: غير محظور وstock>0.
 - `RED_PRODUCT_IDS` فارغ (توافق قديم).
 
 ### 3.17 `src/lib/product-reviews.ts`
@@ -405,7 +405,7 @@ Browser ──→ Vercel CDN (dist/ ثابتة مسبقاً)
 4. **`use-scroll-tracking` كود ميت**: كان يحسب 50%/90% ولا يرسل أي حدث. ✓ أصبح يرسل حدث GA4 `scroll` (مع page_title/percent_scrolled) عبر gtag أو dataLayer، مرة لكل milestone لكل صفحة.
 5. **lastmod خاطئ للمنتجات**: sitemap كان يأخذ git-log لـ `products.ts` (المنسق) بينما البيانات في `men/women/devices.ts`. ✓ أصبح `max(git-log للملفات الأربعة)`.
 6. **`public/offline.html` ملف ميت** (لم يرد له ذكر في الكود — التطبيق network-only). ✓ حُذف.
-7. **تعليقات قديمة**: "87 منتج" في product-compliance.ts (الفعلي 82) · تعليق cron في auto-publish ("12:00 Cairo during daylight-saving" — مصر ألغت التوقيت الصيفي: 09:00 UTC = 11:00 دائماً). ✓ صُححتا.
+7. **تعليقات قديمة**: "87 منتج" في former channel policy module (الفعلي 82) · تعليق cron في auto-publish ("12:00 Cairo during daylight-saving" — مصر ألغت التوقيت الصيفي: 09:00 UTC = 11:00 دائماً). ✓ صُححتا.
 
 ### ملاحظات تشغيلية (لا تحتاج كوداً — قرار نشر):
 
@@ -1062,8 +1062,8 @@ GSC هيعيد قراءة الـ sitemap تلقائيًا (أو "طلب إعاد
 ## 32) رد على المراجعة الثانية (SEO/Bundle/SW/Node) + اكتشاف redirect معلّق (2026-09-04)
 
 ### الحكم على نقاط المراجعة
-1. **Compliance فصل (GOOGLE_SHOPPING_BLOCKED vs HOMEPAGE_EXCLUDED + noindex + استبعاد structured data)**: تصميم صحيح — اتأكد عمليًا (1163 schema / 0 أخطاء + e2e + data-integrity). مفيش تعديل.
-2. **NOINDEX_PRODUCT_FILES أوسع من GOOGLE_SHOPPING_BLOCKED (maintenance risk)**: صحيح جزئيًا — التحليل الدقيق: القائمة = 3 منتجات محظورة-محتجزة (تداخل فعلي مع GOOGLE_SHOPPING_BLOCKED) + 5 محذوفة (اهتمام مختلف: صفحات محذوفة لازم تفضل noindex لو عادت). اتطبق:
+1. **Compliance فصل (former channel blocklist vs HOMEPAGE_EXCLUDED + noindex + استبعاد structured data)**: تصميم صحيح — اتأكد عمليًا (1163 schema / 0 أخطاء + e2e + data-integrity). مفيش تعديل.
+2. **NOINDEX_PRODUCT_FILES أوسع من former channel blocklist (maintenance risk)**: صحيح جزئيًا — التحليل الدقيق: القائمة = 3 منتجات محظورة-محتجزة (تداخل فعلي مع former channel blocklist) + 5 محذوفة (اهتمام مختلف: صفحات محذوفة لازم تفضل noindex لو عادت). اتطبق:
    - Anti-drift assertions في data-integrity: كل slug محظور لازم يكون في قائمة noindex، وكل slug في القائمة لازم يكون محظور أو 301-redirected (bidirectional).
    - اكتشاف حقيقي طلع من الـ guard: `/products/viagra-20-tablets` كان redirect destination معلّق (صفحة مش موجودة → 404) في sync-vercel-redirects.mjs بينما vercel.json كان مضبوط (→ /products/women) — أي رشة sync كانت هتعيد الكسر. صلحنا السكربت + شطبنا المدخل القديم من validate-schemas (الملف مش موجود أصلاً).
 3. **Bundle rate SSOT**: صحيح — BUNDLE_DISCOUNT_RATE = 0.2 كان constant منفصل في api/submit-order.js. اتطبق: النسبة دلوقتي بتتولد من src/lib/bundle-discount.ts → config-db.json → الـ API يقراها من هناك (fallback 0.2 + warning لو الـ config قديم — نذر الطلبات). data-integrity بتقفل الدرفت (deepEqual على config-db كامل).
@@ -1112,7 +1112,7 @@ GSC هيعيد قراءة الـ sitemap تلقائيًا (أو "طلب إعاد
 
 ### ✅ تحققت منه ومفيش فيه مشكلة (أقفل)
 3. **تصميم الـ pharma compliance**: 3 محظورين بس (m-38/m-43/m-45) في
-   `GOOGLE_SHOPPING_BLOCKED` (مصدر واحد — src/lib/product-compliance.ts)،
+   `former channel blocklist` (مصدر واحد — src/lib/former channel policy module)،
    صفحاتهم موجودة في dist بطبقة noindex كاملة
    (noindex,follow,noarchive,nosnippet,noimageindex) + X-Robots-Tag،
    والـ 5 المحذوفين ملهمش ملفات (301 لفئاتهم). ItemList guard شغّال
@@ -1313,7 +1313,7 @@ Shopping + sitemap + noindex متدرج** — نفس m-38/m-43/m-45 بالظبط
    الاسم/الوصف/المكونات/الاستخدام/التحذيرات الأصلية (السعر 300 ج.م،
    rating 4.7/49) + صورة الكاتالوج الموجودة أصلاً (المرفوعة من
    المستخدم = نفس الصورة) + stock 1000.
-2. **product-compliance.ts**: `w-17` رجعت في `GOOGLE_SHOPPING_BLOCKED`
+2. **former channel policy module**: `w-17` رجعت في `former channel blocklist`
    (4 منتجات) — ده يقفل لوحده: استبعاد من catalog-feed + sitemap +
    noindex في pre-render + استبعاد من ItemList الفئات.
 3. **products.ts**: `w-17` في `HOMEPAGE_EXCLUDED_PRODUCT_IDS`
@@ -1352,7 +1352,7 @@ lint 0 · tsc 0 · integrity ✓ · schemas 0 · 172 وحدة · 19 e2e.
 
 ### التعديلات (نفس عملية الحذف المثبتة)
 - women.ts: حذف entry (23 women / 82 إجمالي)
-- product-compliance.ts: GOOGLE_SHOPPING_BLOCKED رجع 3 (m-38,m-43,m-45)
+- former channel policy module: former channel blocklist رجع 3 (m-38,m-43,m-45)
 - products.ts: شُفت من HOMEPAGE_EXCLUDED
 - vercel.json: 3 redirects → /products/women (w-17, viagra-20-tablets,
   viagra-for-women-20-tablets) — **بما فيها /products/viagra-20-tablets
@@ -1383,10 +1383,10 @@ catalog-feed.xml متغيرش مطلقًا بسبب الحذف (79 منتج قب
 - الحساب عنده تاريخ 5 رفضات دوائية — التكرار ممكن يتصاعد لمستوى
   **الحساب** (مش بس المنتجات).
 - **rollback لو MC رفضهم**: إعادة إضافة الـ 3 معرفات لـ
-  GOOGLE_SHOPPING_BLOCKED + قواعد noindex (commit واحد).
+  former channel blocklist + قواعد noindex (commit واحد).
 
 ### التعديلات
-- product-compliance.ts: GOOGLE_SHOPPING_BLOCKED = فارغ
+- former channel policy module: former channel blocklist = فارغ
 - products.ts: التلاتة خارج HOMEPAGE_EXCLUDED (اتركت m-02/m-03/m-49
   — استبعاد تجاري قديم مش حظر دوائي)
 - vercel.json: قواعد noindex headers (صفحة + صور) اتشالت
@@ -1409,7 +1409,7 @@ Procomil Fort "مطابق عليها" في Google Merchant Center، المالك
 
 ### العملية (نفس playbook الحذف المثبت)
 1. men.ts: entry اتحذف (51 men / 81 إجمالي)
-2. product-compliance.ts: GOOGLE_SHOPPING_BLOCKED لسه فاضي (m-43
+2. former channel policy module: former channel blocklist لسه فاضي (m-43
    مش "محظور" دلوقتي — "مش موجود") — التعليق اتحدّث (6 محذوفين)
 3. products.ts: m-43 خارج HOMEPAGE_EXCLUDED + 3 تعليقات اتحدّثت
 4. vercel.json + sync script:

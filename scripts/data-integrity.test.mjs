@@ -35,7 +35,6 @@ try {
   const { seoLandingPages } = await vite.ssrLoadModule("/src/data/landing-pages.ts");
   const promo = await vite.ssrLoadModule("/src/lib/promo.ts");
   const bundle = await vite.ssrLoadModule("/src/lib/bundle-discount.ts");
-  const { GOOGLE_SHOPPING_BLOCKED } = await vite.ssrLoadModule("/src/lib/product-compliance.ts");
   const siteConfig = await vite.ssrLoadModule("/src/lib/site-config.ts");
   const vercel = JSON.parse(readFileSync(resolve(ROOT, "vercel.json"), "utf-8"));
   const dockerfile = readFileSync(resolve(ROOT, "Dockerfile"), "utf-8");
@@ -80,8 +79,8 @@ try {
   }
 
   assert.deepEqual(productsDb, products, "products-db.json is stale; run npm run build");
-  // config-db.json = artifact للسيرفر (مش مصدر): الشحن/العروض/نسبة الباقة/
-  // المنتجات المحظورة — كلهم مولّدون من مصادر TS وقت البناء (SSOT = TS).
+  // config-db.json = artifact للسيرفر (مش مصدر): الشحن/العروض/نسبة الباقة
+  // مولّد من مصادر TS وقت البناء (SSOT = TS).
   // لو حد عدّل الـ JSON يدويًا، هيفشل الـ test هنا حتى يعمل build.
   assert.deepEqual(
     configDb,
@@ -90,7 +89,6 @@ try {
       FREE_SHIPPING_THRESHOLD: siteConfig.FREE_SHIPPING_THRESHOLD,
       PROMO_TIERS: promo.PROMO_TIERS,
       BUNDLE_DISCOUNT_RATE: bundle.BUNDLE_DISCOUNT_RATE,
-      GOOGLE_SHOPPING_BLOCKED: [...GOOGLE_SHOPPING_BLOCKED],
     },
     "config-db.json is stale; run npm run build",
   );
@@ -651,18 +649,24 @@ try {
     (imageSitemap.match(/<image:image>/g) || []).length,
     "Each image sitemap entry must contain exactly one image location",
   );
-  for (const product of products.filter((item) => GOOGLE_SHOPPING_BLOCKED.has(item.id))) {
+  const inStockProducts = products.filter((product) => (product.stock ?? 0) > 0);
+  assert.equal(
+    (catalogFeed.match(/<g:id>/g) || []).length,
+    inStockProducts.length,
+    "Catalog feed must contain every in-stock catalog product",
+  );
+  for (const product of inStockProducts) {
     const productUrl = `https://elysrmedical.store/products/${product.slug}`;
-    assert.equal(sitemap.includes(productUrl), false, `Blocked product in sitemap: ${product.id}`);
+    assert.equal(sitemap.includes(productUrl), true, `Product missing from sitemap: ${product.id}`);
     assert.equal(
       imageSitemap.includes(productUrl),
-      false,
-      `Blocked product in image sitemap: ${product.id}`,
+      true,
+      `Product missing from image sitemap: ${product.id}`,
     );
     assert.equal(
       catalogFeed.includes(`<g:id>${product.id}</g:id>`),
-      false,
-      `Blocked product in catalog feed: ${product.id}`,
+      true,
+      `Product missing from catalog feed: ${product.id}`,
     );
   }
   // المنتجات التي أعادها المالك يجب ألا تحمل قواعد noindex على مستوى headers.

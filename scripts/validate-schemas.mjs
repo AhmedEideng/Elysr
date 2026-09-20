@@ -30,15 +30,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const DIST = resolve(ROOT, "dist");
 const SITE_URL = "https://elysrmedical.store";
-// 🚫 ملفات noindex — مصدران موثقان (بدل قائمة يدوية واحدة قابلة للدرفت):
-//
-// (أ) المنتجات المحظورة **النشطة** (ماتزال على الموقع — noindex + مستبعدة
-// من الخلاصة/sitemap): مستنتجة تلقائياً من المصدر الرسمي
-// (config-db.json ← src/lib/product-compliance.ts + slugs من products-db.json)
-// — أي منتج محظور جديد يظهر هنا لوحده وقت البناء.
-//
-// (ب) slugs دوائية تاريخية — منتجات محذوفة نهائياً (301 لفئاتها)،
-// منها slugs لـ m-36/m-43/m-47/w-24 (حذف نهائي).
+// slugs دوائية تاريخية لمنتجات محذوفة نهائياً (301 لفئاتها).
 // مهمتها: أي schema/ItemList في أي صفحة يرجع يذكّرهم تاني → error فوري.
 const DELETED_PHARMA_FILES = new Set([
   "products/vegal-extra-sildenafil-130mg-cobra.html", // m-36
@@ -48,20 +40,6 @@ const DELETED_PHARMA_FILES = new Set([
   "products/viagra-1-2-3-2-10-tablets.html", // slug دوائي أقدم — له 301 قائم
 ]);
 const NOINDEX_PRODUCT_FILES = new Set([...DELETED_PHARMA_FILES]);
-try {
-  const configDb = JSON.parse(readFileSync(resolve(ROOT, "api", "lib", "config-db.json"), "utf-8"));
-  const productsDb = JSON.parse(
-    readFileSync(resolve(ROOT, "api", "lib", "products-db.json"), "utf-8"),
-  );
-  for (const id of configDb.GOOGLE_SHOPPING_BLOCKED ?? []) {
-    const product = productsDb.find((p) => p.id === id);
-    if (product) NOINDEX_PRODUCT_FILES.add(`products/${product.slug}.html`);
-  }
-} catch (err) {
-  // config-db/products-db بيولّدوا وقت البناء — لو ناقصين، القائمة
-  // التاريخية بتفضل شغالة وبنحذر بدل ما نسكت.
-  console.error("⚠️ Could not derive active blocked products:", err.message);
-}
 const NOINDEX_PRODUCT_URLS = new Set(
   [...NOINDEX_PRODUCT_FILES].map((file) => `${SITE_URL}/${file.replace(/\.html$/, "")}`),
 );

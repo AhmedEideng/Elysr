@@ -10,7 +10,7 @@
 
 | المجال | الحالة الحالية |
 |---|---|
-| حظر منتجات Google Merchant / feed | **لا توجد منتجات محظورة فعليًا**: `GOOGLE_SHOPPING_BLOCKED = []` |
+| سياسة Google Merchant / feed | **أزيلت بالكامل من الكود**؛ لا توجد قائمة حظر أو سياسة قناة تنفيذية |
 | المنتجات الحالية | 84 منتجًا: 54 رجال، 23 نساء، 7 أجهزة |
 | مخزون صفر مستبعد من feed/cart | لا يوجد حاليًا؛ المنتجات الـ84 كلها `stock > 0` |
 | استبعاد الصفحة الرئيسية | 3 منتجات فقط: `m-02`, `m-03`, `m-49` — استبعاد عرض، وليس حظر بيع أو SEO أو feed |
@@ -25,24 +25,14 @@
 
 ## 2. قوائم المنتجات والاستبعاد التجاري
 
-### 2.1 قائمة Google Shopping النشطة
+### 2.1 سياسة Google Merchant / feed — أزيلت بالكامل
 
-**المصدر:** `src/lib/product-compliance.ts:25`
+بقرار المالك، أزيلت قائمة الحظر السابقة ووحدة سياسة القنوات بالكامل من المصدر.
+لم يعد هناك فلتر حظر، أو `nofollow` خاص بالمنتجات، أو `noindex` ناتج عن Merchant/feed،
+ولا تعتمد صفحات المنتجات أو ItemList أو sitemap على سياسة قناة خارجية.
 
-```ts
-export const GOOGLE_SHOPPING_BLOCKED = new Set<string>([]);
-```
-
-هذه القائمة تُستهلك في:
-
-- `scripts/generate-sitemap.mjs` — استبعاد المنتج من `catalog-feed.xml` وsitemap.
-- `scripts/prerender-seo.mjs` — تحويل صفحة المنتج إلى `noindex` وعدم وضع Product JSON-LD.
-- `src/lib/seo.ts` — استبعاد المنتج من ItemList.
-- `src/routes/products.$slug.tsx` — meta robots للمنتج.
-- `src/components/ProductCard.tsx` — `rel="nofollow"` للروابط.
-- `scripts/validate-schemas.mjs` و`data-integrity.test.mjs` — فحص عدم تسرب المنتج إلى feed/sitemap/schema.
-
-**النتيجة:** لا يوجد أي ID داخل الحظر النشط الآن. لم تتغير قائمة Merchant/feed أو سياسة الإعلانات تلقائيًا؛ الكتالوج الحالي يولّد artifacts وفق السياسة القائمة، بينما نطاق الاستعادة هو العرض على الموقع.
+يبقى catalog feed المولّد artifact اختياريًا مبنيًا من الكتالوج والمخزون فقط، وليس
+هناك قرار إعلاني أو قائمة منتجات محظورة مرتبطة به.
 
 ### 2.2 الاستبعاد من الصفحة الرئيسية فقط
 
@@ -73,7 +63,7 @@ m-49  Power Fully Up Advanced
 المنتج يُرفض أو يُستبعد عندما:
 
 - `stock <= 0` في `src/lib/cart-normalization.ts:64-67`.
-- feed يستعمل `isCatalogFeedEligible` ويشترط `stock > 0`.
+- feed يستعمل فحص المخزون ويشترط `stock > 0`.
 - بطاقة المنتج تعطل الإضافة عند نفاد المخزون في `src/components/ProductCard.tsx`.
 - API الطلب يرفض المنتج غير الموجود أو الذي مخزونه أقل من 1 في `api/submit-order.js:301-308`.
 
@@ -93,7 +83,7 @@ w-24  Black Widow Drops
 مصادر التحقق:
 
 - `src/data/products.ts` — الكتالوج الحالي.
-- `src/lib/product-compliance.ts` — السجل التاريخي.
+- `src/data/products.ts` — مصدر الكتالوج الحالي.
 - `scripts/sync-vercel-redirects.mjs` — redirects إلى `/products/men` أو `/products/women`.
 - `vercel.json` — redirects المنشورة.
 
@@ -568,11 +558,11 @@ m-45  Viagra Pfizer
 w-17  Viagra for Women
 ```
 
-واستُعيدت صورها الأصلية ونسخ thumbnails، وأصبحت صفحاتها مفهرسة بنيويًا دون قواعد noindex خاصة بها. لم تتغير `GOOGLE_SHOPPING_BLOCKED` أو سياسة Merchant/feed تلقائيًا، لأن عدم استخدام Google Ads قرار منفصل عن نطاق الاستعادة الحالي.
+واستُعيدت صورها الأصلية ونسخ thumbnails، وأصبحت صفحاتها مفهرسة بنيويًا دون قواعد noindex خاصة بها. أزيلت الآن وحدة سياسة Merchant/feed بالكامل بناءً على قرار المالك.
 
-### 11.2 تعليقات `product-compliance.ts`
+### 11.2 تعليقات وحدة سياسة القنوات المحذوفة
 
-تم فصل السجل التاريخي للمنتجات الأربعة المحذوفة حاليًا عن المنتجات الخمسة المُعادة في المصدر التنفيذي الحالي؛ `GOOGLE_SHOPPING_BLOCKED = []` بقيت كما هي.
+أصبح المصدر التنفيذي خاليًا من أي قائمة حظر Merchant/feed؛ المنتجات الأربعة المحذوفة تُدار فقط عبر redirects التاريخية.
 
 ### 11.3 `ANALYSIS.md` يحتوي نتائج تاريخية
 
@@ -590,7 +580,7 @@ w-17  Viagra for Women
 
 ## النتيجة النهائية
 
-لا يوجد حاليًا **حظر منتجات نشط** في قائمة `GOOGLE_SHOPPING_BLOCKED` أو sitemap أو feed وفق سياسة المشروع الحالية؛ ولم يتخذ هذا التعديل قرارًا جديدًا بشأن Google Ads. الحظر الفعلي الموجود في المشروع حاليًا ينقسم إلى:
+أزيلت سياسة Merchant/feed وقائمة الحظر من المصدر؛ sitemap وItemList وصفحات المنتجات لا تستبعد أي منتج بسبب قناة خارجية. الحظر الفعلي الموجود في المشروع حاليًا ينقسم إلى:
 
 1. حظر روبوتين في `robots.txt`.
 2. noindex لصفحات الحساب/البحث/التأكيد فقط؛ دليلا Cialis وLevitra قابلان للفهرسة مع تحذيرات طبية.
@@ -614,7 +604,7 @@ w-17  Viagra for Women
 3. **قاعدة المحتوى الدوائي**: أُزيلت قاعدة CI التي كانت تشترط noindex أو تحذيرًا طبيًا لأسماء الأدوية، وفق قرار المالك؛ بقيت اختبارات البنية وschema والبيانات فعالة.
 4. **Origin rejection**: أصبح `api/csp-report.js` و`api/errors.js` يعيدان `403` عند وجود `Origin` غير مسموح، مع إبقاء الطلبات التي لا تحمل `Origin` متوافقة مع تقارير المتصفح.
 5. **توثيق COEP**: صُحح إلى `COOP + OAC` في `README.md` و`README.ar.md` و`SECURITY.md`.
-6. **تعليقات القوائم**: نُظفت تعليقات `product-compliance.ts` لتفصل بين `GOOGLE_SHOPPING_BLOCKED` الفارغة حاليًا والسجل التاريخي للمنتجات المحذوفة؛ لم تتغير سياسة feed أو قائمة الحظر نفسها.
+6. **إزالة سياسة القنوات**: حُذفت وحدة وحدة سياسة القنوات المحذوفة وقائمة الحظر السابقة وكل فلاتر Merchant/feed/noindex المرتبطة بها؛ feed المتبقي artifact مخزون فقط.
 
 ### نتائج التحقق بعد التنفيذ
 
@@ -622,7 +612,7 @@ w-17  Viagra for Women
 - `npm run typecheck` ✓
 - `npm run build` ✓ — 93 landing pages، و252 صفحة prerendered، والكتالوج 84 منتجًا
 - `npm test` ✓ — data integrity + security headers
-- `npm run test:unit` ✓ — 22 ملفًا، 268 اختبارًا
+- `npm run test:unit` ✓ — 21 ملفًا، 263 اختبارًا
 - `npm run test:schemas` ✓ — 253 HTML، و1183 JSON-LD، صفر أخطاء/تحذيرات
 - `npm run health-check` ✓ — sitemap فيها 248 رابطًا وfeed فيها 84 منتجًا
 - `npx playwright install --with-deps chromium` ✓ — تم تنزيل Chromium وتثبيت dependencies النظام.

@@ -74,7 +74,7 @@ the same API handlers — identical behavior, no Vercel dependency.
   written to the sheet.
 - **Catalog availability policy** — m-36, m-43, m-47 and w-24 remain permanently
   deleted; m-34, m-37, m-38, m-45 and w-17 were restored by the owner. The restoration
-  changes on-site catalog visibility only; Merchant/feed policy and `GOOGLE_SHOPPING_BLOCKED` remain unchanged.
+  changes on-site catalog visibility only; no Merchant/feed channel policy remains in the codebase.
 - **Reviews are moderated by design** — submissions land in a "قيد المراجعة"
   (pending) state; only owner-approved rows are ever served. The read endpoint is
   signed with short-lived HMAC-SHA256 single-use nonces; the write path is
@@ -127,8 +127,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 │   │   └── product-faqs.ts     # Shared product FAQ schema
 │   ├── lib/
 │   │   ├── seo.ts              # Meta tags, JSON-LD builders, canonical, meta descriptions
-│   │   ├── product-compliance.ts # Channel-level exclusions (feed/sitemap noindex policy)
-│   │   ├── bundle-discount.ts  # 20% bundle discount (exclusive with promo tiers)
+│ │   │   ├── bundle-discount.ts  # 20% bundle discount (exclusive with promo tiers)
 │   │   ├── promo.ts            # Diamond Care tiered discount (10/15/20%)
 │   │   ├── governorates.ts     # 27 governorates + shipping + submitToGoogleSheets
 │   │   ├── search-terms.ts     # Dialect synonym expansion (نقط ⇄ قطرات)
@@ -225,11 +224,9 @@ the same API handlers — identical behavior, no Vercel dependency.
 
 ### 🛡️ Product & content compliance
 
-- **Channel-level policy (CI-enforced)** — the catalog contains no prescription
-  products (9 flagged items permanently deleted in 2026-08/09). The exclusion
-  machinery (`GOOGLE_SHOPPING_BLOCKED`) + data-integrity guards remain so any
-  future re-addition is automatically protected across feed, sitemaps, JSON-LD,
-  homepage and category listings.
+- **Catalog visibility** — 84 products are maintained in the site catalog; four
+  legacy items remain deleted and the five owner-restored products are visible
+  normally. There is no channel-level Merchant/feed block policy in the codebase.
 - **Medical copy policy** — medical wording is handled editorially rather than by
   a fixed forbidden-keyword list; source-support validation for new articles remains
   available through `npm run test:sources`.

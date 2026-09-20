@@ -553,10 +553,6 @@ async function prerender() {
         },
       },
     }));
-    const { GOOGLE_SHOPPING_BLOCKED } = await vite.ssrLoadModule("/src/lib/product-compliance.ts");
-    // صفحات المنتجات الدوائية المرفوضة: noindex حتى لا يزحفها جوجل (تبقى على الموقع
-    // وقابلة للشراء عبر الروابط المباشرة/واتساب، لكن لا تُفهرس في نتائج البحث).
-    const isNoindexProduct = (p) => GOOGLE_SHOPPING_BLOCKED.has(p.id);
     let articles = [];
     try {
       const mod = await vite.ssrLoadModule("/src/data/articles.ts");
@@ -1055,7 +1051,7 @@ async function prerender() {
         url: `${SITE_URL}${r.path}`,
       });
 
-      const structuredCatItems = catItems.filter((p) => !GOOGLE_SHOPPING_BLOCKED.has(p.id));
+      const structuredCatItems = catItems;
       if (structuredCatItems.length > 0) {
         jsonLd.push({
           "@context": "https://schema.org",
@@ -1108,7 +1104,7 @@ async function prerender() {
           ? `<h2>منتجات ${r.title}</h2><ul>${catItems
               .map(
                 (p) =>
-                  `<li><a${GOOGLE_SHOPPING_BLOCKED.has(p.id) ? ' rel="nofollow"' : ""} href="${SITE_URL}/products/${p.slug}">${esc(p.name)}</a> — ${esc(
+                  `<li><a href="${SITE_URL}/products/${p.slug}">${esc(p.name)}</a> — ${esc(
                     makeMetaDescription(p.description),
                   )}</li>`,
               )
@@ -1234,12 +1230,7 @@ async function prerender() {
 
       // منتجات مشابهة من نفس القسم (حتى 4، مع استبعاد المنتج الحالي) - مع صور واضحة alt/title لمنع لخبطة Google Images
       const relatedProducts = products
-        .filter(
-          (p) =>
-            p.category === product.category &&
-            p.slug !== product.slug &&
-            !GOOGLE_SHOPPING_BLOCKED.has(p.id),
-        )
+        .filter((p) => p.category === product.category && p.slug !== product.slug)
         .slice(0, 4);
       const relatedBody =
         relatedProducts.length > 0
@@ -1273,8 +1264,8 @@ async function prerender() {
         image: img,
         canonical,
         type: "product",
-        noindex: isNoindexProduct(product),
-        jsonLd: isNoindexProduct(product) ? [breadcrumb] : [productJsonLd, breadcrumb],
+        noindex: false,
+        jsonLd: [productJsonLd, breadcrumb],
         bodyContent: body,
         // (2026-09-17) أبعاد حقيقية + alt وصفية (صور المنتجات 800×800)
         imageAlt: product.name,
@@ -1421,8 +1412,7 @@ async function prerender() {
         const canonical = `${SITE_URL}/products/guides/${page.slug}`;
         const selectedProducts = (page.productIds || [])
           .map((id) => products.find((p) => p.id === id))
-          .filter(Boolean)
-          .filter((p) => !GOOGLE_SHOPPING_BLOCKED.has(p.id));
+          .filter(Boolean);
 
         const webPageJsonLd = {
           "@context": "https://schema.org",
