@@ -174,6 +174,13 @@ export const getOralSolidForm = (product: Product): "tablet" | "capsule" | null 
   return null;
 };
 
+export const getBundlePresentation = (product: Product): "gel" | "cream" | null => {
+  const text = `${product.name} ${product.nameEn} ${product.slug}`.toLowerCase();
+  if (/جل|جيل|\bgel\b/.test(text)) return "gel";
+  if (/كريم|\bcream\b/.test(text)) return "cream";
+  return null;
+};
+
 /**
  * يختار عضوين غير صلبين فموياً من نفس الفئة بترتيب دوّار ثابت.
  * بهذا تظل كل باقة من 3 منتجات، وتتنوع الاقتراحات من صفحة لأخرى،
@@ -199,7 +206,21 @@ function pickVariedBundleSuggestions(product: Product, preferredIds: string[] = 
   const seed = Number(product.id.match(/\d+/)?.[0] ?? 0);
   const start = pool.length > 0 ? seed % pool.length : 0;
   const rotated = [...pool.slice(start), ...pool.slice(0, start)];
-  return [...preferred, ...rotated].slice(0, 2);
+  const chosen: Product[] = [];
+  for (const candidate of [...preferred, ...rotated]) {
+    if (chosen.length === 2) break;
+    const candidatePresentation = getBundlePresentation(candidate);
+    const conflictsWithGelOrCream = [product, ...chosen].some((existing) => {
+      const existingPresentation = getBundlePresentation(existing);
+      return Boolean(
+        candidatePresentation &&
+        existingPresentation &&
+        candidatePresentation !== existingPresentation,
+      );
+    });
+    if (!conflictsWithGelOrCream) chosen.push(candidate);
+  }
+  return chosen;
 }
 
 /** محرك البيع المتقاطع (Cross Sell Engine) */
