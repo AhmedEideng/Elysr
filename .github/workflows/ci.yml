@@ -136,6 +136,8 @@ jobs:
         with:
           name: dist
           path: dist
+          # Preserve .well-known/security.txt when transferring dist to jobs.
+          include-hidden-files: true
           retention-days: 7
           if-no-files-found: error
 
