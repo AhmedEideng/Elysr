@@ -86,8 +86,10 @@ const ALLOWED_ORIGINS = new Set(["https://elysrmedical.store", "https://www.elys
  */
 export default async function handler(req, res) {
   const origin = req.headers.origin;
-  const allowedOrigin =
-    origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://elysrmedical.store";
+  // Same-origin browser reports may omit Origin; when it is present, reject
+  // cross-origin callers instead of merely hiding the response with CORS.
+  if (origin && !ALLOWED_ORIGINS.has(origin)) return res.status(403).end();
+  const allowedOrigin = origin || "https://elysrmedical.store";
   res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");

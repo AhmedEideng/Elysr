@@ -59,7 +59,7 @@ responsibly:
 | **PII Protection**     | لا تخزين PII في localStorage، sessionStorage يحفظ orderId فقط بدون PII، IP hash في الشيت |
 | **Data Retention**     | `autoCleanupOldOrders()` في Apps Script يحذف طلبات أقدم من 90 يوم + حذف يدوي عند الطلب (مفيش endpoint آلي — قرار المالك) |
 | **Security.txt**       | `/.well-known/security.txt` + `/security.txt` مع Contact و Expires          |
-| **API Hardening**      | كل APIs عليها `X-Robots-Tag: noindex` + `no-store` + `Vary: Origin` + COEP + OAC |
+| **API Hardening**      | كل APIs عليها `X-Robots-Tag: noindex` + `no-store` + `Vary: Origin` + COOP + OAC |
 
 ### 🔒 حماية بيانات العملاء (أغسطس 2026 - أحدث الأنظمة)
 

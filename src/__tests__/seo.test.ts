@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { seoLandingPages } from "@/data/landing-pages";
 import { productSchema } from "@/lib/seo";
 
 const product = {
@@ -9,6 +10,16 @@ const product = {
   price: 300,
   stock: 10,
 };
+
+describe("SEO landing-page policy", () => {
+  it("keeps the Cialis and Levitra educational guides indexable", () => {
+    for (const slug of ["cialis-20mg-guide", "levitra-guide"]) {
+      const page = seoLandingPages.find((candidate) => candidate.slug === slug);
+      expect(page).toBeDefined();
+      expect(page?.noindex).not.toBe(true);
+    }
+  });
+});
 
 describe("product JSON-LD review provenance", () => {
   it("does not emit an aggregate rating without an approved API summary", () => {

@@ -14,12 +14,13 @@ function responseMock() {
   return res;
 }
 
-function request(body: unknown, contentType = "application/csp-report") {
+function request(body: unknown, contentType = "application/csp-report", origin?: string) {
   return {
     method: "POST",
     headers: {
       "content-type": contentType,
       "x-forwarded-for": `203.0.113.${Math.floor(Math.random() * 100) + 20}`,
+      ...(origin ? { origin } : {}),
     },
     body,
   };
@@ -78,5 +79,14 @@ describe("CSP report API", () => {
     oversized["csp-report"]["script-sample"] = "x".repeat(5000);
     await handler(request(oversized) as never, oversizedRes as never);
     expect(oversizedRes.statusCode).toBe(400);
+  });
+
+  it("rejects an explicitly untrusted Origin", async () => {
+    const res = responseMock();
+    await handler(
+      request(legacyReport, "application/csp-report", "https://evil.example") as never,
+      res as never,
+    );
+    expect(res.statusCode).toBe(403);
   });
 });

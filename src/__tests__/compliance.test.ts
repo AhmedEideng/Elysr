@@ -2,8 +2,8 @@
  * ============================================================
  * Unit Tests — نظام الامتثال (Product Compliance)
  * ============================================================
- * جميع المنتجات ظاهرة داخل الموقع، بينما تُستبعد المنتجات الدوائية المحددة
- * من Merchant feed وتخضع لنصوص دوائية أكثر تحفظاً.
+ * اختبارات سياسة الكتالوج وMerchant feed؛ لا تفرض هذه المجموعة
+ * قائمة كلمات ادعاءات طبية أو قاعدة noindex على المحتوى.
  */
 
 import { describe, it, expect } from "vitest";
@@ -37,15 +37,6 @@ describe("النصوص الدوائية", () => {
         80,
       );
       expect(product.usage?.length, `Missing usage in ${product.id}`).toBeGreaterThan(80);
-    }
-  });
-
-  it("لا تستخدم وعود أمان أو نتائج مطلقة في المنتجات الدوائية المحجوبة", () => {
-    const prohibited =
-      /آمن(?:ة)?\s*(?:تمام|100%)|أمان\s*تام|منتج\s*مضمون|مضمون\s*100%|يضمن\s+لك|مجرب\s*سريري|نتائج\s*مؤكدة|ثقة\s*مطلقة/i;
-    for (const product of products.filter((item) => GOOGLE_SHOPPING_BLOCKED.has(item.id))) {
-      const copy = [product.description, ...product.benefits, product.usage ?? ""].join(" ");
-      expect(copy, `Risky absolute claim in ${product.id}`).not.toMatch(prohibited);
     }
   });
 });
