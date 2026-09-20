@@ -97,7 +97,6 @@ products/vegal-extra-sildenafil-130mg-cobra.html
 products/levitra-100mg.html
 products/procomil-fort-tablet.html
 products/black-widow-drops.html
-products/viagra-1-2-3-2-10-tablets.html
 ```
 
 أي ظهور لها في ItemList أو Product JSON-LD يفشل `test:schemas`. أما slugs المنتجات الخمسة المُعادة فأزيلت من هذه القائمة وأصبحت صفحات حية.

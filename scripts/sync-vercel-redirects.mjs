@@ -43,7 +43,6 @@ async function syncRedirects() {
     // different product), per store policy. Renamed same-product aliases →
     // redirect to the current product slug.
     const legacyAliases = [
-      { source: "/products/dooz-gel", destination: "/products/men", permanent: true },
       { source: "/index.html", destination: "/", permanent: true },
       { source: "/index", destination: "/", permanent: true },
       { source: "/product/:slug", destination: "/products/:slug", permanent: true },
@@ -78,10 +77,6 @@ async function syncRedirects() {
         destination: "/products/women",
         permanent: true,
       },
-      { source: "/products/turbo-fitness-gel-50gm", destination: "/products/men", permanent: true },
-      { source: "/products/brioge-gel", destination: "/products/men", permanent: true },
-      { source: "/products/hulk-gel-50gm", destination: "/products/men", permanent: true },
-      { source: "/products/royal-honey-malaysian", destination: "/products/men", permanent: true },
       { source: "/blog", destination: "/education", permanent: true },
       { source: "/blog/:slug", destination: "/education/:slug", permanent: true },
       { source: "/articles", destination: "/education", permanent: true },
@@ -202,16 +197,6 @@ async function syncRedirects() {
       {
         source: "/products/guides/tadalafil-products-guide",
         destination: "/products/guides/best-delay-products-egypt",
-        permanent: true,
-      },
-      {
-        source: "/products/lovezone-vaginal-gel",
-        destination: "/products/women",
-        permanent: true,
-      },
-      {
-        source: "/products/hilto-wonderful-honey-for-men",
-        destination: "/products/men",
         permanent: true,
       },
       {
@@ -342,42 +327,7 @@ async function syncRedirects() {
         permanent: true,
       },
       { source: "/products/levitra-100mg", destination: "/products/men", permanent: true },
-      {
-        source: "/products/viagra-1-2-3-2-10-tablets",
-        destination: "/products/men",
-        permanent: true,
-      },
       // ── aliases قديمة لمنتجات اتغيرت أسماؤها → المنتج الحالي/فئته ──
-      {
-        source: "/products/coffemix-caviar-original-for-men",
-        destination: "/products/coffemix-caviar-original",
-        permanent: true,
-      },
-      {
-        source: "/products/max-man-extra-power-premium-cream",
-        destination: "/products/men",
-        permanent: true,
-      },
-      {
-        source: "/products/60-minutes-delay-men-delay-gel",
-        destination: "/products/men",
-        permanent: true,
-      },
-      {
-        source: "/products/hilti-wonderful-honey-for-men",
-        destination: "/products/men",
-        permanent: true,
-      },
-      {
-        source: "/products/overlord-rhino-power-mmc",
-        destination: "/products/men",
-        permanent: true,
-      },
-      {
-        source: "/products/tiger-power-tablets",
-        destination: "/products/men",
-        permanent: true,
-      },
       {
         source: "/products/viga-1-million-delay-spray",
         destination: "/products/men",

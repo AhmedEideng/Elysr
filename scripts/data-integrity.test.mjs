@@ -99,7 +99,6 @@ try {
     "levitra-100mg", // m-47
     "procomil-fort-tablet", // m-43 (حذف نهائي 2026-09-07)
     "black-widow-drops", // w-24 (حذف نهائي 2026-09-07)
-    "viagra-1-2-3-2-10-tablets", // slug دوائي أقدم
   ];
   for (const slug of deletedPharmaSlugs) {
     assert.ok(

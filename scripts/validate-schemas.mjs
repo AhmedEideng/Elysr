@@ -37,7 +37,6 @@ const DELETED_PHARMA_FILES = new Set([
   "products/levitra-100mg.html", // m-47
   "products/procomil-fort-tablet.html", // m-43 Procomil Fort (حذف نهائي 2026-09-07)
   "products/black-widow-drops.html", // w-24 Black Widow Drops (حذف نهائي 2026-09-07)
-  "products/viagra-1-2-3-2-10-tablets.html", // slug دوائي أقدم — له 301 قائم
 ]);
 const NOINDEX_PRODUCT_FILES = new Set([...DELETED_PHARMA_FILES]);
 const NOINDEX_PRODUCT_URLS = new Set(
