@@ -175,69 +175,38 @@ export const getOralSolidForm = (product: Product): "tablet" | "capsule" | null 
 };
 
 /**
- * يحافظ على توافق أعضاء الباقة: يسمح بالمنتجات الموضعية/العسل مع أي شكل،
- * لكنه لا يسمح بوجود tablet و capsule معاً في نفس الباقة.
+ * يختار عضوين غير صلبين فموياً من نفس الفئة بترتيب دوّار ثابت.
+ * بهذا تظل كل باقة من 3 منتجات، وتتنوع الاقتراحات من صفحة لأخرى،
+ * ولا تدخل الأقراص أو الكبسولات في الباقة معاً.
  */
-function filterCompatibleCrossSells(product: Product, suggestions: Product[]): Product[] {
-  const forms = new Set<"tablet" | "capsule">();
-  const mainForm = getOralSolidForm(product);
-  if (mainForm) forms.add(mainForm);
+function pickVariedBundleSuggestions(product: Product, preferredIds: string[] = []): Product[] {
+  const preferred = preferredIds
+    .map((id) => getProductById(id))
+    .filter((p): p is Product => Boolean(p))
+    .filter((p) => p.id !== product.id && !getOralSolidForm(p));
+  const preferredIdsSet = new Set(preferred.map((p) => p.id));
+  const pool = products.filter(
+    (candidate) =>
+      candidate.category === product.category &&
+      candidate.id !== product.id &&
+      candidate.stock > 0 &&
+      !getOralSolidForm(candidate) &&
+      !preferredIdsSet.has(candidate.id),
+  );
 
-  return suggestions.filter((suggestion) => {
-    const form = getOralSolidForm(suggestion);
-    if (!form) return true;
-    if (forms.size === 0) {
-      forms.add(form);
-      return true;
-    }
-    if (!forms.has(form)) return false;
-    forms.add(form);
-    return true;
-  });
+  // رقم المنتج يعطي تدويراً ثابتاً: نفس الصفحة = نفس الباقة، لكن الصفحات
+  // المختلفة لا تبدأ دائماً من نفس المنتجين.
+  const seed = Number(product.id.match(/\d+/)?.[0] ?? 0);
+  const start = pool.length > 0 ? seed % pool.length : 0;
+  const rotated = [...pool.slice(start), ...pool.slice(0, start)];
+  return [...preferred, ...rotated].slice(0, 2);
 }
 
 /** محرك البيع المتقاطع (Cross Sell Engine) */
 export const getCrossSellsForProduct = (product: Product): Product[] => {
-  if (product.crossSell && product.crossSell.length > 0) {
-    return filterCompatibleCrossSells(
-      product,
-      product.crossSell.map((id) => getProductById(id)).filter((p): p is Product => Boolean(p)),
-    );
-  }
-
-  // خوارزمية ذكية لاقتراح باقة تلقائية لو لم يتم تحديدها:
-  let suggestedIds: string[];
-  const name = product.name.toLowerCase();
-
-  if (product.category === "men") {
-    // لو المنتج حبوب/كبسولات -> اقترح تأخير (بخاخ/كريم) + عسل/طاقة (بدائل آمنة بدون أدوية محظورة)
-    if (name.includes("حبوب") || name.includes("كبسول") || name.includes("قرص")) {
-      suggestedIds = ["m-44", "m-20"]; // ريمانز دووز + عسل جولدن هورس (آمن)
-    }
-    // لو المنتج تأخير (بخاخ/كريم/جل) -> اقترح صلابة (حبوب آمنة) + طاقة (عسل)
-    else if (name.includes("بخاخ") || name.includes("كريم") || name.includes("جل")) {
-      suggestedIds = ["m-01", "m-52"]; // هامر أوف ثور + عسل توب سيلرز
-    }
-    // لو المنتج عسل/شوكولاتة -> اقترح صلابة + تأخير (آمن)
-    else {
-      suggestedIds = ["m-01", "m-30"]; // هامر أوف ثور + كريم إملا (آمن)
-    }
-  } else if (product.category === "women") {
-    // منتجات النساء
-    suggestedIds = ["w-02", "w-04", "w-15"]; // ليدي إيرا، شوكولاتة، كونيبال
-  } else {
-    // أجهزة
-    suggestedIds = ["m-48", "m-32"]; // تيتان جل
-  }
-
-  return filterCompatibleCrossSells(
-    product,
-    suggestedIds
-      .filter((id) => id !== product.id)
-      .slice(0, 2) // اقترح منتجين فقط ليكوّنوا باقة ثلاثية مع المنتج الأصلي
-      .map((id) => getProductById(id))
-      .filter((p): p is Product => Boolean(p)),
-  );
+  // أي cross-sell يدوي يظل له الأولوية، ثم نكمله تلقائياً حتى تصبح الباقة 3 منتجات.
+  // الاقتراحات الفموية الصلبة تُستبعد هنا عمداً حتى لا تختلط الأقراص بالكبسولات.
+  return pickVariedBundleSuggestions(product, product.crossSell ?? []);
 };
 
 /** Look up a product by its URL slug (e.g. "hammer-of-thor-capsules"). */

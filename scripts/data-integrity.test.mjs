@@ -487,6 +487,7 @@ try {
   assert.ok(Object.keys(bundlesDb).length > 0, "bundles-db.json is empty");
   for (const [mainId, members] of Object.entries(bundlesDb)) {
     assert.ok(productIds.has(mainId), `Bundle main missing: ${mainId}`);
+    assert.equal(members.length, 3, `Bundle must contain exactly 3 products: ${mainId}`);
     for (const member of members) {
       assert.ok(productIds.has(member), `Bundle member missing: ${member} (of ${mainId})`);
     }

@@ -20,7 +20,8 @@ export function CrossSellBundle({
   const [isAdding, setIsAdding] = useState(false);
   const [added, setAdded] = useState(false);
 
-  if (!suggestedProducts || suggestedProducts.length === 0) return null;
+  // كل باقة معروضة يجب أن تكون: المنتج الحالي + منتجين إضافيين بالضبط.
+  if (!suggestedProducts || suggestedProducts.length !== 2) return null;
 
   const bundleItems = [mainProduct, ...suggestedProducts];
   const totalPrice = bundleItems.reduce((sum, item) => sum + item.price, 0);
