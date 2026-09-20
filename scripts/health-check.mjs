@@ -47,7 +47,6 @@ const thumbsDir = resolve(DIST, "images", "thumbs");
 const imageFiles = existsSync(imagesDir) ? walk(imagesDir, ".webp") : [];
 const thumbFiles = existsSync(thumbsDir) ? walk(thumbsDir, ".webp") : [];
 const sitemapPath = resolve(DIST, "sitemap.xml");
-const catalogPath = resolve(DIST, "catalog-feed.xml");
 
 // ─────────────────────────────────────────────────────────
 // 1) HTML distribution
@@ -92,12 +91,6 @@ if (existsSync(sitemapPath)) {
     console.log(`     /${cat.padEnd(20)} ${n}`);
   }
   console.log();
-}
-
-if (existsSync(catalogPath)) {
-  const xml = readFileSync(catalogPath, "utf-8");
-  const items = xml.match(/<item>/g) ?? [];
-  console.log(`📦 catalog-feed.xml: ${items.length} products\n`);
 }
 
 // ─────────────────────────────────────────────────────────

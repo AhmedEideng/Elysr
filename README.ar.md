@@ -41,7 +41,7 @@
 | المقياس                   | القيمة                                                                                               |
 | ------------------------- | ---------------------------------------------------------------------------------------------------- |
 | 📦 المنتجات               | **84** (54 رجال · 23 نساء · 7 أجهزة) — 4 عناصر تاريخية ما زالت محذوفة؛ تمت إعادة 5 منتجات بقرار المالك       |
-| 🛒 تغطية الكتالوج         | **84** — كل المنتجات الحالية موجودة في كتالوج الموقع؛ لم تتغير سياسة Merchant/feed أو أهلية Google Ads بسبب الاستعادة                           |
+| 🛒 تغطية الكتالوج         | **84** — كل المنتجات الحالية موجودة في كتالوج الموقع؛ لا توجد سياسة Merchant/feed أو أهلية Google Ads في هذا البناء                           |
 | 📚 المقالات               | **58** مقالًا توعويًا بمصادر طبية موثوقة (NIH/Mayo/NHS/…)                                            |
 | 🎯 صفحات الدليل           | **93** صفحة هبوط (كلها مفهرسة مع تحذيرات طبية للأدلة الدوائية)                                                             |
 | 📄 الصفحات المولّدة       | **252** (17 ثابتة + 84 منتج + 58 مقال + 93 دليل)                                                     |
@@ -74,7 +74,7 @@
 
 - **صفر قاعدة بيانات** — كل البيانات في ملفات TypeScript تُبنى وقت البناء؛ وGoogle Sheets هو الـ backend الوحيد ذي حالة (طلبات + مراجعات) عبر webhook محصّن.
 - **السيرفر لا يثق بالعميل** — الـ API يعيد التحقق من الأسعار والمخزون والخصومات (بما فيها خصم الباقة 20%) وتكوين الباقات من `products-db.json` / `bundles-db.json` المولّدة وقت البناء قبل كتابة أي شيء في الشيت.
-- **حالة الكتالوج الحالية** — المنتجات المحذوفة نهائيًا هي m-36 وm-43 وm-47 وw-24؛ أعاد المالك m-34 وm-37 وm-38 وm-45 وw-17 للعرض. الاستعادة تخص ظهور الموقع فقط؛ ولا توجد الآن سياسة Merchant/feed على مستوى القنوات.
+- **حالة الكتالوج الحالية** — المنتجات المحذوفة نهائيًا هي m-36 وm-43 وm-47 وw-24؛ أعاد المالك m-34 وm-37 وm-38 وm-45 وw-17 للعرض. الاستعادة تخص ظهور الموقع فقط؛ ولا توجد سياسة Merchant/feed على مستوى القنوات.
 - **المراجعات بإشراف بالضرورة** — كل مراجعة تصل بحالة "قيد المراجعة"؛ لا يُعرض إلا ما اعتمده المالك. مسار القراءة موقّع بـ HMAC-SHA256 بتواقيع قصيرة العمر وnonces أحادية الاستخدام.
 - **فحوصات التكامل في CI** — تتحقق من الكتالوج والـ metadata المولّدة والـ redirects
   وأهلية الـ feed واتساق schema؛ لا توجد قائمة كلمات ثابتة تمنع صياغة المحتوى الطبي.
@@ -94,7 +94,7 @@
 | الاختبارات | Vitest (268) + Playwright (19 E2E) + data-integrity + JSON-LD validator                                                                 |
 | الاستضافة  | Vercel Edge CDN (أساسي) · Express + Docker (نشر ذاتي مدعوم)                                                                             |
 | الطلبات    | Google Apps Script → Google Sheets (ScriptLock + فحص تكرار كامل + هواتف دولية)                                                          |
-| SEO        | 252 صفحة مولّدة · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps + feed                                             |
+| SEO        | 252 صفحة مولّدة · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                             |
 | الصور      | WebP فقط (sharp، 700–800px، q45–55) + alt/title وصفية                                                                                   |
 | الأمان     | CSP · HSTS · COOP/OAC · Report-To · NEL · CORS صارم · rate limits بمعرّفات IP مُجزّأة · HMAC لقراءة المراجعات · error tracking بلا PII |
 
@@ -130,7 +130,7 @@ npm run dev              # → http://localhost:8080
 | الأمر                     | الوصف                                                        |
 | ------------------------- | ------------------------------------------------------------ |
 | `npm run dev`             | خادم التطوير (port 8080)                                     |
-| `npm run build`           | بناء الإنتاج + sitemaps/feeds + prerender لـ 252 صفحة        |
+| `npm run build`           | بناء الإنتاج + sitemaps + prerender لـ 252 صفحة        |
 | `npm run preview`         | معاينة بناء الإنتاج محليًا                                   |
 | `npm run build:ssr`       | بناء + prerender لـ Express الخادم الذاتي                    |
 | `npm start` / `start:dev` | تشغيل الخادم الذاتي (إنتاج / watch)                          |
@@ -249,7 +249,6 @@ Elysr/
 │   ├── sitemap.xml           # 248 رابط
 │   ├── sitemap-images.xml    # 137 رابط صورة
 │   ├── sitemap-index.xml
-│   ├── catalog-feed.xml      # Google Shopping (84) + مرآة CSV/TXT
 │   ├── sw.js                 # kill-switch هجرة PWA (يلغي نفسه، network-only)
 │   ├── scripts/ga-loader.js  # تحميل GA4 مؤجل (2ث + تفاعل، send_page_view:false)
 │   └── .well-known/security.txt
@@ -272,7 +271,7 @@ Elysr/
 | 🔗 Corpus Source Liveness                   | 54 رابط مصدر فريدًا (3 محاولات بتراجع + تصنيف السلطات غير المستقرة)                   |
 | 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 263 اختبار وحدة/API · حارس الكتالوج+البيانات+شبكة redirects |
 | 🛡 Security Audit                            | `npm audit --audit-level=high` على الشجرة المقفلة                                     |
-| 🏗 Build • Prerender • Sitemaps              | Vite + 252 صفحة مولّدة + sitemaps/feeds                                               |
+| 🏗 Build • Prerender • Sitemaps              | Vite + 252 صفحة مولّدة + sitemaps                                               |
 | 🚦 Lighthouse Performance Budget            | موازِن أداء LHCI على الموقع المبنى                                                    |
 
 محليًا: `npm run ci` (lint + typecheck + test:all) و`npm run test:e2e`.
@@ -286,7 +285,7 @@ Elysr/
 CI/CD تلقائي على كل push إلى `main`:
 
 1. `vite build` → `dist/` محسّن ومقسّم
-2. `generate-sitemap.mjs` → sitemaps (248) + feed (84) + robots + security.txt + landing JSON
+2. `generate-sitemap.mjs` → sitemaps (248) + robots + security.txt + landing JSON
 3. `prerender-seo.mjs` → 252 صفحة مولّدة بـ SEO meta + JSON-LD كامل
 4. Vercel يقدّم `dist/` من Edge CDN مع 12 مجموعة headers أمان + 176 redirect
 

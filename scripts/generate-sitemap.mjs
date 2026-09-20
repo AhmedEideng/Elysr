@@ -516,118 +516,6 @@ ${articleImageEntries}
 </sitemapindex>
 `;
 
-    // 4. بناء ملفات الكتالوج (XML + CSV + TXT) للمنتجات المتاحة في المخزون
-    // 🛒 Google Merchant Center يطلب المكونات داخل الوصف.
-    // نضيف المكونات فقط إن لم تكن موجودة (منع تكرار النص).
-    // ملاحظة (GSC 2026-09-13): "طريقة الاستخدام" مقصود إن مش في وصف الـ feed —
-    // وصفات الاستخدام الموضعي بتزوّد إشارة "محتوى بالغين" في الـ feed، والتعليمات
-    // الكاملة بتفضل على صفحة المنتج (مصدر الحقيقة للزبون).
-    const buildFeedDescription = (p) => {
-      let fullDesc = (p.description || "").trim();
-      if (p.ingredients && !fullDesc.includes(p.ingredients)) {
-        fullDesc += " المكونات: " + p.ingredients;
-      }
-      // Google Merchant يقبل حتى 5000 حرف في الوصف
-      return fullDesc.slice(0, 5000);
-    };
-
-    // 🏷️ Google Product Category (official taxonomy IDs) — صادق لكل منتج:
-    // قبل كده مكنش في تصنيف في الـ feed فـ Google كان "بيخمن" (طلّع خطافات
-    // صيد لأكياس عشبية و"تصفيف شعر" لكريم) — تقرير GSC 2026-09-13.
-    // القيم IDs رسمية من taxonomy-with-ids.en-US.txt (stable/locale-independent).
-    const feedCategory = (p) => {
-      // أجهزة البالغين (مضخات/VED/جهاز شد) — التصنيف الصادق
-      // "Mature > Erotic > Sex Toys". d-04 (حقيبة تكبير صدر نسائية) مش sex toy.
-      if (p.category === "devices") return p.id === "d-04" ? "2915" : "778";
-      const n = `${p.name} ${p.nameEn || ""}`;
-      // موضعي الأول (بخاخ/جل/كريم/مناديل) — عشان نصوص زي "with Vitamin E" في
-      // الـ nameEn ما تدفعش بخاخ لقائمة المكملات
-      if (/بخاخ|سبراي|سبراى|جل\b|جيل\b|كريم|مناديل|spray|\bgel\b|cream|wipes/i.test(n))
-        return "2915"; // Health & Beauty > Personal Care
-      if (/عسل|honey/i.test(n)) return "4947"; // Food Items > Condiments & Sauces > Honey
-      if (/شوكولاتة|شيكولاته|chocolate|علكة|\bgum\b|بنكهة/i.test(n)) return "4748"; // Food Items > Candy & Chocolate
-      if (/قهوة|coffee/i.test(n)) return "1868"; // Beverages > Coffee
-      // فمّي (كبسولات/أقراص/أكياس/قطرات فمّية)
-      if (/كبسول|أقراص|أكياس|قطرات|capsules?|tablets?|drops?|nutriceutical/i.test(n)) return "525"; // Fitness & Nutrition > Vitamins & Supplements
-      return "2915"; // fallback: Personal Care
-    };
-
-    const feedRow = (p) => ({
-      id: p.id,
-      title: p.name,
-      description: buildFeedDescription(p),
-      link: `${SITE_URL}/products/${p.slug}`,
-      image_link: `${SITE_URL}${assetUrl(p.image)}`,
-      brand: p.brand ?? "اليسر ميديكال",
-      condition: "new",
-      availability: p.stock > 0 ? "in stock" : "out of stock",
-      price: `${p.price} EGP`,
-      google_product_category: feedCategory(p),
-    });
-
-    const catalogXml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
-  <channel>
-    <title>اليسر ميديكال - كتالوج المنتجات</title>
-    <link>${SITE_URL}</link>
-    <description>كتالوج منتجات الصحة الزوجية الأصلية من اليسر ميديكال</description>
-${catalogProducts
-  .map((p) => {
-    const row = feedRow(p);
-    return `    <item>
-      <g:id>${esc(row.id)}</g:id>
-      <g:title>${esc(row.title)}</g:title>
-      <g:description>${esc(row.description)}</g:description>
-      <g:link>${row.link}</g:link>
-      <g:image_link>${row.image_link}</g:image_link>
-      <g:brand>${esc(row.brand)}</g:brand>
-      <g:condition>${row.condition}</g:condition>
-      <g:availability>${row.availability}</g:availability>
-      <g:price>${row.price}</g:price>
-      <g:google_product_category>${esc(row.google_product_category)}</g:google_product_category>
-    </item>`;
-  })
-  .join("\n")}
-  </channel>
-</rss>
-`;
-
-    // CSV (متوافق مع Excel) وTXT (Tab-separated) — نفس المنتجات الوصف نفسه
-    // كانا يُولّدا يدوياً ويبتعدان عن الكتالوج؛ الآن جزء من البناء.
-    const FEED_COLUMNS = [
-      "id",
-      "title",
-      "description",
-      "link",
-      "image_link",
-      "brand",
-      "condition",
-      "availability",
-      "price",
-      "google_product_category",
-    ];
-    const feedRows = catalogProducts.map(feedRow);
-    const csvEscape = (v) => {
-      const s = String(v ?? "");
-      return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    // BOM UTF-8 في بداية الـ CSV حتى لا تتخرب العربية عند الفتح في Excel على
-    // Google Merchant يتعامل مع BOM في CSV بشكل قياسي؛ نستخدم أسطر LF ثابتة في artifacts.
-    const csvContent =
-      "\uFEFF" +
-      [
-        FEED_COLUMNS.join(","),
-        ...feedRows.map((row) => FEED_COLUMNS.map((c) => csvEscape(row[c])).join(",")),
-      ].join("\n") +
-      "\n";
-    const txtContent =
-      [
-        FEED_COLUMNS.join("\t"),
-        ...feedRows.map((row) =>
-          FEED_COLUMNS.map((c) => String(row[c] ?? "").replace(/[\t\r\n]+/g, " ")).join("\t"),
-        ),
-      ].join("\n") + "\n";
-
     const robots = `# robots.txt — Elysr Medical Group
 # ${SITE_URL}
 
@@ -672,9 +560,6 @@ Sitemap: ${SITE_URL}/sitemap-images.xml
     writeFileSync(resolve(outDir, "sitemap.xml"), xml, "utf-8");
     writeFileSync(resolve(outDir, "sitemap-images.xml"), imageXml, "utf-8");
     writeFileSync(resolve(outDir, "sitemap-index.xml"), indexXml, "utf-8");
-    writeFileSync(resolve(outDir, "catalog-feed.xml"), catalogXml, "utf-8");
-    writeFileSync(resolve(outDir, "catalog-feed.csv"), csvContent, "utf-8");
-    writeFileSync(resolve(outDir, "catalog-feed.txt"), txtContent, "utf-8");
     writeFileSync(resolve(outDir, "robots.txt"), robots, "utf-8");
 
     // ⚡ تحسين الأداء: توليد ملفات JSON فردية لكل Landing Page
@@ -721,7 +606,7 @@ Sitemap: ${SITE_URL}/sitemap-images.xml
     }
     console.log(`   ✅ ${allPages.length} individual JSON files generated (${landingPagesDir})`);
 
-    console.log(`✓ sitemaps & catalog feed generated successfully.`);
+    console.log(`✓ sitemaps generated successfully.`);
   } finally {
     await vite.close();
   }

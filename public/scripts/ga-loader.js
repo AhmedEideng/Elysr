@@ -32,7 +32,7 @@
       // scroll → لازم نستخدم scroll_milestone بدل الـ clash
       // outbound → بيتعارض مع الـ share_click لو ما عطلناه
       // site_search → بنبعث search يدوياً مع results_count
-      // file_download → مفيد للـ catalog-feed.xml
+      // file_download → مفيد لتنزيل الملفات العامة
       // نفعّلها كلها + scroll/outbound=False (عشان الـ custom events)
       scroll_events: false, // نستخدم scroll_milestone
       outbound_links: false, // نستخدم outbound_click (أدق)

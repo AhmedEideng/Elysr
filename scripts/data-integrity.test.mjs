@@ -638,35 +638,18 @@ try {
   const sitemap = readFileSync(resolve(ROOT, "public/sitemap.xml"), "utf-8");
   const imageSitemap = readFileSync(resolve(ROOT, "public/sitemap-images.xml"), "utf-8");
   const sitemapIndex = readFileSync(resolve(ROOT, "public/sitemap-index.xml"), "utf-8");
-  const catalogFeed = readFileSync(resolve(ROOT, "public/catalog-feed.xml"), "utf-8");
-  assert.equal(
-    sitemapIndex.includes("catalog-feed.xml"),
-    false,
-    "Product feed must not be listed as a sitemap",
-  );
   assert.equal(
     (imageSitemap.match(/<image:loc>/g) || []).length,
     (imageSitemap.match(/<image:image>/g) || []).length,
     "Each image sitemap entry must contain exactly one image location",
   );
-  const inStockProducts = products.filter((product) => (product.stock ?? 0) > 0);
-  assert.equal(
-    (catalogFeed.match(/<g:id>/g) || []).length,
-    inStockProducts.length,
-    "Catalog feed must contain every in-stock catalog product",
-  );
-  for (const product of inStockProducts) {
+  for (const product of products) {
     const productUrl = `https://elysrmedical.store/products/${product.slug}`;
     assert.equal(sitemap.includes(productUrl), true, `Product missing from sitemap: ${product.id}`);
     assert.equal(
       imageSitemap.includes(productUrl),
       true,
       `Product missing from image sitemap: ${product.id}`,
-    );
-    assert.equal(
-      catalogFeed.includes(`<g:id>${product.id}</g:id>`),
-      true,
-      `Product missing from catalog feed: ${product.id}`,
     );
   }
   // المنتجات التي أعادها المالك يجب ألا تحمل قواعد noindex على مستوى headers.

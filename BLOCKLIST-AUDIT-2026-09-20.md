@@ -31,8 +31,7 @@
 لم يعد هناك فلتر حظر، أو `nofollow` خاص بالمنتجات، أو `noindex` ناتج عن Merchant/feed،
 ولا تعتمد صفحات المنتجات أو ItemList أو sitemap على سياسة قناة خارجية.
 
-يبقى catalog feed المولّد artifact اختياريًا مبنيًا من الكتالوج والمخزون فقط، وليس
-هناك قرار إعلاني أو قائمة منتجات محظورة مرتبطة به.
+تم حذف catalog feed وملفات CSV/TXT الخاصة به من البناء والمستودع؛ لا توجد الآن طبقة Merchant/feed أو artifact إعلاني.
 
 ### 2.2 الاستبعاد من الصفحة الرئيسية فقط
 
@@ -52,7 +51,7 @@ m-49  Power Fully Up Advanced
 - البحث.
 - صفحة المنتج المباشرة.
 - الشراء.
-- catalog feed.
+- صفحات الموقع وsitemap.
 - sitemap.
 - Google indexing.
 
@@ -604,7 +603,7 @@ w-17  Viagra for Women
 3. **قاعدة المحتوى الدوائي**: أُزيلت قاعدة CI التي كانت تشترط noindex أو تحذيرًا طبيًا لأسماء الأدوية، وفق قرار المالك؛ بقيت اختبارات البنية وschema والبيانات فعالة.
 4. **Origin rejection**: أصبح `api/csp-report.js` و`api/errors.js` يعيدان `403` عند وجود `Origin` غير مسموح، مع إبقاء الطلبات التي لا تحمل `Origin` متوافقة مع تقارير المتصفح.
 5. **توثيق COEP**: صُحح إلى `COOP + OAC` في `README.md` و`README.ar.md` و`SECURITY.md`.
-6. **إزالة سياسة القنوات**: حُذفت وحدة وحدة سياسة القنوات المحذوفة وقائمة الحظر السابقة وكل فلاتر Merchant/feed/noindex المرتبطة بها؛ feed المتبقي artifact مخزون فقط.
+6. **إزالة سياسة القنوات**: حُذفت وحدة سياسة القنوات وقائمة الحظر السابقة وكل فلاتر Merchant/feed/noindex المرتبطة بها، كما حُذفت artifacts الخاصة بالـ feed.
 
 ### نتائج التحقق بعد التنفيذ
 
@@ -614,7 +613,7 @@ w-17  Viagra for Women
 - `npm test` ✓ — data integrity + security headers
 - `npm run test:unit` ✓ — 21 ملفًا، 263 اختبارًا
 - `npm run test:schemas` ✓ — 253 HTML، و1183 JSON-LD، صفر أخطاء/تحذيرات
-- `npm run health-check` ✓ — sitemap فيها 248 رابطًا وfeed فيها 84 منتجًا
+- `npm run health-check` ✓ — sitemap فيها 248 رابطًا، ولا يوجد catalog feed
 - `npx playwright install --with-deps chromium` ✓ — تم تنزيل Chromium وتثبيت dependencies النظام.
 - `npm run test:e2e` ✓ — 19/19 اختبارًا ناجحًا بعد تحديث اختبارات redirects للمنتجات المُعادة.
 
