@@ -23,6 +23,7 @@
  *  - cap حجمي عشان الـ HTML ما ينفخش.
  */
 import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
+import { transform } from "esbuild";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -479,8 +480,14 @@ for (const k of kept) {
 // الكامل (theme/base/components/utilities) فأولويته أدنى: لو في تعارض،
 // الـ CSS الكامل دايمًا يفوز (critical = أول رسمة بس، مش مصدر الحقيقة).
 const criticalCss = "@layer critical{" + chosen.map((k) => k.text).join("") + "}";
+// The main stylesheet is minified by Vite, but this inline stylesheet bypasses
+// Vite. Minify it here too so PageSpeed does not count whitespace/comments as
+// render-blocking CSS bytes.
+const minifiedCriticalCss = (
+  await transform(criticalCss, { loader: "css", minify: true, target: "es2022" })
+).code.trim();
 console.log(
-  `✓ critical CSS: ${(criticalCss.length / 1024).toFixed(1)}KB من ${kept.length} rules (budget ${CRITICAL_BUDGET / 1024}KB)`,
+  `✓ critical CSS: ${(minifiedCriticalCss.length / 1024).toFixed(1)}KB من ${kept.length} rules (budget ${CRITICAL_BUDGET / 1024}KB)`,
 );
 
 // ── 5) حقن في كل صفحات dist ──
@@ -508,7 +515,7 @@ for (const f of htmlFiles) {
   );
   // 5b) إضافة الـ critical style بعد الـ <style> الحالي (أو قبل </head>)
   const styleClose = html.indexOf("</style>");
-  const insert = `<style id="critical-above-the-fold">${criticalCss}</style>`;
+  const insert = `<style id="critical-above-the-fold">${minifiedCriticalCss}</style>`;
   if (styleClose !== -1) {
     html = html.slice(0, styleClose + 8) + "\n    " + insert + html.slice(styleClose + 8);
   } else {

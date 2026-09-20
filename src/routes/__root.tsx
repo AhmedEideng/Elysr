@@ -8,8 +8,6 @@ import {
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Toaster } from "sonner";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/react";
 // ⚠️ Toaster imported STATICALLY (not lazy): sonner's Toaster starts with an
 // empty state and only subscribes to toasts emitted after mount — a lazy
 // Toaster creates a window where the first user interaction (e.g. add to
@@ -249,9 +247,6 @@ function RootComponent() {
         <Outlet />
       </Layout>
       <Toaster position="top-center" richColors closeButton />
-      {/* 🚀 Vercel Web Analytics & Speed Insights Integration */}
-      <Analytics />
-      <SpeedInsights />
     </CartProvider>
   );
 }
