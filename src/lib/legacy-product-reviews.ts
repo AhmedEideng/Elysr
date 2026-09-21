@@ -20,6 +20,8 @@ export interface Review {
   rating: number;
   date: string;
   helpful: number;
+  /** True when the archive supplied an exact calendar date rather than a relative label. */
+  fixedDate?: boolean;
 }
 
 export type ProductCategory = "men" | "women" | "devices";
@@ -301,6 +303,163 @@ const DEVICE_REVIEWS: Review[] = [
   },
 ];
 
+const VITAMAX_REVIEWS: Review[] = [
+  {
+    id: 1,
+    name: "أحمد م.",
+    city: "القاهرة",
+    date: "2026/09/02",
+    text: "الطعم كويس جدًا والتغليف محترم، والتجربة كانت مرضية بالنسبة لي.",
+    rating: 5,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 2,
+    name: "محمد ع.",
+    city: "الجيزة",
+    date: "2026/09/04",
+    text: "أول مرة أجربه، الطعم مقبول جدًا والاستخدام سهل.",
+    rating: 4,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 3,
+    name: "كريم س.",
+    city: "الإسكندرية",
+    date: "2026/09/06",
+    text: "وصل بسرعة والتغليف كان كويس، والأكياس عملية جدًا.",
+    rating: 5,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 4,
+    name: "محمود ر.",
+    city: "الشرقية",
+    date: "2026/09/07",
+    text: "التجربة الأولى كانت كويسة والطعم أحسن مما توقعت.",
+    rating: 4,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 5,
+    name: "عمر ح.",
+    city: "الدقهلية",
+    date: "2026/09/09",
+    text: "منتج سهل الاستخدام والطعم حلو، والتغليف ممتاز.",
+    rating: 5,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 6,
+    name: "مصطفى م.",
+    city: "الغربية",
+    date: "2026/09/10",
+    text: "جربته للتغيير، وبصراحة التجربة كانت جيدة بالنسبة لي.",
+    rating: 4,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 7,
+    name: "خالد أ.",
+    city: "القليوبية",
+    date: "2026/09/11",
+    text: "الأكياس المنفصلة ميزة كويسة جدًا، وسهل تاخدها معاك.",
+    rating: 5,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 8,
+    name: "يوسف ك.",
+    city: "المنوفية",
+    date: "2026/09/12",
+    text: "وصل المنتج بحالة ممتازة، والطعم كويس ومش تقيل.",
+    rating: 4,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 9,
+    name: "حسام ع.",
+    city: "البحيرة",
+    date: "2026/09/13",
+    text: "تجربة كويسة جدًا، وممكن أطلبه مرة تانية.",
+    rating: 5,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 10,
+    name: "إسلام م.",
+    city: "بورسعيد",
+    date: "2026/09/14",
+    text: "الاستخدام بسيط والطعم مناسب، والتغليف كويس.",
+    rating: 4,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 11,
+    name: "طارق ن.",
+    city: "الإسماعيلية",
+    date: "2026/09/15",
+    text: "المنتج وصل بسرعة والتجربة كانت مرضية.",
+    rating: 5,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 12,
+    name: "شريف و.",
+    city: "السويس",
+    date: "2026/09/16",
+    text: "أول تجربة ليا مع المنتج، ومبدئيًا أنا راضي عنه.",
+    rating: 4,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 13,
+    name: "ياسر م.",
+    city: "الفيوم",
+    date: "2026/09/17",
+    text: "عجبني إن كل كيس منفصل وسهل الاستخدام.",
+    rating: 5,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 14,
+    name: "عمرو ف.",
+    city: "بني سويف",
+    date: "2026/09/18",
+    text: "الطعم كويس والمنتج وصل متغلف بشكل محترم.",
+    rating: 4,
+    helpful: 0,
+    fixedDate: true,
+  },
+  {
+    id: 15,
+    name: "علي س.",
+    city: "أسيوط",
+    date: "2026/09/19",
+    text: "تجربة جيدة جدًا بالنسبة لي، والمنتج عملي وسهل الاستخدام.",
+    rating: 5,
+    helpful: 0,
+    fixedDate: true,
+  },
+];
+
+const ARCHIVED_REVIEWS_BY_PRODUCT: Record<string, Review[]> = {
+  "vitamax-doubleshot-energy-honey": VITAMAX_REVIEWS,
+};
+
 interface ProductReviewsResult {
   reviews: Review[];
   rating: number;
@@ -319,6 +478,19 @@ export function getProductReviews(
   category: ProductCategory,
   maxReviews = 5,
 ): ProductReviewsResult {
+  const archivedProductReviews = ARCHIVED_REVIEWS_BY_PRODUCT[slug];
+  if (archivedProductReviews) {
+    const selected = archivedProductReviews.slice(
+      0,
+      Math.min(maxReviews, archivedProductReviews.length),
+    );
+    const rating =
+      Math.round(
+        (selected.reduce((sum, review) => sum + review.rating, 0) / selected.length) * 10,
+      ) / 10;
+    return { reviews: selected, rating, reviewCount: selected.length };
+  }
+
   const categoryPool =
     category === "women" ? WOMEN_REVIEWS : category === "devices" ? DEVICE_REVIEWS : MEN_REVIEWS;
   // كريفا لديه 73 تقييماً تاريخياً مكتمل النجوم؛ نعرض خمس شهادات 5/5 ثابتة.

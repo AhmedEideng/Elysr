@@ -13,7 +13,7 @@ export function LegacyProductReviews({
   slug: string;
 }) {
   // تقييمات فريدة وثابتة لكل منتج (اختيار حتمي بحسب slug المنتج)
-  const { reviews } = getProductReviews(slug, category);
+  const { reviews } = getProductReviews(slug, category, reviewsCount);
 
   return (
     <section className="mt-8 mb-8 rounded-[2rem] border border-border/50 bg-card p-6 md:p-8 shadow-sm">
@@ -76,7 +76,7 @@ export function LegacyProductReviews({
                 <div className="text-[11px] text-muted-foreground mt-1.5 flex items-center gap-1.5">
                   <span>{review.city}</span>
                   <span>•</span>
-                  <span>من أرشيف العملاء</span>
+                  <span>{review.fixedDate ? review.date : "من أرشيف العملاء"}</span>
                 </div>
               </div>
               <div className="flex text-amber-500">
@@ -88,10 +88,12 @@ export function LegacyProductReviews({
             <p className="text-sm font-medium leading-relaxed text-foreground/90 my-3">
               "{review.text}"
             </p>
-            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-              <ThumbsUp className="h-3 w-3" />
-              <span>{review.helpful} شخص وجد هذا التقييم مفيداً</span>
-            </div>
+            {review.helpful > 0 ? (
+              <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <ThumbsUp className="h-3 w-3" />
+                <span>{review.helpful} شخص وجد هذا التقييم مفيداً</span>
+              </div>
+            ) : null}
           </div>
         ))}
       </div>
