@@ -218,6 +218,30 @@ function staticProductCard(product, getProductBadge) {
 </article>`;
 }
 
+function staticEducationShell(article) {
+  if (!article) return "";
+  const image = article.image ? assetUrl(article.image) : "";
+  const imageMarkup = image
+    ? `<img src="${esc(image)}" alt="${esc(article.title)}" width="640" height="360" fetchpriority="high" decoding="sync" style="display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:16px 16px 0 0;" />`
+    : `<div style="display:flex;aspect-ratio:16/9;align-items:center;justify-content:center;font-size:64px;background:#eef8ff;border-radius:16px 16px 0 0;">${esc(article.emoji || "📚")}</div>`;
+  return `<div id="elysr-prerender-education-shell" inert aria-hidden="true" style="padding:32px 16px 48px;background:#fff;color:#14213d;font-family:Cairo,Arial,sans-serif;">
+  <div style="width:min(100%,1120px);margin:0 auto;">
+    <div style="margin-bottom:24px;text-align:center;">
+      <div style="color:#087ea4;font-size:13px;font-weight:700;">تعليم • توعية • علم</div>
+      <h1 style="margin:8px 0;font-size:clamp(28px,4vw,42px);line-height:1.2;">مكتبة التوعية الجنسية</h1>
+      <p style="margin:0 auto;max-width:720px;color:#60708a;line-height:1.8;">مقالات توعوية مع مصادر واضحة تساعدك على فهم جسدك وعلاقاتك بشكل صحي وآمن.</p>
+    </div>
+    <article style="width:min(100%,520px);margin:0 auto;overflow:hidden;border:1px solid #dbe7ef;border-radius:16px;background:#fff;box-shadow:0 8px 24px rgba(20,33,61,.08);">
+      <a href="/education/${esc(article.slug)}" aria-label="${esc(article.title)}">${imageMarkup}</a>
+      <div style="padding:16px;">
+        <div style="margin-bottom:8px;color:#087ea4;font-size:12px;font-weight:700;">${esc(article.category || "توعية")}</div>
+        <h2 style="margin:0;font-size:20px;line-height:1.45;">${esc(article.title)}</h2>
+      </div>
+    </article>
+  </div>
+</div>`;
+}
+
 function staticRecentlyViewedShell() {
   return `<section data-prerender-recently-viewed aria-hidden="true">
   <div data-prerender-recent-inner>
@@ -325,6 +349,7 @@ function buildHtml(template, opts) {
     type = "website",
     noindex = false,
     heroPreload = false,
+    preloadImage = "",
     loadingShell = "",
     // (2026-09-17) بيانات الصورة لمشاركة الـ OG — الأبعاد الحقيقية للملف
     // (مش أبعاد العرض) + alt وصفية (SEO + accessibility + معاينة المشاركة).
@@ -453,6 +478,18 @@ function buildHtml(template, opts) {
     html = html.replace(
       "</head>",
       `  <link rel="preload" as="image" href="${assetUrl("/images/hero-banner-480.webp")}" imagesrcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" imagesizes="100vw" fetchpriority="high" />
+</head>`,
+    );
+  }
+
+  // Route-specific LCP preload. The education index hydrates its first
+  // article card after the shell; declaring the same image in the initial
+  // document removes the lazy-image discovery delay without preloading every
+  // article image on the site.
+  if (preloadImage) {
+    html = html.replace(
+      "</head>",
+      `  <link rel="preload" as="image" href="${esc(preloadImage)}" fetchpriority="high" />
 </head>`,
     );
   }
@@ -1137,11 +1174,14 @@ async function prerender() {
         jsonLd,
         // (2026-09-17) og-default 1200×631 (الأبعاد الافتراضية في buildHtml)
         imageAlt: r.title,
+        preloadImage:
+          r.path === "/education" && articles[0]?.image ? assetUrl(articles[0].image) : "",
         // Category pages also receive a visible prerender shell outside #root
         // with the canonical H1. Use H2 in the hidden crawler body there so
         // raw HTML contains one H1 rather than duplicating the same heading.
         bodyContent: `<${categoryType ? "h2" : "h1"}>${esc(r.h1)}</${categoryType ? "h2" : "h1"}><p>${esc(r.desc)}</p>${r.body ? r.body : ""}${productLinksBody}${articleLinksBody}${faqBody}`,
-        loadingShell: categoryLoadingShell,
+        loadingShell:
+          r.path === "/education" ? staticEducationShell(articles[0]) : categoryLoadingShell,
       });
 
       // Write to dist/<path>.html (cleanUrls handles trailing-slash routing)

@@ -37,9 +37,9 @@ export const articleBodies: Record<string, ArticleBody> = {
         publisher: "National Institutes of Health (NIH)",
       },
       {
-        title: "Therapeutic effects of Maca on fatigue and metabolic regulation",
-        url: "https://www.sciencedirect.com/science/article/pii/S037887411500201X",
-        publisher: "Journal of Ethnopharmacology",
+        title: "Chemical composition and health effects of maca (Lepidium meyenii)",
+        url: "https://pubmed.ncbi.nlm.nih.gov/30902313/",
+        publisher: "PubMed",
       },
     ],
   },

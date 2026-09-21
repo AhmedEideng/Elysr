@@ -24,7 +24,7 @@ export const Route = createFileRoute("/education")({
   component: EducationIndex,
 });
 
-function ArticleCard({ a }: { a: ArticleMeta }) {
+function ArticleCard({ a, priority = false }: { a: ArticleMeta; priority?: boolean }) {
   const [isError, setIsError] = useState(false);
 
   return (
@@ -40,7 +40,9 @@ function ArticleCard({ a }: { a: ArticleMeta }) {
             alt={a.title}
             width={640}
             height={360}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            decoding={priority ? "sync" : "async"}
             onError={() => setIsError(true)}
             className="h-full w-full object-cover transition-smooth duration-500"
           />
@@ -75,8 +77,8 @@ function EducationIndex() {
       />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {articles.map((a) => (
-          <ArticleCard key={a.slug} a={a} />
+        {articles.map((a, index) => (
+          <ArticleCard key={a.slug} a={a} priority={index === 0} />
         ))}
       </div>
     </div>
