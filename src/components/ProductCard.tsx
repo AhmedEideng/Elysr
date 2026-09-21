@@ -60,7 +60,7 @@ export function ProductCard({ product, listName }: { product: Product; listName?
             className: "rounded-2xl font-bold",
           });
         }}
-        className={`group/heart absolute right-4 top-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ease-out hover:scale-110 active:scale-90 ${
+        className={`group/heart absolute right-4 top-4 z-30 inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-300 ease-out hover:scale-110 active:scale-90 ${
           wishlisted
             ? "bg-rose-500 text-white shadow-lg shadow-rose-500/40 ring-2 ring-rose-200"
             : "bg-white/85 text-foreground/70 backdrop-blur-md shadow-md hover:bg-white hover:text-rose-500 ring-1 ring-black/5"
@@ -69,7 +69,7 @@ export function ProductCard({ product, listName }: { product: Product; listName?
         aria-pressed={wishlisted}
       >
         <Heart
-          className={`h-[18px] w-[18px] transition-all duration-300 ${wishlisted ? "fill-current scale-110" : "scale-100 group-hover/heart:scale-105"}`}
+          className={`h-4 w-4 transition-all duration-300 ${wishlisted ? "fill-current scale-110" : "scale-100 group-hover/heart:scale-105"}`}
           strokeWidth={wishlisted ? 2.25 : 1.75}
         />
       </button>
