@@ -402,21 +402,22 @@ try {
     assert.deepEqual(duplicates(ids), [], "Duplicate @id in index.html JSON-LD graph");
   }
 
-  // Product ratings/counts are not catalog facts. They may only come from
-  // owner-approved reviews returned by /api/reviews at runtime. Keep the
-  // build artifact free of both legacy fields so fake aggregates cannot
-  // silently return through a data edit.
+  // Historical ratings are restored only for the archived products approved
+  // by the owner. New products must not receive invented defaults or counts.
   for (const product of products) {
-    assert.equal(
-      Object.hasOwn(product, "rating"),
-      false,
-      `Synthetic rating field in ${product.id}`,
-    );
-    assert.equal(
-      Object.hasOwn(product, "reviews"),
-      false,
-      `Synthetic review count in ${product.id}`,
-    );
+    const hasRating = Object.hasOwn(product, "rating");
+    const hasReviews = Object.hasOwn(product, "reviews");
+    assert.equal(hasRating, hasReviews, `Incomplete legacy review summary in ${product.id}`);
+    if (hasRating) {
+      assert.ok(
+        Number.isFinite(product.rating) && product.rating >= 1 && product.rating <= 5,
+        `Invalid rating in ${product.id}`,
+      );
+      assert.ok(
+        Number.isInteger(product.reviews) && product.reviews >= 1,
+        `Invalid review count in ${product.id}`,
+      );
+    }
   }
 
   // Verify every product-bearing homepage section, not only the top featured grid.

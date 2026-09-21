@@ -305,13 +305,14 @@ function makeMetaDescription(text = "", maxLength = 155) {
 
 function makeProductMetaDescription(p, maxLength = 155) {
   const firstBenefit = p.benefits?.[0] ? ` - ${String(p.benefits[0]).slice(0, 50)}` : "";
+  const ratingPart = p.reviews && p.rating ? ` ⭐${p.rating}/5 (${p.reviews} تقييم سابق)` : "";
   const pricePart = ` - ${p.price} ج.م - شحن سري، دفع عند الاستلام`;
   // لقب البحثي البديل (عامي/شعبي) — يعرض الكلمة المصرية اللي بيبحثوا بيها (نقط)
   const aliasPart = p.searchAliases?.length ? ` «${p.searchAliases[0]}»` : "";
-  const candidate = `${p.name}${aliasPart}${firstBenefit}${pricePart} - اليسر ميديكال`;
+  const candidate = `${p.name}${aliasPart}${firstBenefit}${ratingPart}${pricePart} - اليسر ميديكال`;
   if (candidate.length <= maxLength) return candidate;
   const baseDesc = String(p.description).split("。")[0].split(".")[0].slice(0, 80);
-  const short = `${p.name}${aliasPart} - ${baseDesc} - ${p.price} ج.م - شحن سري - اليسر ميديكال`;
+  const short = `${p.name}${aliasPart} - ${baseDesc}${ratingPart} - ${p.price} ج.م - شحن سري - اليسر ميديكال`;
   return makeMetaDescription(short, maxLength);
 }
 
@@ -1204,6 +1205,11 @@ async function prerender() {
         ? `${SITE_URL}${assetUrl(product.image)}`
         : `${SITE_URL}/og-default.webp`;
       const canonical = `${SITE_URL}/products/${product.slug}`;
+      const productReviews = Number.isInteger(product.reviews) ? Math.max(0, product.reviews) : 0;
+      const productRating = Number.isFinite(product.rating)
+        ? Math.max(0, Math.min(5, product.rating))
+        : 0;
+      const hasLegacyRating = productReviews > 0 && productRating >= 1;
       const productJsonLd = {
         "@context": "https://schema.org",
         "@type": "Product",
@@ -1214,6 +1220,17 @@ async function prerender() {
         sku: product.id,
         mpn: product.id,
         image: img,
+        ...(hasLegacyRating
+          ? {
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: productRating,
+                reviewCount: productReviews,
+                bestRating: 5,
+                worstRating: 1,
+              },
+            }
+          : {}),
         // (2026-09-17) البراند الفعلي للمنتج مش اسم المتجر: brand ?? nameEn ?? name
         brand: { "@type": "Brand", name: product.brand ?? product.nameEn ?? product.name },
         offers: {
@@ -1293,6 +1310,7 @@ async function prerender() {
         ${product.ingredients ? `<h2>المكونات</h2><p>${esc(product.ingredients)}</p>` : ""}
         ${product.usage ? `<h2>طريقة الاستخدام</h2><p>${esc(product.usage)}</p>` : ""}
         <p>السعر: ${product.price} ج.م</p>
+        ${hasLegacyRating ? `<h2>تقييمات العملاء</h2><p>التقييم العام: ${productRating} من 5 (${productReviews} تقييم سابق من أرشيف مراجعات العملاء).</p>` : ""}
         <p><a href="${categoryUrl}">تصفح كل ${esc(categoryName)}</a></p>
         ${relatedBody}
         ${topicLinksHtml("product", product.id)}

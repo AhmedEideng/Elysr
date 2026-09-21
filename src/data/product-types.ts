@@ -26,6 +26,9 @@ export interface Product {
   badge?: string;
   emoji: string; // visual placeholder (fallback)
   image?: string; // مسار الصورة الحقيقية (اختياري) — مثال: "/images/1.webp"
+  /** Historical customer-review summary imported from the store archive. */
+  rating?: number;
+  reviews?: number;
   stock: number;
   featured?: boolean;
   /** مصفوفة بمعرفات المنتجات المقترحة للبيع المتقاطع (Cross-Sell) - اختياري */

@@ -2,6 +2,7 @@ import { useScrollTracking } from "@/hooks/use-scroll-tracking";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import {
+  Star,
   ShoppingCart,
   ShieldCheck,
   Truck,
@@ -33,6 +34,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { CrossSellBundle } from "@/components/sections/CrossSellBundle";
 import { FAQ } from "@/components/FAQ";
 import { CustomerReviews } from "@/features/product/components/CustomerReviews";
+import { LegacyProductReviews } from "@/features/product/components/LegacyProductReviews";
 import { ProductImage } from "@/features/product/components/ProductImage";
 import { buildOrderMessage, waLink } from "@/lib/whatsapp";
 import { ShareButton } from "@/components/ShareButton";
@@ -199,7 +201,16 @@ function ProductPage() {
   useEffect(() => {
     // أزل نسخ الـ prerender أولاً حتى لا يتكرر أي schema بعد الـ hydration
     clearPrerenderJsonLd();
-    injectJsonLd("product", productSchema(product));
+    injectJsonLd(
+      "product",
+      productSchema({
+        ...product,
+        approvedReviewSummary:
+          product.rating && product.reviews
+            ? { ratingValue: product.rating, reviewCount: product.reviews }
+            : undefined,
+      }),
+    );
     injectJsonLd(
       "breadcrumb",
       breadcrumbSchema([
@@ -456,6 +467,12 @@ function ProductPage() {
           </h1>
           <p className="mt-2 text-sm md:text-base text-muted-foreground">{product.nameEn}</p>
           <div className="mt-4 flex flex-wrap gap-2 text-xs sm:text-sm">
+            {product.rating && product.reviews ? (
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 font-bold text-amber-700 border border-amber-200">
+                <Star className="h-4 w-4 fill-current" />
+                {product.rating} ({product.reviews} تقييم سابق)
+              </div>
+            ) : null}
             <div className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1.5 font-bold text-sky-700 border border-sky-200">
               <Truck className="h-4 w-4" />
               شحن سري لكل المحافظات
@@ -631,7 +648,17 @@ function ProductPage() {
         <CrossSellBundle mainProduct={product} suggestedProducts={crossSells} />
       )}
 
-      {/* 📝 المراجعات الحقيقية (معتمدة فقط) + نموذج المشاركة */}
+      {/* ⭐ التقييمات الأرشيفية المستعادة من مراجعات عملاء سابقين */}
+      {product.rating && product.reviews ? (
+        <LegacyProductReviews
+          rating={product.rating}
+          reviewsCount={product.reviews}
+          category={product.category}
+          slug={product.slug}
+        />
+      ) : null}
+
+      {/* 📝 المراجعات الجديدة المعتمدة فقط + نموذج المشاركة */}
       <CustomerReviews productId={product.id} />
 
       {/* ── FAQ Section ── */}

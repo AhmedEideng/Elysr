@@ -33,17 +33,19 @@ export function makeProductMetaDescription(p: {
   name: string;
   description: string;
   price: number;
+  rating?: number;
+  reviews?: number;
   benefits?: string[];
 }): string {
   const firstBenefit = p.benefits?.[0] ? ` - ${p.benefits[0].slice(0, 50)}` : "";
+  const ratingPart = p.reviews && p.rating ? ` ⭐${p.rating}/5 (${p.reviews} تقييم سابق)` : "";
   const pricePart = ` - ${p.price} ج.م - شحن سري، دفع عند الاستلام`;
-  // لا نضع أي aggregate rating هنا؛ التقييمات المعتمدة تُجلب من API وقت التشغيل.
   const baseDesc = String(p.description).split("。")[0].split(".")[0].slice(0, 80);
-  const candidate = `${p.name}${firstBenefit}${pricePart} - اليسر ميديكال`;
+  const candidate = `${p.name}${firstBenefit}${ratingPart}${pricePart} - اليسر ميديكال`;
   // لو المرشح أطول من 155، استخدم الوصف المختصر
   if (candidate.length <= 155) return candidate;
-  // Fallback: اسم + وصف + سعر + شحن (قصير وفريد)
-  const short = `${p.name} - ${baseDesc} - ${p.price} ج.م - شحن سري - اليسر ميديكال`;
+  // Fallback: اسم + وصف + تقييم + سعر + شحن (قصير وفريد)
+  const short = `${p.name} - ${baseDesc}${ratingPart} - ${p.price} ج.م - شحن سري - اليسر ميديكال`;
   return makeMetaDescription(short, 155);
 }
 const DEFAULT_OG = `${SITE_URL}/og-default.webp`;
