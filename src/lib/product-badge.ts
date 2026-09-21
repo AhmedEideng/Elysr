@@ -38,6 +38,8 @@ export function getUseBadge(product: Product): UseBadge {
     return { label: "رغبة وإثارة", className: "bg-rose-700 text-white" };
   }
 
+  if (product.id === "m-01") return { label: "انتصاب وتضخيم", className: "bg-teal-700 text-white" };
+
   if (
     /(dapoxetine|130\/60|170\/60|hard-on|ferrari 130\/60|porsche 130\/60|love extra|double shot|مفعول مزدوج)/.test(
       text,
