@@ -9,6 +9,7 @@
   }
 
   var loaded = false;
+  var idleLoadScheduled = false;
 
   function loadGA() {
     if (loaded) return;
@@ -48,16 +49,32 @@
     document.head.appendChild(s);
   }
 
+  function scheduleIdleLoad() {
+    if (idleLoadScheduled || loaded) return;
+    idleLoadScheduled = true;
+    var run = function () {
+      if (!loaded) loadGA();
+    };
+    // Load after the page settles even when the visitor only reads and never
+    // interacts. Otherwise passive page views stay queued forever in dataLayer.
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(run, { timeout: 2500 });
+    } else {
+      window.setTimeout(run, 1500);
+    }
+  }
+
   if (typeof window !== "undefined") {
-    // ⚠️ scroll مش محفز: scroll restore الراوتر (scrollTo(0)) بيطلق الحدث
-    // بعد اللود مباشرة بدون أي تصرف من المستخدم → GA كان بيبدأ التحميل
-    // في نافذة الـ LCP وبيتنافس على bandwidth. التحميل دلوقتي يبدأ بعد
-    // تفاعل حقيقي فقط، عشان الزائر اللي يفتح الصفحة من غير تفاعل ما يدفعش
-    // تكلفة gtag.js (حوالي 168KB) في أول تحميل. الأحداث اللي بتتدفع قبل
-    // تحميل gtag.js بتنحفظ في dataLayer وتتبعت عند التحميل.
+    // Interaction remains the fastest path, while the post-load idle fallback
+    // captures passive views without competing with the initial paint.
     window.addEventListener("pointerdown", loadGA, { passive: true });
     window.addEventListener("touchstart", loadGA, { passive: true });
     window.addEventListener("keydown", loadGA, { passive: true });
     window.addEventListener("click", loadGA, { passive: true });
+    if (document.readyState === "complete") {
+      scheduleIdleLoad();
+    } else {
+      window.addEventListener("load", scheduleIdleLoad, { once: true });
+    }
   }
 })();
