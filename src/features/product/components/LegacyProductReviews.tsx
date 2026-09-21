@@ -29,18 +29,15 @@ export function LegacyProductReviews({
           <EyeOff className="h-4 w-4" />
         </div>
         <p className="leading-relaxed">
-          🔒 <strong>حفاظاً على السرية التامة والخصوصية المطلقة لعملائنا:</strong> يتم حجب أسماء
-          المشترين وتعميتها برمجياً (Blur Effect) لضمان حماية وسرية هويتكم الطبية والزوجية بنسبة
-          100%.
+          <strong>ملاحظة:</strong> هذه التقييمات بيانات تجريبية (Seed Data) وليست تقييمات موثقة
+          لعملاء حقيقيين. وتُحجب الأسماء المعروضة برمجياً (Blur Effect) حفاظاً على الخصوصية.
         </p>
       </div>
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8 border-b pb-8">
         <div className="text-center md:text-right">
           <h2 className="text-2xl md:text-3xl font-bold">آراء وتقييمات العملاء</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            تجارب عملاء سابقة من جميع محافظات مصر
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">بيانات تجريبية (Seed Data) للعرض فقط</p>
         </div>
 
         <div className="flex flex-col items-center md:items-end">
@@ -76,7 +73,7 @@ export function LegacyProductReviews({
 
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-700">
                     <CheckCircle className="h-3 w-3 text-emerald-600" />
-                    تقييم من عميل سابق
+                    تقييم تجريبي
                   </span>
                 </div>
                 <div className="text-[11px] text-muted-foreground mt-1.5 flex items-center gap-1.5">

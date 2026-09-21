@@ -43,5 +43,6 @@ describe("archived customer reviews", () => {
     expect(result.reviewCount).toBe(count);
     expect(result.rating).toBe(rating);
     expect(result.reviews.every((review) => review.fixedDate === true)).toBe(true);
+    expect(result.reviews.every((review) => review.city)).toBe(true);
   });
 });
