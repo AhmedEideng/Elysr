@@ -80,8 +80,12 @@ export function LegacyProductReviews({
                   </span>
                 </div>
                 <div className="text-[11px] text-muted-foreground mt-1.5 flex items-center gap-1.5">
-                  <span>{review.city}</span>
-                  <span>•</span>
+                  {review.city ? (
+                    <>
+                      <span>{review.city}</span>
+                      <span>•</span>
+                    </>
+                  ) : null}
                   <span>{review.fixedDate ? review.date : "من أرشيف العملاء"}</span>
                 </div>
               </div>
