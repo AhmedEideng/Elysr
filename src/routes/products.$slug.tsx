@@ -105,8 +105,8 @@ export const Route = createFileRoute("/products/$slug")({
     const absImg = loaderData?.product.image
       ? loaderData.product.image.startsWith("http")
         ? loaderData.product.image
-        : `${SITE_URL}${loaderData.product.image}`
-      : `${SITE_URL}/og-default.webp`;
+        : `${SITE_URL}${assetUrl(loaderData.product.image)}`
+      : `${SITE_URL}${assetUrl("/og-default.webp")}`;
     return {
       meta: [
         { title: loaderData?.product.name },

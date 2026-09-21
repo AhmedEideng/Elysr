@@ -5,6 +5,7 @@
  */
 
 import { GOVERNORATE_SHIPPING } from "@/lib/site-config";
+import { assetUrl } from "@/lib/cache";
 
 const SITE_URL = "https://elysrmedical.store";
 
@@ -58,6 +59,11 @@ function absoluteUrl(url?: string): string {
   if (!url) return DEFAULT_OG;
   if (/^https?:\/\//i.test(url)) return url;
   return `${SITE_URL}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
+function absoluteProductImage(url?: string): string {
+  if (!url) return DEFAULT_OG;
+  return absoluteUrl(/^https?:\/\//i.test(url) ? url : assetUrl(url));
 }
 
 export interface SeoMeta {
@@ -218,7 +224,7 @@ export const productSchema = (p: {
     description: p.description,
     sku: p.id,
     mpn: p.id,
-    image: absoluteUrl(p.image),
+    image: absoluteProductImage(p.image),
     ...(p.approvedReviewSummary &&
     Number.isFinite(p.approvedReviewSummary.ratingValue) &&
     p.approvedReviewSummary.ratingValue >= 1 &&
