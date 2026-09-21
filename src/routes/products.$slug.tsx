@@ -655,11 +655,15 @@ function ProductPage() {
           reviewsCount={product.reviews}
           category={product.category}
           slug={product.slug}
+          maxVisibleReviews={3}
         />
       ) : null}
 
       {/* 📝 المراجعات الجديدة المعتمدة فقط + نموذج المشاركة */}
-      <CustomerReviews productId={product.id} />
+      <CustomerReviews
+        productId={product.id}
+        maxVisibleReviews={product.rating && product.reviews ? 1 : 4}
+      />
 
       {/* ── FAQ Section ── */}
       <FAQ />

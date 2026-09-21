@@ -6,14 +6,20 @@ export function LegacyProductReviews({
   reviewsCount,
   category = "men",
   slug,
+  maxVisibleReviews = 4,
 }: {
   rating: number;
   reviewsCount: number;
   category?: ProductCategory;
   slug: string;
+  maxVisibleReviews?: number;
 }) {
   // تقييمات فريدة وثابتة لكل منتج (اختيار حتمي بحسب slug المنتج)
-  const { reviews } = getProductReviews(slug, category, reviewsCount);
+  const { reviews } = getProductReviews(
+    slug,
+    category,
+    Math.min(reviewsCount, Math.max(1, maxVisibleReviews)),
+  );
 
   return (
     <section className="mt-8 mb-8 rounded-[2rem] border border-border/50 bg-card p-6 md:p-8 shadow-sm">

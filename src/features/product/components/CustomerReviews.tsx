@@ -40,7 +40,13 @@ function Stars({ value, size = "md" }: { value: number; size?: "sm" | "md" }) {
  * - النموذج متاح دائماً: المراجعة الجديدة تُسجل "قيد المراجعة"
  *   ولا تظهر إلا بعد اعتماد المالك — لا مراجعات وهمية.
  */
-export function CustomerReviews({ productId }: { productId: string }) {
+export function CustomerReviews({
+  productId,
+  maxVisibleReviews = 4,
+}: {
+  productId: string;
+  maxVisibleReviews?: number;
+}) {
   const [reviews, setReviews] = useState<LiveReview[] | null>(null);
   const [rating, setRating] = useState(0);
   const [name, setName] = useState("");
@@ -72,10 +78,18 @@ export function CustomerReviews({ productId }: { productId: string }) {
     };
   }, [productId]);
 
+  const visibleReviews = useMemo(
+    () => (reviews ? reviews.slice(0, Math.max(1, maxVisibleReviews)) : null),
+    [reviews, maxVisibleReviews],
+  );
+
   const average = useMemo(() => {
-    if (!reviews || reviews.length === 0) return 0;
-    return Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10;
-  }, [reviews]);
+    if (!visibleReviews || visibleReviews.length === 0) return 0;
+    return (
+      Math.round((visibleReviews.reduce((s, r) => s + r.rating, 0) / visibleReviews.length) * 10) /
+      10
+    );
+  }, [visibleReviews]);
 
   const textLength = text.trim().length;
   const textValid = textLength >= MIN_TEXT && textLength <= MAX_TEXT;
@@ -124,7 +138,7 @@ export function CustomerReviews({ productId }: { productId: string }) {
       </div>
 
       {/* ── المراجعات المعتمدة (تظهر فقط إن وُجدت فعلاً) ── */}
-      {reviews !== null && reviews.length > 0 && (
+      {visibleReviews !== null && visibleReviews.length > 0 && (
         <div className="mt-6">
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 px-4 py-3">
             <div className="flex items-center gap-3">
@@ -132,12 +146,12 @@ export function CustomerReviews({ productId }: { productId: string }) {
               <Stars value={Math.round(average)} size="md" />
             </div>
             <span className="text-xs font-bold text-emerald-800">
-              متوسط {reviews.length} مراجعة موثقة
+              متوسط {visibleReviews.length} مراجعة موثقة
             </span>
           </div>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
-            {reviews.map((review, i) => (
+            {visibleReviews.map((review, i) => (
               <article
                 key={`${review.date}-${i}`}
                 className="rounded-2xl border border-border/60 bg-background p-5 shadow-sm transition-smooth hover:shadow-md"
