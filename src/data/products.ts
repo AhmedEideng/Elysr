@@ -182,15 +182,67 @@ export const getBundlePresentation = (product: Product): "gel" | "cream" | null 
 };
 
 /**
+ * يحدد نوع المنتج الظاهر في الباقة. النوع هنا هو الشكل/الصنف التجاري
+ * (عسل، جل، كريم، شوكولاتة، بخاخ...) وليس مجرد اختلاف الاسم.
+ */
+export const getBundleProductType = (
+  product: Product,
+):
+  | "tablet"
+  | "capsule"
+  | "gel"
+  | "cream"
+  | "honey"
+  | "chocolate"
+  | "spray"
+  | "drops"
+  | "gum"
+  | "wipes"
+  | "sachet"
+  | "coffee"
+  | "digital-pump"
+  | "vacuum-kit"
+  | "manual-pump"
+  | "breast-kit"
+  | "traction-device"
+  | "electric-pump"
+  | "other" => {
+  const text = `${product.name} ${product.nameEn} ${product.slug}`.toLowerCase();
+  const oralForm = getOralSolidForm(product);
+  if (oralForm) return oralForm;
+  const presentation = getBundlePresentation(product);
+  if (presentation) return presentation;
+  if (/عسل|honey/.test(text)) return "honey";
+  if (/شيكول|شوكول|chocolate/.test(text)) return "chocolate";
+  if (/بخاخ|spray/.test(text)) return "spray";
+  if (/قطر|قطرات|drops/.test(text)) return "drops";
+  if (/علك|gum/.test(text)) return "gum";
+  if (/مناديل|wipes/.test(text)) return "wipes";
+  if (/أكياس|sachet/.test(text)) return "sachet";
+  if (/قهوة|coffee/.test(text)) return "coffee";
+
+  if (product.category === "devices") {
+    if (/رقمية|digital/.test(text)) return "digital-pump";
+    if (/حقيبة|kit/.test(text) && /صدر|breast/.test(text)) return "breast-kit";
+    if (/حقيبة|kit/.test(text)) return "vacuum-kit";
+    if (/شد|إطالة|traction/.test(text)) return "traction-device";
+    if (/كهرب|electric/.test(text)) return "electric-pump";
+    if (/يدوية|manual/.test(text)) return "manual-pump";
+  }
+
+  return "other";
+};
+
+/**
  * يختار عضوين غير صلبين فموياً من نفس الفئة بترتيب دوّار ثابت.
  * بهذا تظل كل باقة من 3 منتجات، وتتنوع الاقتراحات من صفحة لأخرى،
- * ولا تدخل الأقراص أو الكبسولات في الباقة معاً.
+ * ولا تتكرر نفس فئة المنتج داخل الباقة.
  */
 function pickVariedBundleSuggestions(product: Product, preferredIds: string[] = []): Product[] {
   const preferred = preferredIds
     .map((id) => getProductById(id))
     .filter((p): p is Product => Boolean(p))
-    .filter((p) => p.id !== product.id && !getOralSolidForm(p));
+    .filter((p) => p.category === product.category && p.id !== product.id && !getOralSolidForm(p));
   const preferredIdsSet = new Set(preferred.map((p) => p.id));
   const pool = products.filter(
     (candidate) =>
@@ -209,8 +261,30 @@ function pickVariedBundleSuggestions(product: Product, preferredIds: string[] = 
   const chosen: Product[] = [];
   for (const candidate of [...preferred, ...rotated]) {
     if (chosen.length === 2) break;
+
+    const candidateType = getBundleProductType(candidate);
+    const hasSameType = [product, ...chosen].some(
+      (existing) => getBundleProductType(existing) === candidateType,
+    );
+    if (hasSameType) continue;
+
+    const candidateOralForm = getOralSolidForm(candidate);
+    const existingOralForms = new Set(
+      [product, ...chosen]
+        .map((existing) => getOralSolidForm(existing))
+        .filter((form): form is "tablet" | "capsule" => Boolean(form)),
+    );
+    // استمرار منع خلط الأقراص مع الكبسولات، حتى مع اختلاف النوع.
+    if (
+      candidateOralForm &&
+      existingOralForms.size > 0 &&
+      !existingOralForms.has(candidateOralForm)
+    ) {
+      continue;
+    }
+
     const candidatePresentation = getBundlePresentation(candidate);
-    const conflictsWithGelOrCream = [product, ...chosen].some((existing) => {
+    const mixesGelAndCream = [product, ...chosen].some((existing) => {
       const existingPresentation = getBundlePresentation(existing);
       return Boolean(
         candidatePresentation &&
@@ -218,7 +292,9 @@ function pickVariedBundleSuggestions(product: Product, preferredIds: string[] = 
         candidatePresentation !== existingPresentation,
       );
     });
-    if (!conflictsWithGelOrCream) chosen.push(candidate);
+    if (mixesGelAndCream) continue;
+
+    chosen.push(candidate);
   }
   return chosen;
 }

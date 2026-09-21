@@ -32,6 +32,7 @@ try {
     HOMEPAGE_CONCERN_CANDIDATES,
     getOralSolidForm,
     getBundlePresentation,
+    getBundleProductType,
   } = await vite.ssrLoadModule("/src/data/products.ts");
   const { articles } = await vite.ssrLoadModule("/src/data/articles.ts");
   const { seoLandingPages } = await vite.ssrLoadModule("/src/data/landing-pages.ts");
@@ -509,6 +510,14 @@ try {
     assert.ok(
       presentations.size <= 1,
       `Bundle mixes gel and cream: ${mainId} (${members.join(", ")})`,
+    );
+    const productTypes = members.map((id) =>
+      getBundleProductType(products.find((product) => product.id === id)),
+    );
+    assert.equal(
+      new Set(productTypes).size,
+      productTypes.length,
+      `Bundle repeats a product type (${productTypes.join(", ")}): ${mainId} (${members.join(", ")})`,
     );
   }
 
