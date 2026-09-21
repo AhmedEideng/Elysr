@@ -76,7 +76,7 @@ export function LegacyProductReviews({
                 <div className="text-[11px] text-muted-foreground mt-1.5 flex items-center gap-1.5">
                   <span>{review.city}</span>
                   <span>•</span>
-                  <span>{review.date}</span>
+                  <span>من أرشيف العملاء</span>
                 </div>
               </div>
               <div className="flex text-amber-500">

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingCart, Heart } from "lucide-react";
+import { ShoppingCart, Heart, Star } from "lucide-react";
 import type { Product } from "@/data/product-types";
 import { formatPrice } from "@/data/product-types";
 import { useCart } from "@/hooks/use-cart";
@@ -135,6 +135,16 @@ export function ProductCard({ product, listName }: { product: Product; listName?
         >
           {product.name}
         </Link>
+        {product.rating && product.reviews ? (
+          <div className="flex items-center gap-1 text-[11px]">
+            <div className="flex items-center rounded-full bg-yellow-400/10 px-2 py-0.5 font-black text-amber-700">
+              <Star className="mr-1 h-3 w-3 fill-yellow-400 text-yellow-400" /> {product.rating}
+            </div>
+            <span className="font-medium text-muted-foreground">
+              ({product.reviews} تقييم سابق)
+            </span>
+          </div>
+        ) : null}
         <div className="mt-auto flex items-end justify-between gap-2 pt-3">
           <span className="text-xl font-black tracking-tight text-primary">
             {formatPrice(product.price)}
