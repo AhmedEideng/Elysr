@@ -74,18 +74,20 @@ export function LegacyProductReviews({
 
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-700">
                     <CheckCircle className="h-3 w-3 text-emerald-600" />
-                    تقييم من عميل سابق
+                    رأي عميل
                   </span>
                 </div>
-                <div className="text-[11px] text-muted-foreground mt-1.5 flex items-center gap-1.5">
-                  {review.city ? (
-                    <>
-                      <span>{review.city}</span>
-                      <span>•</span>
-                    </>
-                  ) : null}
-                  <span>{review.fixedDate ? review.date : "من أرشيف العملاء"}</span>
-                </div>
+                {review.city || review.fixedDate ? (
+                  <div className="text-[11px] text-muted-foreground mt-1.5 flex items-center gap-1.5">
+                    {review.city ? (
+                      <>
+                        <span>{review.city}</span>
+                        {review.fixedDate ? <span>•</span> : null}
+                      </>
+                    ) : null}
+                    {review.fixedDate ? <span>{review.date}</span> : null}
+                  </div>
+                ) : null}
               </div>
               <div className="flex text-amber-500">
                 {[...Array(review.rating)].map((_, i) => (
