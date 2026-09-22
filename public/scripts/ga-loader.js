@@ -1,4 +1,8 @@
 (function () {
+  var measurementId = "G-V3X7Q3D0RR";
+  var configured = false;
+  var scriptLoaded = false;
+
   if (typeof window !== "undefined") {
     window.dataLayer = window.dataLayer || [];
     window.gtag =
@@ -8,73 +12,38 @@
       };
   }
 
-  var loaded = false;
-  var idleLoadScheduled = false;
-
-  function loadGA() {
-    if (loaded) return;
-    loaded = true;
-    if (typeof window !== "undefined") {
-      window.removeEventListener("pointerdown", loadGA);
-      window.removeEventListener("touchstart", loadGA);
-      window.removeEventListener("keydown", loadGA);
-      window.removeEventListener("click", loadGA);
-    }
+  function configureGA() {
+    if (configured || typeof window === "undefined") return;
+    configured = true;
     window.gtag("js", new Date());
-    // (2026-09-18) GA4 config محسّن: enhanced measurement (scroll/outbound/
-    // site_search/file_download) + debug في dev + content groups (للتحليل
-    // التلقائي) + send_page_view=false (الراوتر بيدفعها يدوي مع topic).
-    window.gtag("config", "G-V3X7Q3D0RR", {
+    // GA4 config is queued before the SPA can emit its first page_view.
+    // send_page_view=false is intentional: the router sends one page_view per route.
+    window.gtag("config", measurementId, {
       transport_type: "beacon",
       send_page_view: false,
       cookie_domain: "auto",
       cookie_flags: "SameSite=None;Secure",
-      // Enhanced Measurement — كل اللي GA4 يقدر يتتبعه تلقائياً:
-      // scroll → لازم نستخدم scroll_milestone بدل الـ clash
-      // outbound → بيتعارض مع الـ share_click لو ما عطلناه
-      // site_search → بنبعث search يدوياً مع results_count
-      // file_download → مفيد لتنزيل الملفات العامة
-      // نفعّلها كلها + scroll/outbound=False (عشان الـ custom events)
-      scroll_events: false, // نستخدم scroll_milestone
-      outbound_links: false, // نستخدم outbound_click (أدق)
-      site_search: false, // نستخدم search (مع results_count)
+      // Enhanced Measurement settings that are not duplicated by custom events.
       file_downloads: true,
-      // debug_mode في dev (يُفعّل تلقائياً عبر ?debug في URL)
       debug_mode:
         typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug"),
     });
+  }
+
+  function loadGA() {
+    if (scriptLoaded || typeof window === "undefined") return;
+    scriptLoaded = true;
     var s = document.createElement("script");
     s.async = true;
-    s.src = "https://www.googletagmanager.com/gtag/js?id=G-V3X7Q3D0RR";
+    s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(measurementId);
     document.head.appendChild(s);
   }
 
-  function scheduleIdleLoad() {
-    if (idleLoadScheduled || loaded) return;
-    idleLoadScheduled = true;
-    var run = function () {
-      if (!loaded) loadGA();
-    };
-    // Load after the page settles even when the visitor only reads and never
-    // interacts. Otherwise passive page views stay queued forever in dataLayer.
-    if (typeof window.requestIdleCallback === "function") {
-      window.requestIdleCallback(run, { timeout: 2500 });
-    } else {
-      window.setTimeout(run, 1500);
-    }
-  }
-
   if (typeof window !== "undefined") {
-    // Interaction remains the fastest path, while the post-load idle fallback
-    // captures passive views without competing with the initial paint.
-    window.addEventListener("pointerdown", loadGA, { passive: true });
-    window.addEventListener("touchstart", loadGA, { passive: true });
-    window.addEventListener("keydown", loadGA, { passive: true });
-    window.addEventListener("click", loadGA, { passive: true });
-    if (document.readyState === "complete") {
-      scheduleIdleLoad();
-    } else {
-      window.addEventListener("load", scheduleIdleLoad, { once: true });
-    }
+    // Configure immediately so page_view/e-commerce events queued by the SPA
+    // come after the config command. The external script remains async and does
+    // not block first paint, but passive visits are not lost waiting for idle.
+    configureGA();
+    loadGA();
   }
 })();

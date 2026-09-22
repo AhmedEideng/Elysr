@@ -58,7 +58,8 @@ describe("analytics event plumbing", () => {
     w.gtag = gtag;
     trackAddToCart({ id: "m-02", name: "Test 2", price: 50, qty: 3 });
     expect(gtag).toHaveBeenCalledTimes(1);
-    const [event, params] = gtag.mock.calls[0];
+    const [command, event, params] = gtag.mock.calls[0];
+    expect(command).toBe("event");
     expect(event).toBe("add_to_cart");
     expect(params.value).toBe(150);
     expect(params.items[0].quantity).toBe(3);

@@ -54,10 +54,8 @@
       content="اليسر ميديكال أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. منتجات أصلية مختارة بعناية، شحن سري ودفع عند الاستلام."
     />
     <meta name="twitter:image" content="https://elysrmedical.store/og-default.webp" />
-    <!-- (2026-09-15) Preconnects لمصادر GA اتشالوا: PSI وسمّهم "unused"
-         — GA بيحمّل بعد نافذة الـ LCP (fallback 5s في ga-loader.js) فمفيش
-         ليه أثر على LCP، والاتصالان في t=0 كانوا بيستهلكوا bandwidth/CPU
-         على المسار الحرج في كل زيارة. -->
+    <!-- GA config is initialized early and the external gtag script is loaded
+         asynchronously, so visit/event queues are ready without blocking paint. -->
     <!-- 🚀 Self-hosted font (no Google Fonts round-trip).
          Preload only the Arabic subset since the page is Arabic. -->
     <link rel="preload" href="/fonts/cairo.woff2" as="font" type="font/woff2" crossorigin />
@@ -1030,7 +1028,7 @@
     </script>
 
     <!-- 🚀 Third-Party Scripts — Google Analytics with cache-busting version -->
-    <script src="/scripts/ga-loader.js?v=85" defer></script>
+    <script src="/scripts/ga-loader.js?v=86" defer></script>
   </head>
   <body>
     <div id="root"></div>

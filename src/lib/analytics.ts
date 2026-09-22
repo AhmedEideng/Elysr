@@ -61,7 +61,10 @@ function emit(event: string, params: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   const w = window as unknown as AnalyticsWindow;
   if (typeof w.gtag === "function") {
-    w.gtag(event, params);
+    // GA4's gtag API requires the command "event" before the event name:
+    // gtag("event", "add_to_cart", params). Calling gtag(event, params)
+    // queues an unknown command and does not register the event in GA4.
+    w.gtag("event", event, params);
   } else if (Array.isArray(w.dataLayer)) {
     w.dataLayer.push({ event, ...params });
   }
