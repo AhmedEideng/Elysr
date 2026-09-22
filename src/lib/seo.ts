@@ -4,7 +4,7 @@
  * - حقن JSON-LD (Schema.org)
  */
 
-import { GOVERNORATE_SHIPPING } from "@/lib/site-config";
+import { GOVERNORATE_SHIPPING, getShippingDeliveryWindow } from "@/lib/site-config";
 import { assetUrl } from "@/lib/cache";
 
 const SITE_URL = "https://elysrmedical.store";
@@ -23,31 +23,130 @@ export function makeMetaDescription(text = "", maxLength = 155): string {
   return `${base}…`;
 }
 
-/**
- * 🎯 وصف منتج مخصص لـ Google لا يتم إعادة كتابته
- * يبني وصف غني بالبيانات الفريدة (السعر، الشحن، ومعلومات المنتج) لمنع Google من
- * استبداله بوصف الموقع العام. جوجل يعيد كتابة الـ meta descriptions
- * التي تعتبرها مكررة أو مبالغ فيها، لكن الوصف الغني بالبيانات الفريدة
- * يتم الاحتفاظ به.
- */
-export function makeProductMetaDescription(p: {
+/** Returns a compact title that never cuts a product name in the middle of a word. */
+export function makeProductMetaTitle(name: string, maxLength = 60): string {
+  const clean = String(name).trim().replace(/\s+/g, " ");
+  if (clean.length <= maxLength) return clean;
+
+  const cut = clean.slice(0, Math.max(1, maxLength - 1));
+  const lastSpace = cut.lastIndexOf(" ");
+  let base = lastSpace > 20 ? cut.slice(0, lastSpace) : cut;
+  const openParen = base.lastIndexOf("(");
+  const closeParen = base.lastIndexOf(")");
+  if (openParen > closeParen && openParen > base.length - 28) {
+    base = base.slice(0, openParen).trimEnd();
+  }
+  return `${base.trimEnd()}…`;
+}
+
+type ProductMetaCategory = "men" | "women" | "devices";
+
+type ProductMetaInput = {
   name: string;
+  nameEn?: string;
+  category?: ProductMetaCategory;
   description: string;
-  price: number;
+  stock?: number;
   rating?: number;
   reviews?: number;
   benefits?: string[];
-}): string {
-  const firstBenefit = p.benefits?.[0] ? ` - ${p.benefits[0].slice(0, 50)}` : "";
-  const ratingPart = p.reviews && p.rating ? ` ⭐${p.rating}/5 (${p.reviews} تقييم سابق)` : "";
-  const pricePart = ` - ${p.price} ج.م - شحن سري، دفع عند الاستلام`;
-  const baseDesc = String(p.description).split("。")[0].split(".")[0].slice(0, 80);
-  const candidate = `${p.name}${firstBenefit}${ratingPart}${pricePart} - اليسر ميديكال`;
-  // لو المرشح أطول من 155، استخدم الوصف المختصر
-  if (candidate.length <= 155) return candidate;
-  // Fallback: اسم + وصف + تقييم + سعر + شحن (قصير وفريد)
-  const short = `${p.name} - ${baseDesc}${ratingPart} - ${p.price} ج.م - شحن سري - اليسر ميديكال`;
-  return makeMetaDescription(short, 155);
+  ingredients?: string;
+  usage?: string;
+};
+
+type ProductMetaKind = {
+  label: string;
+  salesLabel: string;
+};
+
+function productMetaKind(p: ProductMetaInput): ProductMetaKind {
+  const text =
+    `${p.name} ${p.nameEn ?? ""} ${p.description} ${p.ingredients ?? ""} ${p.usage ?? ""}`.toLowerCase();
+
+  if (p.category === "devices" || /جهاز|مضخة|ved|pump|device|extender|traction/.test(text)) {
+    return {
+      label: "جهاز أصلي للاستخدام الشخصي، حل عملي لدعم الأداء والراحة",
+      salesLabel: "جهاز أصلي للاستخدام الشخصي لدعم الأداء والراحة",
+    };
+  }
+
+  if (
+    /sildenafil|tadalafil|dapoxetine|lidocaine|prilocaine|viagra|cialis|levitra|فياجرا|سياليس|دابوكستين|ليدوكايين|بريلوكايين|منتج دوائي|مادة فعالة/.test(
+      text,
+    )
+  ) {
+    return {
+      label: "منتج دوائي أصلي يحتوي على مادة فعالة، خيار عملي لدعم الأداء والثقة",
+      salesLabel: "منتج دوائي أصلي بمادة فعالة لدعم الأداء والثقة",
+    };
+  }
+
+  if (/كريم|جل|بخاخ|رذاذ|مناديل|cream|gel|spray|wipes|topical|emollient/.test(text)) {
+    const audience = p.category === "women" ? "للنساء" : "للرجال";
+    return {
+      label: `منتج موضعي أصلي ${audience} للاستخدام الخارجي والتحكم في التوقيت`,
+      salesLabel: `منتج موضعي أصلي ${audience} للاستخدام الخارجي وتعزيز الثقة`,
+    };
+  }
+
+  if (p.category === "women") {
+    return {
+      label: "منتج أصلي للنساء للراحة والحيوية الزوجية والثقة",
+      salesLabel: "منتج أصلي للنساء للراحة والحيوية الزوجية",
+    };
+  }
+
+  if (/تأخير|سرعة القذف|delay|premature/.test(text)) {
+    return {
+      label: "مكمل غذائي أصلي للرجال للتحكم في التوقيت وتعزيز الثقة",
+      salesLabel: "مكمل أصلي للرجال للتحكم في التوقيت والثقة",
+    };
+  }
+
+  return {
+    label: "مكمل غذائي أصلي للرجال لدعم الطاقة والحيوية والثقة",
+    salesLabel: "مكمل غذائي أصلي للرجال للطاقة والحيوية",
+  };
+}
+
+function compactProductName(name: string, maxLength = 46): string {
+  const clean = String(name).trim().replace(/\s+/g, " ");
+  if (clean.length <= maxLength) return clean;
+
+  // Keep the Arabic product identity first; the English name remains in the
+  // title, visible product heading, and Product structured data.
+  const withoutEnglish = clean.replace(/\s*\([^)]*\)\s*$/, "").trim();
+  const candidate = withoutEnglish || clean;
+  if (candidate.length <= maxLength) return candidate;
+
+  const cut = candidate.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trimEnd();
+}
+
+/**
+ * Product descriptions use strong, benefit-led sales copy instead of the
+ * catalogue description. The preferred variants end at a sentence boundary
+ * and include product type, target audience/use, availability, discreet
+ * shipping, cash on delivery, and the brand — without showing a price.
+ */
+export function makeProductMetaDescription(p: ProductMetaInput, maxLength = 155): string {
+  const name = compactProductName(p.name);
+  const kind = productMetaKind(p);
+  const availability = p.stock === 0 ? "غير متوفر حالياً" : "اطلب الآن";
+  const brand = "اليسر ميديكال";
+
+  const variants = [
+    `${name} — ${kind.label}. ${availability}؛ شحن سري ودفع عند الاستلام. ${brand}.`,
+    `${name} — ${kind.salesLabel}. ${availability}؛ شحن سري ودفع عند الاستلام. ${brand}.`,
+    `${name} — ${kind.salesLabel}. ${availability} مع شحن سري ودفع عند الاستلام من ${brand}.`,
+  ];
+
+  const complete = variants.find((variant) => variant.length <= maxLength);
+  if (complete) return complete;
+
+  // The compact name and sales label keep this fallback sentence-complete.
+  return `${name} — ${availability}؛ شحن سري ودفع عند الاستلام. ${brand}.`;
 }
 const DEFAULT_OG = `${SITE_URL}/og-default.webp`;
 
@@ -99,10 +198,10 @@ export function applySeo(meta: SeoMeta = {}) {
   const path = typeof window !== "undefined" ? window.location.pathname : "/";
   const url = `${SITE_URL}${path}`;
   const title =
-    meta.title ?? "اليسر ميديكال — أفضل شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر";
+    meta.title ?? "اليسر ميديكال — أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر";
   const description =
     meta.description ??
-    "اليسر ميديكال أفضل شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. منتجات أصلية مختارة بعناية، شحن سري ودفع عند الاستلام.";
+    "اليسر ميديكال أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. منتجات أصلية مختارة بعناية، شحن سري ودفع عند الاستلام.";
   const image = absoluteUrl(meta.image);
 
   document.title = title;
@@ -169,14 +268,24 @@ export function clearPrerenderJsonLd() {
 // Schema builders جاهزة
 /** Merchant shipping bands generated from the same governorate config used at checkout. */
 export function merchantShippingDetails() {
-  const byRate = new Map<number, string[]>();
+  type ShippingBand = {
+    rate: number;
+    regions: string[];
+    delivery: ReturnType<typeof getShippingDeliveryWindow>;
+  };
+
+  // Group by both price and delivery window so the schema cannot claim
+  // 1–5 days for Cairo/Giza when the customer-facing policy says 24–48 hours.
+  const byBand = new Map<string, ShippingBand>();
   for (const entry of GOVERNORATE_SHIPPING) {
-    const regions = byRate.get(entry.shipping) ?? [];
-    regions.push(entry.name);
-    byRate.set(entry.shipping, regions);
+    const delivery = getShippingDeliveryWindow(entry.name);
+    const key = `${entry.shipping}:${delivery.key}`;
+    const band = byBand.get(key) ?? { rate: entry.shipping, regions: [], delivery };
+    band.regions.push(entry.name);
+    byBand.set(key, band);
   }
 
-  return [...byRate.entries()].map(([rate, regions]) => ({
+  return [...byBand.values()].map(({ rate, regions, delivery }) => ({
     "@type": "OfferShippingDetails",
     shippingDestination: {
       "@type": "DefinedRegion",
@@ -190,16 +299,18 @@ export function merchantShippingDetails() {
     },
     deliveryTime: {
       "@type": "ShippingDeliveryTime",
+      // The public promise is already a total delivery window. Keep handling
+      // at zero here so transitTime matches the visible 1–2 / 2–4 day range.
       handlingTime: {
         "@type": "QuantitativeValue",
         minValue: 0,
-        maxValue: 1,
+        maxValue: 0,
         unitCode: "DAY",
       },
       transitTime: {
         "@type": "QuantitativeValue",
-        minValue: 1,
-        maxValue: 5,
+        minValue: delivery.minDays,
+        maxValue: delivery.maxDays,
         unitCode: "DAY",
       },
     },
@@ -212,6 +323,8 @@ export const productSchema = (p: {
   name: string;
   nameEn?: string;
   brand?: string;
+  mpn?: string;
+  gtin?: string;
   description: string;
   price: number;
   stock: number;
@@ -224,7 +337,8 @@ export const productSchema = (p: {
     name: p.name,
     description: p.description,
     sku: p.id,
-    mpn: p.id,
+    ...(p.mpn?.trim() ? { mpn: p.mpn.trim() } : {}),
+    ...(p.gtin?.trim() ? { gtin: p.gtin.trim() } : {}),
     image: absoluteProductImage(p.image),
     ...(p.approvedReviewSummary &&
     Number.isFinite(p.approvedReviewSummary.ratingValue) &&
@@ -260,8 +374,7 @@ export const productSchema = (p: {
       },
       shippingDetails: merchantShippingDetails(),
     },
-    // (2026-09-17) البراند الفعلي للمنتج مش اسم المتجر: brand ?? nameEn ?? name.
-    brand: { "@type": "Brand", name: p.brand ?? p.nameEn ?? p.name },
+    ...(p.brand?.trim() ? { brand: { "@type": "Brand", name: p.brand.trim() } } : {}),
   };
 };
 

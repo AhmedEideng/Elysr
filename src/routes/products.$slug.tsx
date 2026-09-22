@@ -29,6 +29,7 @@ import {
   productSchema,
   breadcrumbSchema,
   makeProductMetaDescription,
+  makeProductMetaTitle,
 } from "@/lib/seo";
 import { ProductCard } from "@/components/ProductCard";
 import { CrossSellBundle } from "@/components/sections/CrossSellBundle";
@@ -109,7 +110,7 @@ export const Route = createFileRoute("/products/$slug")({
       : `${SITE_URL}${assetUrl("/og-default.webp")}`;
     return {
       meta: [
-        { title: loaderData?.product.name },
+        { title: loaderData?.product ? makeProductMetaTitle(loaderData.product.name) : "المنتج" },
         {
           name: "description",
           content: loaderData?.product ? makeProductMetaDescription(loaderData.product) : "",

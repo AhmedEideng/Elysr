@@ -6,6 +6,8 @@
  *
  * ملاحظة: لا يوجد حالياً حقن FAQ schema داخل src/routes/products.$slug.tsx.
  */
+import { SHIPPING_DELIVERY_TEXT } from "@/lib/site-config";
+
 export interface ProductFAQ {
   question: string;
   answer: string;
@@ -19,8 +21,7 @@ export const productFAQs: ProductFAQ[] = [
   },
   {
     question: "كم يستغرق الشحن؟",
-    answer:
-      "يتم التوصيل داخل القاهرة والجيزة خلال 24-48 ساعة عمل. أما باقي محافظات الجمهورية فيستغرق الشحن من 2 إلى 4 أيام عمل كحد أقصى.",
+    answer: `${SHIPPING_DELIVERY_TEXT}.`,
   },
   {
     question: "كيف يمكنني الدفع؟",

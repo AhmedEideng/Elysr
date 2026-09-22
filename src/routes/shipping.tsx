@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHero } from "@/components/PageHero";
 import { FREE_SHIPPING_THRESHOLD, GOVERNORATE_SHIPPING } from "@/lib/governorates";
+import { SHIPPING_DELIVERY_TEXT } from "@/lib/site-config";
 import { formatPrice } from "@/data/product-types";
 
 export const Route = createFileRoute("/shipping")({
@@ -32,7 +33,7 @@ function ShippingPage() {
 
       <div className="prose prose-lg max-w-3xl mx-auto text-foreground">
         <h2 className="text-2xl font-bold mt-8 mb-3">مدة التوصيل</h2>
-        <p>القاهرة والجيزة: 24-48 ساعة. باقي المحافظات: 2-4 أيام عمل.</p>
+        <p>{SHIPPING_DELIVERY_TEXT}.</p>
         <h2 className="text-2xl font-bold mt-8 mb-3">رسوم الشحن</h2>
         <p>
           تختلف حسب المحافظة (من {formatPrice(minShipping)} إلى {formatPrice(maxShipping)}). الشحن

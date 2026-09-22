@@ -55,6 +55,7 @@ try {
   const configDb = JSON.parse(readFileSync(resolve(ROOT, "api/lib/config-db.json"), "utf-8"));
   const cacheConfig = JSON.parse(readFileSync(resolve(ROOT, "config/cache-version.json"), "utf-8"));
   const cacheModule = await vite.ssrLoadModule("/src/lib/cache.ts");
+  const { makeProductMetaDescription } = await vite.ssrLoadModule("/src/lib/seo.ts");
   assert.equal(cacheModule.CACHE_VERSION, cacheConfig.version, "Cache version source mismatch");
   // (2026-09-15) package.json ↔ package-lock.json لازم يفضلوا متزامنين —
   // كان الـ release script بيهمل الـ lock فتجمع drift لـ 5 releases.
@@ -80,8 +81,48 @@ try {
       `Duplicate cache version in ${script}`,
     );
   }
+  // The prerender fallback must be real visible HTML, never a clipped
+  // crawler-only copy. This protects the SEO/UX contract from regression.
+  {
+    const prerender = readFileSync(resolve(ROOT, "scripts/prerender-seo.mjs"), "utf-8");
+    assert.match(prerender, /data-prerender-content dir="rtl"/);
+    assert.doesNotMatch(prerender, /data-prerender-content[^>]*clip:/);
+    assert.doesNotMatch(prerender, /elysr-prerender-shell/);
+  }
 
   assert.deepEqual(productsDb, products, "products-db.json is stale; run npm run build");
+
+  // Product meta copy is intentionally sales-led and price-free. Keep the
+  // generated SPA/prerender template from drifting back to mechanical or
+  // instruction-heavy descriptions.
+  for (const product of products) {
+    const description = makeProductMetaDescription(product);
+    assert.ok(
+      description.length <= 155,
+      `Product meta description too long: ${product.slug} (${description.length})`,
+    );
+    assert.doesNotMatch(
+      description,
+      /\d+\s*ج\.م|السعر|حسب|تعليمات|وفق|النشرة|استشر/,
+      `Product meta description contains removed pricing/instruction copy: ${product.slug}`,
+    );
+    assert.match(
+      description,
+      /اطلب الآن|غير متوفر حالياً/,
+      `Product meta availability missing: ${product.slug}`,
+    );
+    assert.match(
+      description,
+      /شحن سري ودفع عند الاستلام/,
+      `Product meta shipping missing: ${product.slug}`,
+    );
+    assert.match(description, /اليسر ميديكال/, `Product meta brand missing: ${product.slug}`);
+    assert.match(
+      description,
+      /[.!؟]$/,
+      `Product meta description must end as a sentence: ${product.slug}`,
+    );
+  }
   // config-db.json = artifact للسيرفر (مش مصدر): الشحن/العروض/نسبة الباقة
   // مولّد من مصادر TS وقت البناء (SSOT = TS).
   // لو حد عدّل الـ JSON يدويًا، هيفشل الـ test هنا حتى يعمل build.
@@ -684,6 +725,21 @@ try {
     (catalogFeed.match(/<g:google_product_category>/g) || []).length,
     inStockProducts.length,
     "Every catalog feed item must have an official Google product category",
+  );
+  assert.equal(
+    (catalogFeed.match(/<g:identifier_exists>/g) || []).length,
+    inStockProducts.length,
+    "Every catalog feed item must declare identifier_exists",
+  );
+  assert.equal(
+    (catalogFeed.match(/<g:identifier_exists>no<\/g:identifier_exists>/g) || []).length,
+    inStockProducts.filter((product) => !product.gtin && !product.mpn).length,
+    "identifier_exists=no must match products without verified GTIN/MPN",
+  );
+  assert.equal(
+    (catalogFeed.match(/<g:brand>/g) || []).length,
+    inStockProducts.filter((product) => Boolean(product.brand?.trim())).length,
+    "Merchant feed must not invent a brand from the product name",
   );
   assert.doesNotMatch(
     catalogFeed,

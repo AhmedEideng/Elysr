@@ -103,7 +103,7 @@ function validateSchema(filePath, schema) {
 
   switch (primaryType) {
     case "Product": {
-      const required = ["name", "description", "sku", "image", "offers", "brand"];
+      const required = ["name", "description", "sku", "image", "offers"];
       for (const key of required) {
         if (!schema[key]) errors.push(`Product missing required field: ${key}`);
       }

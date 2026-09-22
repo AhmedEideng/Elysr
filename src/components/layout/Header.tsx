@@ -177,7 +177,7 @@ export function Header() {
           <Link to="/" className="flex items-center">
             <img
               src={logoMonoSmall}
-              alt="اليسر ميديكال — أفضل شركة متخصصة في المنتجات الأصلية"
+              alt="اليسر ميديكال — أكبر شركة متخصصة في المنتجات الأصلية"
               className="h-11 w-auto object-contain md:h-12"
               width={130}
               height={49}

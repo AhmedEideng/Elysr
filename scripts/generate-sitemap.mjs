@@ -562,7 +562,10 @@ ${articleImageEntries}
       description: buildFeedDescription(p),
       link: `${SITE_URL}/products/${p.slug}`,
       image_link: `${SITE_URL}${assetUrl(p.image)}`,
-      brand: p.brand ?? p.nameEn ?? p.name,
+      ...(p.brand?.trim() ? { brand: p.brand.trim() } : {}),
+      ...(p.gtin?.trim() ? { gtin: p.gtin.trim() } : {}),
+      ...(p.mpn?.trim() ? { mpn: p.mpn.trim() } : {}),
+      identifier_exists: p.gtin?.trim() || p.mpn?.trim() ? "yes" : "no",
       condition: "new",
       availability: p.stock > 0 ? "in stock" : "out of stock",
       price: `${p.price} EGP`,
@@ -578,13 +581,20 @@ ${articleImageEntries}
 ${catalogProducts
   .map((p) => {
     const row = feedRow(p);
+    const optionalIdentifiers = [
+      row.brand ? `      <g:brand>${esc(row.brand)}</g:brand>` : "",
+      row.gtin ? `      <g:gtin>${esc(row.gtin)}</g:gtin>` : "",
+      row.mpn ? `      <g:mpn>${esc(row.mpn)}</g:mpn>` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
     return `    <item>
       <g:id>${esc(row.id)}</g:id>
       <g:title>${esc(row.title)}</g:title>
       <g:description>${esc(row.description)}</g:description>
       <g:link>${row.link}</g:link>
       <g:image_link>${row.image_link}</g:image_link>
-      <g:brand>${esc(row.brand)}</g:brand>
+${optionalIdentifiers ? `${optionalIdentifiers}\n` : ""}      <g:identifier_exists>${row.identifier_exists}</g:identifier_exists>
       <g:condition>${row.condition}</g:condition>
       <g:availability>${row.availability}</g:availability>
       <g:price>${row.price}</g:price>
@@ -605,6 +615,9 @@ ${catalogProducts
       "link",
       "image_link",
       "brand",
+      "gtin",
+      "mpn",
+      "identifier_exists",
       "condition",
       "availability",
       "price",

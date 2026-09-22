@@ -8,10 +8,10 @@
  *   • Full Open Graph + Twitter card meta
  *   • <link rel="canonical">
  *   • Schema.org JSON-LD (Product / Article / BreadcrumbList / WebPage)
- *   • A <noscript>-friendly content block holding the real text
- *     (product name, description, benefits, article body) so
- *     Googlebot and social previewers see real content even
- *     before the React app boots.
+ *   • A visible initial HTML fallback holding the real route text
+ *     (product name, description, benefits, article body) so users,
+ *     assistive technology, and crawlers see the same content before
+ *     the React app boots.
  *
  * Uses Vite's ssrLoadModule to resolve TypeScript data files
  * without booting a full dev server.
@@ -40,244 +40,6 @@ function assetUrl(path) {
   return `${base}?v=${CACHE_VERSION}`;
 }
 
-/** Same thumbnail source used by ProductCardImage during hydration. */
-function thumbAssetUrl(path, directory = "thumbs") {
-  const base = String(path)
-    .split("?")[0]
-    .replace(/^\/images\//, `/images/${directory}/`);
-  return `${base}?v=${CACHE_VERSION}`;
-}
-
-/**
- * Visible first-paint shell helpers. These are deliberately small and static:
- * React replaces them as soon as the app is ready, but users still see the
- * real navigation, offer, and first product cards while JavaScript is loading.
- */
-function staticHeaderShell() {
-  const logoUrl = "/images/logo-mono-small.webp";
-  return `<div data-prerender-header-shell aria-hidden="true">
-  <div data-prerender-header-inner>
-    <a href="/" data-prerender-brand aria-label="اليسر ميديكال">
-      <img src="${logoUrl}" alt="اليسر ميديكال — Elysr Medical Group" width="128" height="48" fetchpriority="low" decoding="async" />
-    </a>
-    <nav data-prerender-header-nav aria-label="القائمة الرئيسية">
-      <a href="/">الرئيسية</a>
-      <a href="/products/men">منتجات الرجال</a>
-      <a href="/products/women">منتجات النساء</a>
-      <a href="/products/devices">الأجهزة الطبية</a>
-      <a href="/education">النصائح الطبية</a>
-      <a href="/contact">تواصل معنا</a>
-      <a href="/about">من نحن</a>
-    </nav>
-    <div data-prerender-header-actions>
-      <button type="button" aria-label="بحث (Ctrl+K)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
-      </button>
-      <a href="/wishlist" aria-label="المفضلة">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.8-3-3.2-3-5.5"></path></svg>
-      </a>
-      <a href="/cart" aria-label="السلة">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
-      </a>
-      <button type="button" data-prerender-menu aria-label="القائمة">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"></path><path d="M4 12h16"></path><path d="M4 19h16"></path></svg>
-      </button>
-    </div>
-  </div>
-</div>
-<div data-prerender-header-spacer aria-hidden="true"></div>`;
-}
-
-function sparklesIcon(size = 16) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>`;
-}
-
-function clockIcon(size = 14) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
-}
-
-function arrowLeftIcon(size = 14) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>`;
-}
-
-function chevronLeftIcon(size = 12) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>`;
-}
-
-function heartIcon() {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"></path></svg>`;
-}
-
-function cartIcon() {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>`;
-}
-
-function promoCountdown({ desktop = false, values = ["00", "05", "00", "00"] } = {}) {
-  if (!desktop) {
-    return `<div data-prerender-promo-countdown>
-      ${clockIcon(12)}
-      <span>تتجدد الدورة خلال:</span>
-      <div data-prerender-promo-digits dir="ltr">${values.map((value) => `<span>${value}</span>`).join(":")}</div>
-    </div>`;
-  }
-  const labels = ["يوم", "ساعة", "د", "ث"];
-  return `<div data-prerender-promo-countdown>
-    ${clockIcon(14)}
-    <span>تتجدد الدورة خلال</span>
-    <div data-prerender-promo-digits dir="ltr">${values
-      .map(
-        (value, index) =>
-          `<span data-prerender-promo-digit><b>${value}</b><small>${labels[index]}</small></span>`,
-      )
-      .join("<i>:</i>")}</div>
-  </div>`;
-}
-
-function staticPromoShell({ title, tagline, tiers, values } = {}) {
-  const promoTitle = title || "مبادرة الرعاية الماسية";
-  const promoTagline = tagline || "رعاية طبية متكاملة.. بتوفير استثنائي!";
-  const promoTiers = tiers || [
-    { icon: "💎", label: "10%" },
-    { icon: "⚡", label: "15%" },
-    { icon: "👑", label: "20%" },
-  ];
-  const promoValues = values || ["00", "05", "00", "00"];
-  const desktopTiers = [...promoTiers].reverse();
-  return `<div data-prerender-promo-shell aria-hidden="true">
-  <div data-prerender-promo-shine></div>
-  <div data-prerender-promo-sparkles></div>
-  <div data-prerender-promo-mobile>
-    <div data-prerender-promo-mobile-row>
-      <div data-prerender-promo-mobile-left>
-        <div data-prerender-promo-mobile-icon>${sparklesIcon(16)}</div>
-        <div data-prerender-promo-copy>
-          <div data-prerender-promo-tagline>${esc(promoTagline)}</div>
-          <div data-prerender-promo-name>${esc(`💎 ${promoTitle}`)}</div>
-        </div>
-      </div>
-      <div data-prerender-promo-spacer></div>
-      <div data-prerender-promo-actions>
-        <span><span>👑</span><span>${esc(promoTiers[0]?.label || "")}</span></span>
-        <a href="/products/men">تسوّق ${chevronLeftIcon(12)}</a>
-      </div>
-    </div>
-    ${promoCountdown({ values: promoValues })}
-  </div>
-  <div data-prerender-promo-desktop>
-    <div data-prerender-promo-desktop-left>
-      <div data-prerender-promo-desktop-icon>${sparklesIcon(16)}</div>
-      <div data-prerender-promo-copy>
-        <div data-prerender-promo-tagline>${esc(promoTagline)}</div>
-        <div data-prerender-promo-name>${esc(`💎 ${promoTitle}`)}</div>
-      </div>
-    </div>
-    <i data-prerender-promo-divider></i>
-    <div data-prerender-promo-tiers>${desktopTiers.map((tier) => `<span>${esc(tier.icon)}<b>${esc(tier.label)}</b></span>`).join("")}</div>
-    <i data-prerender-promo-divider></i>
-    ${promoCountdown({ desktop: true, values: promoValues })}
-    <div data-prerender-promo-spacer></div>
-    <a href="/products/men">تسوّق العرض ${arrowLeftIcon(14)}</a>
-  </div>
-</div>`;
-}
-
-function badgeStyle(className) {
-  if (className.includes("cyan")) return "background:#0e7490;color:#fff";
-  if (className.includes("violet")) return "background:#6d28d9;color:#fff";
-  if (className.includes("fuchsia")) return "background:#a21caf;color:#fff";
-  if (className.includes("rose")) return "background:#be123c;color:#fff";
-  if (className.includes("sky")) return "background:#0369a1;color:#fff";
-  if (className.includes("teal")) return "background:#0f766e;color:#fff";
-  if (className.includes("indigo")) return "background:#4338ca;color:#fff";
-  if (className.includes("emerald")) return "background:#047857;color:#fff";
-  if (className.includes("amber")) return "background:#fbbf24;color:#451a03";
-  return "background:#0f766e;color:#fff";
-}
-
-function staticProductCard(product, getProductBadge) {
-  const image = product.image
-    ? `<img src="${thumbAssetUrl(product.image, "thumbs")}" srcset="${thumbAssetUrl(product.image, "thumbs-120")} 240w, ${thumbAssetUrl(product.image, "thumbs-180")} 360w, ${thumbAssetUrl(product.image, "thumbs")} 480w, ${assetUrl(product.image)} 800w" sizes="(max-width: 640px) 180px, (max-width: 1024px) 240px, 300px" alt="${esc(product.name)}" width="480" height="480" loading="eager" decoding="async" />`
-    : `<span data-prerender-product-emoji>${esc(product.emoji || "🛍️")}</span>`;
-  const useBadge = getProductBadge(product);
-  const stockNotice =
-    product.stock > 0 && product.stock <= 5
-      ? `<span data-prerender-product-stock>باقي ${product.stock}</span>`
-      : "";
-  const soldOut =
-    product.stock <= 0 ? `<div data-prerender-product-sold-out><span>نفد المخزون</span></div>` : "";
-  return `<article data-prerender-product-card>
-  <span data-prerender-product-badge style="${badgeStyle(useBadge.className)}">${esc(useBadge.label)}</span>
-  <button type="button" data-prerender-product-wishlist aria-label="إضافة للمفضلة">${heartIcon()}</button>
-  ${stockNotice}
-  ${soldOut}
-  <a href="/products/${esc(product.slug)}" data-prerender-product-image>${image}</a>
-  <div data-prerender-product-details>
-    <a href="/products/${esc(product.slug)}" data-prerender-product-name>${esc(product.name)}</a>
-    <div data-prerender-product-bottom><strong>${esc(product.price)} ج.م</strong><span data-prerender-cart>${cartIcon()}</span></div>
-  </div>
-</article>`;
-}
-
-function staticEducationShell(article) {
-  if (!article) return "";
-  const image = article.image ? assetUrl(article.image) : "";
-  const imageMarkup = image
-    ? `<img src="${esc(image)}" alt="${esc(article.title)}" width="640" height="360" fetchpriority="high" decoding="sync" style="display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:16px 16px 0 0;" />`
-    : `<div style="display:flex;aspect-ratio:16/9;align-items:center;justify-content:center;font-size:64px;background:#eef8ff;border-radius:16px 16px 0 0;">${esc(article.emoji || "📚")}</div>`;
-  return `<div id="elysr-prerender-education-shell" inert aria-hidden="true" style="padding:32px 16px 48px;background:#fff;color:#14213d;font-family:Cairo,Arial,sans-serif;">
-  <div style="width:min(100%,1120px);margin:0 auto;">
-    <div style="margin-bottom:24px;text-align:center;">
-      <div style="color:#087ea4;font-size:13px;font-weight:700;">تعليم • توعية • علم</div>
-      <h1 style="margin:8px 0;font-size:clamp(28px,4vw,42px);line-height:1.2;">مكتبة التوعية الجنسية</h1>
-      <p style="margin:0 auto;max-width:720px;color:#60708a;line-height:1.8;">مقالات توعوية مع مصادر واضحة تساعدك على فهم جسدك وعلاقاتك بشكل صحي وآمن.</p>
-    </div>
-    <article style="width:min(100%,520px);margin:0 auto;overflow:hidden;border:1px solid #dbe7ef;border-radius:16px;background:#fff;box-shadow:0 8px 24px rgba(20,33,61,.08);">
-      <a href="/education/${esc(article.slug)}" aria-label="${esc(article.title)}">${imageMarkup}</a>
-      <div style="padding:16px;">
-        <div style="margin-bottom:8px;color:#087ea4;font-size:12px;font-weight:700;">${esc(article.category || "توعية")}</div>
-        <h2 style="margin:0;font-size:20px;line-height:1.45;">${esc(article.title)}</h2>
-      </div>
-    </article>
-  </div>
-</div>`;
-}
-
-function staticRecentlyViewedShell() {
-  return `<section data-prerender-recently-viewed aria-hidden="true">
-  <div data-prerender-recent-inner>
-    <div data-prerender-recent-heading><h2>👀 شاهدتها مؤخراً</h2><span>مسح السجل</span></div>
-    <div data-prerender-recent-list></div>
-  </div>
-</section>`;
-}
-
-function staticProductSection(
-  products,
-  { title = "✨ اخترنا لك", description = "" } = {},
-  getProductBadge,
-) {
-  return `<section data-prerender-product-section aria-hidden="true">
-  <div data-prerender-product-section-inner>
-    <div data-prerender-product-heading><span>${esc(title)}</span>${description ? `<p>${esc(description)}</p>` : ""}</div>
-    <div data-prerender-product-grid>${products.map((product) => staticProductCard(product, getProductBadge)).join("")}</div>
-  </div>
-</section>`;
-}
-
-function staticCategoryShell({ eyebrow, title, description, products }, getProductBadge) {
-  return `<div data-prerender-category-shell aria-hidden="true">
-  ${staticHeaderShell()}
-  <main data-prerender-category-main>
-    <div data-prerender-page-hero>
-      <small>${esc(eyebrow)}</small>
-      <h1>${esc(title)}</h1>
-      <p>${esc(description)}</p>
-    </div>
-    <div data-prerender-product-grid>${products.map((product) => staticProductCard(product, getProductBadge)).join("")}</div>
-  </main>
-</div>`;
-}
-
 /** HTML-escape */
 function esc(str = "") {
   return String(str)
@@ -301,19 +63,6 @@ function makeMetaDescription(text = "", maxLength = 155) {
   const lastSpace = cut.lastIndexOf(" ");
   const base = lastSpace > 40 ? cut.slice(0, lastSpace) : cut;
   return `${base}…`;
-}
-
-function makeProductMetaDescription(p, maxLength = 155) {
-  const firstBenefit = p.benefits?.[0] ? ` - ${String(p.benefits[0]).slice(0, 50)}` : "";
-  const ratingPart = p.reviews && p.rating ? ` ⭐${p.rating}/5 (${p.reviews} تقييم سابق)` : "";
-  const pricePart = ` - ${p.price} ج.م - شحن سري، دفع عند الاستلام`;
-  // لقب البحثي البديل (عامي/شعبي) — يعرض الكلمة المصرية اللي بيبحثوا بيها (نقط)
-  const aliasPart = p.searchAliases?.length ? ` «${p.searchAliases[0]}»` : "";
-  const candidate = `${p.name}${aliasPart}${firstBenefit}${ratingPart}${pricePart} - اليسر ميديكال`;
-  if (candidate.length <= maxLength) return candidate;
-  const baseDesc = String(p.description).split("。")[0].split(".")[0].slice(0, 80);
-  const short = `${p.name}${aliasPart} - ${baseDesc}${ratingPart} - ${p.price} ج.م - شحن سري - اليسر ميديكال`;
-  return makeMetaDescription(short, maxLength);
 }
 
 /**
@@ -351,7 +100,6 @@ function buildHtml(template, opts) {
     noindex = false,
     heroPreload = false,
     preloadImage = "",
-    loadingShell = "",
     // (2026-09-17) بيانات الصورة لمشاركة الـ OG — الأبعاد الحقيقية للملف
     // (مش أبعاد العرض) + alt وصفية (SEO + accessibility + معاينة المشاركة).
     imageAlt,
@@ -501,22 +249,13 @@ function buildHtml(template, opts) {
     html = html.replace("</head>", `${tag}\n</head>`);
   });
 
-  // Inject crawler-friendly content right inside #root (will be replaced
-  // by React when JS boots — but bots see it instantly).
+  // Put the real route content in the initial HTML. React replaces these
+  // children when it mounts, but the pre-render remains visible and useful to
+  // users, assistive technology, and crawlers instead of being a clipped
+  // crawler-only copy.
   if (bodyContent) {
-    // الـ shell المرئي هنا يحافظ على محتوى أول viewport ومقاساته حتى يركب React.
-    const prerenderShell = loadingShell
-      ? `<div id="elysr-prerender-shell">${loadingShell}</div>`
-      : "";
-    // يبقى الـ shell خارج #root حتى لا يمسحه createRoot أثناء تحميل route chunks.
-    // Layout.tsx يزيله بعد تركيب واجهة React كاملة؛ لذلك لا توجد لحظة بيضاء
-    // بين أول paint ووصول الهيدر/الكروت الحقيقية.
-    html = html.replace(
-      '<div id="root"></div>',
-      // 🎭 إخفاء المحتوى SEO بدون left:-9999px — الإحداثي السلبي الضخم كان
-      // يكسر paint viewport كامل (hero مش ظاهر) على بعض builds Chromium.
-      `<div id="root"${prerenderShell ? ' data-prerender-pending="true"' : ""}><div data-prerender-content style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">${bodyContent}</div></div>${prerenderShell}`,
-    );
+    const visibleFallback = `<div data-prerender-content dir="rtl" style="max-width:1120px;margin:0 auto;padding:32px 16px 48px;color:#14213d;font-family:Arial,sans-serif;line-height:1.8;">${bodyContent}</div>`;
+    html = html.replace('<div id="root"></div>', `<div id="root">${visibleFallback}</div>`);
   }
 
   return html;
@@ -546,51 +285,49 @@ async function prerender() {
   let staticCount = 0;
 
   try {
-    const { products, getPublicProductsByCategory } =
-      await vite.ssrLoadModule("/src/data/products.ts");
-    const { getUseBadge: getProductBadge } = await vite.ssrLoadModule("/src/lib/product-badge.ts");
-    const { PROMO_TITLE, PROMO_TAGLINE, PROMO_TIERS, getTimeLeft } =
-      await vite.ssrLoadModule("/src/lib/promo.ts");
-    const promoTime = getTimeLeft();
-    const promoShellData = {
-      title: PROMO_TITLE,
-      tagline: PROMO_TAGLINE,
-      tiers: PROMO_TIERS,
-      values: [promoTime.days, promoTime.hours, promoTime.minutes, promoTime.seconds].map((value) =>
-        String(value).padStart(2, "0"),
-      ),
-    };
-    const { GOVERNORATE_SHIPPING } = await vite.ssrLoadModule("/src/lib/site-config.ts");
+    const { products } = await vite.ssrLoadModule("/src/data/products.ts");
+    const { makeProductMetaDescription, makeProductMetaTitle } =
+      await vite.ssrLoadModule("/src/lib/seo.ts");
+    const { GOVERNORATE_SHIPPING, SHIPPING_DELIVERY_TEXT, getShippingDeliveryWindow } =
+      await vite.ssrLoadModule("/src/lib/site-config.ts");
     const shippingBands = new Map();
     for (const entry of GOVERNORATE_SHIPPING) {
-      const regions = shippingBands.get(entry.shipping) ?? [];
-      regions.push(entry.name);
-      shippingBands.set(entry.shipping, regions);
+      const delivery = getShippingDeliveryWindow(entry.name);
+      const key = `${entry.shipping}:${delivery.key}`;
+      const band = shippingBands.get(key) ?? {
+        rate: entry.shipping,
+        regions: [],
+        delivery,
+      };
+      band.regions.push(entry.name);
+      shippingBands.set(key, band);
     }
-    const merchantShippingDetails = [...shippingBands.entries()].map(([rate, regions]) => ({
-      "@type": "OfferShippingDetails",
-      shippingDestination: {
-        "@type": "DefinedRegion",
-        addressCountry: "EG",
-        addressRegion: regions,
-      },
-      shippingRate: { "@type": "MonetaryAmount", value: rate, currency: "EGP" },
-      deliveryTime: {
-        "@type": "ShippingDeliveryTime",
-        handlingTime: {
-          "@type": "QuantitativeValue",
-          minValue: 0,
-          maxValue: 1,
-          unitCode: "DAY",
+    const merchantShippingDetails = [...shippingBands.values()].map(
+      ({ rate, regions, delivery }) => ({
+        "@type": "OfferShippingDetails",
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "EG",
+          addressRegion: regions,
         },
-        transitTime: {
-          "@type": "QuantitativeValue",
-          minValue: 1,
-          maxValue: 5,
-          unitCode: "DAY",
+        shippingRate: { "@type": "MonetaryAmount", value: rate, currency: "EGP" },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 0,
+            unitCode: "DAY",
+          },
+          transitTime: {
+            "@type": "QuantitativeValue",
+            minValue: delivery.minDays,
+            maxValue: delivery.maxDays,
+            unitCode: "DAY",
+          },
         },
-      },
-    }));
+      }),
+    );
     let articles = [];
     try {
       const mod = await vite.ssrLoadModule("/src/data/articles.ts");
@@ -708,30 +445,18 @@ async function prerender() {
 
     /* ========== 1) Home page ========== */
     {
-      const title = "اليسر ميديكال — أفضل شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر";
+      const title = "اليسر ميديكال — أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر";
       const desc =
-        "اليسر ميديكال أفضل شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. منتجات أصلية مختارة بعناية، شحن سري ودفع عند الاستلام.";
-      const homeFeatured = ["m-11", "m-01", "m-44", "m-60", "w-15", "w-13"]
-        .map((id) => products.find((p) => p.id === id))
-        .filter(Boolean);
-      const homeLoadingShell = `<div data-prerender-hero>
-  ${staticHeaderShell()}
-  <section data-prerender-static-hero><div><img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" width="1200" height="663" loading="eager" fetchpriority="high" decoding="async"></div></section>
-  ${staticPromoShell(promoShellData)}
-  ${staticRecentlyViewedShell()}
-  <script src="/scripts/recently-viewed-shell.js?v=${CACHE_VERSION}"></script>
-  ${staticProductSection(homeFeatured, { description: "باقة مختارة بعناية من أفضل المنتجات والمكملات لدعم صحتك وحيويتك الزوجية بأمان وثقة" }, getProductBadge)}
-</div>`;
+        "اليسر ميديكال أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. منتجات أصلية مختارة بعناية، شحن سري ودفع عند الاستلام.";
       let html = buildHtml(template, {
         title,
         description: desc,
-        loadingShell: homeLoadingShell,
         image: `${SITE_URL}/og-default.webp`,
         canonical: `${SITE_URL}/`,
         type: "website",
         heroPreload: true,
         // (2026-09-17) og-default 1200×631 (الأبعاد الافتراضية في buildHtml)
-        imageAlt: "اليسر ميديكال — أفضل شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر",
+        imageAlt: "اليسر ميديكال — أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر",
         jsonLd: [
           {
             "@context": "https://schema.org",
@@ -751,7 +476,7 @@ async function prerender() {
             },
           },
         ],
-        bodyContent: `<h1>اليسر ميديكال — أفضل شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر</h1>
+        bodyContent: `<h1>اليسر ميديكال — أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر</h1>
 <p>${esc(desc)}</p>
 <p>نوفر تشكيلة مختارة من المكملات والمنتجات الموضعية والأجهزة المساعدة، مع وصف واضح للمكونات وطريقة الاستخدام والتحذيرات المتاحة لكل منتج.</p>
 <p>نحافظ على خصوصية الطلبات بتغليف محايد وشحن سري، ونوفر الدفع عند الاستلام حيثما كان متاحاً. يمكن التواصل معنا عبر واتساب للاستفسار عن المنتجات والطلبات، مع التأكيد أن المحتوى التوعوي لا يغني عن استشارة الطبيب أو الصيدلي.</p>
@@ -929,7 +654,7 @@ async function prerender() {
         h1: "سياسة الشحن",
         body:
           "<h2>الشحن السري لجميع المحافظات</h2>" +
-          "<p>نوصل طلباتك إلى جميع محافظات مصر مع خدمة شحن سري وموثوقة. داخل القاهرة الكبرى يصل طلبك عادة خلال 24 إلى 48 ساعة، بينما تتغير المدة قليلاً حسب بعد المحافظة، مع إمكانية معرفة موعد وصول تقريبي عند تأكيد الطلب.</p>" +
+          `<p>${esc(SHIPPING_DELIVERY_TEXT)}. نوصل طلباتك إلى جميع محافظات مصر مع خدمة شحن سري وموثوقة، ويمكن معرفة موعد وصول تقريبي عند تأكيد الطلب.</p>` +
           "<h2>خصوصيتك أولاً</h2>" +
           "<p>نجهز جميع الطلبات بتغليف محايد تماماً لا يكشف طبيعة المنتج، ولا يتم كتابة أي تفاصيل عن المحتوى على العبوة الخارجية أو في بوليصة الشحن. هذا جزء من التزامنا بحماية خصوصيتك من لحظة الطلب حتى استلامه.</p>" +
           "<h2>الدفع عند الاستلام</h2>" +
@@ -1053,32 +778,6 @@ async function prerender() {
           : r.path.endsWith("/devices")
             ? "devices"
             : null;
-      const categoryItems = categoryType
-        ? getPublicProductsByCategory(categoryType).slice(0, 8)
-        : [];
-      const categoryLoadingShell =
-        categoryType && categoryItems.length > 0
-          ? staticCategoryShell(
-              {
-                eyebrow:
-                  categoryType === "men"
-                    ? "صحة الرجل"
-                    : categoryType === "women"
-                      ? "صحة المرأة"
-                      : "الأجهزة الطبية",
-                title: r.h1,
-                description:
-                  categoryType === "men"
-                    ? "مكمّلات غذائية، عسل ملكي، بخاخات، كريمات وجل موضعي مختارة بعناية لدعم الصحة الزوجية للرجال مع الخصوصية والشحن السري داخل مصر."
-                    : categoryType === "women"
-                      ? "منتجات مختارة بعناية لدعم الراحة، الترطيب، الحيوية والثقة في العلاقة الزوجية للمرأة مع التزام كامل بالخصوصية وسرية التوصيل."
-                      : "أجهزة ومستلزمات طبية موثوقة مختارة بعناية، مع جودة عالية وشحن سري لكل المحافظات لتجربة أكثر أماناً واحترافية.",
-                products: categoryItems,
-              },
-              getProductBadge,
-            )
-          : "";
-
       const jsonLd = [];
       jsonLd.push({
         "@context": "https://schema.org",
@@ -1177,12 +876,9 @@ async function prerender() {
         imageAlt: r.title,
         preloadImage:
           r.path === "/education" && articles[0]?.image ? assetUrl(articles[0].image) : "",
-        // Category pages also receive a visible prerender shell outside #root
-        // with the canonical H1. Use H2 in the hidden crawler body there so
-        // raw HTML contains one H1 rather than duplicating the same heading.
-        bodyContent: `<${categoryType ? "h2" : "h1"}>${esc(r.h1)}</${categoryType ? "h2" : "h1"}><p>${esc(r.desc)}</p>${r.body ? r.body : ""}${productLinksBody}${articleLinksBody}${faqBody}`,
-        loadingShell:
-          r.path === "/education" ? staticEducationShell(articles[0]) : categoryLoadingShell,
+        // The visible SSG fallback carries the canonical H1 and is replaced
+        // by the React route after boot. It is not a hidden crawler copy.
+        bodyContent: `<h1>${esc(r.h1)}</h1><p>${esc(r.desc)}</p>${r.body ? r.body : ""}${productLinksBody}${articleLinksBody}${faqBody}`,
       });
 
       // Write to dist/<path>.html (cleanUrls handles trailing-slash routing)
@@ -1198,7 +894,7 @@ async function prerender() {
     if (!existsSync(productsDir)) mkdirSync(productsDir, { recursive: true });
 
     for (const product of products) {
-      const title = product.name;
+      const title = makeProductMetaTitle(product.name);
       // 🎯 وصف غني بالبيانات الفريدة (السعر، الشحن، ومعلومات المنتج) لمنع Google من إعادة كتابته بوصف الموقع العام
       const desc = makeProductMetaDescription(product);
       const img = product.image
@@ -1218,7 +914,8 @@ async function prerender() {
         ...(product.searchAliases?.length ? { alternativeName: product.searchAliases } : {}),
         description: product.description,
         sku: product.id,
-        mpn: product.id,
+        ...(product.mpn?.trim() ? { mpn: product.mpn.trim() } : {}),
+        ...(product.gtin?.trim() ? { gtin: product.gtin.trim() } : {}),
         image: img,
         ...(hasLegacyRating
           ? {
@@ -1231,8 +928,9 @@ async function prerender() {
               },
             }
           : {}),
-        // (2026-09-17) البراند الفعلي للمنتج مش اسم المتجر: brand ?? nameEn ?? name
-        brand: { "@type": "Brand", name: product.brand ?? product.nameEn ?? product.name },
+        ...(product.brand?.trim()
+          ? { brand: { "@type": "Brand", name: product.brand.trim() } }
+          : {}),
         offers: {
           "@type": "Offer",
           price: product.price,
@@ -1274,7 +972,10 @@ async function prerender() {
         ],
       };
 
-      const benefits = (product.benefits || []).map((b) => `<li>${esc(b)}</li>`).join("");
+      const benefits = (product.benefits || [])
+        .slice(0, 4)
+        .map((b) => `<li>${esc(b)}</li>`)
+        .join("");
 
       // اسم القسم + رابط القسم (crawler-visible)
       const categoryName =
@@ -1310,7 +1011,7 @@ async function prerender() {
         ${product.ingredients ? `<h2>المكونات</h2><p>${esc(product.ingredients)}</p>` : ""}
         ${product.usage ? `<h2>طريقة الاستخدام</h2><p>${esc(product.usage)}</p>` : ""}
         <p>السعر: ${product.price} ج.م</p>
-        ${hasLegacyRating ? `<h2>تقييمات العملاء</h2><p>التقييم العام: ${productRating} من 5 (${productReviews} تقييم سابق من أرشيف مراجعات العملاء).</p>` : ""}
+        ${hasLegacyRating ? `<h2>تقييمات العملاء</h2><p>التقييم العام: ${productRating} من 5 (${productReviews} تقييم سابق).</p>` : ""}
         <p><a href="${categoryUrl}">تصفح كل ${esc(categoryName)}</a></p>
         ${relatedBody}
         ${topicLinksHtml("product", product.id)}

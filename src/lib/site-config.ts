@@ -25,6 +25,51 @@ export interface GovernorateShipping {
   region: string;
 }
 
+export type ShippingDeliveryWindowKey = "metropolitan" | "other";
+
+export interface ShippingDeliveryWindow {
+  key: ShippingDeliveryWindowKey;
+  label: string;
+  text: string;
+  minDays: number;
+  maxDays: number;
+}
+
+/**
+ * المواعيد المعلنة للشحن — المصدر الوحيد للنص الظاهر ولـ Product/Offer schema.
+ * القاهرة والجيزة 24–48 ساعة عمل، وباقي المحافظات 2–4 أيام عمل.
+ * تمثيل الساعات في Schema يكون بالأيام لأن Schema.org لا يملك وحدة ساعات
+ * لحقول deliveryTime: 1–2 يوم للقاهرة والجيزة، و2–4 أيام للباقي.
+ */
+export const SHIPPING_DELIVERY_WINDOWS: Record<ShippingDeliveryWindowKey, ShippingDeliveryWindow> =
+  {
+    metropolitan: {
+      key: "metropolitan",
+      label: "القاهرة والجيزة",
+      text: "24–48 ساعة عمل",
+      minDays: 1,
+      maxDays: 2,
+    },
+    other: {
+      key: "other",
+      label: "باقي المحافظات",
+      text: "2–4 أيام عمل",
+      minDays: 2,
+      maxDays: 4,
+    },
+  };
+
+export const SHIPPING_DELIVERY_TEXT =
+  `القاهرة والجيزة: ${SHIPPING_DELIVERY_WINDOWS.metropolitan.text}. ` +
+  `باقي المحافظات: ${SHIPPING_DELIVERY_WINDOWS.other.text}`;
+
+export function getShippingDeliveryWindow(governorate: string): ShippingDeliveryWindow {
+  const normalized = governorate.trim().replace(/\s+/g, " ");
+  return normalized === "القاهرة" || normalized === "الجيزة"
+    ? SHIPPING_DELIVERY_WINDOWS.metropolitan
+    : SHIPPING_DELIVERY_WINDOWS.other;
+}
+
 export interface PromoTier {
   threshold: number;
   discount: number;

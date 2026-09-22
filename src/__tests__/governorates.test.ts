@@ -13,6 +13,7 @@ import {
   GOVERNORATE_SHIPPING,
   submitToGoogleSheets,
 } from "@/lib/governorates";
+import { SHIPPING_DELIVERY_TEXT, getShippingDeliveryWindow } from "@/lib/site-config";
 
 describe("GOVERNORATE_SHIPPING data", () => {
   it("يحتوي على 27 محافظة", () => {
@@ -34,6 +35,32 @@ describe("GOVERNORATE_SHIPPING data", () => {
 
   it("EGYPT_GOVERNORATES يتطابق مع GOVERNORATE_SHIPPING", () => {
     expect(EGYPT_GOVERNORATES.length).toBe(GOVERNORATE_SHIPPING.length);
+  });
+});
+
+describe("shipping delivery policy", () => {
+  it("uses one customer-facing delivery statement everywhere", () => {
+    expect(SHIPPING_DELIVERY_TEXT).toBe(
+      "القاهرة والجيزة: 24–48 ساعة عمل. باقي المحافظات: 2–4 أيام عمل",
+    );
+  });
+
+  it("maps Cairo/Giza to 1–2 days and all other governorates to 2–4 days", () => {
+    expect(getShippingDeliveryWindow("القاهرة")).toMatchObject({
+      key: "metropolitan",
+      minDays: 1,
+      maxDays: 2,
+    });
+    expect(getShippingDeliveryWindow("الجيزة")).toMatchObject({
+      key: "metropolitan",
+      minDays: 1,
+      maxDays: 2,
+    });
+    expect(getShippingDeliveryWindow("الإسكندرية")).toMatchObject({
+      key: "other",
+      minDays: 2,
+      maxDays: 4,
+    });
   });
 });
 

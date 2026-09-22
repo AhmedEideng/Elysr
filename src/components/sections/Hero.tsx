@@ -12,7 +12,7 @@ export function Hero() {
   return (
     <section className="relative w-full overflow-hidden">
       <h1 className="sr-only">
-        اليسر ميديكال — أفضل شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر
+        اليسر ميديكال — أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر
       </h1>
 
       {/* ── Hero Image — كل المحتوى المدمج ظاهر بالكامل ── */}

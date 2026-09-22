@@ -1479,7 +1479,6 @@ export const men: Product[] = [
     slug: "halpeno-men-gel-50gm",
     name: "جل هالبينو للرجال 50 جم (Halpeno Men Gel)",
     nameEn: "Halpeno Men Gel 50g",
-    brand: "HALPENO",
     category: "men",
     searchAliases: [
       "هالبينو",
