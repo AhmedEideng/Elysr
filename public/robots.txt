@@ -1,4 +1,4 @@
-# robots.txt — Elysr Medical Group
+# robots.txt — اليسر ميديكال
 # https://elysrmedical.store
 
 User-agent: *

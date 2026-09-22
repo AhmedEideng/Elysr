@@ -6,7 +6,7 @@ const WHATSAPP_NUMBER = "201098088206";
 
 export const COMPANY = {
   name: "اليسر ميديكال",
-  nameEn: "Elysr Medical Group",
+  nameEn: "Elysr Medical",
   email: "info@elysrmedical.store",
   address: "العاشر من رمضان، محافظة الشرقية، جمهورية مصر العربية",
 };

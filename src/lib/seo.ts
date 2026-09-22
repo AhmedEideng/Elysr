@@ -98,10 +98,11 @@ function setLink(rel: string, href: string) {
 export function applySeo(meta: SeoMeta = {}) {
   const path = typeof window !== "undefined" ? window.location.pathname : "/";
   const url = `${SITE_URL}${path}`;
-  const title = meta.title ?? "اليسر — منتجات الصحة الزوجية الأصلية في مصر | شحن سري";
+  const title =
+    meta.title ?? "اليسر ميديكال — أفضل شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر";
   const description =
     meta.description ??
-    "اليسر ميديكال متجر مصري لمنتجات الصحة الزوجية للرجال والنساء. شحن سري وتغليف محايد ودفع عند الاستلام مع دعم عبر واتساب.";
+    "اليسر ميديكال أفضل شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. منتجات أصلية مختارة بعناية، شحن سري ودفع عند الاستلام.";
   const image = absoluteUrl(meta.image);
 
   document.title = title;
@@ -321,7 +322,7 @@ export const articleSchema = (a: {
     })) ?? [],
   publisher: {
     "@type": "Organization",
-    name: "Elysr Medical Group",
+    name: "اليسر ميديكال",
     logo: {
       "@type": "ImageObject",
       url: `${SITE_URL}/logo.png`,
