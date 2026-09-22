@@ -34,7 +34,7 @@ flow through the same webhook into a moderated reviews sheet.
 | Metric                  | Value                                                                                                             |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | Products                | **84** (54 men · 23 women · 7 devices) — 4 legacy items remain deleted; five previously removed products restored by owner decision       |
-| Catalog coverage        | **84** — all current products are in the site catalog; no Merchant/feed or Google Ads channel policy is present in this build                             |
+| Catalog coverage        | **84** — all current products are in the site catalog and the Merchant feed; no channel-level blocklist is applied                             |
 | Articles                | **58** educational health articles with trusted medical sources (NIH/Mayo/NHS/…)                                  |
 | SEO landing pages       | **93** long-form guide pages (**93 indexed**; drug-guide pages retain medical safety warnings) |
 | Pre-rendered pages      | **252** (17 static + 84 products + 58 articles + 93 guides)                                                       |
