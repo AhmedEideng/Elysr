@@ -89,6 +89,16 @@ try {
     assert.doesNotMatch(prerender, /data-prerender-content[^>]*clip:/);
     assert.doesNotMatch(prerender, /elysr-prerender-shell/);
   }
+  // GA4 must configure before the SPA emits events, and the browser must
+  // load the same versioned loader referenced by the HTML template.
+  {
+    const gaLoader = readFileSync(resolve(ROOT, "public/scripts/ga-loader.js"), "utf-8");
+    const indexHtml = readFileSync(resolve(ROOT, "index.html"), "utf-8");
+    assert.match(indexHtml, /\/scripts\/ga-loader\.js\?v=\d+/);
+    assert.match(gaLoader, /window\.gtag\("config", measurementId/);
+    assert.match(gaLoader, /send_page_view:\s*false/);
+    assert.match(gaLoader, /configureGA\(\);\s*loadGA\(\);/);
+  }
 
   assert.deepEqual(productsDb, products, "products-db.json is stale; run npm run build");
 
