@@ -249,9 +249,9 @@ describe("submit-order payload validation", () => {
   });
 
   it("recalculates and validates subtotal, tier discount, shipping and grand total", () => {
-    const payload = validPayload(2); // 1160 EGP => 10% discount
+    const payload = validPayload(3); // 1440 EGP => 10% discount
     expect(validateOrderPayload(payload)).toBeUndefined();
-    expect(payload.discount).toBe(116);
+    expect(payload.discount).toBe(144);
 
     for (const field of [
       "subtotalBeforeDiscount",
