@@ -629,6 +629,11 @@ function appendRowByHeaders(sheet, columns, valuesByKey) {
   }
 
   var nextRow = sheet.getLastRow() + 1;
+  // أمان أبعاد: لو الشبكة ممتلئة تماماً ننموّها قبل الكتابة (مسارات runtime
+  // معينة ترفض النطاقات خارج الأبعاد) — النمو عند النهاية لا يزيح بيانات
+  if (nextRow > sheet.getMaxRows()) {
+    sheet.insertRowsAfter(sheet.getMaxRows(), 500);
+  }
   sheet.getRange(nextRow, 1, 1, row.length).setValues([row]);
 
   // تلوين الصف الجديد بلون خفيف للتمييز
@@ -727,14 +732,23 @@ function ensureStatusValidation(sheet, columns, statusKey, statusOptions) {
   }
   if (statusColIdx <= 0) return;
   try {
-    var probe = sheet.getRange(lastRow + 1, statusColIdx).getDataValidation();
-    if (probe) return; // الصف التالي ما زال داخل النطاق الحالي
+    var maxRows = sheet.getMaxRows();
+    // هل الصف التالي لآخر صف مكتوب ما زال مغطى بالـ validation؟
+    // (لو الشبكة ممتلئة تماماً فلا تغطية بعد نهايتها بالتعريف)
+    var covered =
+      lastRow + 1 <= maxRows &&
+      Boolean(sheet.getRange(lastRow + 1, statusColIdx).getDataValidation());
+    if (covered) return;
+    var target = lastRow + VALIDATION_ROWS;
+    if (maxRows < target) {
+      sheet.insertRowsAfter(maxRows, target - maxRows);
+    }
     var validation = SpreadsheetApp.newDataValidation()
       .requireValueInList(statusOptions)
       .setAllowInvalid(false)
       .build();
-    sheet.getRange(2, statusColIdx, lastRow + 5000 - 1, 1).setDataValidation(validation);
-    console.log("ensureStatusValidation: extended range to row " + (lastRow + 5000));
+    sheet.getRange(2, statusColIdx, target - 1, 1).setDataValidation(validation);
+    console.log("ensureStatusValidation: extended range to row " + target);
   } catch (err) {
     console.error("ensureStatusValidation failed:", err);
   }
@@ -774,8 +788,11 @@ function createFreshSheet(ss, name, headers, columns, statusKey, statusOptions) 
         .requireValueInList(statusOptions)
         .setAllowInvalid(false)
         .build();
-      // Apply to rows 2-VALIDATION_ROWS (ويمدَّد تلقائياً عند الحاجة)
-      sheet.getRange(2, statusColIdx, VALIDATION_ROWS - 1, 1).setDataValidation(statusValidation);
+      // النطاق داخل أبعاد الشبكة الحالية فقط (الشيت الجديد شبكته أصغر من
+      // VALIDATION_ROWS والنطاقات خارج الأبعاد غير مضمونة على كل مسارات
+      // الـ runtime) — وensureStatusValidation يمدّد التغطية لاحقاً عند الحاجة
+      var freshRows = Math.min(VALIDATION_ROWS, sheet.getMaxRows()) - 1;
+      sheet.getRange(2, statusColIdx, freshRows, 1).setDataValidation(statusValidation);
     }
   }
 
