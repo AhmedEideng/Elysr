@@ -18,7 +18,9 @@
 // vercel.json (نفس القيمة حرفيًا — الـ parity check هي اللي بتتأكد).
 export const CSP_POLICY = [
   "default-src 'self'",
-  "script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com",
+  // الـ hash يساوي حرفياً سكربت علم الـ first-paint في index.html —
+  // يفحصه data-integrity.test.mjs عند كل تغيير (مصدر واحد مضمون).
+  "script-src 'self' 'sha256-jqffmSzJG3FKjTMMljuijqTzyNM2OLeZTIVyL7llYbw=' https://www.googletagmanager.com https://www.google-analytics.com",
   "script-src-attr 'none'",
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",

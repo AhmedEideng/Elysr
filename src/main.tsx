@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";
 import "./styles.css";
 import { router } from "./router";
-import { thumbUrl } from "@/lib/cache";
 
 // 🛡️ Force unregister service workers and clear browser Cache Storage once to bypass persistent Android Chrome caches
 if (typeof window !== "undefined") {
@@ -37,93 +36,14 @@ if (typeof window !== "undefined") {
   }
 }
 
-type PrerenderRecentItem = {
-  id: string;
-  slug: string;
-  name: string;
-  price: number;
-  emoji?: string;
-  image?: string;
-};
-
-function syncPrerenderRecentlyViewed() {
-  const section = document.querySelector<HTMLElement>("[data-prerender-recently-viewed]");
-  if (!section) return;
-
-  let items: PrerenderRecentItem[] = [];
-  try {
-    const raw = localStorage.getItem("elysr_recently_viewed_v1");
-    const parsed: unknown = raw ? JSON.parse(raw) : [];
-    if (Array.isArray(parsed)) {
-      items = parsed
-        .filter((item): item is PrerenderRecentItem =>
-          Boolean(
-            item &&
-            typeof item === "object" &&
-            typeof (item as PrerenderRecentItem).id === "string" &&
-            typeof (item as PrerenderRecentItem).slug === "string" &&
-            typeof (item as PrerenderRecentItem).name === "string",
-          ),
-        )
-        .slice(0, 12);
-    }
-  } catch {
-    items = [];
-  }
-
-  if (items.length === 0) {
-    section.remove();
-    return;
-  }
-
-  const list = section.querySelector<HTMLElement>("[data-prerender-recent-list]");
-  if (!list) return;
-  list.replaceChildren();
-
-  for (const item of items) {
-    const card = document.createElement("a");
-    card.href = `/products/${encodeURIComponent(item.slug)}`;
-    card.setAttribute("data-prerender-recent-card", "true");
-
-    if (item.image) {
-      const image = document.createElement("img");
-      image.src = thumbUrl(item.image, "thumbs");
-      image.srcset = `${thumbUrl(item.image, "thumbs-180")} 360w, ${thumbUrl(item.image, "thumbs")} 480w`;
-      image.sizes = "160px";
-      image.alt = item.name;
-      image.width = 480;
-      image.height = 480;
-      image.loading = "eager";
-      image.decoding = "async";
-      image.setAttribute("data-prerender-recent-card-image", "true");
-      card.append(image);
-    } else {
-      const emoji = document.createElement("span");
-      emoji.textContent = item.emoji || "🛍️";
-      emoji.setAttribute("data-prerender-recent-card-image", "true");
-      card.append(emoji);
-    }
-
-    const body = document.createElement("span");
-    body.setAttribute("data-prerender-recent-card-body", "true");
-    const name = document.createElement("span");
-    name.textContent = item.name;
-    name.setAttribute("data-prerender-recent-card-name", "true");
-    const price = document.createElement("span");
-    price.textContent = `${item.price || ""} ج.م`;
-    price.setAttribute("data-prerender-recent-card-price", "true");
-    body.append(name, price);
-    card.append(body);
-    list.append(card);
-  }
-
-  section.removeAttribute("aria-hidden");
-  section.setAttribute("data-prerender-recent-visible", "true");
-}
-
-syncPrerenderRecentlyViewed();
-
 const rootEl = document.getElementById("root")!;
+
+declare global {
+  interface Window {
+    /** يضبطه main.tsx؛ سكربت الـ first-paint في index.html يستعمله كشرط watchdog. */
+    __ELYSR_MOUNTED__?: boolean;
+  }
+}
 
 try {
   ReactDOM.createRoot(rootEl).render(
@@ -131,6 +51,9 @@ try {
       <RouterProvider router={router} />
     </StrictMode>,
   );
+  // (2026-09-28) إشارة لـ watchdog الطلة الأولى: إن فشل تحميل الـ bundle أو
+  // render() نفسه، يبقى العلم غائباً فتُستعاد النسخة الثابتة بعد 4 ثوانٍ.
+  window.__ELYSR_MOUNTED__ = true;
 } catch (err) {
   console.error("Failed to mount React app:", err);
   // Show visible error for debugging without injecting HTML from the error object.

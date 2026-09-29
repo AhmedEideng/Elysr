@@ -4,8 +4,8 @@
  * - حقن JSON-LD (Schema.org)
  */
 
+import { PRODUCT_META_PROFILES } from "@/data/product-meta";
 import { GOVERNORATE_SHIPPING, getShippingDeliveryWindow } from "@/lib/site-config";
-import { assetUrl } from "@/lib/cache";
 
 const SITE_URL = "https://elysrmedical.store";
 
@@ -23,8 +23,15 @@ export function makeMetaDescription(text = "", maxLength = 155): string {
   return `${base}…`;
 }
 
-/** Returns a compact title that never cuts a product name in the middle of a word. */
-export function makeProductMetaTitle(name: string, maxLength = 60): string {
+/**
+ * Returns the product title for <title>/og:title.
+ *
+ * The limit only guards against runaway names: every catalog name (max 65
+ * chars) is emitted verbatim, so the prerendered HTML and the hydrated head
+ * show the identical, untruncated product name — Google decides display
+ * truncation itself.
+ */
+export function makeProductMetaTitle(name: string, maxLength = 70): string {
   const clean = String(name).trim().replace(/\s+/g, " ");
   if (clean.length <= maxLength) return clean;
 
@@ -42,6 +49,7 @@ export function makeProductMetaTitle(name: string, maxLength = 60): string {
 type ProductMetaCategory = "men" | "women" | "devices";
 
 type ProductMetaInput = {
+  id?: string;
   name: string;
   nameEn?: string;
   category?: ProductMetaCategory;
@@ -54,59 +62,48 @@ type ProductMetaInput = {
   usage?: string;
 };
 
-type ProductMetaKind = {
-  label: string;
-  salesLabel: string;
+type ResolvedProductMetaProfile = {
+  hook: string;
+  form: "oral" | "topical" | "device";
 };
 
-function productMetaKind(p: ProductMetaInput): ProductMetaKind {
-  const text =
-    `${p.name} ${p.nameEn ?? ""} ${p.description} ${p.ingredients ?? ""} ${p.usage ?? ""}`.toLowerCase();
+const TOPICAL_NAME_PATTERN =
+  /(?:^|[\s(،؛,:])(?:كريم|جل|بخاخ|رذاذ|مناديل|cream|gel|spray|wipes)(?=$|[\s)،؛,.:_-])/i;
 
-  if (p.category === "devices" || /جهاز|مضخة|ved|pump|device|extender|traction/.test(text)) {
-    return {
-      label: "جهاز أصلي للاستخدام الشخصي، حل عملي لدعم الأداء والراحة",
-      salesLabel: "جهاز أصلي للاستخدام الشخصي لدعم الأداء والراحة",
-    };
+/**
+ * Product form is resolved from an explicit, reviewed profile keyed by the
+ * stable product id. The fallback deliberately looks only at the product name
+ * and category; ingredients/usage are not allowed to classify the product.
+ */
+function resolveProductMetaProfile(p: ProductMetaInput): ResolvedProductMetaProfile {
+  if (p.id && PRODUCT_META_PROFILES[p.id]) return PRODUCT_META_PROFILES[p.id];
+  if (p.category === "devices") return { form: "device", hook: "جهاز للاستخدام الشخصي" };
+  if (TOPICAL_NAME_PATTERN.test(`${p.name} ${p.nameEn ?? ""}`)) {
+    return { form: "topical", hook: "منتج موضعي للاستخدام الخارجي" };
   }
+  if (p.category === "women") return { form: "oral", hook: "منتج للنساء بتركيبة عملية" };
+  return { form: "oral", hook: "مكمل غذائي للرجال" };
+}
 
+function productAudienceSuffix(p: ProductMetaInput, hook: string): string {
+  if (p.category === "devices") return "";
+  const context = `${p.name} ${p.nameEn ?? ""} ${hook}`;
   if (
-    /sildenafil|tadalafil|dapoxetine|lidocaine|prilocaine|viagra|cialis|levitra|فياجرا|سياليس|دابوكستين|ليدوكايين|بريلوكايين|منتج دوائي|مادة فعالة/.test(
-      text,
+    /للرجال|للنساء|للزوجين|for men|for women|for him|for her|\bman\b|\bwomen\b|\bmen\b/i.test(
+      context,
     )
   ) {
-    return {
-      label: "منتج دوائي أصلي يحتوي على مادة فعالة، خيار عملي لدعم الأداء والثقة",
-      salesLabel: "منتج دوائي أصلي بمادة فعالة لدعم الأداء والثقة",
-    };
+    return "";
   }
+  return p.category === "women" ? " للنساء" : " للرجال";
+}
 
-  if (/كريم|جل|بخاخ|رذاذ|مناديل|cream|gel|spray|wipes|topical|emollient/.test(text)) {
-    const audience = p.category === "women" ? "للنساء" : "للرجال";
-    return {
-      label: `منتج موضعي أصلي ${audience} للاستخدام الخارجي والتحكم في التوقيت`,
-      salesLabel: `منتج موضعي أصلي ${audience} للاستخدام الخارجي وتعزيز الثقة`,
-    };
-  }
-
-  if (p.category === "women") {
-    return {
-      label: "منتج أصلي للنساء للراحة والحيوية الزوجية والثقة",
-      salesLabel: "منتج أصلي للنساء للراحة والحيوية الزوجية",
-    };
-  }
-
-  if (/تأخير|سرعة القذف|delay|premature/.test(text)) {
-    return {
-      label: "مكمل غذائي أصلي للرجال للتحكم في التوقيت وتعزيز الثقة",
-      salesLabel: "مكمل أصلي للرجال للتحكم في التوقيت والثقة",
-    };
-  }
-
-  return {
-    label: "مكمل غذائي أصلي للرجال لدعم الطاقة والحيوية والثقة",
-    salesLabel: "مكمل غذائي أصلي للرجال للطاقة والحيوية",
-  };
+function compactPhrase(text: string, maxLength: number): string {
+  const clean = String(text).trim().replace(/\s+/g, " ");
+  if (clean.length <= maxLength) return clean;
+  const cut = clean.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > 12 ? cut.slice(0, lastSpace) : cut).trimEnd();
 }
 
 function compactProductName(name: string, maxLength = 46): string {
@@ -125,28 +122,30 @@ function compactProductName(name: string, maxLength = 46): string {
 }
 
 /**
- * Product descriptions use strong, benefit-led sales copy instead of the
- * catalogue description. The preferred variants end at a sentence boundary
- * and include product type, target audience/use, availability, discreet
- * shipping, cash on delivery, and the brand — without showing a price.
+ * Builds a short, factual product-specific snippet instead of repeating a
+ * category template. The reviewed profile contributes the product form and a
+ * concrete pack/ingredient/feature hook; it never adds price, ratings, brand
+ * identity, or medical outcomes that are not already in the product data.
  */
 export function makeProductMetaDescription(p: ProductMetaInput, maxLength = 155): string {
+  const profile = resolveProductMetaProfile(p);
   const name = compactProductName(p.name);
-  const kind = productMetaKind(p);
+  const hook = `${profile.hook}${productAudienceSuffix(p, profile.hook)}`;
   const availability = p.stock === 0 ? "غير متوفر حالياً" : "اطلب الآن";
   const brand = "اليسر ميديكال";
+  const tail = `${availability}؛ شحن سري ودفع عند الاستلام. ${brand}.`;
 
   const variants = [
-    `${name} — ${kind.label}. ${availability}؛ شحن سري ودفع عند الاستلام. ${brand}.`,
-    `${name} — ${kind.salesLabel}. ${availability}؛ شحن سري ودفع عند الاستلام. ${brand}.`,
-    `${name} — ${kind.salesLabel}. ${availability} مع شحن سري ودفع عند الاستلام من ${brand}.`,
+    `${name} — ${hook}. ${tail}`,
+    `${compactProductName(p.name, 40)} — ${compactPhrase(hook, 44)}. ${tail}`,
+    `${compactProductName(p.name, 34)} — ${compactPhrase(hook, 34)}. ${tail}`,
   ];
 
   const complete = variants.find((variant) => variant.length <= maxLength);
   if (complete) return complete;
 
-  // The compact name and sales label keep this fallback sentence-complete.
-  return `${name} — ${availability}؛ شحن سري ودفع عند الاستلام. ${brand}.`;
+  // Keep the sentence complete even for a future unusually long product name.
+  return `${compactProductName(p.name, 30)} — ${tail}`;
 }
 const DEFAULT_OG = `${SITE_URL}/og-default.webp`;
 
@@ -160,9 +159,16 @@ function absoluteUrl(url?: string): string {
   return `${SITE_URL}${url.startsWith("/") ? url : `/${url}`}`;
 }
 
+/**
+ * Structured data + social previews use the plain absolute image URL.
+ *
+ * The cache-busting `?v=N` suffix belongs to on-page <img> tags only: adding it
+ * here made the hydrated og:image/Product schema disagree with the identical
+ * value the prerendered HTML already declares.
+ */
 function absoluteProductImage(url?: string): string {
   if (!url) return DEFAULT_OG;
-  return absoluteUrl(/^https?:\/\//i.test(url) ? url : assetUrl(url));
+  return absoluteUrl(url);
 }
 
 export interface SeoMeta {
@@ -322,6 +328,7 @@ export const productSchema = (p: {
   slug: string;
   name: string;
   nameEn?: string;
+  searchAliases?: string[];
   brand?: string;
   mpn?: string;
   gtin?: string;
@@ -335,6 +342,9 @@ export const productSchema = (p: {
     "@context": "https://schema.org",
     "@type": "Product",
     name: p.name,
+    // Search aliases must stay in both copies (prerender + hydrated) so the
+    // initial HTML and the rendered DOM never declare different structured data.
+    ...(p.searchAliases?.length ? { alternativeName: p.searchAliases } : {}),
     description: p.description,
     sku: p.id,
     ...(p.mpn?.trim() ? { mpn: p.mpn.trim() } : {}),
@@ -426,6 +436,9 @@ export const articleSchema = (a: {
       url: SITE_URL,
     },
   },
+  // Prerender parity: the static HTML declares each citation as a CreativeWork
+  // (title + publisher) and the publisher as the Arabic brand name. Both copies
+  // must stay identical or Google sees two different Article entities.
   citation:
     a.sources?.map((source) => ({
       "@type": "CreativeWork",

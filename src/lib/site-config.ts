@@ -152,3 +152,27 @@ export function getShippingCost(governorate: string, subtotal = 0): number {
   const found = GOVERNORATE_SHIPPING.find((g) => g.name === normalized);
   return found ? found.shipping : 70;
 }
+
+/**
+ * المواد الفعالة الدوائية التي تمنعها سياسات Google Merchant Center في القوائم
+ * المجانية (أدوية بوصفة). قرار المالك 2026-09-28: تُستثنى من فيد Merchant فقط —
+ * صفحات المنتجات تبقى منشورة ومفهرسة، ولا تُحذف من الكتالوج أو الـ sitemap.
+ * هذا هو المصدر الوحيد للقاعدة؛ تستهلكها generate-sitemap والاختبارات والتدقيق.
+ */
+export const PRESCRIPTION_ACTIVE_PATTERN =
+  /sildenafil|tadalafil|vardenafil|dapoxetine|سيلدينافيل|تادالافيل|دابوكستين|finasteride|فيناسترايد/i;
+
+export interface MerchantFeedScreenable {
+  name?: string;
+  nameEn?: string;
+  description?: string;
+  ingredients?: string;
+}
+
+/** هل يُستبعد المنتج من فيد Merchant لاحتوائه مادة دوائية بوصفة؟ */
+export function isMerchantFeedExcluded(product: MerchantFeedScreenable): boolean {
+  const hay = `${product.name || ""} ${product.nameEn || ""} ${product.description || ""} ${
+    product.ingredients || ""
+  }`;
+  return PRESCRIPTION_ACTIVE_PATTERN.test(hay);
+}

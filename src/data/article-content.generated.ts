@@ -85,7 +85,7 @@ export const articleBodies: Record<string, ArticleBody> = {
         publisher: "National Center for Biotechnology Information (NCBI)",
       },
       {
-        title: "Ejaculatory Dysfunction: Pathophysiology and Clinical Clinical Guidance",
+        title: "Ejaculatory Dysfunction: Pathophysiology and Clinical Guidance",
         url: "https://www.mayoclinic.org/diseases-conditions/premature-ejaculation/diagnosis-treatment/drc-20354905",
         publisher: "Mayo Clinic",
       },

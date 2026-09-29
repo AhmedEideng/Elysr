@@ -3,7 +3,6 @@ import { Clock } from "lucide-react";
 import { useState } from "react";
 import { PageHero } from "@/components/PageHero";
 import type { ArticleMeta } from "@/data/articles-meta.generated";
-import { ARTICLE_COUNT } from "@/data/articles-cards.generated";
 import { assetUrl } from "@/lib/cache";
 
 export const Route = createFileRoute("/education")({
@@ -17,7 +16,8 @@ export const Route = createFileRoute("/education")({
       { title: "التوعية الجنسية — مقالات علمية موثوقة | اليسر ميديكال" },
       {
         name: "description",
-        content: `${ARTICLE_COUNT} مقالة توعوية علمية عن الصحة الجنسية والعلاقات الزوجية مع ذكر المصادر`,
+        content:
+          "مكتبة مقالات توعوية موثوقة بالعربية عن الصحة الجنسية والعلاقات الزوجية: ضعف الانتصاب، سرعة القذف، الرغبة، والتواصل بين الزوجين — بمصادر طبية مذكورة.",
       },
     ],
   }),

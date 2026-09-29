@@ -13,8 +13,6 @@ import {
   Scale,
 } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
-import { useEffect } from "react";
-import { applySeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/medical-review-board")({
   head: () => ({
@@ -23,6 +21,7 @@ export const Route = createFileRoute("/medical-review-board")({
         title: "شفافية المحتوى: من يكتب وكيف نتحقق — اليسر ميديكال",
       },
       {
+        // نفس النص الذي كان applySeo() ينشره بعد الـ hydration — مصدر واحد.
         name: "description",
         content:
           "من يكتب المحتوى، وكيف نتحقق منه آليًا، ما المصادر المعتمدة، وأين حدود مسؤوليتنا — بلا مبالغة وبلا مصطلحات غير حقيقية.",
@@ -33,14 +32,6 @@ export const Route = createFileRoute("/medical-review-board")({
 });
 
 function MedicalReviewBoardPage() {
-  useEffect(() => {
-    applySeo({
-      title: "شفافية المحتوى: من يكتب وكيف نتحقق — اليسر ميديكال",
-      description:
-        "من يكتب المحتوى، وكيف نتحقق منه آليًا، ما المصادر المعتمدة، وأين حدود مسؤوليتنا — بلا مبالغة وبلا مصطلحات غير حقيقية.",
-    });
-  }, []);
-
   return (
     <div className="container mx-auto max-w-5xl px-4 py-10 md:py-14">
       <PageHero

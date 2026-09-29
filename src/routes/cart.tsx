@@ -46,7 +46,15 @@ import { assetUrl } from "@/lib/cache";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
-    meta: [{ title: "سلة التسوق — اليسر ميديكال" }, { name: "robots", content: "noindex,follow" }],
+    meta: [
+      { title: "سلة التسوق — اليسر ميديكال" },
+      {
+        name: "description",
+        content:
+          "سلة التسوق الخاصة بك في اليسر ميديكال. أكمل طلبك بسهولة عبر واتساب أو طلب مباشر مع خصومات متدرجة.",
+      },
+      { name: "robots", content: "noindex,follow" },
+    ],
   }),
   component: CartPage,
 });

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Share2, Gift, Users, Copy, Check } from "lucide-react";
+import { Share2, Gift, Users, Copy, Check, ShieldCheck } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 import { toast } from "sonner";
 import { getOwnReferralCode, buildReferralLink, buildReferralShareText } from "@/lib/referral";
@@ -10,11 +10,11 @@ import { trackCtaClick, trackViewPromotion } from "@/lib/analytics";
 export const Route = createFileRoute("/refer")({
   head: () => ({
     meta: [
-      { title: "برنامج المشاركة — شارك رابط اليسر | اليسر ميديكال" },
+      { title: "برنامج الإحالة — شارك رابطك مع أصدقائك | اليسر ميديكال" },
       {
         name: "description",
         content:
-          "شارك رابط اليسر مع أصدقائك؛ يُسجّل كود الإحالة مع الطلب لمتابعة مصدره. نظام مشاركة بسيط مع شحن سري لكل مصر.",
+          "لكل زائر كود إحالة فريد لا يحتوي بيانات شخصية. شاركه عبر واتساب؛ وعند الطلب يُسجّل الكود لمتابعة مصدر الإحالة مع شحن سري لكل مصر.",
       },
     ],
   }),
@@ -134,6 +134,52 @@ function ReferPage() {
               </li>
             ))}
           </ol>
+        </div>
+
+        {/* ملاحظات مهمة */}
+        <div className="rounded-[2rem] border border-primary/10 bg-card p-6 md:p-8">
+          <h2 className="mb-4 flex items-center gap-2 text-xl font-black">
+            <ShieldCheck className="h-5 w-5 text-primary" /> ملاحظات مهمة
+          </h2>
+          <ul className="space-y-3 text-sm leading-6">
+            <li className="rounded-2xl border bg-muted/30 p-4">
+              كود الإحالة رمز عشوائي لا يحتوي أي بيانات شخصية — خصوصيتك محفوظة.
+            </li>
+            <li className="rounded-2xl border bg-muted/30 p-4">
+              يمكنك مشاركة نفس الرابط مع أكثر من صديق، ويُسجَّل كودك في كل طلب يتم عبره.
+            </li>
+            <li className="rounded-2xl border bg-muted/30 p-4">
+              يُحفظ الكود تلقائياً على جهاز صديقك لمدة 30 يوماً من أول زيارة عبر رابطك.
+            </li>
+            <li className="rounded-2xl border bg-muted/30 p-4">
+              أي مكافأة تُراجع وفق سياسة المتجر، وجميع الطلبات تُشحن بتغليف سري محايد يحفظ خصوصية
+              المشتري.
+            </li>
+            <li className="rounded-2xl border bg-muted/30 p-4">
+              الكود يعمل على أي جهاز ومتصفح ويُحفظ تلقائياً دون الحاجة لإنشاء حساب.
+            </li>
+            <li className="rounded-2xl border bg-muted/30 p-4">
+              إذا فتحت رابط صديقك بالخطأ فلا تتأثر إحالته — يمكنك توليد رابطك الخاص من هذه الصفحة في
+              أي وقت ومشاركته عبر واتساب أو أي قناة أخرى.
+            </li>
+          </ul>
+          <p className="mt-4 text-sm leading-6 text-muted-foreground">
+            للتفاصيل الكاملة عن كيفية التعامل مع البيانات راجع{" "}
+            <Link to="/privacy">سياسة الخصوصية</Link>، ولأي سؤال عن البرنامج راسلنا عبر واتساب من{" "}
+            <Link to="/contact">صفحة التواصل</Link>.
+          </p>
+        </div>
+
+        {/* لماذا تشارك */}
+        <div className="rounded-[2rem] border border-primary/10 bg-gradient-soft p-6 md:p-8">
+          <h2 className="mb-4 flex items-center gap-2 text-xl font-black">
+            <Share2 className="h-5 w-5 text-primary" /> لماذا تشارك رابطك؟
+          </h2>
+          <p className="text-sm leading-6">
+            مشاركة رابطك تساعد أصدقاءك على الوصول لمتجر بمنتجات أصلية وشحن سري وتغليف محايد، وتتيح
+            لنا متابعة مصدر الإحالة ومكافأتك وفق سياسة المتجر. كلما وصل رابطك لأشخاص أكثر زادت فرص
+            تسجيل إحالاتك في طلباتهم.
+          </p>
         </div>
 
         <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-center text-xs leading-6 text-amber-900">

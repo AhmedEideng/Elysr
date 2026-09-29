@@ -511,7 +511,7 @@ export const articles: Article[] = [
         publisher: "National Center for Biotechnology Information (NCBI)",
       },
       {
-        title: "Ejaculatory Dysfunction: Pathophysiology and Clinical Clinical Guidance",
+        title: "Ejaculatory Dysfunction: Pathophysiology and Clinical Guidance",
         url: "https://www.mayoclinic.org/diseases-conditions/premature-ejaculation/diagnosis-treatment/drc-20354905",
         publisher: "Mayo Clinic",
       },
@@ -3213,7 +3213,7 @@ export const articles: Article[] = [
     slug: "sexual-health-glossary",
     title: "قاموس الصحة الجنسية: 45 مصطلحاً تحتاج تعرفه بالظبط",
     excerpt:
-      "قاموس مرجعي مبسّط لأهم 45 مصطلح في الصحة الجنسية: الحالات، الهرمونات، المواد الفعالة، الأجهزة، والمكملات — مع إشارات الأمان المهمة، مكتوب بلغة عربية واضحة من صيدلي.",
+      "قاموس مرجعي مبسّط لأهم 45 مصطلح في الصحة الجنسية: الحالات، الهرمونات، المواد الفعالة، الأجهزة، والمكملات — بلغة عربية واضحة من صيدلي.",
     category: "أساسيات",
     readMin: 12,
     emoji: "📖",

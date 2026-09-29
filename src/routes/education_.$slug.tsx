@@ -12,7 +12,14 @@ import {
 import { PageHero } from "@/components/PageHero";
 import { ShareButton } from "@/components/ShareButton";
 import { shareArticleText } from "@/lib/share";
-import { articleSchema, clearJsonLd, clearPrerenderJsonLd, injectJsonLd } from "@/lib/seo";
+import {
+  articleSchema,
+  breadcrumbSchema,
+  clearJsonLd,
+  clearPrerenderJsonLd,
+  injectJsonLd,
+  makeMetaDescription,
+} from "@/lib/seo";
 import { editorialTrustSignals } from "@/data/editorial-trust-signals";
 import { type Article } from "@/data/articles";
 import { type ArticleMeta } from "@/data/articles-meta.generated";
@@ -54,7 +61,12 @@ export const Route = createFileRoute("/education_/$slug")({
   head: ({ loaderData }) => ({
     meta: [
       { title: loaderData?.article.title },
-      { name: "description", content: loaderData?.article.excerpt },
+      {
+        // Same helper/limit as the prerendered copy so the initial HTML and the
+        // hydrated <head> never declare two different descriptions.
+        name: "description",
+        content: loaderData?.article ? makeMetaDescription(loaderData.article.excerpt) : "",
+      },
       { property: "og:type", content: "article" },
       { property: "og:image", content: loaderData?.article.image },
       { name: "twitter:image", content: loaderData?.article.image },
@@ -140,7 +152,21 @@ function ArticlePage() {
   useEffect(() => {
     clearPrerenderJsonLd();
     injectJsonLd("article", articleSchema(article));
-    return () => clearJsonLd("article");
+    // The prerendered article HTML also declares a BreadcrumbList; injecting the
+    // same node keeps the initial document and the hydrated DOM identical
+    // (clearPrerenderJsonLd removes every prerendered block first).
+    injectJsonLd(
+      "breadcrumb",
+      breadcrumbSchema([
+        { name: "الرئيسية", url: "/" },
+        { name: "المقالات", url: "/education" },
+        { name: article.title, url: `/education/${article.slug}` },
+      ]),
+    );
+    return () => {
+      clearJsonLd("article");
+      clearJsonLd("breadcrumb");
+    };
   }, [article]);
 
   return (

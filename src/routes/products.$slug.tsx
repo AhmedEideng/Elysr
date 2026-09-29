@@ -103,11 +103,14 @@ export const Route = createFileRoute("/products/$slug")({
   },
   head: ({ loaderData }) => {
     const SITE_URL = "https://elysrmedical.store";
+    // Social previews must point at the same URL the prerendered HTML declares
+    // (no cache-busting suffix), otherwise the initial document and the
+    // hydrated DOM advertise two different og:image values.
     const absImg = loaderData?.product.image
       ? loaderData.product.image.startsWith("http")
         ? loaderData.product.image
-        : `${SITE_URL}${assetUrl(loaderData.product.image)}`
-      : `${SITE_URL}${assetUrl("/og-default.webp")}`;
+        : `${SITE_URL}${loaderData.product.image}`
+      : `${SITE_URL}/og-default.webp`;
     return {
       meta: [
         { title: loaderData?.product ? makeProductMetaTitle(loaderData.product.name) : "المنتج" },

@@ -21,11 +21,13 @@ import {
   UserCheck,
 } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
-import { useEffect } from "react";
-import { applySeo } from "@/lib/seo";
 import { SHIPPING_DELIVERY_TEXT } from "@/lib/site-config";
 
 export const Route = createFileRoute("/about")({
+  // ⚠️ مصدر SEO واحد. كان لهذه الصفحة مصدران: head() وapplySeo() داخل
+  // useEffect — والثاني كان يفوز بعد الـ hydration، فيفهرس جوجل عنواناً ووصفاً
+  // مختلفين عمّا تعلنه النسخة الثابتة (prerender). القيم هنا هي نفسها التي
+  // كان applySeo() ينشرها، فلا يتغيّر ما يراه جوجل اليوم، وتتطابق النسختان.
   head: () => ({
     meta: [
       { title: "من نحن — اليسر ميديكال | أكبر شركة متخصصة" },
@@ -40,14 +42,6 @@ export const Route = createFileRoute("/about")({
 });
 
 function AboutPage() {
-  useEffect(() => {
-    applySeo({
-      title: "من نحن — اليسر ميديكال | أكبر شركة متخصصة",
-      description:
-        "تعرف على اليسر ميديكال، أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر، مع كتالوج مختار بعناية وشحن سري ودفع عند الاستلام.",
-    });
-  }, []);
-
   return (
     <div className="container mx-auto px-4 py-10 md:py-14 max-w-5xl">
       <PageHero

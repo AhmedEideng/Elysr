@@ -67,13 +67,21 @@ describe("shipping structured data provenance", () => {
 });
 
 describe("product metadata templates", () => {
-  it("keeps product titles within 60 characters without cutting a parenthetical brand", () => {
-    const title = makeProductMetaTitle(
-      "كبسولات هامر أوف ثور الألمانية الأصلية المستوردة (Hammer of Thor)",
-    );
+  it("emits catalog product titles verbatim so prerender and SPA agree", () => {
+    const name = "كبسولات هامر أوف ثور الألمانية الأصلية المستوردة (Hammer of Thor)";
+    const title = makeProductMetaTitle(name);
 
-    expect(title.length).toBeLessThanOrEqual(60);
-    expect(title).not.toContain("(Hammer…");
+    // Every catalog name fits the guard limit, so nothing is clipped: the
+    // initial HTML <title> and the hydrated document.title stay identical.
+    expect(title).toBe(name);
+    expect(title).not.toContain("…");
+  });
+
+  it("still guards against a runaway name by trimming at a word boundary", () => {
+    const title = makeProductMetaTitle(`${"اسم طويل جداً ".repeat(12)}(Brand Name)`, 60);
+
+    expect(title.length).toBeLessThanOrEqual(61);
+    expect(title.endsWith("…")).toBe(true);
   });
 
   it("builds a complete, sentence-ended supplement description", () => {

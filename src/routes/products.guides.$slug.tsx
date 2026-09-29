@@ -16,6 +16,7 @@ import {
   faqSchema,
   injectJsonLd,
   itemListSchema,
+  makeMetaDescription,
 } from "@/lib/seo";
 import { useScrollTracking } from "@/hooks/use-scroll-tracking";
 import { trackViewItemList } from "@/lib/analytics";
@@ -59,7 +60,12 @@ export const Route = createFileRoute("/products/guides/$slug")({
   head: ({ loaderData }) => ({
     meta: [
       { title: loaderData?.page.metaTitle },
-      { name: "description", content: loaderData?.page.metaDescription },
+      {
+        // Same helper/limit as the prerendered guide HTML (155 chars) so the
+        // initial document and the hydrated head agree.
+        name: "description",
+        content: loaderData?.page ? makeMetaDescription(loaderData.page.metaDescription) : "",
+      },
       ...(loaderData?.page.noindex ? [{ name: "robots", content: "noindex, follow" }] : []),
     ],
   }),
@@ -80,6 +86,19 @@ function SeoLandingPageComponent() {
 
   useEffect(() => {
     clearPrerenderJsonLd();
+    // The prerendered guide HTML declares a WebPage entity; injecting the same
+    // node here keeps the initial document and the hydrated DOM identical.
+    injectJsonLd("webpage", {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": `https://elysrmedical.store/products/guides/${page.slug}`,
+      name: page.title,
+      headline: page.title,
+      description: page.metaDescription,
+      url: `https://elysrmedical.store/products/guides/${page.slug}`,
+      inLanguage: "ar-EG",
+      about: page.primaryKeyword,
+    });
     injectJsonLd(
       "breadcrumb",
       breadcrumbSchema([
@@ -110,6 +129,7 @@ function SeoLandingPageComponent() {
     }
 
     return () => {
+      clearJsonLd("webpage");
       clearJsonLd("breadcrumb");
       clearJsonLd("faq");
       clearJsonLd("itemlist");

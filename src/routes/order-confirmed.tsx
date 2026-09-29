@@ -10,7 +10,10 @@ export const Route = createFileRoute("/order-confirmed")({
   head: () => ({
     meta: [
       { title: "تم استلام طلبك — اليسر ميديكال" },
-      { name: "description", content: "تم استلام طلبك بنجاح. سنتواصل معك قريباً لتأكيد التفاصيل." },
+      {
+        name: "description",
+        content: "تم استلام طلبك بنجاح. سنتواصل معك قريباً لتأكيد التفاصيل والشحن.",
+      },
       { name: "robots", content: "noindex,follow" },
     ],
   }),

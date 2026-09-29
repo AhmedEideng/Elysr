@@ -31,7 +31,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const DIST = resolve(ROOT, "dist");
 
-const CRITICAL_BUDGET = 30 * 1024; // سقف الحجم (bytes)
+// سقف الحجم (bytes).
+// رُفع من 30KB إلى 45KB بعد قياس 2026-09-28: القواعد المطابقة فعلاً لمحتوى
+// الصفحات 394 قاعدة بحجم 42.9KB، أي أن السقف القديم كان يُسقط 34 قاعدة
+// (13.2KB) بصمت — منها قواعد تخطيط مستخدمة فوق الطية مثل
+// `:where(.space-y-*>:not(:last-child))` و`.backdrop-blur-*`، فتظهر الأقسام
+// بلا مسافات رأسية في أول رسمة ثم تقفز عند وصول الـ CSS الكامل (CLS).
+// التكلفة الحقيقية صغيرة: الـ CSS الداخلي ينضغط ~4:1 (+~3KB gzip للصفحة)،
+// وهو داخل `@layer critical` فلا يتقدم أبداً على الـ CSS الكامل.
+const CRITICAL_BUDGET = 45 * 1024;
 const BODY_SAMPLE = 9000; // أول 9KB من body لكل صفحة عينة
 
 // ── 1) إيجاد الـ CSS المبنى ──
@@ -486,9 +494,35 @@ const criticalCss = "@layer critical{" + chosen.map((k) => k.text).join("") + "}
 const minifiedCriticalCss = (
   await transform(criticalCss, { loader: "css", minify: true, target: "es2022" })
 ).code.trim();
+const dropped = kept.length - chosen.length;
+const usage = minifiedCriticalCss.length / CRITICAL_BUDGET;
 console.log(
-  `✓ critical CSS: ${(minifiedCriticalCss.length / 1024).toFixed(1)}KB من ${kept.length} rules (budget ${CRITICAL_BUDGET / 1024}KB)`,
+  `✓ critical CSS: ${(minifiedCriticalCss.length / 1024).toFixed(1)}KB — ${chosen.length} قاعدة محقونة من ${kept.length} مرشحة (budget ${CRITICAL_BUDGET / 1024}KB)`,
 );
+// ⚠️ القواعد المستبعدة لا تكسر الموقع (الـ CSS الكامل يُحمَّل بعدها) لكنها
+// تُرجع أول رسمة بلا تنسيق لتلك الأجزاء. قبل هذا التحذير كان الإسقاط صامتاً
+// تماماً والسقف مستهلكاً بنسبة ~99%، فأي class جديد فوق الطية كان يُحذف
+// دون أن يلاحظ أحد.
+if (dropped > 0) {
+  const droppedRules = kept.filter((k) => !chosen.includes(k));
+  const droppedBytes = droppedRules.reduce((s, k) => s + k.size, 0);
+  const selectorOf = (t) => t.slice(0, t.indexOf("{")).trim().replace(/\s+/g, " ").slice(0, 60);
+  console.warn(
+    `⚠️  critical CSS: ${dropped} قاعدة مستبعدة بسبب السقف (${CRITICAL_BUDGET / 1024}KB) بحجم ${(droppedBytes / 1024).toFixed(1)}KB — أول رسمة قد تظهر بلا تنسيق لهذه الأجزاء حتى يُحمَّل الـ CSS الكامل.`,
+  );
+  console.warn(
+    `    المستبعد (الأدنى أولوية أولاً): ${droppedRules
+      .slice(-12)
+      .reverse()
+      .map((k) => `[s${k.score}] ${selectorOf(k.text)}`)
+      .join(" · ")}`,
+  );
+}
+if (usage > 0.95) {
+  console.warn(
+    `⚠️  critical CSS: السقف مستهلك بنسبة ${(usage * 100).toFixed(1)}% — أي قواعد جديدة فوق الطية ستُستبعد صامتةً ما لم يُرفع CRITICAL_BUDGET.`,
+  );
+}
 
 // ── 5) حقن في كل صفحات dist ──
 const htmlFiles = [];
