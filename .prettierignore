@@ -6,3 +6,10 @@ pnpm-lock.yaml
 package-lock.json
 bun.lock
 routeTree.gen.ts
+
+# Generated build artifacts (npm run build) — prettier reformatting causes
+# perpetual churn because the generators emit their own formatting.
+public/landing-pages/
+api/lib/products-db.json
+api/lib/bundles-db.json
+api/lib/config-db.json
