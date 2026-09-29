@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import handler, { fetchApprovedReviews } from "../../api/reviews.js";
+import handler, { fetchApprovedReviews, maskReviewerName } from "../../api/reviews.js";
 
 function mockResponse() {
   const response = {
@@ -49,6 +49,24 @@ const jsonHeaders = {
   get: (k: string) =>
     k.toLowerCase() === "content-type" ? "application/json; charset=utf-8" : null,
 };
+
+describe("maskReviewerName — تعمية أسماء المراجعات الحية (قرار المالك 2026-09-29)", () => {
+  it("الاسمان تصبح «الاسم الأول + أول حرف من الثاني» مثل الأرشيف", () => {
+    expect(maskReviewerName("أحمد محمد")).toBe("أحمد م.");
+    expect(maskReviewerName("John Smith")).toBe("John S.");
+  });
+  it("ثلاثة أسماء أو أكثر تُعمى بنفس القاعدة", () => {
+    expect(maskReviewerName("أحمد محمد علي")).toBe("أحمد م.");
+  });
+  it("الاسم المفرد يبقى كما هو", () => {
+    expect(maskReviewerName("محمد")).toBe("محمد");
+  });
+  it("المسافات الزائدة تُطبّع والفراغ يسقط إلى «عميل»", () => {
+    expect(maskReviewerName("  سارة   علي  ")).toBe("سارة ع.");
+    expect(maskReviewerName("")).toBe("عميل");
+    expect(maskReviewerName("   ")).toBe("عميل");
+  });
+});
 
 describe("reviews read handler", () => {
   beforeEach(() => {

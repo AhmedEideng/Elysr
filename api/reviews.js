@@ -79,6 +79,25 @@ function cleanCache(now) {
 const rateLimiter = createRateLimiter({ ...RATE_LIMIT, prefix: "reviews-read" });
 
 /**
+ * (2026-09-29) قرار المالك: تعمية أسماء المراجعات الحية في طبقة البيانات —
+ * نفس سياسة الأرشيف («أحمد م.» في legacy-product-reviews.ts): الاسم الأول +
+ * أول حرف من الاسم الثاني + نقطة. التعمية تحدث قبل خروج البيانات من الـ API
+ * فلا يصل الاسم الكامل إلى المتصفح أبداً (خصوصية بالبناء، لا بالعرض).
+ * الاسم المفرد يبقى كما هو، والفراغ يسقط إلى «عميل».
+ * @param {string} fullName
+ * @returns {string}
+ */
+export function maskReviewerName(fullName) {
+  const name = String(fullName || "")
+    .trim()
+    .replace(/\s+/g, " ");
+  if (!name) return "عميل";
+  const parts = name.split(" ");
+  if (parts.length === 1) return parts[0].slice(0, 60);
+  return `${parts[0].slice(0, 60)} ${parts[1].charAt(0)}.`;
+}
+
+/**
  * تطبيع المراجعة القادمة من Apps Script — يرفض أي شكل غير متوقع
  * @param {Record<string, unknown> | null | undefined} raw
  */
@@ -89,7 +108,7 @@ function normalizeReview(raw) {
   const text = typeof raw.text === "string" ? raw.text.trim() : "";
   if (text.length < 10 || text.length > 600) return null;
   return {
-    name: typeof raw.name === "string" && raw.name.trim() ? raw.name.trim().slice(0, 60) : "عميل",
+    name: maskReviewerName(typeof raw.name === "string" ? raw.name : ""),
     rating,
     date: typeof raw.date === "string" ? raw.date.trim().slice(0, 40) : "",
     text,
