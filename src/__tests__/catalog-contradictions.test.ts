@@ -2,7 +2,7 @@ import { products } from "@/data/products";
 import { describe, it } from "vitest";
 
 describe("Catalog Contradiction Audit", () => {
-  it("scans all 84 products for topical vs edible description-usage contradictions", () => {
+  it("scans all 83 products for topical vs edible description-usage contradictions", () => {
     const contradictions: Array<{ id: string; name: string; issue: string }> = [];
 
     const topicalKeywords = [
@@ -23,12 +23,16 @@ describe("Catalog Contradiction Audit", () => {
       const desc = (p.description || "").toLowerCase();
       const usage = (p.usage || "").toLowerCase();
       const name = (p.name || "").toLowerCase();
+      // Use the product name and lead sentence for form detection. Full
+      // descriptions often mention an ingredient such as royal honey inside a
+      // topical formula; treating that ingredient as an edible product creates
+      // false positives (e.g. Royal Cream m-09).
+      const formLead = `${name} ${desc.split(/[.!؟]/)[0] || ""}`;
 
       // Check if description implies a topical product (using regex for جل/جيل to prevent false matches with الرجل/رجل)
       const hasGelKeyword =
-        /\b(جل|جيل)\b|(\s+جل\s+)|(\s+جيل\s+)/.test(desc) || /\b(جل|جيل)\b/.test(name);
-      const isTopicalDesc =
-        hasGelKeyword || topicalKeywords.some((k) => desc.includes(k) || name.includes(k));
+        /\b(جل|جيل)\b|(\s+جل\s+)|(\s+جيل\s+)/.test(formLead) || /\b(جل|جيل)\b/.test(name);
+      const isTopicalDesc = hasGelKeyword || topicalKeywords.some((k) => formLead.includes(k));
 
       // Check if usage implies an edible product
       const hasEdibleUsage = [
@@ -64,7 +68,7 @@ describe("Catalog Contradiction Audit", () => {
         "مكمل",
         "قرص",
         "كبسول",
-      ].some((k) => desc.includes(k) || name.includes(k));
+      ].some((k) => formLead.includes(k));
       const hasTopicalUsage = ["دهن", "تدليك", "موضعي", "غسل", "رش", "بخ", "مساج"].some((k) =>
         usage.includes(k),
       );

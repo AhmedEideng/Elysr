@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { createServer } from "vite";
@@ -56,6 +57,8 @@ try {
   const cacheConfig = JSON.parse(readFileSync(resolve(ROOT, "config/cache-version.json"), "utf-8"));
   const cacheModule = await vite.ssrLoadModule("/src/lib/cache.ts");
   const { makeProductMetaDescription } = await vite.ssrLoadModule("/src/lib/seo.ts");
+  const { PRODUCT_META_PROFILES } = await vite.ssrLoadModule("/src/data/product-meta.ts");
+  const { isMerchantFeedExcluded } = await vite.ssrLoadModule("/src/lib/site-config.ts");
   assert.equal(cacheModule.CACHE_VERSION, cacheConfig.version, "Cache version source mismatch");
   // (2026-09-15) package.json ↔ package-lock.json لازم يفضلوا متزامنين —
   // كان الـ release script بيهمل الـ lock فتجمع drift لـ 5 releases.
@@ -95,18 +98,64 @@ try {
     const gaLoader = readFileSync(resolve(ROOT, "public/scripts/ga-loader.js"), "utf-8");
     const indexHtml = readFileSync(resolve(ROOT, "index.html"), "utf-8");
     assert.match(indexHtml, /\/scripts\/ga-loader\.js\?v=\d+/);
+    // (2026-09-28) this is the only hardcoded ?v= in the repo — release.mjs syncs
+    // it, but a broad restore commit once left it one ahead of the central config
+    // (config=85, index.html=86) and every built page inherited the stale number.
+    const gaVersion = indexHtml.match(/\/scripts\/ga-loader\.js\?v=(\d+)/)[1];
+    // (2026-09-28) سكربت علم الطلة الأولى مضمّن — لازم يبقى مطابقاً حرفياً
+    // لـ sha256 المصرّح به في CSP، وإلا تمنعه السياسة ويظهر وميض النص السادة.
+    const flagScript = indexHtml.match(/<script>(document\.documentElement[^<]*)<\/script>/);
+    assert.ok(flagScript, "first-paint flag script missing from index.html");
+    const { CSP_POLICY } = await import("../config/security-headers.mjs");
+    const flagHash =
+      "sha256-" + createHash("sha256").update(flagScript[1], "utf8").digest("base64");
+    assert.ok(
+      CSP_POLICY.includes(flagHash),
+      `CSP script-src missing hash ${flagHash} for the first-paint flag script`,
+    );
+    assert.match(indexHtml, /\[data-prerender-skeleton\]\s*\{\s*display:\s*none/);
+    assert.match(indexHtml, /html\.js \[data-prerender-content\]\s*\{\s*display:\s*none/);
+    assert.equal(
+      gaVersion,
+      cacheConfig.version,
+      `index.html ga-loader.js?v=${gaVersion} != config/cache-version.json ${cacheConfig.version}`,
+    );
     assert.match(gaLoader, /window\.gtag\("config", measurementId/);
     assert.match(gaLoader, /send_page_view:\s*false/);
     assert.match(gaLoader, /configureGA\(\);\s*loadGA\(\);/);
   }
 
   assert.deepEqual(productsDb, products, "products-db.json is stale; run npm run build");
+  assert.deepEqual(
+    Object.keys(PRODUCT_META_PROFILES).sort(),
+    products.map((product) => product.id).sort(),
+    "Every catalog product must have one reviewed Product Meta profile",
+  );
 
   // Product meta copy is intentionally sales-led and price-free. Keep the
   // generated SPA/prerender template from drifting back to mechanical or
   // instruction-heavy descriptions.
   for (const product of products) {
+    const profile = PRODUCT_META_PROFILES[product.id];
     const description = makeProductMetaDescription(product);
+    assert.ok(profile, `Product Meta profile missing: ${product.slug}`);
+    if (product.category === "devices") {
+      assert.equal(profile.form, "device", `Device form drifted: ${product.slug}`);
+    }
+    if (profile.form === "topical") {
+      assert.match(
+        description,
+        /كريم|جل|بخاخ|مناديل|موضعي|cream|gel|spray|wipes/i,
+        `Topical form missing: ${product.slug}`,
+      );
+    }
+    if (profile.form === "device") {
+      assert.match(
+        description,
+        /جهاز|مضخة|طقم|pump|device/i,
+        `Device form missing: ${product.slug}`,
+      );
+    }
     assert.ok(
       description.length <= 155,
       `Product meta description too long: ${product.slug} (${description.length})`,
@@ -179,8 +228,8 @@ try {
 
   assert.equal(
     products.length,
-    84,
-    "Expected 84 products (five previously deleted products restored; four deleted products remain)",
+    83,
+    "Expected 83 products (five previously deleted products restored; five deleted products remain — black-horse-long-time-gel removed 2026-09-29 by owner decision)",
   );
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
   // 🧭 Anti-drift: أرقام الكتالوج/المحتوى hardcoded في نصوص التسويق = درفت
@@ -414,8 +463,8 @@ try {
   }, {});
   assert.deepEqual(
     categories,
-    { men: 54, women: 23, devices: 7 },
-    "Unexpected category split (84 = 54 men / 23 women / 7 devices)",
+    { men: 53, women: 23, devices: 7 },
+    "Unexpected category split (83 = 53 men / 23 women / 7 devices)",
   );
 
   // (2026-09-15) JSON-LD OfferCatalog في index.html لازم يطابق كتالوج
@@ -721,6 +770,8 @@ try {
   const sitemapIndex = readFileSync(resolve(ROOT, "public/sitemap-index.xml"), "utf-8");
   const catalogFeed = readFileSync(resolve(ROOT, "public/catalog-feed.xml"), "utf-8");
   const inStockProducts = products.filter((product) => (product.stock ?? 0) > 0);
+  // قرار المالك 2026-09-28: أدوية الوصفة خارج فيد Merchant فقط (القاعدة في site-config).
+  const feedProducts = inStockProducts.filter((product) => !isMerchantFeedExcluded(product));
   assert.equal(
     (imageSitemap.match(/<image:loc>/g) || []).length,
     (imageSitemap.match(/<image:image>/g) || []).length,
@@ -728,27 +779,27 @@ try {
   );
   assert.equal(
     (catalogFeed.match(/<item>/g) || []).length,
-    inStockProducts.length,
-    "Catalog feed must contain every in-stock catalog product",
+    feedProducts.length,
+    "Catalog feed must contain every in-stock, feed-eligible catalog product",
   );
   assert.equal(
     (catalogFeed.match(/<g:google_product_category>/g) || []).length,
-    inStockProducts.length,
+    feedProducts.length,
     "Every catalog feed item must have an official Google product category",
   );
   assert.equal(
     (catalogFeed.match(/<g:identifier_exists>/g) || []).length,
-    inStockProducts.length,
+    feedProducts.length,
     "Every catalog feed item must declare identifier_exists",
   );
   assert.equal(
     (catalogFeed.match(/<g:identifier_exists>no<\/g:identifier_exists>/g) || []).length,
-    inStockProducts.filter((product) => !product.gtin && !product.mpn).length,
+    feedProducts.filter((product) => !product.gtin && !product.mpn).length,
     "identifier_exists=no must match products without verified GTIN/MPN",
   );
   assert.equal(
     (catalogFeed.match(/<g:brand>/g) || []).length,
-    inStockProducts.filter((product) => Boolean(product.brand?.trim())).length,
+    feedProducts.filter((product) => Boolean(product.brand?.trim())).length,
     "Merchant feed must not invent a brand from the product name",
   );
   assert.doesNotMatch(
@@ -769,7 +820,7 @@ try {
       true,
       `Product missing from image sitemap: ${product.id}`,
     );
-    if ((product.stock ?? 0) > 0) {
+    if ((product.stock ?? 0) > 0 && !isMerchantFeedExcluded(product)) {
       assert.equal(
         catalogFeed.includes(`<g:id>${product.id}</g:id>`),
         true,

@@ -343,6 +343,14 @@ async function syncRedirects() {
         destination: "/products/men",
         permanent: true,
       },
+      // (2026-09-29) قرار المالك: حذف جل بلاك هورس من الكتالوج — 301 لفئة
+      // الرجال (نفس نمط المنتجات المحذوفة السابقة) للحفاظ على قيمة الـ URL.
+      {
+        source: "/products/black-horse-long-time-gel",
+        destination: "/products/men",
+        permanent: true,
+      },
+      { source: "/products/m-50", destination: "/products/men", permanent: true },
     ];
 
     for (const redirect of legacyAliases) {

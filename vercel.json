@@ -174,7 +174,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.g.doubleclick.net; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com; worker-src 'self'; frame-ancestors 'self'; form-action 'self'; base-uri 'self'; object-src 'none'; manifest-src 'self'; media-src 'self'; upgrade-insecure-requests; report-uri /api/csp-report"
+          "value": "default-src 'self'; script-src 'self' 'sha256-jqffmSzJG3FKjTMMljuijqTzyNM2OLeZTIVyL7llYbw=' https://www.googletagmanager.com https://www.google-analytics.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.g.doubleclick.net; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com; worker-src 'self'; frame-ancestors 'self'; form-action 'self'; base-uri 'self'; object-src 'none'; manifest-src 'self'; media-src 'self'; upgrade-insecure-requests; report-uri /api/csp-report"
         },
         {
           "key": "Origin-Agent-Cluster",
@@ -439,7 +439,7 @@
     },
     {
       "source": "/products/m-50",
-      "destination": "/products/black-horse-long-time-gel",
+      "destination": "/products/men",
       "permanent": true
     },
     {
@@ -985,6 +985,11 @@
     {
       "source": "/products/m-62",
       "destination": "/products/halpeno-men-gel-50gm",
+      "permanent": true
+    },
+    {
+      "source": "/products/black-horse-long-time-gel",
+      "destination": "/products/men",
       "permanent": true
     }
   ]
