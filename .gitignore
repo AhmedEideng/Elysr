@@ -61,3 +61,6 @@ test-results/
 # GSC data dumps (private performance data) — samples stay tracked
 scripts/gsc/*.csv
 !scripts/gsc/sample-*.csv
+
+# Audit tool outputs — regenerable via npm run audit:site / audit:parity
+AUDIT-*.json
