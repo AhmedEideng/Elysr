@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { expect, test } from "@playwright/test";
 
 test("customer can add a product, update quantity, calculate shipping and submit", async ({
@@ -433,17 +436,45 @@ test("complete bundle applies the real 20% bundle discount (exclusive with tier)
     });
   });
 
-  // باقة m-01 (هامر أوف ثور) = [m-01: 580, m-06: 300, m-11: 400] → 1280
-  // خصم الباقة = 20% من 1280 = 256 — وخصم شريحة الماسة (10% = 128)
-  // موقوف لهذا الطلب: الخصمان متبادلا الاستبعاد، الباقة هي الخصم الوحيد
-  // (الأرقام تتبع أسعار الكتالوج — آخر تحديث 2026-09-14: m-01 اتغير 590→580)
+  // 🔒 التوقعات تُحسب من كتالوج المصدر (api/lib) وليس hardcoded:
+  // انجراف الأسعار السابق (commit 8a14a2e غيّر m-01 إلى 520 بدون تحديث الاختبار)
+  // كسر CI — الحساب من المصدر يمنع تكرار ذلك لأي تحديث سعر مستقبلي.
+  const root0 = test.info().config.rootDir;
+  let base = root0;
+  while (!existsSync(join(base, "api", "lib", "products-db.json")) && base !== join(base, "..")) {
+    base = join(base, "..");
+  }
+  const readDb = (n: string) =>
+    JSON.parse(readFileSync(join(base, "api", "lib", n), "utf-8")) as Record<string, unknown>;
+  const products = readDb("products-db.json") as unknown as { id: string; price: number }[];
+  const bundles = readDb("bundles-db.json") as unknown as Record<string, string[]>;
+  const config = readDb("config-db.json") as unknown as {
+    BUNDLE_DISCOUNT_RATE: number;
+    FREE_SHIPPING_THRESHOLD: number;
+    GOVERNORATE_SHIPPING: { name: string; shipping: number }[];
+  };
+  const members = bundles["m-01"];
+  const priceOf = (id: string): number => {
+    const p = products.find((x) => x.id === id);
+    if (!p) throw new Error(`missing product in catalog: ${id}`);
+    return p.price;
+  };
+  const unitSum = members.reduce((s, id) => s + priceOf(id), 0);
+  const bundleDiscount = Math.round(unitSum * config.BUNDLE_DISCOUNT_RATE);
+  const subtotal = unitSum - bundleDiscount;
+  const shipping =
+    unitSum >= config.FREE_SHIPPING_THRESHOLD
+      ? 0
+      : (config.GOVERNORATE_SHIPPING.find((g) => g.name === "القاهرة")?.shipping ?? 0);
+  const total = subtotal + shipping;
+
   await page.goto("/products/hammer-of-thor-capsules");
   await page.getByRole("button", { name: /أضف الباقة للسلة/ }).click();
   await page.waitForTimeout(1000);
 
   await page.goto("/cart");
   await expect(page.getByText("خصم الباقة المكتملة (20%)")).toBeVisible();
-  await expect(page.getByText("-256 ج.م")).toBeVisible();
+  await expect(page.getByText(`-${bundleDiscount} ج.م`)).toBeVisible();
   // خصم الشرائح يجب ألا يظهر (موقوف بسبب الباقة)
   await expect(page.getByText(/خصم (?:10|15)%/)).toHaveCount(0);
 
@@ -457,11 +488,11 @@ test("complete bundle applies the real 20% bundle discount (exclusive with tier)
 
   expect(submittedPayload).toBeTruthy();
   expect(submittedPayload).toMatchObject({
-    subtotalBeforeDiscount: 1280,
-    discount: 0, // شريحة 10% موقوف — الباقة هي الخصم الوحيد
-    bundleDiscount: 256, // خصم الباقة 20%
-    subtotal: 1024,
-    shipping: 50,
-    total: 1074,
+    subtotalBeforeDiscount: unitSum,
+    discount: 0, // الشرائح موقوف — الباقة هي الخصم الوحيد
+    bundleDiscount, // خصم الباقة (20% من مجموع أعضاء الباقة)
+    subtotal,
+    shipping,
+    total,
   });
 });
