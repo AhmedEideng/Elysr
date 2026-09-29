@@ -28,7 +28,7 @@
  *   4. ✅ إشعار إيميل تلقائي عند كل طلب جديد
  *   5. ✅ حماية من الطلبات المكررة (نفس الـ orderId)
  *   6. ✅ تنسيق تلقائي للشيت (ألوان + عرض أعمدة)
- *   7. ✅ صف الهيدر محمي بـ Data Validation
+ *   7. ✅ عمود "الحالة" محمي بـ Data Validation (قائمة خيارات ثابتة)
  */
 
 const SHEET_NAME = "الطلبات";
@@ -104,7 +104,7 @@ function getSpreadsheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   if (!ss) {
     throw new Error(
-      "خطأ فني: السكريبت مستقل ولم يتم ربطه بمعرف شيت. يرجى كتابة معرف الشيت في المتغير SPREADSHEET_ID أعلى السكريبت، أو إنشاء السكريبت من داخل الشيت نفسه عبر Extensions -> Apps Script.",
+      "خطأ فني: السكريبت مستقل ولم يتم ربطه بمعرف شيت. يرجى وضع معرف الشيت في Project Settings → Script Properties تحت اسم SPREADSHEET_ID، أو إنشاء السكريبت من داخل الشيت نفسه عبر Extensions -> Apps Script.",
     );
   }
   return ss;
@@ -154,6 +154,10 @@ const MAX_TEXT = {
 
 const RATE_LIMIT_WINDOW_SEC = 60;
 const RATE_LIMIT_MAX = 15;
+
+// عدد الصفوف التي يغطيها الـ Data Validation لعمود "الحالة" عند الإنشاء.
+// ensureStatusValidation() يمدّد النطاق تلقائياً لو اقتربت الصفوف من الحد.
+const VALIDATION_ROWS = 5000;
 
 // ============================================================
 // Main POST handler
@@ -222,10 +226,10 @@ function doPost(e) {
     if (!address && orderMethod !== "واتساب") throw new Error("Missing address");
 
     // Rate limiting
-    var rateLimitKey =
-      customerPhone === "01000000000" && orderType === "شراء فوري" && clientIp
-        ? clientIp
-        : customerPhone;
+    // (2026-09-30) كان فيه استثناء قديم يحوّل المفتاح لـ IP لرقم تجريبي محدد
+    // (01000000000) — لا يستخدمه أي تدفق حي ولا أي اختبار e2e حالي، فأُزيل
+    // تبسيطةً: المفتاح دوماً هاتف العميل (15 طلب/دقيقة لكل هاتف).
+    var rateLimitKey = customerPhone;
     if (!checkRateLimit(rateLimitKey)) {
       throw new Error("Too many requests; please wait a moment");
     }
@@ -574,7 +578,7 @@ function handleReviewsGet(params) {
               // 🔒 الهاتف لا يُكشف أبداً في المخرجات
               name: String(rows[r][colIdx.name - 1] || "").trim() || "عميل",
               rating: clampInt(rows[r][colIdx.rating - 1], 1, 5),
-              date: String(rows[r][colIdx.date - 1] || "").trim(),
+              date: formatCellDate(rows[r][colIdx.date - 1]),
               text: text.slice(0, REVIEW_MAX_TEXT),
               verified: String(rows[r][colIdx.verified - 1] || "").trim() === "نعم",
             });
@@ -697,13 +701,48 @@ function getOrCreateSheetWithColumns(name, columns, statusKey, statusOptions) {
   }
   if (addedColumn) sheet.autoResizeColumns(1, sheet.getLastColumn());
 
+  // (2026-09-30) ضمان استمرار تغطية الـ Data Validation لعمود الحالة
+  // (النطاق القديم كان 999 صفاً فقط — وهذه الدعوة تتم لكل كتابة على أي حال)
+  ensureStatusValidation(sheet, columns, statusKey, statusOptions);
+
   return sheet;
+}
+
+/**
+ * يمدّد نطاق الـ Data Validation لعمود "الحالة" عندما تتجاوزه الصفوف.
+ * الكشف رخيص: نفحص هل الصف التالي لآخر صف مكتوب ما زال مغطاةً خليته؛
+ * إن لم تكن مغطاة ⇒ نعيد تطبيق النطاق حتى آخر الصفوف + هامش 5000.
+ * يصلح أيضاً الشيتات الموجودة فعلياً التي أُنشئت بالنطاق القديم (999).
+ */
+function ensureStatusValidation(sheet, columns, statusKey, statusOptions) {
+  if (!statusKey || !Array.isArray(statusOptions) || statusOptions.length === 0) return;
+  var lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return;
+  var statusColIdx = -1;
+  for (var i = 0; i < columns.length; i++) {
+    if (columns[i].key === statusKey) {
+      statusColIdx = i + 1;
+      break;
+    }
+  }
+  if (statusColIdx <= 0) return;
+  try {
+    var probe = sheet.getRange(lastRow + 1, statusColIdx).getDataValidation();
+    if (probe) return; // الصف التالي ما زال داخل النطاق الحالي
+    var validation = SpreadsheetApp.newDataValidation()
+      .requireValueInList(statusOptions)
+      .setAllowInvalid(false)
+      .build();
+    sheet.getRange(2, statusColIdx, lastRow + 5000 - 1, 1).setDataValidation(validation);
+    console.log("ensureStatusValidation: extended range to row " + (lastRow + 5000));
+  } catch (err) {
+    console.error("ensureStatusValidation failed:", err);
+  }
 }
 
 function createFreshSheet(ss, name, headers, columns, statusKey, statusOptions) {
   var sheet = ss.insertSheet(name);
   sheet.appendRow(headers);
-  sheet.setFrozenRows(1);
 
   var headerRange = sheet.getRange(1, 1, 1, headers.length);
   headerRange
@@ -735,8 +774,8 @@ function createFreshSheet(ss, name, headers, columns, statusKey, statusOptions) 
         .requireValueInList(statusOptions)
         .setAllowInvalid(false)
         .build();
-      // Apply to rows 2-1000
-      sheet.getRange(2, statusColIdx, 999, 1).setDataValidation(statusValidation);
+      // Apply to rows 2-VALIDATION_ROWS (ويمدَّد تلقائياً عند الحاجة)
+      sheet.getRange(2, statusColIdx, VALIDATION_ROWS - 1, 1).setDataValidation(statusValidation);
     }
   }
 
@@ -937,8 +976,18 @@ function clampInt(value, min, max) {
   return Math.min(Math.max(n, min), max);
 }
 
-function now() {
-  return Utilities.formatDate(new Date(), "Africa/Cairo", "d/M/yyyy h:mm:ss a");
+/**
+ * تنسيق التاريخ المُعاد للموقع (المراجعات المعتمدة):
+ * الخلايا تُحفظ ككائن Date منذ 2026-09-15 — وString(Date) كان يخرج بصيغة
+ * محرك JS خام ("Tue Sep 30 2026 ... GMT+0300") تظهر للعميل كما هي.
+ * هنا نوحد العرض: Date أو نص قديم → "d/M/yyyy" بتوقيت القاهرة.
+ */
+function formatCellDate(value) {
+  var d = value instanceof Date ? value : parseSheetDate(value);
+  if (d) {
+    return Utilities.formatDate(d, "Africa/Cairo", "d/M/yyyy");
+  }
+  return String(value || "").trim();
 }
 
 // ============================================================
@@ -948,7 +997,7 @@ function now() {
 /**
  * تحليل تاريخ الشيت — يدعم الصيغتين:
  *   1) كائن Date (لو خلية التاريخ محفوظة كتاريخ)
- *   2) النص اللي تكتبه now() بصيغة "d/M/yyyy h:mm:ss a" (مثال:
+ *   2) نصوص الصفوف القديمة (قبل 2026-09-15) بصيغة "d/M/yyyy h:mm:ss a" (مثال:
  *      "14/9/2026 2:30:45 PM" أو بصيغة عربية "14/9/2026 2:30:45 م")
  * أي فشل في التحليل → null (الصف ما يتشالش أبداً — الأمان قبل التنظيف).
  */
@@ -975,7 +1024,10 @@ function parseSheetDate(value) {
 // حذف الطلبات القديمة تلقائياً بعد 90 يوم (لتقليل الاحتفاظ بـ PII)
 function autoCleanupOldOrders() {
   try {
-    var sheet = getOrCreateSheet(SHEET_NAME);
+    // (2026-09-30) قراءة فقط بدون إنشاء: التنظيف اليومي لا يجب أن ينشئ
+    // تبويبات فارغة إن لم يكن قد وصل أي طلب بعد.
+    var sheet = getSpreadsheet().getSheetByName(SHEET_NAME);
+    if (!sheet) return;
     var lastRow = sheet.getLastRow();
     if (lastRow <= 1) return;
     var dateColIdx = -1;
@@ -990,9 +1042,9 @@ function autoCleanupOldOrders() {
     // نحذف من الأسفل للأعلى لتجنب إزاحة الصفوف
     for (var r = lastRow; r >= 2; r--) {
       var cell = sheet.getRange(r, dateColIdx).getValue();
-      // 🐛 إصلاح (2026-09-14): التاريخ بيتكتب كنص منطّق (now()) مش كائن Date —
-      // الشرط القديم `cell instanceof Date` كان بيفشل دايمًا فالحذف مكنش
-      // بيحصل خالص والـ PII كان بيتراكم. دلوقتي بنحلل النص صراحةً.
+      // 🐛 إصلاح (2026-09-14): الصفوف القديمة تاريخها نص منسّق وليس كائن Date —
+      // الاعتماد على `cell instanceof Date` وحده كان يفشل معها دائماً فلا يُحذف
+      // شيء والـ PII يتراكم. الآن تُحلل الصيغتان (كائن Date + النص القديم).
       var cellDate = parseSheetDate(cell);
       if (cellDate && cellDate < cutoff) {
         sheet.deleteRow(r);
@@ -1013,7 +1065,9 @@ function autoCleanupOldOrders() {
 /** حذف المراجعات المرفوضة الأقدم من 90 يوم (سياسة PII retention للمراجعات). */
 function cleanupOldRejectedReviews() {
   try {
-    var sheet = getOrCreateReviewsSheet();
+    // قراءة فقط بدون إنشاء (نفس مبدأ autoCleanupOldOrders)
+    var sheet = getSpreadsheet().getSheetByName(REVIEWS_SHEET_NAME);
+    if (!sheet) return;
     var lastRow = sheet.getLastRow();
     if (lastRow <= 1) return;
     var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
