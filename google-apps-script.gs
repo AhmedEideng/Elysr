@@ -10,6 +10,10 @@
  *        REVIEW_READ_TOKEN  = نفس قيمة GOOGLE_SHEETS_REVIEWS_TOKEN في الخادم (لو مفيش مراجعات)
  *        NOTIFICATION_EMAIL = إيميل الإشعارات (اختياري)
  *        SPREADSHEET_ID     = معرف الشيت (سكريبت standalone بس)
+ *        ⚠ القيمة = المعرف فقط (النص بين /d/ و /edit في رابط الشيت)،
+ *          وليس الرابط كاملاً — openById() يرفض الروابط ويفشل الفتح.
+ *          لو السكريبت منشأ من داخل الشيت (Extensions → Apps Script)
+ *          فلا تضبطي هذه الخاصية إطلاقاً (يُستخدم الشيت الحاوي تلقائياً).
  *   2. Vercel: تأكدي أن GOOGLE_SHEETS_WEBHOOK_SECRET مضبوط بنفس القيمة + Redeploy.
  *   3. Deploy → Manage deployments → New version.
  *   4. شغّلي setupAutoCleanupTrigger() مرة واحدة من المحرر (Run) —
