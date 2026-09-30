@@ -343,6 +343,11 @@
       "permanent": true
     },
     {
+      "source": "/products/emla-7-lidocaine-cream",
+      "destination": "/products/emla-7-5-lidocaine-prilocaine-cream",
+      "permanent": true
+    },
+    {
       "source": "/products/m-31",
       "destination": "/products/sotara-gel-50gm",
       "permanent": true
