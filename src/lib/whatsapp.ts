@@ -1,8 +1,9 @@
 import { getPromoTier, isPromotionEnabled, PROMO_ORDER_LABEL } from "@/lib/promo";
 import { MAX_CUSTOMER_PHONE_LENGTH, sanitizeForMsg } from "@/lib/utils";
 
-// رقم الواتساب الرسمي للشركة
-const WHATSAPP_NUMBER = "201098088206";
+// رقم الواتساب الرسمي للشركة — المصدر الوحيد؛ كل الأماكن الأخرى تستورده
+// أو يفحصها اختبار الانجراف (whatsapp.test.ts) للملفات الثابتة.
+export const WHATSAPP_NUMBER = "201098088206";
 
 export const COMPANY = {
   name: "اليسر ميديكال",

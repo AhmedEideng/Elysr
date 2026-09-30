@@ -13,6 +13,7 @@ import {
   Scale,
 } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
+import { waLink } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/medical-review-board")({
   head: () => ({
@@ -261,7 +262,7 @@ function MedicalReviewBoardPage() {
           معنا فوراً وسنراجع ونحدّث المحتوى خلال 48 ساعة.
         </p>
         <a
-          href="https://wa.me/201098088206?text=%D9%85%D9%84%D8%A7%D8%AD%D8%B8%D8%A9%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D9%85%D8%AD%D8%AA%D9%88%D9%89"
+          href={waLink("ملاحظة علي المحتوي")}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-4 inline-flex rounded-full bg-gradient-brand px-6 py-3 text-sm font-black text-primary-foreground"

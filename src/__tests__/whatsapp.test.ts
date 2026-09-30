@@ -1,5 +1,8 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { describe, expect, it } from "vitest";
-import { buildOrderMessage, formatOrderDate } from "@/lib/whatsapp";
+import { buildOrderMessage, formatOrderDate, WHATSAPP_NUMBER } from "@/lib/whatsapp";
 
 describe("buildOrderMessage phone handling", () => {
   it("keeps the full maximum-length E.164 phone number", () => {
@@ -81,5 +84,38 @@ describe("promo label in the order message — only when a discount actually app
     expect(message).toContain("💎 مبادرة الرعاية الماسية");
     expect(message).toContain("خصم الباقة (20%): -120 ج.م");
     expect(message).not.toContain("خصم 10%");
+  });
+});
+
+describe("whatsapp number single-source drift guard", () => {
+  // الملفات الثابتة (shell/security) لا تستورد من lib/whatsapp — هذا الحارس
+  // يضمن أن أي تغيير للرقم في المصدر يُحدِّثها أو يفشل الـ CI بدل الانجراف الصامت.
+  it("static files reference only the canonical WhatsApp number", () => {
+    const root = process.cwd();
+    const files = ["index.html", "public/security.txt", "public/.well-known/security.txt"];
+    for (const f of files) {
+      const content = readFileSync(resolve(root, f), "utf-8");
+      const waNumbers = [...content.matchAll(/wa\.me\/(\d+)/g)].map((m) => m[1]);
+      for (const n of waNumbers) {
+        expect(n, `${f} يحتوي رقم واتساب مختلف عن المصدر الوحيد`).toBe(WHATSAPP_NUMBER);
+      }
+      // صيغة telephone في الـ schema داخل index.html: +20 متبوعاً بنفس الرقم
+      const tels = [...content.matchAll(/"telephone": "\+?(\d+)"/g)].map((m) => m[1]);
+      for (const t of tels) {
+        expect(t.replace(/^20/, "").length > 0).toBe(true);
+        expect(
+          t === WHATSAPP_NUMBER || t === "20" + WHATSAPP_NUMBER,
+          `${f} telephone schema خارج المصدر`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("no component hardcodes a wa.me URL anymore", () => {
+    const root = process.cwd();
+    for (const f of ["src/components/sections/WhyUs.tsx", "src/routes/medical-review-board.tsx"]) {
+      const content = readFileSync(resolve(root, f), "utf-8");
+      expect(content, `${f} ما زال يحتوي رابط wa.me حرفي`).not.toMatch(/wa\.me\/\d/);
+    }
   });
 });

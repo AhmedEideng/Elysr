@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ShieldCheck, Truck, Lock, CreditCard } from "lucide-react";
 
+import { waLink } from "@/lib/whatsapp";
+
 const features = [
   {
     icon: ShieldCheck,
@@ -65,7 +67,7 @@ export function WhyUs() {
             تسوّق الآن
           </Link>
           <a
-            href="https://wa.me/201098088206?text=%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1"
+            href={waLink("أريد الاستفسار")}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-green-600 px-6 py-2.5 text-sm font-bold text-green-700 transition hover:bg-green-50 hover:scale-[1.02]"
