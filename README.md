@@ -31,18 +31,18 @@ entirely on static pre-rendered pages — no database, no server runtime require
 Orders flow through a hardened serverless API into Google Sheets; customer reviews
 flow through the same webhook into a moderated reviews sheet.
 
-| Metric                  | Value                                                                                                             |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Products                | **84** (54 men · 23 women · 7 devices) — 4 legacy items remain deleted; five previously removed products restored by owner decision       |
-| Catalog coverage        | **84** — all current products are in the site catalog and the Merchant feed; no channel-level blocklist is applied                             |
-| Articles                | **58** educational health articles with trusted medical sources (NIH/Mayo/NHS/…)                                  |
-| SEO landing pages       | **93** long-form guide pages (**93 indexed**; drug-guide pages retain medical safety warnings) |
-| Pre-rendered pages      | **252** (17 static + 84 products + 58 articles + 93 guides)                                                       |
-| Sitemap URLs            | **248** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)                       |
-| Catalog feed            | **84** items (Google Shopping RSS, price + availability per product)                                              |
-| Redirects               | **176** permanent 301s (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                     |
-| Images                  | **139** WebP (8–55 KB, avg 26 KB) + 239 thumbnails                                                                 |
-| Tests                   | **268** unit (Vitest) + **19** E2E (Playwright) + data-integrity + schema validation                              |
+| Metric             | Value                                                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Products           | **84** (54 men · 23 women · 7 devices) — 4 legacy items remain deleted; five previously removed products restored by owner decision |
+| Catalog coverage   | **84** — all current products are in the site catalog and the Merchant feed; no channel-level blocklist is applied                  |
+| Articles           | **58** educational health articles with trusted medical sources (NIH/Mayo/NHS/…)                                                    |
+| SEO landing pages  | **93** long-form guide pages (**93 indexed**; drug-guide pages retain medical safety warnings)                                      |
+| Pre-rendered pages | **252** (17 static + 84 products + 58 articles + 93 guides)                                                                         |
+| Sitemap URLs       | **248** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)                                         |
+| Catalog feed       | **84** items (Google Shopping RSS, price + availability per product)                                                                |
+| Redirects          | **176** permanent 301s (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                                       |
+| Images             | **139** WebP (8–55 KB, avg 26 KB) + 239 thumbnails                                                                                  |
+| Tests              | **268** unit (Vitest) + **19** E2E (Playwright) + data-integrity + schema validation                                                |
 
 ---
 
@@ -89,18 +89,18 @@ the same API handlers — identical behavior, no Vercel dependency.
 
 ## Tech Stack
 
-| Layer     | Technology                                                                                                                   |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Framework | React 19 + TypeScript 6                                                                                                      |
-| Build     | Vite 8 (code-split: vendor-react / router / icons / search / toast + per-catalog data chunks)                                |
-| Routing   | TanStack Router (file-based, 21 routes)                                                                                      |
-| Styling   | Tailwind CSS 4 (Oklch colors, full RTL)                                                                                      |
-| Search    | Fuse.js (fuzzy, lazy-loaded) + Egyptian dialect synonyms (نقط ⇄ قطرات)                                                       |
-| Tests     | Vitest (268 unit) + Playwright (19 E2E) + data-integrity + JSON-LD schema validator                                          |
-| Hosting   | Vercel Edge CDN (primary) · self-hosted Express + Docker (supported)                                                         |
-| Orders    | Google Apps Script → Google Sheets (ScriptLock, full duplicate scan, intl phones)                                            |
-| SEO       | 252 pre-rendered pages · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                           |
-| Images    | WebP only (sharp pipeline, 700–800 px, q45–55) + descriptive alt/title                                                       |
+| Layer     | Technology                                                                                                                  |
+| --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Framework | React 19 + TypeScript 6                                                                                                     |
+| Build     | Vite 8 (code-split: vendor-react / router / icons / search / toast + per-catalog data chunks)                               |
+| Routing   | TanStack Router (file-based, 21 routes)                                                                                     |
+| Styling   | Tailwind CSS 4 (Oklch colors, full RTL)                                                                                     |
+| Search    | Fuse.js (fuzzy, lazy-loaded) + Egyptian dialect synonyms (نقط ⇄ قطرات)                                                      |
+| Tests     | Vitest (268 unit) + Playwright (19 E2E) + data-integrity + JSON-LD schema validator                                         |
+| Hosting   | Vercel Edge CDN (primary) · self-hosted Express + Docker (supported)                                                        |
+| Orders    | Google Apps Script → Google Sheets (ScriptLock, full duplicate scan, intl phones)                                           |
+| SEO       | 252 pre-rendered pages · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                 |
+| Images    | WebP only (sharp pipeline, 700–800 px, q45–55) + descriptive alt/title                                                      |
 | Security  | CSP · HSTS · COOP/OAC · Report-To · NEL · CORS strict · hashed-IP rate limits · HMAC review reads · PII-safe error tracking |
 
 ---
@@ -261,22 +261,22 @@ writing an order.
 
 ### Commands
 
-| Command                   | Description                                                        |
-| ------------------------- | ------------------------------------------------------------------ |
-| `npm run dev`             | Development server (port 8080)                                     |
-| `npm run build`           | Production build + sitemaps + 252-page prerender             |
-| `npm run preview`         | Preview the production build locally                               |
-| `npm run build:ssr`       | Build + prerender for the self-hosted Express server               |
-| `npm start` / `start:dev` | Run the self-hosted server (production / watch)                    |
+| Command                   | Description                                              |
+| ------------------------- | -------------------------------------------------------- |
+| `npm run dev`             | Development server (port 8080)                           |
+| `npm run build`           | Production build + sitemaps + 252-page prerender         |
+| `npm run preview`         | Preview the production build locally                     |
+| `npm run build:ssr`       | Build + prerender for the self-hosted Express server     |
+| `npm start` / `start:dev` | Run the self-hosted server (production / watch)          |
 | `npm run test`            | Data-integrity guard (catalog, metadata, redirect graph) |
-| `npm run test:unit`       | Vitest unit + API security tests (268)                             |
-| `npm run test:e2e`        | Playwright E2E suite (19)                                          |
-| `npm run test:schemas`    | JSON-LD validator over every pre-rendered page                     |
-| `npm run test:sources`    | New-article claim→source support check                             |
-| `npm run test:all`        | integrity + unit + build + schemas                                 |
-| `npm run ci`              | lint + typecheck + test:all                                        |
-| `npm run audit:deps`      | `npm audit --audit-level=high`                                     |
-| `npm run release`         | Version + cache-version bump workflow                              |
+| `npm run test:unit`       | Vitest unit + API security tests (268)                   |
+| `npm run test:e2e`        | Playwright E2E suite (19)                                |
+| `npm run test:schemas`    | JSON-LD validator over every pre-rendered page           |
+| `npm run test:sources`    | New-article claim→source support check                   |
+| `npm run test:all`        | integrity + unit + build + schemas                       |
+| `npm run ci`              | lint + typecheck + test:all                              |
+| `npm run audit:deps`      | `npm audit --audit-level=high`                           |
+| `npm run release`         | Version + cache-version bump workflow                    |
 
 ---
 
@@ -339,9 +339,9 @@ Five jobs on every push (plus a weekly Saturday source-liveness cron):
 | Job                                         | Gate                                                                                          |
 | ------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | 🔗 Corpus Source Liveness                   | All 60 unique article source URLs checked (bot-blocked authorities are classified separately) |
-| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc --noEmit` · 268 unit/API tests · catalog+metadata+redirect-graph guard |
+| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc --noEmit` · 268 unit/API tests · catalog+metadata+redirect-graph guard          |
 | 🛡 Security Audit                            | `npm audit --audit-level=high` on the locked tree                                             |
-| 🏗 Build • Prerender • Sitemaps              | Vite build + 252-page prerender + sitemap artifacts                                    |
+| 🏗 Build • Prerender • Sitemaps              | Vite build + 252-page prerender + sitemap artifacts                                           |
 | 🚦 Lighthouse Performance Budget            | LHCI performance budgets on the built site                                                    |
 
 Local equivalents: `npm run ci` (lint + typecheck + test:all) and `npm run test:e2e`.
@@ -404,6 +404,30 @@ intentionally **network-only**: the app registers no caching Service Worker and 
 not promise offline browsing. `public/sw.js` remains as a migration kill-switch that
 clears legacy caches and unregisters itself, preventing old HTML/CSS/JS from being
 served.
+
+---
+
+## Merchant Center — postponed by owner decision (2026-09-30)
+
+`public/catalog-feed.xml` is Merchant-ready (all required attributes validated:
+id/title/description/link/image_link/availability/price/condition,
+`identifier_exists=no`, prices as `NNN EGP`), **but it deliberately lacks the
+`g:adult` attribute and must NOT be submitted to Merchant Center until the
+adult-content policy path is decided by the owner**:
+
+- Google requires `g:adult=yes` on products "intended to enhance sexual
+  activity"; omitting it on qualifying items is a policy violation that can
+  suspend the account.
+- Policy also forbids showing adult-oriented products on landing pages of
+  non-adult products; our cross-links/bundles make per-product marking alone
+  insufficient unless the whole site is set adult-oriented (which age-gates
+  the entire catalog on Shopping surfaces).
+- Owner chose (2026-09-30): postpone Merchant Center, grow organic search
+  (GSC + content engine) first, revisit with real query data.
+
+Do not "fix" the feed by adding `g:adult` or submitting it without an explicit
+owner decision between: (a) site-wide adult-oriented, (b) per-use classification
+accepting cross-link disapprovals, (c) continued postponement.
 
 ---
 
