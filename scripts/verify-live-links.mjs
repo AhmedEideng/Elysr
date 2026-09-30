@@ -129,12 +129,17 @@ const redirectResults = await runQueue(redirects, async (rule) => {
   }
   return r;
 });
-console.log(`✓ redirects: ${redirectResults.length} sources probed (منها ${paramRules.length} قواعد :slug بعينات حية)`);
+console.log(
+  `✓ redirects: ${redirectResults.length} sources probed (منها ${paramRules.length} قواعد :slug بعينات حية)`,
+);
 
 const destResults = await runQueue([...literalDests], async (path) => {
   const r = await probe(path);
   checks++;
-  if (r.status !== 200) failures.push(`[destination] ${path} ⇒ ${r.status || "ERR"} (وجهة تحويل ميتة) ${r.error || ""}`);
+  if (r.status !== 200)
+    failures.push(
+      `[destination] ${path} ⇒ ${r.status || "ERR"} (وجهة تحويل ميتة) ${r.error || ""}`,
+    );
   return r;
 });
 console.log(`✓ destinations: ${destResults.length} literal destinations probed`);
@@ -146,4 +151,6 @@ if (failures.length) {
   for (const f of failures) console.error(`  ${f}`);
   process.exit(1);
 }
-console.log("✓ لا روابط ميتة: كل صفحات الـ sitemap حية 200، وكل التحويلات 301/308 بوجهات صحيحة وحية.");
+console.log(
+  "✓ لا روابط ميتة: كل صفحات الـ sitemap حية 200، وكل التحويلات 301/308 بوجهات صحيحة وحية.",
+);

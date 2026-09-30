@@ -219,11 +219,7 @@ for (const file of htmlFiles) {
       const sp = stripQuery(p);
       if (!sp.startsWith("/api/") && redirectSources.has(sp)) {
         crutchLinks.push({ page, url: raw });
-      } else if (
-        !sp.startsWith("/api/") &&
-        !pageFileFor(sp) &&
-        !assetFileFor(sp)
-      )
+      } else if (!sp.startsWith("/api/") && !pageFileFor(sp) && !assetFileFor(sp))
         brokenLinks.push({ page, url: raw });
       if (/\.(webp|png|jpe?g|gif|svg|woff2?|css|js|ico|webmanifest)$/i.test(sp))
         referencedImages.add(sp);
