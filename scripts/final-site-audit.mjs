@@ -196,6 +196,11 @@ const brokenAssets = [];
  *  تعمل ظاهرياً عبر 301 لكنها تسرّب سلطة الروابط وتخفي انجراف الـ slugs —
  *  نفس فئة ثغرة emla-7-lidocaine-cream. */
 const crutchLinks = [];
+/** روابط بناها قالب ديناميكياً بقيمة ناقصة: slug فارغ بعد بادئة slug، أو
+ *  رمز placeholder (undefined/null/NaN/${…)، أو شرطة مائلة مزدوجة. */
+const sluglessLinks = [];
+const SLUGLESS_BAD = /(undefined|null|NaN|\$\{|\{\{)/;
+const SLUGLESS_EMPTY = /^\/(?:products|education|products\/guides|landing)\/$/;
 
 for (const file of htmlFiles) {
   const html = readFileSync(file, "utf-8");
@@ -217,6 +222,12 @@ for (const file of htmlFiles) {
       checkedLinks++;
       seen.add(stripQuery(p));
       const sp = stripQuery(p);
+      if (
+        !sp.startsWith("/api/") &&
+        (SLUGLESS_BAD.test(sp) || sp.slice(1).includes("//") || SLUGLESS_EMPTY.test(sp))
+      ) {
+        sluglessLinks.push({ page, url: raw });
+      }
       if (!sp.startsWith("/api/") && redirectSources.has(sp)) {
         crutchLinks.push({ page, url: raw });
       } else if (!sp.startsWith("/api/") && !pageFileFor(sp) && !assetFileFor(sp))
@@ -241,6 +252,8 @@ for (const file of htmlFiles) {
     checkedLinks++;
     const path = stripQuery(raw);
     seen.add(path);
+    if (SLUGLESS_BAD.test(path) || path.slice(1).includes("//") || SLUGLESS_EMPTY.test(path))
+      sluglessLinks.push({ page, url: raw });
     if (path.startsWith("/api/")) continue;
     if (redirectSources.has(path)) {
       crutchLinks.push({ page, url: raw });
@@ -260,6 +273,12 @@ for (const b of crutchLinks)
     "A7.redirect-crutch-link",
     b.page,
     `${b.url} — رابط داخلي يعتمد على تحويل من slug قديم؛ وجّهه للصفحة النهائية مباشرة`,
+  );
+for (const b of sluglessLinks)
+  err(
+    "A8.slugless-or-placeholder-link",
+    b.page,
+    `${b.url} — رابط بقيمة ناقصة (slug فارغ أو placeholder أو // مزدوجة)`,
   );
 
 // A3 — redirect destinations must exist (or be external)
