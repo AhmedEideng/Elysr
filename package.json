@@ -25,6 +25,7 @@
     "audit:prerender-parity": "node scripts/prerender-vs-hydrated.mjs",
     "audit:site": "node scripts/final-site-audit.mjs",
     "audit:parity": "node scripts/browser-parity.mjs",
+    "audit:live-links": "node scripts/verify-live-links.mjs",
     "content:generate-article": "node scripts/auto-generate-article.mjs",
     "content:process-hero": "node scripts/process-hero.mjs",
     "test:all": "npm run test && npm run test:unit && npm run build && npm run test:schemas && npm run health-check && npm run audit:prerender-parity && npm run audit:site",
