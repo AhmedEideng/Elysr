@@ -192,6 +192,10 @@ const linkTargets = new Map(); // page → Set(internal url paths)
 let checkedLinks = 0;
 const brokenLinks = [];
 const brokenAssets = [];
+/** روابط داخلية تشير لـ slug قديم (مصدر تحويل) بدل الصفحة النهائية القانونية.
+ *  تعمل ظاهرياً عبر 301 لكنها تسرّب سلطة الروابط وتخفي انجراف الـ slugs —
+ *  نفس فئة ثغرة emla-7-lidocaine-cream. */
+const crutchLinks = [];
 
 for (const file of htmlFiles) {
   const html = readFileSync(file, "utf-8");
@@ -213,9 +217,10 @@ for (const file of htmlFiles) {
       checkedLinks++;
       seen.add(stripQuery(p));
       const sp = stripQuery(p);
-      if (
+      if (!sp.startsWith("/api/") && redirectSources.has(sp)) {
+        crutchLinks.push({ page, url: raw });
+      } else if (
         !sp.startsWith("/api/") &&
-        !redirectSources.has(sp) &&
         !pageFileFor(sp) &&
         !assetFileFor(sp)
       )
@@ -241,7 +246,10 @@ for (const file of htmlFiles) {
     const path = stripQuery(raw);
     seen.add(path);
     if (path.startsWith("/api/")) continue;
-    if (redirectSources.has(path)) continue;
+    if (redirectSources.has(path)) {
+      crutchLinks.push({ page, url: raw });
+      continue;
+    }
     if (pageFileFor(path)) continue;
     if (assetFileFor(path)) continue;
     brokenLinks.push({ page, url: raw });
@@ -251,6 +259,12 @@ for (const file of htmlFiles) {
 
 for (const b of brokenLinks) err("A1.broken-internal-link", b.page, b.url);
 for (const b of brokenAssets) err("A2.broken-asset", b.page, b.url);
+for (const b of crutchLinks)
+  err(
+    "A7.redirect-crutch-link",
+    b.page,
+    `${b.url} — رابط داخلي يعتمد على تحويل من slug قديم؛ وجّهه للصفحة النهائية مباشرة`,
+  );
 
 // A3 — redirect destinations must exist (or be external)
 let redirectDead = 0;
