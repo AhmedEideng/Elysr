@@ -243,6 +243,7 @@ export const TOPICS: Topic[] = [
       "best-energy-honey-for-men",
       "original-vs-fake-honey-products",
       "nutrition-for-marital-health",
+      "supplement-storage-egypt-heat",
     ],
     productIds: [
       "m-09",
@@ -352,6 +353,8 @@ export const TOPICS: Topic[] = [
       "product-safety-checklist",
     ],
     guideSlugs: [
+      "daily-intimate-hygiene-men-women",
+      "discreet-shipping-privacy-explained",
       "doctor-consultation-before-products",
       "safe-use-guide-all-products",
       "medication-interactions-marital-products",
