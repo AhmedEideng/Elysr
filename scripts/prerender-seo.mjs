@@ -332,7 +332,9 @@ async function prerender() {
       HOMEPAGE_CONCERN_CANDIDATES,
       HOMEPAGE_EXCLUDED_PRODUCT_IDS,
     } = await vite.ssrLoadModule("/src/data/products.ts");
-    const { getProductReviews } = await vite.ssrLoadModule("/src/lib/legacy-product-reviews.ts");
+    const { getProductReviews, VISIBLE_REVIEW_COUNT } = await vite.ssrLoadModule(
+      "/src/lib/legacy-product-reviews.ts",
+    );
     const { makeProductMetaDescription, makeProductMetaTitle } =
       await vite.ssrLoadModule("/src/lib/seo.ts");
     const {
@@ -1229,7 +1231,8 @@ ${homeArticlesBody}
         : 0;
       const hasLegacyRating = productReviews > 0 && productRating >= 1;
       // (2026-09-28) مطابقة القسم المرئي: الأرشيف تحت «تجارب عملاء حقيقية».
-      const legacyList = getProductReviews(product.slug, product.category, 5).reviews || [];
+      const legacyList =
+        getProductReviews(product.slug, product.category, VISIBLE_REVIEW_COUNT).reviews || [];
       const legacyReviewsHtml = legacyList.length
         ? `<h2>تجارب عملاء حقيقية</h2>` +
           legacyList
@@ -1256,6 +1259,24 @@ ${homeArticlesBody}
                 bestRating: 5,
                 worstRating: 1,
               },
+            }
+          : {}),
+        // نفس مصفوفة الـ Review التي يبنيها src/lib/seo.ts بعد الـ hydration:
+        // المحتوى المرئي والـ markup متطابقان في النسختين (prerender + hydrated).
+        ...(hasLegacyRating && legacyList.length
+          ? {
+              review: legacyList.map((r) => ({
+                "@type": "Review",
+                author: { "@type": "Person", name: r.name },
+                ...(r.fixedDate ? { datePublished: r.date } : {}),
+                reviewBody: r.text,
+                reviewRating: {
+                  "@type": "Rating",
+                  ratingValue: r.rating,
+                  bestRating: 5,
+                  worstRating: 1,
+                },
+              })),
             }
           : {}),
         ...(product.brand?.trim()

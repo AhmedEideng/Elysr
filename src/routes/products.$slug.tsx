@@ -36,6 +36,7 @@ import { CrossSellBundle } from "@/components/sections/CrossSellBundle";
 import { FAQ } from "@/components/FAQ";
 import { CustomerReviews } from "@/features/product/components/CustomerReviews";
 import { LegacyProductReviews } from "@/features/product/components/LegacyProductReviews";
+import { VISIBLE_REVIEW_COUNT } from "@/lib/legacy-product-reviews";
 import { ProductImage } from "@/features/product/components/ProductImage";
 import { buildOrderMessage, waLink } from "@/lib/whatsapp";
 import { ShareButton } from "@/components/ShareButton";
@@ -659,7 +660,7 @@ function ProductPage() {
           reviewsCount={product.reviews}
           category={product.category}
           slug={product.slug}
-          maxVisibleReviews={3}
+          maxVisibleReviews={VISIBLE_REVIEW_COUNT}
         />
       ) : null}
 

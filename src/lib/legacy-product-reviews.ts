@@ -26,6 +26,11 @@ export interface Review {
 
 export type ProductCategory = "men" | "women" | "devices";
 
+/** عدد الشهادات المعروضة على الصفحة = عدد عناصر review في الـ schema تماماً.
+ *  مصدر وحيد: تستهلكه واجهة React وsrc/lib/seo.ts معاً حتى يبقى المحتوى
+ *  المرئي والـ markup متطابقين (سياسة جوجل: الـ markup يعكس المحتوى الظاهر). */
+export const VISIBLE_REVIEW_COUNT = 6;
+
 /** دالة Hash حتمية بسيطة تُستخدم كـ seed لاختيار التقييمات. */
 function hashCode(str: string): number {
   let h = 0;

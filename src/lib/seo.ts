@@ -5,6 +5,11 @@
  */
 
 import { PRODUCT_META_PROFILES } from "@/data/product-meta";
+import {
+  getProductReviews,
+  VISIBLE_REVIEW_COUNT,
+  type ProductCategory,
+} from "@/lib/legacy-product-reviews";
 import { GOVERNORATE_SHIPPING, getShippingDeliveryWindow } from "@/lib/site-config";
 
 const SITE_URL = "https://elysrmedical.store";
@@ -336,8 +341,17 @@ export const productSchema = (p: {
   price: number;
   stock: number;
   approvedReviewSummary?: { ratingValue: number; reviewCount: number };
+  category?: string;
   image?: string;
 }) => {
+  // الـ markup يعكس المحتوى المرئي حرفياً: نفس دالة الاختيار الحتمية ونفس
+  // العدد الذي تعرضه واجهة React (مصدر وحيد VISIBLE_REVIEW_COUNT).
+  const reviewCategory: ProductCategory | null =
+    p.category === "men" || p.category === "women" || p.category === "devices" ? p.category : null;
+  const visibleReviews =
+    reviewCategory && p.approvedReviewSummary
+      ? getProductReviews(p.slug, reviewCategory, VISIBLE_REVIEW_COUNT).reviews
+      : [];
   return {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -364,6 +378,22 @@ export const productSchema = (p: {
             bestRating: 5,
             worstRating: 1,
           },
+        }
+      : {}),
+    ...(visibleReviews.length
+      ? {
+          review: visibleReviews.map((r) => ({
+            "@type": "Review",
+            author: { "@type": "Person", name: r.name },
+            ...(r.fixedDate ? { datePublished: r.date } : {}),
+            reviewBody: r.text,
+            reviewRating: {
+              "@type": "Rating",
+              ratingValue: r.rating,
+              bestRating: 5,
+              worstRating: 1,
+            },
+          })),
         }
       : {}),
     offers: {
