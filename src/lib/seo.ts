@@ -7,6 +7,7 @@
 import { PRODUCT_META_PROFILES } from "@/data/product-meta";
 import {
   getProductReviews,
+  reviewDatePublished,
   VISIBLE_REVIEW_COUNT,
   type ProductCategory,
 } from "@/lib/legacy-product-reviews";
@@ -385,7 +386,7 @@ export const productSchema = (p: {
           review: visibleReviews.map((r) => ({
             "@type": "Review",
             author: { "@type": "Person", name: r.name },
-            ...(r.fixedDate ? { datePublished: r.date } : {}),
+            ...(reviewDatePublished(r) ? { datePublished: reviewDatePublished(r) } : {}),
             reviewBody: r.text,
             reviewRating: {
               "@type": "Rating",

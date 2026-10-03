@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getProductReviews } from "@/lib/legacy-product-reviews";
+import { getProductReviews, reviewDatePublished } from "@/lib/legacy-product-reviews";
 
 describe("archived customer reviews", () => {
   it("returns a stable, non-empty review set for an archived product", () => {
@@ -44,5 +44,57 @@ describe("archived customer reviews", () => {
     expect(result.rating).toBe(rating);
     expect(result.reviews.every((review) => review.fixedDate === true)).toBe(true);
     expect(result.reviews.every((review) => review.city)).toBe(true);
+  });
+});
+
+describe("reviewDatePublished — ISO 8601 للـ schema فقط", () => {
+  it("يحوّل DD/MM/YYYY إلى ISO", () => {
+    expect(
+      reviewDatePublished({
+        id: 1,
+        name: "خ",
+        text: "نص",
+        rating: 5,
+        date: "03/02/2026",
+        helpful: 0,
+        fixedDate: true,
+      }),
+    ).toBe("2026-02-03");
+  });
+  it("يمرر ISO كما هو", () => {
+    expect(
+      reviewDatePublished({
+        id: 1,
+        name: "خ",
+        text: "نص",
+        rating: 5,
+        date: "2026-09-02",
+        helpful: 0,
+        fixedDate: true,
+      }),
+    ).toBe("2026-09-02");
+  });
+  it("يرفض التواريخ النسبية وكل صيغة غير مدعومة", () => {
+    expect(
+      reviewDatePublished({
+        id: 1,
+        name: "خ",
+        text: "نص",
+        rating: 5,
+        date: "منذ يومين",
+        helpful: 0,
+      }),
+    ).toBeNull();
+    expect(
+      reviewDatePublished({
+        id: 1,
+        name: "خ",
+        text: "نص",
+        rating: 5,
+        date: "02-2026-03",
+        helpful: 0,
+        fixedDate: true,
+      }),
+    ).toBeNull();
   });
 });

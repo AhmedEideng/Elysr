@@ -332,9 +332,8 @@ async function prerender() {
       HOMEPAGE_CONCERN_CANDIDATES,
       HOMEPAGE_EXCLUDED_PRODUCT_IDS,
     } = await vite.ssrLoadModule("/src/data/products.ts");
-    const { getProductReviews, VISIBLE_REVIEW_COUNT } = await vite.ssrLoadModule(
-      "/src/lib/legacy-product-reviews.ts",
-    );
+    const { getProductReviews, reviewDatePublished, VISIBLE_REVIEW_COUNT } =
+      await vite.ssrLoadModule("/src/lib/legacy-product-reviews.ts");
     const { makeProductMetaDescription, makeProductMetaTitle } =
       await vite.ssrLoadModule("/src/lib/seo.ts");
     const {
@@ -1268,7 +1267,7 @@ ${homeArticlesBody}
               review: legacyList.map((r) => ({
                 "@type": "Review",
                 author: { "@type": "Person", name: r.name },
-                ...(r.fixedDate ? { datePublished: r.date } : {}),
+                ...(reviewDatePublished(r) ? { datePublished: reviewDatePublished(r) } : {}),
                 reviewBody: r.text,
                 reviewRating: {
                   "@type": "Rating",

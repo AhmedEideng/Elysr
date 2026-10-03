@@ -26,6 +26,18 @@ export interface Review {
 
 export type ProductCategory = "men" | "women" | "devices";
 
+/** تاريخ النشر بصيغة ISO 8601 لـ schema فقط (جوجل ترفض ما سواها).
+ *  الأرشيف يحمل تواريخ ثابتة بصيغتين: ISO مباشرة أو DD/MM/YYYY للعرض البشري.
+ *  العرض يحتفظ بنصه كما هو؛ الـ markup يأخذ ISO أو لا شيء. */
+export function reviewDatePublished(r: Review): string | null {
+  if (!r.fixedDate) return null;
+  const d = String(r.date).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+  const m = d.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+  return null;
+}
+
 /** عدد الشهادات المعروضة على الصفحة = عدد عناصر review في الـ schema تماماً.
  *  مصدر وحيد: تستهلكه واجهة React وsrc/lib/seo.ts معاً حتى يبقى المحتوى
  *  المرئي والـ markup متطابقين (سياسة جوجل: الـ markup يعكس المحتوى الظاهر). */
