@@ -937,6 +937,26 @@ try {
     );
   }
 
+  // ── vercel.json route sources must compile with the SAME engine Vercel
+  // validates them with (path-to-regexp v6). A pattern this engine rejects
+  // fails the Vercel deploy BEFORE the build even starts — two deploys were
+  // lost to a lookahead/character-class headers pattern on 2026-10-06 — so
+  // every source in headers/redirects/rewrites is compiled here first.
+  const { pathToRegexp } = await import("path-to-regexp");
+  const vercelCfg = JSON.parse(readFileSync(resolve(ROOT, "vercel.json"), "utf-8"));
+  const routeSources = [
+    ...(vercelCfg.headers ?? []).map((h) => h.source),
+    ...(vercelCfg.redirects ?? []).map((r) => r.source),
+    ...(vercelCfg.rewrites ?? []).map((r) => r.source),
+  ];
+  for (const src of routeSources) {
+    assert.doesNotThrow(
+      () => pathToRegexp(src),
+      `vercel.json source rejected by path-to-regexp v6 (Vercel would refuse the deploy): ${src}`,
+    );
+  }
+  console.log(`✓ vercel.json: ${routeSources.length} route sources compile with path-to-regexp v6`);
+
   console.log("✓ data integrity tests passed");
 } finally {
   await vite.close();
