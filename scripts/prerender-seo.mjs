@@ -285,17 +285,10 @@ function buildHtml(template, opts) {
         `<img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" class="block h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async" width="1200" height="663" style="width:100%;height:100%;object-fit:cover;display:block" />` +
         `</div>`
       : "";
-    // The interim state must read as "the store is loading", not "the store
-    // vanished": mirror the real home layout below the hero (title rows,
-    // category chips, two card rows) and fill the viewport so no white void
-    // shows under the fold while hydration completes.
     const skeleton =
-      `<div data-prerender-skeleton aria-hidden="true"${heroPreload ? ` data-sk-flush=""` : ""}>` +
+      `<div data-prerender-skeleton aria-hidden="true">` +
       `${heroPreload ? "" : `<div data-sk="hero"></div>`}<div data-sk="row"></div><div data-sk="row"></div>` +
-      `<div data-sk="chips"><div></div><div></div><div></div><div></div><div></div></div>` +
-      `<div data-sk="grid">` +
-      `<div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>` +
-      `</div>` +
+      `<div data-sk="grid"><div></div><div></div><div></div><div></div></div>` +
       `</div>`;
     const visibleFallback = `<div data-prerender-content dir="rtl" style="max-width:1120px;margin:0 auto;padding:32px 16px 48px;color:#14213d;font-family:Arial,sans-serif;line-height:1.8;">${bodyContent}</div>`;
     html = html.replace(

@@ -126,12 +126,6 @@
         max-width: 1280px;
         margin: 0 auto;
         padding: 76px 16px 24px;
-        min-height: 72vh;
-      }
-      /* Home ships the real hero above the skeleton, so the nav clearance the
-         skeleton-hero routes need becomes an empty band here — flush it. */
-      html.js [data-prerender-skeleton][data-sk-flush] {
-        padding-top: 20px;
       }
       html.js [data-prerender-skeleton] [data-sk] {
         display: block;
@@ -156,21 +150,8 @@
         margin-top: 24px;
       }
       html.js [data-prerender-skeleton] [data-sk="grid"] > div {
-        height: 208px;
+        height: 132px;
         border-radius: 14px;
-        background: linear-gradient(90deg, #e8eef2 25%, #f4f8fa 50%, #e8eef2 75%);
-        background-size: 200% 100%;
-        animation: elysr-sk 1.2s ease-in-out infinite;
-      }
-      html.js [data-prerender-skeleton] [data-sk="chips"] {
-        display: flex;
-        gap: 10px;
-        margin: 18px 0 4px;
-      }
-      html.js [data-prerender-skeleton] [data-sk="chips"] > div {
-        height: 36px;
-        flex: 1;
-        border-radius: 999px;
         background: linear-gradient(90deg, #e8eef2 25%, #f4f8fa 50%, #e8eef2 75%);
         background-size: 200% 100%;
         animation: elysr-sk 1.2s ease-in-out infinite;
@@ -182,8 +163,7 @@
       }
       @media (prefers-reduced-motion: reduce) {
         html.js [data-prerender-skeleton] [data-sk],
-        html.js [data-prerender-skeleton] [data-sk="grid"] > div,
-        html.js [data-prerender-skeleton] [data-sk="chips"] > div {
+        html.js [data-prerender-skeleton] [data-sk="grid"] > div {
           animation: none;
         }
       }
