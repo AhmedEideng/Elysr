@@ -274,15 +274,26 @@ function buildHtml(template, opts) {
     // (2026-09-28) قرار المالك: هيكل first-paint محايد يظهر فقط عند وجود
     // JavaScript (صنف html.js) ويختفي فور تركيب React؛ بلا JavaScript يبقى
     // مخفياً وتظهر النسخة الثابتة الكاملة نفسها.
+    // Home only: ship the real hero <img> in the initial document so the LCP
+    // element paints with the first render instead of waiting for hydration
+    // (~700KB of JS on a mid-range phone). Markup mirrors
+    // src/components/sections/Hero.tsx exactly (classes, aspect-ratio, srcset,
+    // alt, width/height) so the hydrated swap is geometry-identical (CLS 0).
+    // It lives OUTSIDE the aria-hidden skeleton so its alt stays exposed.
+    const heroReal = heroPreload
+      ? `<div class="relative w-full overflow-hidden bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50" style="aspect-ratio:1200 / 663">` +
+        `<img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" class="block h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async" width="1200" height="663" style="width:100%;height:100%;object-fit:cover;display:block" />` +
+        `</div>`
+      : "";
     const skeleton =
       `<div data-prerender-skeleton aria-hidden="true">` +
-      `<div data-sk="hero"></div><div data-sk="row"></div><div data-sk="row"></div>` +
+      `${heroPreload ? "" : `<div data-sk="hero"></div>`}<div data-sk="row"></div><div data-sk="row"></div>` +
       `<div data-sk="grid"><div></div><div></div><div></div><div></div></div>` +
       `</div>`;
     const visibleFallback = `<div data-prerender-content dir="rtl" style="max-width:1120px;margin:0 auto;padding:32px 16px 48px;color:#14213d;font-family:Arial,sans-serif;line-height:1.8;">${bodyContent}</div>`;
     html = html.replace(
       '<div id="root"></div>',
-      `<div id="root">${skeleton}${visibleFallback}</div>`,
+      `<div id="root">${heroReal}${skeleton}${visibleFallback}</div>`,
     );
   }
 
@@ -294,6 +305,20 @@ function buildHtml(template, opts) {
   html = html.replace(
     /(<noscript>\s*<div[^>]*>\s*)<p>[\s\S]*?<\/p>/,
     `$1<p>${safeTitle}</p>\n        <p>${safeDesc}</p>`,
+  );
+
+  // The build emits BOTH <link rel="preload" as="style"> and a render-blocking
+  // <link rel="stylesheet"> for the same bundle; the blocking copy defeats the
+  // critical-CSS + css-swapper design (first paint waits for the full 100KB
+  // bundle). Drop the blocking copy — css-swapper.js promotes the preload to a
+  // stylesheet the moment it lands — and keep a <noscript> stylesheet so no-JS
+  // visitors still get the full design.
+  html = html.replace(
+    /<link rel="stylesheet" href="(\/assets\/index-[^"]+\.css)"\s*\/?>/,
+    (m, href) =>
+      html.includes(`<link rel="preload" href="${href}" as="style">`)
+        ? `<noscript><link rel="stylesheet" href="${href}"></noscript>`
+        : m,
   );
 
   return html;
