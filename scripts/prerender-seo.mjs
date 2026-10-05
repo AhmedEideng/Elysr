@@ -1220,9 +1220,11 @@ ${homeArticlesBody}
       const title = makeProductMetaTitle(product.name);
       // 🎯 وصف غني بالبيانات الفريدة (السعر، الشحن، ومعلومات المنتج) لمنع Google من إعادة كتابته بوصف الموقع العام
       const desc = makeProductMetaDescription(product);
-      // absoluteProductImage() in src/lib/seo.ts (the hydrated copy) resolves
-      // product images without the cache-busting suffix; keep both identical.
-      const img = product.image ? `${SITE_URL}${product.image}` : `${SITE_URL}/og-default.webp`;
+      // absoluteProductImage() in src/lib/seo.ts (the hydrated copy) appends the
+      // same cache-busting suffix via assetUrl(); keep both URLs identical.
+      const img = product.image
+        ? `${SITE_URL}${assetUrl(product.image)}`
+        : `${SITE_URL}/og-default.webp`;
       const canonical = `${SITE_URL}/products/${product.slug}`;
       const productReviews = Number.isInteger(product.reviews) ? Math.max(0, product.reviews) : 0;
       const productRating = Number.isFinite(product.rating)

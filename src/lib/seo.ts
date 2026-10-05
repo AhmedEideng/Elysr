@@ -4,6 +4,7 @@
  * - حقن JSON-LD (Schema.org)
  */
 
+import { assetUrl } from "@/lib/cache";
 import { PRODUCT_META_PROFILES } from "@/data/product-meta";
 import {
   getProductReviews,
@@ -174,7 +175,9 @@ function absoluteUrl(url?: string): string {
  */
 function absoluteProductImage(url?: string): string {
   if (!url) return DEFAULT_OG;
-  return absoluteUrl(url);
+  // نفس suffix كسر الكاش الذي يستخدمه الفيد والـ og:image في نسخة الـ prerender:
+  // عنوان صورة جديد يجبر جوجل على إعادة جلبها بدل الاعتماد على مصغّرة قديمة.
+  return absoluteUrl(assetUrl(url));
 }
 
 export interface SeoMeta {
