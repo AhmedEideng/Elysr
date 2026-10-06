@@ -14,7 +14,7 @@ export const landingPagesMeta: LandingPageMeta[] = [
     slug: "complete-guide-premature-ejaculation-delay",
     title: "دليل تأخير القذف الشامل: الأسباب، الخيارات، والمنتجات الآمنة في مصر",
   },
-  { slug: "marital-health-products", title: "منتجات الصحة الزوجية الأصلية في مصر" },
+  { slug: "marital-health-products", title: "منتجات الصحة والسعادة الزوجية الأصلية في مصر" },
   { slug: "marital-happiness-products", title: "منتجات السعادة الزوجية للرجال والنساء" },
   { slug: "sexual-health-products", title: "منتجات الصحة الجنسية والزوجية بأمان" },
   { slug: "men-delay-products", title: "منتجات تأخير للرجال وبخاخات وجل موضعي" },

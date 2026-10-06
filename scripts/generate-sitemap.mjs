@@ -582,7 +582,7 @@ ${articleImageEntries}
   <channel>
     <title>اليسر ميديكال - كتالوج المنتجات</title>
     <link>${SITE_URL}</link>
-    <description>كتالوج منتجات الصحة الزوجية الأصلية من اليسر ميديكال</description>
+    <description>كتالوج منتجات الصحة والسعادة الزوجية الأصلية من اليسر ميديكال</description>
 ${catalogProducts
   .map((p) => {
     const row = feedRow(p);
