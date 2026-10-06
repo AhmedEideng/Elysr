@@ -213,7 +213,8 @@ export function applySeo(meta: SeoMeta = {}) {
   const path = typeof window !== "undefined" ? window.location.pathname : "/";
   const url = `${SITE_URL}${path}`;
   const title =
-    meta.title ?? "اليسر ميديكال — أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر";
+    meta.title ??
+    "اليسر ميديكال — أكبر شركة متخصصة في منتجات الصحة والسعادة الزوجية الأصلية في مصر";
   const description =
     meta.description ??
     "اليسر ميديكال أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. منتجات أصلية مختارة بعناية، شحن سري ودفع عند الاستلام.";

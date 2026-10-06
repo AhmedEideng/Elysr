@@ -38,7 +38,8 @@ const DIST = resolve(ROOT, "dist");
 const SITE_URL = "https://elysrmedical.store";
 const WANT_JSON = process.argv.includes("--json");
 
-const DEFAULT_TITLE = "اليسر ميديكال — أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية في مصر";
+const DEFAULT_TITLE =
+  "اليسر ميديكال — أكبر شركة متخصصة في منتجات الصحة والسعادة الزوجية الأصلية في مصر";
 const DEFAULT_DESC =
   "اليسر ميديكال أكبر شركة متخصصة في منتجات الصحة الزوجية الأصلية للرجال والنساء في مصر. منتجات أصلية مختارة بعناية، شحن سري ودفع عند الاستلام.";
 
