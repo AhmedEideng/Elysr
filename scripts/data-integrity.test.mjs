@@ -122,7 +122,12 @@ try {
     );
     assert.match(gaLoader, /window\.gtag\("config", measurementId/);
     assert.match(gaLoader, /send_page_view:\s*false/);
-    assert.match(gaLoader, /configureGA\(\);\s*loadGA\(\);/);
+    // LCP-first contract (2026-10-07): config stays synchronous (dataLayer
+    // order for replay), the heavy gtag bundle starts on window load with a
+    // 3s cap so a stalled asset cannot defer analytics indefinitely.
+    assert.match(gaLoader, /configureGA\(\);/);
+    assert.match(gaLoader, /window\.addEventListener\("load", startOnce, \{ once: true \}\)/);
+    assert.match(gaLoader, /setTimeout\(startOnce, 3000\)/);
   }
 
   assert.deepEqual(productsDb, products, "products-db.json is stale; run npm run build");
