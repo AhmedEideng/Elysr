@@ -291,9 +291,50 @@ function buildHtml(template, opts) {
       `<div data-sk="grid"><div></div><div></div><div></div><div></div></div>` +
       `</div>`;
     const visibleFallback = `<div data-prerender-content dir="rtl" style="max-width:1120px;margin:0 auto;padding:32px 16px 48px;color:#14213d;font-family:Arial,sans-serif;line-height:1.8;">${bodyContent}</div>`;
+    // First-paint HTML shipped with ZERO internal links (all navigation is
+    // client-rendered), so Google's first pass saw no link graph and left
+    // 24 discovered-never-crawled pages (GSC 2026-10-07). A static nav block
+    // inside #root gives every page real internal links pre-hydration (and
+    // for no-JS); hydration swaps it for the full React footer.
+    const staticNav =
+      `<nav data-prerender-nav aria-label="تصفح سريع">` +
+      [
+        ["/products/men", "منتجات الرجال"],
+        ["/products/women", "منتجات النساء"],
+        ["/products/devices", "أجهزة"],
+        ["/education", "مقالات توعوية"],
+        ["/about", "من نحن"],
+        ["/contact", "تواصلي معنا"],
+        ["/terms", "الشروط والأحكام"],
+        ["/products/guides/alcohol-and-performance-products", "الكحول والأداء"],
+        ["/products/guides/blood-pressure-and-performance-products", "الضغط والأداء"],
+        ["/products/guides/breast-enlargement-cup-guide", "كوب تكبير الصدر"],
+        ["/products/guides/chocolate-performance-products", "شوكولاتة الأداء"],
+        ["/products/guides/daily-intimate-hygiene-men-women", "النظافة اليومية الحميمة"],
+        ["/products/guides/diabetes-and-marital-health-products", "السكري والصحة الزوجية"],
+        ["/products/guides/discreet-shipping-privacy-explained", "الشحن السري المشروح"],
+        ["/products/guides/erection-products-side-effects", "آثار منتجات الانتصاب"],
+        ["/products/guides/female-viagra-guide", "دليل الفياجرا النسائية"],
+        ["/products/guides/long-lasting-performance-guide", "دليل الأداء طويل الأمد"],
+        ["/products/guides/natural-delay-products", "منتجات التأخير الطبيعية"],
+        ["/products/guides/performance-anxiety-men", "قلق الأداء"],
+        ["/products/guides/postpartum-intimacy-products", "حميمية ما بعد الولادة"],
+        ["/products/guides/supplement-storage-egypt-heat", "تخزين المكملات في حر مصر"],
+        ["/products/guides/testosterone-support-supplements", "داعمات التستوستيرون"],
+        ["/products/guides/vacuum-pump-after-prostate-surgery", "المضخة بعد جراحة البروستاتا"],
+        ["/products/guides/vacuum-pump-side-effects", "آثار المضخة الجانبية"],
+        ["/products/guides/vaginal-dryness-comfort-products", "جفاف المهبل"],
+        ["/education/ginseng-complete-guide", "دليل الجنسنج الكامل"],
+        ["/education/omega3-circulation-performance", "أوميجا3 والدورة"],
+        ["/education/std-prevention", "الوقاية من الأمراض المنقولة"],
+        ["/education/womens-libido-boosters", "معززات الرغبة النسائية"],
+      ]
+        .map(([href, label]) => `<a href="${href}">${esc(label)}</a>`)
+        .join("") +
+      `</nav>`;
     html = html.replace(
       '<div id="root"></div>',
-      `<div id="root">${heroReal}${skeleton}${visibleFallback}</div>`,
+      `<div id="root">${heroReal}${skeleton}${staticNav}${visibleFallback}</div>`,
     );
   }
 
