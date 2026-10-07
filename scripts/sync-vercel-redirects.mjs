@@ -199,6 +199,112 @@ async function syncRedirects() {
         destination: "/products/guides/best-delay-products-egypt",
         permanent: true,
       },
+      // ── GSC "Not found (404)" cleanup (2026-10-07): 24 legacy URLs ما زالت
+      //    تُزحف من sitemaps/روابط خارجية قديمة — تحويل دائم لأقرب هدف حي ──
+      {
+        source: "/products/guides/original-marital-products-egypt",
+        destination: "/products/guides/marital-health-products",
+        permanent: true,
+      },
+      {
+        source: "/products/guides/ved-device-guide",
+        destination: "/products/devices",
+        permanent: true,
+      },
+      {
+        source: "/products/guides/viagra-vs-cialis-egypt",
+        destination: "/products/guides/best-erection-support-products",
+        permanent: true,
+      },
+      {
+        source: "/products/guides/sildenafil-products-guide",
+        destination: "/products/guides/best-erection-support-products",
+        permanent: true,
+      },
+      {
+        source: "/products/guides/emla-delay-guide",
+        destination: "/products/guides/best-delay-products-egypt",
+        permanent: true,
+      },
+      {
+        source: "/products/guides/delay-spray-for-men-egypt",
+        destination: "/products/guides/best-delay-products-egypt",
+        permanent: true,
+      },
+      {
+        source: "/products/guides/procomil-spray-guide",
+        destination: "/products/procomil-delay-cream-20g",
+        permanent: true,
+      },
+      {
+        source: "/products/guides/viagra-products-egypt",
+        destination: "/products/guides/best-erection-support-products",
+        permanent: true,
+      },
+      {
+        source: "/products/guides/fake-vs-original-performance-products",
+        destination: "/education/product-safety-checklist",
+        permanent: true,
+      },
+      {
+        source: "/education/nutrition-mental-health-testosterone-balance",
+        destination: "/education",
+        permanent: true,
+      },
+      {
+        source: "/products/fox-170-sildenafil-tablets",
+        destination: "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
+        permanent: true,
+      },
+      {
+        source: "/products/viagra-1-2-3-2-10-tablets",
+        destination: "/products/viagra-20-tablets",
+        permanent: true,
+      },
+      {
+        source: "/products/royal-honey-malaysian",
+        destination: "/products/royal-honey-gold-vip",
+        permanent: true,
+      },
+      {
+        source: "/products/lovezone-vaginal-gel",
+        destination: "/products/lovezone-drops-by-mouth",
+        permanent: true,
+      },
+      {
+        source: "/products/60-minutes-delay-men-delay-gel",
+        destination: "/products/stallion-delay-gel",
+        permanent: true,
+      },
+      {
+        source: "/products/hilti-wonderful-honey-for-men",
+        destination: "/products/royal-honey",
+        permanent: true,
+      },
+      {
+        source: "/products/max-man-extra-power-premium-cream",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/coffemix-caviar-original-for-men",
+        destination: "/products/men",
+        permanent: true,
+      },
+      {
+        source: "/products/overlord-rhino-power-mmc",
+        destination: "/products/men",
+        permanent: true,
+      },
+      { source: "/products/turbo-fitness-gel-50gm", destination: "/products/men", permanent: true },
+      { source: "/products/brioge-gel", destination: "/products/men", permanent: true },
+      { source: "/products/hulk-gel-50gm", destination: "/products/men", permanent: true },
+      { source: "/products/tiger-power-tablets", destination: "/products/men", permanent: true },
+      {
+        source: "/products/dooz-gel",
+        destination: "/products/dooz-14000-delay-cream",
+        permanent: true,
+      },
       {
         source: "/products/w-24",
         // w-24 Black Widow — product-id — حذف نهائي 2026-09-07
@@ -351,6 +457,12 @@ async function syncRedirects() {
         permanent: true,
       },
       { source: "/products/m-50", destination: "/products/men", permanent: true },
+      // نفس المنتج بعد تصحيح الاسم (alias معلن في بيانات المنتج)
+      {
+        source: "/products/emla-7-lidocaine-cream",
+        destination: "/products/emla-7-5-lidocaine-prilocaine-cream",
+        permanent: true,
+      },
     ];
 
     for (const redirect of legacyAliases) {
