@@ -41,9 +41,25 @@
 
   if (typeof window !== "undefined") {
     // Configure immediately so page_view/e-commerce events queued by the SPA
-    // come after the config command. The external script remains async and does
-    // not block first paint, but passive visits are not lost waiting for idle.
+    // come after the config command (dataLayer keeps the order until gtag.js
+    // replays it). Configuring is just two dataLayer pushes — microseconds.
     configureGA();
-    loadGA();
+    // LCP-first: fetching+executing the gtag/GTM bundle costs seconds of
+    // main-thread on throttled devices when it lands during first paint
+    // (PSI lab: one 5.4s task pushed LCP to 5.6s while field stayed green).
+    // Start the heavy bundle after window load, capped at 3s so a stalled
+    // asset cannot defer analytics indefinitely. Passive visits in the
+    // sub-load window are queued in dataLayer and replayed on load.
+    var started = false;
+    function startOnce() {
+      if (started) return;
+      started = true;
+      loadGA();
+    }
+    if (document.readyState === "complete") startOnce();
+    else {
+      window.addEventListener("load", startOnce, { once: true });
+      setTimeout(startOnce, 3000);
+    }
   }
 })();
