@@ -13,6 +13,11 @@ const { version: CACHE_VERSION } = JSON.parse(
   readFileSync(resolve(ROOT, "config/cache-version.json"), "utf-8"),
 );
 
+/** مسار صورة مستقر للسitemaps (بلا ?v=): عناوين الصور المُرسلة لجوجل لا تتغير مع كل إصدار. */
+function stableImg(path) {
+  return String(path).split("?")[0];
+}
+
 /** يلحق رقم الإصدار بمسار صورة/أصل (يزيل أي ?v= قديم أولاً). */
 function assetUrl(path) {
   const base = String(path).split("?")[0];
@@ -461,7 +466,7 @@ ${urls
     const imageBlock = u.image
       ? `
     <image:image>
-      <image:loc>${SITE_URL}${assetUrl(u.image)}</image:loc>
+      <image:loc>${SITE_URL}${stableImg(u.image)}</image:loc>
       <image:title>${esc(u.imageTitle)}</image:title>
     </image:image>`
       : "";
@@ -483,7 +488,7 @@ ${imageBlock}
         (a) => `  <url>
     <loc>${SITE_URL}/education/${a.slug}</loc>
     <image:image>
-      <image:loc>${SITE_URL}${assetUrl(a.image)}</image:loc>
+      <image:loc>${SITE_URL}${stableImg(a.image)}</image:loc>
       <image:title>${esc(a.title)}</image:title>
       <image:caption>${esc(a.title)} — اليسر ميديكال</image:caption>
     </image:image>
@@ -499,7 +504,7 @@ ${products
     (p) => `  <url>
     <loc>${SITE_URL}/products/${p.slug}</loc>
     <image:image>
-      <image:loc>${SITE_URL}${assetUrl(p.image)}</image:loc>
+      <image:loc>${SITE_URL}${stableImg(p.image)}</image:loc>
       <image:title>${esc(p.name)}</image:title>
       <image:caption>${esc(p.name)} — اليسر ميديكال</image:caption>
     </image:image>
