@@ -138,7 +138,7 @@ try {
   const seenBytes = new Map();
   for (const product of products) {
     if (!product.image) continue;
-    const file = resolve(ROOT, "public", product.image);
+    const file = resolve(ROOT, "public", String(product.image).replace(/^\/+/, ""));
     assert.ok(existsSync(file), `Product ${product.id} image file missing: ${product.image}`);
     const digest = crypto.createHash("md5").update(readFileSync(file)).digest("hex");
     assert.ok(
