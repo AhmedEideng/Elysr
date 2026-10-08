@@ -131,6 +131,23 @@ try {
   }
 
   assert.deepEqual(productsDb, products, "products-db.json is stale; run npm run build");
+  // ── Fleet image integrity (2026-10-08): every product image file exists and
+  // no two products share identical image bytes — mislabeled-asset guard born
+  // from the sotara SERP-thumbnail investigation (fleet audit: 83/83 unique).
+  const crypto = await import("node:crypto");
+  const seenBytes = new Map();
+  for (const product of products) {
+    if (!product.image) continue;
+    const file = resolve(ROOT, "public", product.image);
+    assert.ok(existsSync(file), `Product ${product.id} image file missing: ${product.image}`);
+    const digest = crypto.createHash("md5").update(readFileSync(file)).digest("hex");
+    assert.ok(
+      !seenBytes.has(digest),
+      `Products ${seenBytes.get(digest)} and ${product.id} share identical image bytes (${product.image})`,
+    );
+    seenBytes.set(digest, product.id);
+  }
+  console.log(`✓ fleet images: ${seenBytes.size} unique product image files, all present`);
   assert.deepEqual(
     Object.keys(PRODUCT_META_PROFILES).sort(),
     products.map((product) => product.id).sort(),
