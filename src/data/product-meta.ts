@@ -14,9 +14,9 @@ export type ProductMetaProfile = {
 export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "m-01": { form: "oral", hook: "كبسولات في عبوة 30 كبسولة مع الجينسنج والماكا" },
   "m-02": { form: "oral", hook: "كبسولات في عبوة 30 كبسولة مع الجينسنج والماكا" },
-  // The catalog name says capsules while the lead description says tablets;
-  // use a neutral count until the package is verified.
-  "m-03": { form: "oral", hook: "عبوة 10 وحدات مع الجنكو والزعفران" },
+  // (2026-10-09) verified: market listings and the lead description agree on
+  // 10 tablets — the old "capsules" catalog name was the outlier and is fixed.
+  "m-03": { form: "oral", hook: "أقراص في عبوة 10 حبات مع الجنكو والزعفران" },
   "m-04": { form: "oral", hook: "كبسولات بتركيز 1650 مجم من الجينسنج" },
   "m-05": { form: "topical", hook: "كريم موضعي بتركيبة عشبية" },
   "m-06": { form: "topical", hook: "جل مائي سريع الامتصاص للاستخدام الخارجي" },
@@ -76,7 +76,7 @@ export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "w-07": { form: "oral", hook: "عسل في 10 أكياس مع الماكا والجينسنج" },
   "w-08": { form: "oral", hook: "قهوة فورية في 10 مغلفات مع الماكا والجينسنج" },
   "w-09": { form: "oral", hook: "عسل بتركيبة عشبية مركزة" },
-  "w-10": { form: "oral", hook: "كبسولات عشبية للنساء" },
+  "w-10": { form: "oral", hook: "لبان عشبي للنساء" },
   "w-11": { form: "oral", hook: "علكة في 30 قطعة بنكهة فاكهية" },
   "w-12": { form: "oral", hook: "شوكولاتة مع الجينسنج والقرفة" },
   "w-13": { form: "oral", hook: "علكة في 30 قطعة بنكهات استوائية" },
