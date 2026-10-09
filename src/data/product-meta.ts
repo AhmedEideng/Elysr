@@ -14,9 +14,10 @@ export type ProductMetaProfile = {
 export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "m-01": { form: "oral", hook: "كبسولات في عبوة 30 كبسولة مع الجينسنج والماكا" },
   "m-02": { form: "oral", hook: "كبسولات في عبوة 30 كبسولة مع الجينسنج والماكا" },
-  // (2026-10-09) verified: market listings and the lead description agree on
-  // 10 tablets — the old "capsules" catalog name was the outlier and is fixed.
-  "m-03": { form: "oral", hook: "أقراص في عبوة 10 حبات مع الجنكو والزعفران" },
+  // (2026-10-09) owner-verified from the physical jar: 30 capsules, one
+  // capsule 1-2h before intimacy. The tablets sibling (Power Fully Up
+  // Advanced) is a separate product and stays tablets.
+  "m-03": { form: "oral", hook: "كبسولات في عبوة 30 كبسولة مع الجنكو والزعفران" },
   "m-04": { form: "oral", hook: "كبسولات بتركيز 1650 مجم من الجينسنج" },
   "m-05": { form: "topical", hook: "كريم موضعي بتركيبة عشبية" },
   "m-06": { form: "topical", hook: "جل مائي سريع الامتصاص للاستخدام الخارجي" },
