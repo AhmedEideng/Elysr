@@ -12,14 +12,14 @@ export type ProductMetaProfile = {
 };
 
 export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
-  "m-01": { form: "oral", hook: "كبسولات في عبوة 30 كبسولة مع الجينسنج والماكا" },
-  "m-02": { form: "oral", hook: "كبسولات في عبوة 30 كبسولة مع الجينسنج والماكا" },
+  "m-01": { form: "oral", hook: "30 كبسولة ألمانية مستوردة" },
+  "m-02": { form: "oral", hook: "30 كبسولة بجينسنج كوري أحمر وماكا" },
   // (2026-10-09) owner-verified from the physical jar: 30 capsules, one
   // capsule 1-2h before intimacy. The tablets sibling (Power Fully Up
   // Advanced) is a separate product and stays tablets.
   "m-03": { form: "oral", hook: "كبسولات في عبوة 30 كبسولة مع الجنكو والزعفران" },
   "m-04": { form: "oral", hook: "30 كبسولة جينسنج كوري أحمر بتركيز 1650 مجم للطاقة" },
-  "m-05": { form: "topical", hook: "كريم موضعي بتركيبة عشبية" },
+  "m-05": { form: "topical", hook: "كريم عشبي صيني بالشيزاندرا والسالفيا" },
   "m-06": { form: "topical", hook: "جل مائي سريع الامتصاص للتلطيف وإطالة أمد اللقاء" },
   "m-07": { form: "topical", hook: "كريم 20 جم للاستخدام الخارجي" },
   "m-09": { form: "topical", hook: "كريم عشبي خارجي للتغذية والصلابة والتحكم بالتوقيت" },
@@ -47,7 +47,7 @@ export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "m-32": { form: "topical", hook: "جل موضعي مع فيتامين E" },
   "m-33": { form: "topical", hook: "كريم موضعي مع الجينسنج والجنكو" },
   "m-34": { form: "oral", hook: "أقراص بسيلدينافيل 130 مجم ودابوكستين 60 مجم" },
-  "m-35": { form: "topical", hook: "كريم موضعي بتركيبة عشبية" },
+  "m-35": { form: "topical", hook: "كريم موضعي بزيوت القرنفل والحلبة" },
   "m-37": { form: "oral", hook: "أقراص بتادالافيل 20 مجم في عبوة 30 قرصاً" },
   "m-38": { form: "oral", hook: "أقراص تجمع سيلدينافيل ودابوكستين" },
   "m-39": { form: "topical", hook: "كريم موضعي بزيوت نباتية" },
