@@ -76,7 +76,7 @@ export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "w-07": { form: "oral", hook: "عسل في 10 أكياس مع الماكا والجينسنج" },
   "w-08": { form: "oral", hook: "قهوة فورية في 10 مغلفات مع الماكا والجينسنج" },
   "w-09": { form: "oral", hook: "عسل بتركيبة عشبية مركزة" },
-  "w-10": { form: "oral", hook: "كبسولات عشبية للنساء" },
+  "w-10": { form: "oral", hook: "لبان عشبي للنساء" },
   "w-11": { form: "oral", hook: "علكة في 30 قطعة بنكهة فاكهية" },
   "w-12": { form: "oral", hook: "شوكولاتة مع الجينسنج والقرفة" },
   "w-13": { form: "oral", hook: "علكة في 30 قطعة بنكهات استوائية" },
