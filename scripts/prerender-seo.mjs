@@ -208,6 +208,12 @@ function buildHtml(template, opts) {
     imageAlt,
     imageWidth,
     imageHeight,
+    // (2026-10-11) دعم الإنجليزية الجزئية: لغة/اتجاه/لوكال/hreflang/nav خاص
+    lang = "ar",
+    dir = "rtl",
+    locale = "ar_EG",
+    hreflang = [],
+    navLinks = null,
   } = opts;
 
   // (2026-10-11) الأبعاد الحقيقية تُقرأ من الملف نفسه (webp/png/jpg) مصدراً
@@ -218,6 +224,8 @@ function buildHtml(template, opts) {
   const ogH = imageHeight || (realDims && realDims.height) || 631;
 
   let html = template;
+  // (2026-10-11) صفحات /en تستبدل لغة المستند واتجاهه (القالب عربي افتراضاً).
+  html = html.replace(/<html lang="ar" dir="rtl">/, `<html lang="${lang}" dir="${dir}">`);
   // 🎯 اقتطاع ذكي للـ title والـ description إلى أطوال مثالية للظهور الكامل في Google.
   const safeTitle = esc(makeTitle(title));
   const safeDesc = esc(makeMetaDescription(description));
@@ -297,6 +305,19 @@ function buildHtml(template, opts) {
     /<meta property="og:site_name"[^>]*>/,
     `<meta property="og:site_name" content="${esc(SITE_NAME)}" />`,
   );
+  // (2026-10-11) og:locale يتبع لغة الصفحة (ar_EG / en_US) مطابقةً لـ applySeo.
+  replaceOrInsert(
+    /<meta property="og:locale"[^>]*>/,
+    `<meta property="og:locale" content="${locale}" />`,
+  );
+  // (2026-10-11) hreflang: مجموعة alternates الكاملة (ar + en + x-default)
+  // للصفحات المتقابلة الثمانية؛ تُحقن في الثابت وتُدار وقت التشغيل بـ applyHreflang.
+  if (Array.isArray(hreflang) && hreflang.length > 0) {
+    const altTags = hreflang
+      .map((a) => `<link rel="alternate" hreflang="${a.lang}" href="${SITE_URL}${a.href}" />`)
+      .join("\n    ");
+    html = html.replace("</head>", `${altTags}\n    </head>`);
+  }
   replaceOrInsert(
     /<meta name="twitter:card"[^>]*>/,
     // (2026-10-10) البطاقة الكبيرة تحتاج نسبة عرض/ارتفاع ≥ ~1.4 وإلا قصّت
@@ -402,7 +423,7 @@ function buildHtml(template, opts) {
       `${heroPreload ? "" : `<div data-sk="hero"></div>`}<div data-sk="row"></div><div data-sk="row"></div>` +
       `<div data-sk="grid"><div></div><div></div><div></div><div></div></div>` +
       `</div>`;
-    const visibleFallback = `<div data-prerender-content dir="rtl" style="max-width:1120px;margin:0 auto;padding:32px 16px 48px;color:#14213d;font-family:Arial,sans-serif;line-height:1.8;">${bodyContent}</div>`;
+    const visibleFallback = `<div data-prerender-content dir="${dir}" style="max-width:1120px;margin:0 auto;padding:32px 16px 48px;color:#14213d;font-family:Arial,sans-serif;line-height:1.8;">${bodyContent}</div>`;
     // First-paint HTML shipped with ZERO internal links (all navigation is
     // client-rendered), so Google's first pass saw no link graph and left
     // 24 discovered-never-crawled pages (GSC 2026-10-07). A static nav block
@@ -410,7 +431,7 @@ function buildHtml(template, opts) {
     // for no-JS); hydration swaps it for the full React footer.
     const staticNav =
       `<nav data-prerender-nav aria-label="تصفح سريع">` +
-      (seoNavLinks || NAV_CORE)
+      (navLinks || seoNavLinks || NAV_CORE)
         .map(([href, label]) => `<a href="${href}">${esc(label)}</a>`)
         .join("") +
       `</nav>`;
@@ -474,6 +495,7 @@ async function prerender() {
     const {
       products,
       getProductsByCategory,
+      getPublicProductsByCategory,
       getCrossSellsForProduct,
       getFeaturedProducts,
       getProductById,
@@ -486,6 +508,9 @@ async function prerender() {
       makeProductMetaDescription,
       makeProductMetaTitle,
       makeMetaDescription: seoMakeMetaDescriptionFn,
+      itemListSchema,
+      breadcrumbSchema,
+      faqSchema,
     } = await vite.ssrLoadModule("/src/lib/seo.ts");
     seoMakeMetaDescription = seoMakeMetaDescriptionFn;
     const {
@@ -592,6 +617,11 @@ async function prerender() {
         .map((p) => [`/products/guides/${p.slug}`, navPhrase(p.metaTitle || p.title || p.slug)]),
       ...articles.slice(0, 4).map((a) => [`/education/${a.slug}`, navPhrase(a.title)]),
     ];
+
+    // (2026-10-11) الإنجليزية الجزئية + hreflang: نصوص وalternates من مصدر واحد
+    const { alternatesFor, enHome, enCategories } = await vite.ssrLoadModule(
+      "/src/data/en-pages.ts",
+    );
 
     // (2026-09-17) Topic Authority: روابط الموضوعات في الـ HTML الثابت
     // (قابل للزحف من غير JS) — نفس محتوى TopicHub في الـ SPA.
@@ -772,6 +802,7 @@ async function prerender() {
         canonical: `${SITE_URL}/`,
         type: "website",
         heroPreload: true,
+        hreflang: alternatesFor("/"),
         // (2026-09-17) og-default 1200×631 (الأبعاد الافتراضية في buildHtml)
         imageAlt:
           "اليسر ميديكال | منتجات الصحة والسعادة الزوجية الأصلية في مصر",
@@ -1367,6 +1398,7 @@ ${homeArticlesBody}
         canonical: `${SITE_URL}${r.path}`,
         type: "website",
         noindex: Boolean(r.noindex),
+        hreflang: alternatesFor(r.path),
         jsonLd,
         // (2026-09-17) og-default 1200×631 (الأبعاد الافتراضية في buildHtml)
         imageAlt: r.title,
@@ -1939,8 +1971,91 @@ ${homeArticlesBody}
       console.log(`✓ landing pages: ${landingCount}`);
     }
 
+    // (2026-10-11) الإنجليزية الجزئية: مركز /en + 3 فئات بقوائم nameEn وhreflang
+    // متبادل مع العربية. النصوص ترجمة أمينة لنصوص النسخة العربية (en-pages.ts).
+    const enNav = [
+      ["/en", "Home"],
+      ["/en/products/men", "Men"],
+      ["/en/products/women", "Women"],
+      ["/en/products/devices", "Devices"],
+      ["/", "العربية"],
+    ];
+    let enCount = 0;
+    const enDir = resolve(DIST, "en");
+    mkdirSync(resolve(enDir, "products"), { recursive: true });
+    const hubHtml = buildHtml(template, {
+      title: enHome.title,
+      description: enHome.description,
+      image: `${SITE_URL}/og-default.webp`,
+      canonical: `${SITE_URL}/en`,
+      type: "website",
+      lang: "en",
+      dir: "ltr",
+      locale: "en_US",
+      hreflang: alternatesFor("/en"),
+      navLinks: enNav,
+      jsonLd: [breadcrumbSchema([{ name: "Home", url: "/en" }])],
+      imageAlt: enHome.title,
+      bodyContent: `<h1>${esc(enHome.h1)}</h1><p>${esc(enHome.intro)}</p><h2>${esc(
+        enHome.browseLabel,
+      )}</h2><ul>${enCategories
+        .map((c) => `<li><a href="${SITE_URL}${c.path}">${esc(c.heroTitle)}</a></li>`)
+        .join("")}</ul><p>${esc(enHome.noteLabel)} <a href="${SITE_URL}/">النسخة العربية</a></p>`,
+    });
+    writeFileSync(resolve(enDir, "index.html"), hubHtml);
+    enCount++;
+
+    for (const page of enCategories) {
+      const items = getPublicProductsByCategory(page.category);
+      const html = buildHtml(template, {
+        title: page.title,
+        description: page.description,
+        image: `${SITE_URL}/og-default.webp`,
+        canonical: `${SITE_URL}${page.path}`,
+        type: "website",
+        lang: "en",
+        dir: "ltr",
+        locale: "en_US",
+        hreflang: alternatesFor(page.path),
+        navLinks: enNav,
+        jsonLd: [
+          itemListSchema(
+            items.map((p) => ({
+              id: p.id,
+              name: p.nameEn,
+              slug: p.slug,
+              image: p.image,
+              price: p.price,
+            })),
+            page.heroTitle,
+          ),
+          breadcrumbSchema([
+            { name: "Home", url: "/en" },
+            { name: page.heroTitle, url: page.path },
+          ]),
+          faqSchema(page.faqs),
+        ],
+        imageAlt: page.heroTitle,
+        bodyContent:
+          `<h1>${esc(page.heroTitle)}</h1><p>${esc(page.heroDescription)}</p>` +
+          `<p><a href="${SITE_URL}${page.arPath}">View this page in Arabic — عرض هذه الصفحة بالعربية</a></p>` +
+          `<h2>${esc(page.listLabel)}</h2><ul>${items
+            .map(
+              (p) =>
+                `<li><a href="${SITE_URL}/products/${p.slug}">${esc(p.nameEn)}</a> — EGP ${p.price}</li>`,
+            )
+            .join("")}</ul>` +
+          `<h2>Frequently asked questions about ${esc(page.heroTitle)}</h2>${page.faqs
+            .map((f) => `<p><strong>${esc(f.question)}</strong></p><p>${esc(f.answer)}</p>`)
+            .join("")}`,
+      });
+      writeFileSync(resolve(enDir, "products", `${page.category}.html`), html);
+      enCount++;
+    }
+    console.log(`✓ english pages: ${enCount}`);
+
     console.log(
-      `\n✅ Prerender complete: ${staticCount} static + ${productsCount} products + ${articlesCount} articles + ${landingCount} landing pages = ${staticCount + productsCount + articlesCount + landingCount} pages`,
+      `\n✅ Prerender complete: ${staticCount} static + ${productsCount} products + ${articlesCount} articles + ${landingCount} landing pages + ${enCount} en = ${staticCount + productsCount + articlesCount + landingCount + enCount} pages`,
     );
 
     // الوصف المقتطع بـ «…» يظهر في نتائج Google بنص ناقص — التصحيح الصحيح هو

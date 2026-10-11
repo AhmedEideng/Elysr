@@ -106,6 +106,10 @@ async function generateSitemap() {
     };
     writeFileSync(resolve(apiLibDir, "config-db.json"), JSON.stringify(configDb, null, 2), "utf-8");
     const { isMerchantFeedExcluded } = await vite.ssrLoadModule("/src/lib/site-config.ts");
+    // (2026-10-11) الإنجليزية الجزئية: نفس مصدر النصوص والـ alternates
+    const { alternatesFor, enCategories } = await vite.ssrLoadModule(
+      "/src/data/en-pages.ts",
+    );
     // قرار المالك 2026-09-28: أدوية الوصفة (سيلدينافيل/تادالافيل…) تُستثنى من فيد
     // Merchant فقط؛ الصفحات تبقى منشورة ومفهرسة. القاعدة في site-config.ts.
     const catalogProducts = products.filter(
@@ -449,6 +453,27 @@ async function generateSitemap() {
         })),
     ];
 
+    // (2026-10-11) الإنجليزية الجزئية في الـ sitemap + hreflang متبادل لكل
+    // الصفحات المتقابلة الثمانية (xhtml:link امتداد مدعوم من جوجل).
+    urls.push(
+      {
+        path: "/en",
+        priority: "0.8",
+        changefreq: "weekly",
+        lastmod: freshLastmod("src/routes/en.index.tsx"),
+      },
+      ...enCategories.map((c) => ({
+        path: c.path,
+        priority: "0.8",
+        changefreq: "weekly",
+        lastmod: freshLastmod(`src/routes/en.products.${c.category}.tsx`),
+      })),
+    );
+    for (const u of urls) {
+      const al = alternatesFor(u.path);
+      if (al.length > 0) u.alternates = al;
+    }
+
     // 2. بناء ملفات الـ XML
     // ⚠️ ملاحظة هامة (قرار موثق): لا نضع أي search template في الـ sitemap.
     // امتداد Yandex <search> (xmlns:search) بيعلّمه Google Search Console
@@ -460,7 +485,8 @@ async function generateSitemap() {
     // بوسوم مدعومة فقط.
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${urls
   .map((u) => {
     const imageBlock = u.image
@@ -470,12 +496,20 @@ ${urls
       <image:title>${esc(u.imageTitle)}</image:title>
     </image:image>`
       : "";
+    const altBlock =
+      Array.isArray(u.alternates) && u.alternates.length > 0
+        ? `\n${u.alternates
+            .map(
+              (a) =>
+                `    <xhtml:link rel="alternate" hreflang="${a.lang}" href="${SITE_URL}${a.href}" />`,
+            )
+            .join("\n")}`
+        : "";
     const lastmod = u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : "";
     return `  <url>
     <loc>${SITE_URL}${u.path}</loc>${lastmod}
     <changefreq>${u.changefreq}</changefreq>
-    <priority>${u.priority}</priority>
-${imageBlock}
+    <priority>${u.priority}</priority>${imageBlock}${altBlock}
   </url>`;
   })
   .join("\n")}

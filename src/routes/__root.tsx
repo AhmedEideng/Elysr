@@ -16,7 +16,8 @@ import { Toaster } from "sonner";
 
 import { CartProvider } from "@/contexts/cart";
 import { Layout } from "@/components/layout/Layout";
-import { applySeo } from "@/lib/seo";
+import { applyHreflang, applySeo } from "@/lib/seo";
+import { alternatesFor } from "@/data/en-pages";
 import { installErrorTracking } from "@/lib/error-tracking";
 import { trackPageView, trackReferralApplied } from "@/lib/analytics";
 import { GlobalTrackers } from "@/components/GlobalTrackers";
@@ -150,6 +151,9 @@ function RouteHeadSync() {
     }
 
     applySeo({ title, description, image, type, noindex });
+    // (2026-10-11) hreflang يُدار مركزياً: الصفحات المتقابلة الثمانية تأخذ
+    // مجموعتها، وأي صفحة أخرى تُصفَّر روابطها القديمة — مطابقاً للـ prerender.
+    applyHreflang(alternatesFor(window.location.pathname));
 
     // (2026-09-18 v2) page_view GA4 كامل 100%: referrer + search + topic
     // كلهم في نفس الـ event (synchronous) — لا حاجة لـ page_topic_set

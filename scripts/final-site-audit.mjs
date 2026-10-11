@@ -381,8 +381,13 @@ for (const file of htmlFiles) {
 
   // html attributes
   const htmlTag = (html.match(/<html\b[^>]*>/i) || [""])[0];
-  if (!/lang="ar"/.test(htmlTag)) err("B21.html-lang", page, htmlTag.slice(0, 80));
-  if (!/dir="rtl"/.test(htmlTag)) err("B22.html-dir", page, htmlTag.slice(0, 80));
+  // (2026-10-11) صفحات /en الإنجليزية: lang=en وdir=ltr صحيحان لها — القاعدة
+  // «اللغة تطابق الصفحة» لا «العربية في كل الصفحات» بعد تعدد اللغات.
+  const isEnPage = page === "/en" || page.startsWith("/en/");
+  if (isEnPage ? !/lang="en"/.test(htmlTag) : !/lang="ar"/.test(htmlTag))
+    err("B21.html-lang", page, htmlTag.slice(0, 80));
+  if (isEnPage ? !/dir="ltr"/.test(htmlTag) : !/dir="rtl"/.test(htmlTag))
+    err("B22.html-dir", page, htmlTag.slice(0, 80));
   if (!/<meta charset="UTF-8"/i.test(head)) err("B23.charset", page, "");
   if (!/name="viewport"/.test(head)) err("B24.viewport", page, "");
 

@@ -24,10 +24,14 @@ import { Route as ShippingRouteImport } from './routes/shipping'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as EducationSlugRouteImport } from './routes/education_.$slug'
+import { Route as EnIndexRouteImport } from './routes/en.index'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 import { Route as ProductsDevicesRouteImport } from './routes/products.devices'
 import { Route as ProductsMenRouteImport } from './routes/products.men'
 import { Route as ProductsWomenRouteImport } from './routes/products.women'
+import { Route as EnProductsDevicesRouteImport } from './routes/en.products.devices'
+import { Route as EnProductsMenRouteImport } from './routes/en.products.men'
+import { Route as EnProductsWomenRouteImport } from './routes/en.products.women'
 import { Route as ProductsGuidesSlugRouteImport } from './routes/products.guides.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -105,6 +109,11 @@ const EducationSlugRoute = EducationSlugRouteImport.update({
   path: '/education/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnIndexRoute = EnIndexRouteImport.update({
+  id: '/en/',
+  path: '/en/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductsSlugRoute = ProductsSlugRouteImport.update({
   id: '/products/$slug',
   path: '/products/$slug',
@@ -123,6 +132,21 @@ const ProductsMenRoute = ProductsMenRouteImport.update({
 const ProductsWomenRoute = ProductsWomenRouteImport.update({
   id: '/products/women',
   path: '/products/women',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnProductsDevicesRoute = EnProductsDevicesRouteImport.update({
+  id: '/en/products/devices',
+  path: '/en/products/devices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnProductsMenRoute = EnProductsMenRouteImport.update({
+  id: '/en/products/men',
+  path: '/en/products/men',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnProductsWomenRoute = EnProductsWomenRouteImport.update({
+  id: '/en/products/women',
+  path: '/en/products/women',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsGuidesSlugRoute = ProductsGuidesSlugRouteImport.update({
@@ -151,6 +175,10 @@ export interface FileRoutesByFullPath {
   '/products/devices': typeof ProductsDevicesRoute
   '/products/men': typeof ProductsMenRoute
   '/products/women': typeof ProductsWomenRoute
+  '/en/': typeof EnIndexRoute
+  '/en/products/devices': typeof EnProductsDevicesRoute
+  '/en/products/men': typeof EnProductsMenRoute
+  '/en/products/women': typeof EnProductsWomenRoute
   '/products/guides/$slug': typeof ProductsGuidesSlugRoute
 }
 export interface FileRoutesByTo {
@@ -173,6 +201,10 @@ export interface FileRoutesByTo {
   '/products/devices': typeof ProductsDevicesRoute
   '/products/men': typeof ProductsMenRoute
   '/products/women': typeof ProductsWomenRoute
+  '/en': typeof EnIndexRoute
+  '/en/products/devices': typeof EnProductsDevicesRoute
+  '/en/products/men': typeof EnProductsMenRoute
+  '/en/products/women': typeof EnProductsWomenRoute
   '/products/guides/$slug': typeof ProductsGuidesSlugRoute
 }
 export interface FileRoutesById {
@@ -196,6 +228,10 @@ export interface FileRoutesById {
   '/products/devices': typeof ProductsDevicesRoute
   '/products/men': typeof ProductsMenRoute
   '/products/women': typeof ProductsWomenRoute
+  '/en/': typeof EnIndexRoute
+  '/en/products/devices': typeof EnProductsDevicesRoute
+  '/en/products/men': typeof EnProductsMenRoute
+  '/en/products/women': typeof EnProductsWomenRoute
   '/products/guides/$slug': typeof ProductsGuidesSlugRoute
 }
 export interface FileRouteTypes {
@@ -220,6 +256,10 @@ export interface FileRouteTypes {
     | '/products/devices'
     | '/products/men'
     | '/products/women'
+    | '/en/'
+    | '/en/products/devices'
+    | '/en/products/men'
+    | '/en/products/women'
     | '/products/guides/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -242,6 +282,10 @@ export interface FileRouteTypes {
     | '/products/devices'
     | '/products/men'
     | '/products/women'
+    | '/en'
+    | '/en/products/devices'
+    | '/en/products/men'
+    | '/en/products/women'
     | '/products/guides/$slug'
   id:
     | '__root__'
@@ -264,6 +308,10 @@ export interface FileRouteTypes {
     | '/products/devices'
     | '/products/men'
     | '/products/women'
+    | '/en/'
+    | '/en/products/devices'
+    | '/en/products/men'
+    | '/en/products/women'
     | '/products/guides/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -287,6 +335,10 @@ export interface RootRouteChildren {
   ProductsDevicesRoute: typeof ProductsDevicesRoute
   ProductsMenRoute: typeof ProductsMenRoute
   ProductsWomenRoute: typeof ProductsWomenRoute
+  EnIndexRoute: typeof EnIndexRoute
+  EnProductsDevicesRoute: typeof EnProductsDevicesRoute
+  EnProductsMenRoute: typeof EnProductsMenRoute
+  EnProductsWomenRoute: typeof EnProductsWomenRoute
   ProductsGuidesSlugRoute: typeof ProductsGuidesSlugRoute
 }
 
@@ -397,6 +449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EducationSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/': {
+      id: '/en/'
+      path: '/en'
+      fullPath: '/en/'
+      preLoaderRoute: typeof EnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/products/$slug': {
       id: '/products/$slug'
       path: '/products/$slug'
@@ -423,6 +482,27 @@ declare module '@tanstack/react-router' {
       path: '/products/women'
       fullPath: '/products/women'
       preLoaderRoute: typeof ProductsWomenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/products/devices': {
+      id: '/en/products/devices'
+      path: '/en/products/devices'
+      fullPath: '/en/products/devices'
+      preLoaderRoute: typeof EnProductsDevicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/products/men': {
+      id: '/en/products/men'
+      path: '/en/products/men'
+      fullPath: '/en/products/men'
+      preLoaderRoute: typeof EnProductsMenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/products/women': {
+      id: '/en/products/women'
+      path: '/en/products/women'
+      fullPath: '/en/products/women'
+      preLoaderRoute: typeof EnProductsWomenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products/guides/$slug': {
@@ -455,6 +535,10 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsDevicesRoute: ProductsDevicesRoute,
   ProductsMenRoute: ProductsMenRoute,
   ProductsWomenRoute: ProductsWomenRoute,
+  EnIndexRoute: EnIndexRoute,
+  EnProductsDevicesRoute: EnProductsDevicesRoute,
+  EnProductsMenRoute: EnProductsMenRoute,
+  EnProductsWomenRoute: EnProductsWomenRoute,
   ProductsGuidesSlugRoute: ProductsGuidesSlugRoute,
 }
 export const routeTree = rootRouteImport

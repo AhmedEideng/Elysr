@@ -239,7 +239,15 @@ export function applySeo(meta: SeoMeta = {}) {
   setMeta('meta[property="og:type"]', "content", meta.type ?? "website");
   setMeta('meta[property="og:url"]', "content", url);
   setMeta('meta[property="og:image"]', "content", image);
-  setMeta('meta[property="og:locale"]', "content", "ar_EG");
+  setMeta(
+    'meta[property="og:locale"]',
+    "content",
+    // (2026-10-11) اللغة تتبع لغة المستند: صفحات /en تعلن en_US حتى تتطابق
+    // مع نسخة الـ prerender بعد الـ hydration (التكافؤ).
+    typeof document !== "undefined" && document.documentElement.lang === "en"
+      ? "en_US"
+      : "ar_EG",
+  );
 
   // Twitter — البطاقة تتبع نسبة الصورة الحقيقية مطابقةً لنسخة الـ prerender
   // (كان تثبيت summary_large_image هنا يعاكس إصلاح النسبة بعد التنقل الداخلي).
@@ -556,3 +564,22 @@ export const itemListSchema = (
     })),
   };
 };
+
+/**
+ * (2026-10-11) hreflang وقت التشغيل: يزيل أي alternates قديمة ويحقن مجموعة
+ * الصفحة الحالية (نفس alternatesFor التي يستخدمها الـ prerender والـ sitemap)
+ * حتى لا تبقى روابط لغة قديمة بعد التنقل الداخلي، وتتطابق النسختان تماماً.
+ */
+export function applyHreflang(alternates: { lang: string; href: string }[]): void {
+  if (typeof document === "undefined") return;
+  document
+    .querySelectorAll('link[rel="alternate"][hreflang]')
+    .forEach((n) => n.remove());
+  for (const a of alternates) {
+    const link = document.createElement("link");
+    link.rel = "alternate";
+    link.hreflang = a.lang;
+    link.href = absoluteUrl(a.href);
+    document.head.appendChild(link);
+  }
+}

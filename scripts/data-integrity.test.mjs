@@ -88,7 +88,10 @@ try {
   // crawler-only copy. This protects the SEO/UX contract from regression.
   {
     const prerender = readFileSync(resolve(ROOT, "scripts/prerender-seo.mjs"), "utf-8");
-    assert.match(prerender, /data-prerender-content dir="rtl"/);
+    // (2026-10-11) الاتجاه صار مُمرراً (dir="${dir}") لدعم صفحات /en ‏ltr —
+    // والحارس الآن يثبت وجود السمة + بقاء الافتراض العربي rtl.
+    assert.match(prerender, /data-prerender-content dir="\$\{dir\}"/);
+    assert.match(prerender, /dir = "rtl"/);
     assert.doesNotMatch(prerender, /data-prerender-content[^>]*clip:/);
     assert.doesNotMatch(prerender, /elysr-prerender-shell/);
   }
