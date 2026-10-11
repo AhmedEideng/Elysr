@@ -160,7 +160,7 @@ function oneYearFromToday(): string {
   return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
-function absoluteUrl(url?: string): string {
+export function absoluteUrl(url?: string): string {
   if (!url) return DEFAULT_OG;
   if (/^https?:\/\//i.test(url)) return url;
   return `${SITE_URL}${url.startsWith("/") ? url : `/${url}`}`;

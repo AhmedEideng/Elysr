@@ -17,7 +17,15 @@
  * without booting a full dev server.
  * ============================================================
  */
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import {
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+  existsSync,
+  openSync,
+  readSync,
+  closeSync,
+} from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
@@ -96,6 +104,92 @@ function makeTitle(text = "") {
   return String(text).trim().replace(/\s+/g, " ");
 }
 
+/**
+ * (2026-10-11) روابط الناف الثابتة الأساسية (لا مقابل لها في البيانات) —
+ * وهي أيضاً شبكة الأمان للـ nav المشتق قبل حقن البيانات.
+ */
+const NAV_CORE = [
+  ["/products/men", "منتجات الرجال"],
+  ["/products/women", "منتجات النساء"],
+  ["/products/devices", "أجهزة"],
+  ["/education", "مقالات توعوية"],
+  ["/about", "من نحن"],
+  ["/contact", "تواصلي معنا"],
+  ["/terms", "الشروط والأحكام"],
+];
+
+/**
+ * (2026-10-11) nav البناء يُشتق من البيانات (seoLandingPages + articles) ويُحقن
+ * هنا من prerender()؛ القائمة اليدوية السابقة (~30 رابطاً) كانت خطر روابط ميتة
+ * جماعية عند أي تغيير slug عبر مئات الصفحات.
+ */
+let seoNavLinks = null;
+
+/** اختصار عنوان طويل لعنوان رابط nav: أول مقطع قبل فاصل، وبحد 42 حرفاً. */
+function navPhrase(text = "") {
+  const first = String(text).split(/\s+[|—:]\s+/)[0].trim();
+  return first.length > 42 ? `${first.slice(0, 41).trim()}…` : first;
+}
+
+/**
+ * (2026-10-11) أبعاد صورة حقيقية من الملف نفسه (webp/png/jpeg) — مصدر واحد
+ * لأبعاد og بدل افتراضات ثابتة: أي صفحة لا تمرر أبعاداً صريحة تُقرأ أبعاد
+ * صورتها من القرص، فلا يُعلن og:image:width/height كاذب أبداً ولا تُقصى صورة
+ * مربعة في بطاقة كبيرة. null عند تعذر القراءة (يبقى الاحتياط 1200×631).
+ */
+function imageDims(imageUrl) {
+  try {
+    const rel = String(imageUrl)
+      .replace(SITE_URL, "")
+      .split("?")[0]
+      .split("#")[0];
+    const p = resolve("public", rel.startsWith("/") ? rel.slice(1) : rel);
+    const fd = openSync(p, "r");
+    const head = Buffer.alloc(32);
+    readSync(fd, head, 0, 32, 0);
+    closeSync(fd);
+    const sig = head.slice(0, 4).toString("latin1");
+    if (sig === "RIFF" && head.slice(8, 12).toString("latin1") === "WEBP") {
+      const chunk = head.slice(12, 16).toString("latin1");
+      if (chunk === "VP8X") {
+        return { width: 1 + head.readUIntLE(24, 3), height: 1 + head.readUIntLE(27, 3) };
+      }
+      if (chunk === "VP8 ") {
+        return {
+          width: head.readUInt16LE(26) & 0x3fff,
+          height: head.readUInt16LE(28) & 0x3fff,
+        };
+      }
+      if (chunk === "VP8L") {
+        const b = head.readUInt32LE(21);
+        return { width: (b & 0x3fff) + 1, height: ((b >> 14) & 0x3fff) + 1 };
+      }
+      return null;
+    }
+    if (head.readUInt32BE(0) === 0x89504e47) {
+      return { width: head.readUInt32BE(16), height: head.readUInt32BE(20) };
+    }
+    if (head[0] === 0xff && head[1] === 0xd8) {
+      const data = readFileSync(p);
+      let i = 2;
+      while (i + 9 < data.length) {
+        if (data[i] !== 0xff) {
+          i += 1;
+          continue;
+        }
+        const marker = data[i + 1];
+        if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+          return { width: data.readUInt16BE(i + 7), height: data.readUInt16BE(i + 5) };
+        }
+        i += 2 + data.readUInt16BE(i + 2);
+      }
+    }
+  } catch {
+    /* ملف غير موجود/غير مقروء — يعود المحتاط الافتراضي */
+  }
+  return null;
+}
+
 /** Build a complete HTML page from the template + overrides */
 function buildHtml(template, opts) {
   const {
@@ -112,9 +206,16 @@ function buildHtml(template, opts) {
     // (2026-09-17) بيانات الصورة لمشاركة الـ OG — الأبعاد الحقيقية للملف
     // (مش أبعاد العرض) + alt وصفية (SEO + accessibility + معاينة المشاركة).
     imageAlt,
-    imageWidth = 1200,
-    imageHeight = 631,
+    imageWidth,
+    imageHeight,
   } = opts;
+
+  // (2026-10-11) الأبعاد الحقيقية تُقرأ من الملف نفسه (webp/png/jpg) مصدراً
+  // وحيداً: الافتراض الثابت 1200×631 السابق كان صحيحاً لـ og-default فقط؛ الآن
+  // كل صفحة بلا أبعاد صريحة تُقرأ أبعاد صورتها — فلا إعلان og كاذب أبداً.
+  const realDims = !imageWidth || !imageHeight ? imageDims(image) : null;
+  const ogW = imageWidth || (realDims && realDims.width) || 1200;
+  const ogH = imageHeight || (realDims && realDims.height) || 631;
 
   let html = template;
   // 🎯 اقتطاع ذكي للـ title والـ description إلى أطوال مثالية للظهور الكامل في Google.
@@ -182,11 +283,11 @@ function buildHtml(template, opts) {
   const safeImgAlt = esc(imageAlt || title);
   replaceOrInsert(
     /<meta property="og:image:width"[^>]*>/,
-    `<meta property="og:image:width" content="${imageWidth}" />`,
+    `<meta property="og:image:width" content="${ogW}" />`,
   );
   replaceOrInsert(
     /<meta property="og:image:height"[^>]*>/,
-    `<meta property="og:image:height" content="${imageHeight}" />`,
+    `<meta property="og:image:height" content="${ogH}" />`,
   );
   replaceOrInsert(
     /<meta property="og:image:alt"[^>]*>/,
@@ -201,7 +302,7 @@ function buildHtml(template, opts) {
     // (2026-10-10) البطاقة الكبيرة تحتاج نسبة عرض/ارتفاع ≥ ~1.4 وإلا قصّت
     // منصات المشاركة الصورة المربعة تشويهاً (تحذير J3 ×110 في تدقيق الموقع).
     `<meta name="twitter:card" content="${
-      imageWidth && imageHeight && imageWidth / imageHeight >= 1.4
+      ogW && ogH && ogW / ogH >= 1.4
         ? "summary_large_image"
         : "summary"
     }" />`,
@@ -309,37 +410,7 @@ function buildHtml(template, opts) {
     // for no-JS); hydration swaps it for the full React footer.
     const staticNav =
       `<nav data-prerender-nav aria-label="تصفح سريع">` +
-      [
-        ["/products/men", "منتجات الرجال"],
-        ["/products/women", "منتجات النساء"],
-        ["/products/devices", "أجهزة"],
-        ["/education", "مقالات توعوية"],
-        ["/about", "من نحن"],
-        ["/contact", "تواصلي معنا"],
-        ["/terms", "الشروط والأحكام"],
-        ["/products/guides/alcohol-and-performance-products", "الكحول والأداء"],
-        ["/products/guides/blood-pressure-and-performance-products", "الضغط والأداء"],
-        ["/products/guides/breast-enlargement-cup-guide", "كوب تكبير الصدر"],
-        ["/products/guides/chocolate-performance-products", "شوكولاتة الأداء"],
-        ["/products/guides/daily-intimate-hygiene-men-women", "النظافة اليومية الحميمة"],
-        ["/products/guides/diabetes-and-marital-health-products", "السكري والصحة الزوجية"],
-        ["/products/guides/discreet-shipping-privacy-explained", "الشحن السري المشروح"],
-        ["/products/guides/erection-products-side-effects", "آثار منتجات الانتصاب"],
-        ["/products/guides/female-viagra-guide", "دليل الفياجرا النسائية"],
-        ["/products/guides/long-lasting-performance-guide", "دليل الأداء طويل الأمد"],
-        ["/products/guides/natural-delay-products", "منتجات التأخير الطبيعية"],
-        ["/products/guides/performance-anxiety-men", "قلق الأداء"],
-        ["/products/guides/postpartum-intimacy-products", "حميمية ما بعد الولادة"],
-        ["/products/guides/supplement-storage-egypt-heat", "تخزين المكملات في حر مصر"],
-        ["/products/guides/testosterone-support-supplements", "داعمات التستوستيرون"],
-        ["/products/guides/vacuum-pump-after-prostate-surgery", "المضخة بعد جراحة البروستاتا"],
-        ["/products/guides/vacuum-pump-side-effects", "آثار المضخة الجانبية"],
-        ["/products/guides/vaginal-dryness-comfort-products", "جفاف المهبل"],
-        ["/education/ginseng-complete-guide", "دليل الجنسنج الكامل"],
-        ["/education/omega3-circulation-performance", "أوميجا3 والدورة"],
-        ["/education/std-prevention", "الوقاية من الأمراض المنقولة"],
-        ["/education/womens-libido-boosters", "معززات الرغبة النسائية"],
-      ]
+      (seoNavLinks || NAV_CORE)
         .map(([href, label]) => `<a href="${href}">${esc(label)}</a>`)
         .join("") +
       `</nav>`;
@@ -486,6 +557,15 @@ async function prerender() {
     } catch {
       /* no articles */
     }
+    // (2026-10-11) صور المشاركة 2:1 للمقالات: نفس مصدر root المقال تماماً
+    // (src/data/og-articles.generated.ts) حتى تتطابق النسختان الثابتة/بعد الإhydration.
+    let ogArticleImagePath = () => null;
+    try {
+      const mod = await vite.ssrLoadModule("/src/data/og-articles.generated.ts");
+      ogArticleImagePath = mod.ogArticleImage;
+    } catch {
+      /* no og article images */
+    }
     let featuredArticleCards = [];
     try {
       const mod = await vite.ssrLoadModule("/src/data/articles-cards.generated.ts");
@@ -501,6 +581,17 @@ async function prerender() {
     } catch {
       /* no landing pages */
     }
+
+    // (2026-10-11) nav البناء مشتق من البيانات لا قائمة يدوية: أي تغيير slug
+    // ينعكس هنا تلقائياً وتستحيل الروابط الميتة الجماعية عبر مئات الصفحات.
+    seoNavLinks = [
+      ...NAV_CORE,
+      ...seoLandingPages
+        .filter((p) => !p.noindex)
+        .slice(0, 20)
+        .map((p) => [`/products/guides/${p.slug}`, navPhrase(p.metaTitle || p.title || p.slug)]),
+      ...articles.slice(0, 4).map((a) => [`/education/${a.slug}`, navPhrase(a.title)]),
+    ];
 
     // (2026-09-17) Topic Authority: روابط الموضوعات في الـ HTML الثابت
     // (قابل للزحف من غير JS) — نفس محتوى TopicHub في الـ SPA.
@@ -1502,10 +1593,8 @@ ${homeArticlesBody}
         noindex: false,
         jsonLd: [productJsonLd, breadcrumb],
         bodyContent: body,
-        // (2026-09-17) أبعاد حقيقية + alt وصفية (صور المنتجات 800×800)
-        imageAlt: product.name,
-        imageWidth: 800,
-        imageHeight: 800,
+          imageAlt: product.name,
+          // (2026-10-11) الأبعاد تُقرأ من ملف الصورة نفسه (imageDims) — لا تثبيت.
       });
 
       writeFileSync(resolve(DIST, "products", `${product.slug}.html`), html);
@@ -1694,15 +1783,16 @@ ${homeArticlesBody}
         const html = buildHtml(template, {
           title,
           description: desc,
-          image: img,
+          image: ogArticleImagePath(article.slug)
+            ? `${SITE_URL}${ogArticleImagePath(article.slug)}`
+            : img,
           canonical,
           type: "article",
           jsonLd: [articleJsonLd, breadcrumb],
           bodyContent: body,
-          // (2026-09-17) أبعاد حقيقية + alt بوصية (صور المقالات 800×800)
           imageAlt: article.title,
-          imageWidth: 800,
-          imageHeight: 800,
+          // (2026-10-11) الأبعاد تُقرأ من الملف (imageDims): صور og الجديدة
+          // ‏1200×630 تعيد البطاقة الكبيرة، وhero القديم 800×800 يبقى summary.
         });
 
         writeFileSync(resolve(DIST, "education", `${article.slug}.html`), html);

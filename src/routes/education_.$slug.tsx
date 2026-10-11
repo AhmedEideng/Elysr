@@ -13,6 +13,7 @@ import { PageHero } from "@/components/PageHero";
 import { ShareButton } from "@/components/ShareButton";
 import { shareArticleText } from "@/lib/share";
 import {
+  absoluteUrl,
   articleSchema,
   breadcrumbSchema,
   clearJsonLd,
@@ -20,6 +21,7 @@ import {
   injectJsonLd,
   makeMetaDescription,
 } from "@/lib/seo";
+import { ogArticleImage } from "@/data/og-articles.generated";
 import { editorialTrustSignals } from "@/data/editorial-trust-signals";
 import { type Article } from "@/data/articles";
 import { type ArticleMeta } from "@/data/articles-meta.generated";
@@ -68,8 +70,20 @@ export const Route = createFileRoute("/education_/$slug")({
         content: loaderData?.article ? makeMetaDescription(loaderData.article.excerpt) : "",
       },
       { property: "og:type", content: "article" },
-      { property: "og:image", content: loaderData?.article.image },
-      { name: "twitter:image", content: loaderData?.article.image },
+      // (2026-10-11) صورة المشاركة 2:1 ‏(1200×630) من نفس مصدر الـ prerender
+      // (og-articles.generated) + مطلقة دائماً لتتطابق النسختان الثابتة/بعد الإhydration.
+      {
+        property: "og:image",
+        content: loaderData?.article
+          ? absoluteUrl(ogArticleImage(loaderData.article.slug) ?? loaderData.article.image)
+          : undefined,
+      },
+      {
+        name: "twitter:image",
+        content: loaderData?.article
+          ? absoluteUrl(ogArticleImage(loaderData.article.slug) ?? loaderData.article.image)
+          : undefined,
+      },
     ],
   }),
   component: ArticlePage,
