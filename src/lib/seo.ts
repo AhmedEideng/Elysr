@@ -212,9 +212,7 @@ function setLink(rel: string, href: string) {
 export function applySeo(meta: SeoMeta = {}) {
   const path = typeof window !== "undefined" ? window.location.pathname : "/";
   const url = `${SITE_URL}${path}`;
-  const title =
-    meta.title ??
-    "اليسر ميديكال | منتجات الصحة والسعادة الزوجية الأصلية في مصر";
+  const title = meta.title ?? "اليسر ميديكال | منتجات الصحة والسعادة الزوجية الأصلية في مصر";
   const description =
     meta.description ??
     "اليسر ميديكال أكبر شركة متخصصة في منتجات الصحة والسعادة الزوجية الأصلية للرجال والنساء في مصر. منتجات أصلية مختارة بعناية، شحن سري ودفع عند الاستلام.";
@@ -244,9 +242,7 @@ export function applySeo(meta: SeoMeta = {}) {
     "content",
     // (2026-10-11) اللغة تتبع لغة المستند: صفحات /en تعلن en_US حتى تتطابق
     // مع نسخة الـ prerender بعد الـ hydration (التكافؤ).
-    typeof document !== "undefined" && document.documentElement.lang === "en"
-      ? "en_US"
-      : "ar_EG",
+    typeof document !== "undefined" && document.documentElement.lang === "en" ? "en_US" : "ar_EG",
   );
 
   // Twitter — البطاقة تتبع نسبة الصورة الحقيقية مطابقةً لنسخة الـ prerender
@@ -258,9 +254,7 @@ export function applySeo(meta: SeoMeta = {}) {
     const probe = new Image();
     probe.onload = () => {
       const ratio =
-        probe.naturalWidth && probe.naturalHeight
-          ? probe.naturalWidth / probe.naturalHeight
-          : 2;
+        probe.naturalWidth && probe.naturalHeight ? probe.naturalWidth / probe.naturalHeight : 2;
       setMeta(
         'meta[name="twitter:card"]',
         "content",
@@ -572,9 +566,7 @@ export const itemListSchema = (
  */
 export function applyHreflang(alternates: { lang: string; href: string }[]): void {
   if (typeof document === "undefined") return;
-  document
-    .querySelectorAll('link[rel="alternate"][hreflang]')
-    .forEach((n) => n.remove());
+  document.querySelectorAll('link[rel="alternate"][hreflang]').forEach((n) => n.remove());
   for (const a of alternates) {
     const link = document.createElement("link");
     link.rel = "alternate";

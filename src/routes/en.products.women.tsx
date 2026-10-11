@@ -16,8 +16,10 @@ export const Route = createFileRoute("/en/products/women")({
       { name: "robots", content: "index, follow" },
     ],
   }),
-  component: () => {
-    const { items } = Route.useLoaderData();
-    return <EnCategoryPage page={PAGE} items={items} />;
-  },
+  component: EnWomenCategoryPage,
 });
+
+function EnWomenCategoryPage() {
+  const { items } = Route.useLoaderData();
+  return <EnCategoryPage page={PAGE} items={items} />;
+}

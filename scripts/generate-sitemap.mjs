@@ -107,9 +107,7 @@ async function generateSitemap() {
     writeFileSync(resolve(apiLibDir, "config-db.json"), JSON.stringify(configDb, null, 2), "utf-8");
     const { isMerchantFeedExcluded } = await vite.ssrLoadModule("/src/lib/site-config.ts");
     // (2026-10-11) الإنجليزية الجزئية: نفس مصدر النصوص والـ alternates
-    const { alternatesFor, enCategories } = await vite.ssrLoadModule(
-      "/src/data/en-pages.ts",
-    );
+    const { alternatesFor, enCategories } = await vite.ssrLoadModule("/src/data/en-pages.ts");
     // قرار المالك 2026-09-28: أدوية الوصفة (سيلدينافيل/تادالافيل…) تُستثنى من فيد
     // Merchant فقط؛ الصفحات تبقى منشورة ومفهرسة. القاعدة في site-config.ts.
     const catalogProducts = products.filter(

@@ -36,8 +36,7 @@ export const enHome = {
   intro:
     "Elysr Medical is Egypt's largest company specialized in original marital health and happiness products for men and women. Carefully selected original products, discreet shipping and cash on delivery.",
   browseLabel: "Browse by category",
-  noteLabel:
-    "The full catalog, buying guides and educational articles are available in Arabic.",
+  noteLabel: "The full catalog, buying guides and educational articles are available in Arabic.",
   switchLabel: "العربية",
 };
 

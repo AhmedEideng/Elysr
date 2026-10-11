@@ -2080,6 +2080,7 @@
   </url>
   <url>
     <loc>https://elysrmedical.store/en</loc>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://elysrmedical.store/" />
@@ -2088,6 +2089,7 @@
   </url>
   <url>
     <loc>https://elysrmedical.store/en/products/men</loc>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://elysrmedical.store/products/men" />
@@ -2096,6 +2098,7 @@
   </url>
   <url>
     <loc>https://elysrmedical.store/en/products/women</loc>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://elysrmedical.store/products/women" />
@@ -2104,6 +2107,7 @@
   </url>
   <url>
     <loc>https://elysrmedical.store/en/products/devices</loc>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://elysrmedical.store/products/devices" />

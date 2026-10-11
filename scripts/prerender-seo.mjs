@@ -127,7 +127,9 @@ let seoNavLinks = null;
 
 /** اختصار عنوان طويل لعنوان رابط nav: أول مقطع قبل فاصل، وبحد 42 حرفاً. */
 function navPhrase(text = "") {
-  const first = String(text).split(/\s+[|—:]\s+/)[0].trim();
+  const first = String(text)
+    .split(/\s+[|—:]\s+/)[0]
+    .trim();
   return first.length > 42 ? `${first.slice(0, 41).trim()}…` : first;
 }
 
@@ -139,10 +141,7 @@ function navPhrase(text = "") {
  */
 function imageDims(imageUrl) {
   try {
-    const rel = String(imageUrl)
-      .replace(SITE_URL, "")
-      .split("?")[0]
-      .split("#")[0];
+    const rel = String(imageUrl).replace(SITE_URL, "").split("?")[0].split("#")[0];
     const p = resolve("public", rel.startsWith("/") ? rel.slice(1) : rel);
     const fd = openSync(p, "r");
     const head = Buffer.alloc(32);
@@ -178,7 +177,13 @@ function imageDims(imageUrl) {
           continue;
         }
         const marker = data[i + 1];
-        if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+        if (
+          marker >= 0xc0 &&
+          marker <= 0xcf &&
+          marker !== 0xc4 &&
+          marker !== 0xc8 &&
+          marker !== 0xcc
+        ) {
           return { width: data.readUInt16BE(i + 7), height: data.readUInt16BE(i + 5) };
         }
         i += 2 + data.readUInt16BE(i + 2);
@@ -323,9 +328,7 @@ function buildHtml(template, opts) {
     // (2026-10-10) البطاقة الكبيرة تحتاج نسبة عرض/ارتفاع ≥ ~1.4 وإلا قصّت
     // منصات المشاركة الصورة المربعة تشويهاً (تحذير J3 ×110 في تدقيق الموقع).
     `<meta name="twitter:card" content="${
-      ogW && ogH && ogW / ogH >= 1.4
-        ? "summary_large_image"
-        : "summary"
+      ogW && ogH && ogW / ogH >= 1.4 ? "summary_large_image" : "summary"
     }" />`,
   );
   replaceOrInsert(
@@ -619,9 +622,8 @@ async function prerender() {
     ];
 
     // (2026-10-11) الإنجليزية الجزئية + hreflang: نصوص وalternates من مصدر واحد
-    const { alternatesFor, enHome, enCategories } = await vite.ssrLoadModule(
-      "/src/data/en-pages.ts",
-    );
+    const { alternatesFor, enHome, enCategories } =
+      await vite.ssrLoadModule("/src/data/en-pages.ts");
 
     // (2026-09-17) Topic Authority: روابط الموضوعات في الـ HTML الثابت
     // (قابل للزحف من غير JS) — نفس محتوى TopicHub في الـ SPA.
@@ -730,8 +732,7 @@ async function prerender() {
 
     /* ========== 1) Home page ========== */
     {
-      const title =
-        "اليسر ميديكال | منتجات الصحة والسعادة الزوجية الأصلية في مصر";
+      const title = "اليسر ميديكال | منتجات الصحة والسعادة الزوجية الأصلية في مصر";
       const desc =
         "اليسر ميديكال أكبر شركة متخصصة في منتجات الصحة والسعادة الزوجية الأصلية للرجال والنساء في مصر. منتجات أصلية مختارة بعناية، شحن سري ودفع عند الاستلام.";
       // The hydrated home route renders featured product cards and featured
@@ -804,8 +805,7 @@ async function prerender() {
         heroPreload: true,
         hreflang: alternatesFor("/"),
         // (2026-09-17) og-default 1200×631 (الأبعاد الافتراضية في buildHtml)
-        imageAlt:
-          "اليسر ميديكال | منتجات الصحة والسعادة الزوجية الأصلية في مصر",
+        imageAlt: "اليسر ميديكال | منتجات الصحة والسعادة الزوجية الأصلية في مصر",
         jsonLd: [
           {
             "@context": "https://schema.org",
@@ -1625,8 +1625,8 @@ ${homeArticlesBody}
         noindex: false,
         jsonLd: [productJsonLd, breadcrumb],
         bodyContent: body,
-          imageAlt: product.name,
-          // (2026-10-11) الأبعاد تُقرأ من ملف الصورة نفسه (imageDims) — لا تثبيت.
+        imageAlt: product.name,
+        // (2026-10-11) الأبعاد تُقرأ من ملف الصورة نفسه (imageDims) — لا تثبيت.
       });
 
       writeFileSync(resolve(DIST, "products", `${product.slug}.html`), html);

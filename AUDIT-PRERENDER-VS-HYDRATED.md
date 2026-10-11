@@ -1,6 +1,6 @@
 # Prerender ↔ Hydrated parity audit
 
-- Generated: 2026-10-11T14:25:00.874Z
+- Generated: 2026-10-11T14:55:25.359Z
 - Pages checked: 254
 - Issues: 0
 

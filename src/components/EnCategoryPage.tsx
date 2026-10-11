@@ -12,7 +12,7 @@ import {
   itemListSchema,
 } from "@/lib/seo";
 import { alternatesFor, type EnCategoryPage as EnCategoryCopy } from "@/data/en-pages";
-import type { Product } from "@/data/products";
+import type { Product } from "@/data/product-types";
 
 /**
  * (2026-10-11) صفحة فئة إنجليزية: نفس ادعاءات النسخة العربية مترجمة أميناً
@@ -20,13 +20,7 @@ import type { Product } from "@/data/products";
  * المنتجات العربية الحالية حتى تُنشأ صفحات المنتجات الإنجليزية.
  * الـ JSON-LD هنا مطابق حرفياً لما يحقنه الـ prerender (تكافؤ).
  */
-export function EnCategoryPage({
-  page,
-  items,
-}: {
-  page: EnCategoryCopy;
-  items: Product[];
-}) {
+export function EnCategoryPage({ page, items }: { page: EnCategoryCopy; items: Product[] }) {
   useEffect(() => {
     clearPrerenderJsonLd();
     injectJsonLd(
@@ -60,11 +54,7 @@ export function EnCategoryPage({
 
   return (
     <div className="container mx-auto px-4 py-10 md:py-12">
-      <PageHero
-        eyebrow={page.eyebrow}
-        title={page.heroTitle}
-        description={page.heroDescription}
-      />
+      <PageHero eyebrow={page.eyebrow} title={page.heroTitle} description={page.heroDescription} />
       <p className="mb-6 text-sm font-bold">
         <Link to={page.arPath} className="text-primary hover:underline">
           View this page in Arabic — عرض هذه الصفحة بالعربية
@@ -74,7 +64,11 @@ export function EnCategoryPage({
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((p) => (
           <li key={p.id} className="rounded-2xl border border-primary/15 bg-white p-4 shadow-sm">
-            <Link to={`/products/${p.slug}`} className="font-bold text-primary hover:underline">
+            <Link
+              to="/products/$slug"
+              params={{ slug: p.slug }}
+              className="font-bold text-primary hover:underline"
+            >
               {p.nameEn}
             </Link>
             <p className="mt-1 text-sm font-bold text-gray-600">EGP {p.price}</p>
