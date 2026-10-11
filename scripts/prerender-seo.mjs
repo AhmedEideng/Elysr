@@ -60,23 +60,28 @@ function arabicCountNoun(n) {
   return "منتجاً";
 }
 
-/**
- * يبني meta description بطول مثالي (~150-155 حرف) للظهور الكامل في نتائج Google.
- * يقطع عند حدود كلمة حتى لا يترك كلمة مقطوعة، ويضيف "…" عند الاقتطاع.
- * يُستخدم للـ <meta name="description"> وog/twitter فقط،
- * بينما يبقى الوصف الكامل في JSON-LD والـ body.
- */
 /** وصف مقتطع أثناء البناء — يُبلَّغ عنه في النهاية بدل أن يمر بصمت. */
 const TRUNCATED_META = [];
 
+/**
+ (2026-10-10) مصدر واحد: خوارزمية الاقتطاع تعيش في src/lib/seo.ts فقط
+ وتُحقن هنا من main عبر ssrLoadModule؛ هذا الغلاف يضيف بلاغ الاقتطاع
+ ولا يكرر المنطق (كانت نسختان متوازيتان خطر انزلاق صامت).
+ */
+let seoMakeMetaDescription = null;
 function makeMetaDescription(text = "", maxLength = 155) {
-  const clean = String(text).trim().replace(/\s+/g, " ");
-  if (clean.length <= maxLength) return clean;
-  const cut = clean.slice(0, maxLength);
-  const lastSpace = cut.lastIndexOf(" ");
-  const base = lastSpace > 40 ? cut.slice(0, lastSpace) : cut;
-  TRUNCATED_META.push({ length: clean.length, maxLength, preview: `${base.slice(-40)}…` });
-  return `${base}…`;
+  if (!seoMakeMetaDescription) {
+    throw new Error("makeMetaDescription called before seo.ts injection in main()");
+  }
+  const out = seoMakeMetaDescription(text, maxLength);
+  if (out.endsWith("…")) {
+    TRUNCATED_META.push({
+      length: String(text).trim().replace(/\s+/g, " ").length,
+      maxLength,
+      preview: `${out.slice(-40)}`,
+    });
+  }
+  return out;
 }
 
 /**
@@ -406,8 +411,12 @@ async function prerender() {
     } = await vite.ssrLoadModule("/src/data/products.ts");
     const { getProductReviews, reviewDatePublished, VISIBLE_REVIEW_COUNT } =
       await vite.ssrLoadModule("/src/lib/legacy-product-reviews.ts");
-    const { makeProductMetaDescription, makeProductMetaTitle } =
-      await vite.ssrLoadModule("/src/lib/seo.ts");
+    const {
+      makeProductMetaDescription,
+      makeProductMetaTitle,
+      makeMetaDescription: seoMakeMetaDescriptionFn,
+    } = await vite.ssrLoadModule("/src/lib/seo.ts");
+    seoMakeMetaDescription = seoMakeMetaDescriptionFn;
     const {
       getProductsForArticle,
       getRelatedArticles,

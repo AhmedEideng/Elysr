@@ -241,11 +241,26 @@ export function applySeo(meta: SeoMeta = {}) {
   setMeta('meta[property="og:image"]', "content", image);
   setMeta('meta[property="og:locale"]', "content", "ar_EG");
 
-  // Twitter
-  setMeta('meta[name="twitter:card"]', "content", "summary_large_image");
+  // Twitter — البطاقة تتبع نسبة الصورة الحقيقية مطابقةً لنسخة الـ prerender
+  // (كان تثبيت summary_large_image هنا يعاكس إصلاح النسبة بعد التنقل الداخلي).
   setMeta('meta[name="twitter:title"]', "content", title);
   setMeta('meta[name="twitter:description"]', "content", description);
   setMeta('meta[name="twitter:image"]', "content", image);
+  if (typeof Image !== "undefined") {
+    const probe = new Image();
+    probe.onload = () => {
+      const ratio =
+        probe.naturalWidth && probe.naturalHeight
+          ? probe.naturalWidth / probe.naturalHeight
+          : 2;
+      setMeta(
+        'meta[name="twitter:card"]',
+        "content",
+        ratio >= 1.4 ? "summary_large_image" : "summary",
+      );
+    };
+    probe.src = image;
+  }
 
   // Canonical
   setLink("canonical", url);
@@ -527,13 +542,12 @@ export const itemListSchema = (
   items: { id?: string; name: string; slug: string; image?: string; price: number }[],
   listName: string,
 ) => {
-  const indexableItems = items;
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: listName,
-    numberOfItems: indexableItems.length,
-    itemListElement: indexableItems.map((it, i) => ({
+    numberOfItems: items.length,
+    itemListElement: items.map((it, i) => ({
       "@type": "ListItem",
       position: i + 1,
       url: `${SITE_URL}/products/${it.slug}`,
