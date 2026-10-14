@@ -1,6 +1,6 @@
 {
   "name": "elysr-health-hub",
-  "version": "2.2.42",
+  "version": "2.2.43",
   "private": true,
   "sideEffects": false,
   "type": "module",
