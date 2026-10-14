@@ -387,7 +387,16 @@ export const productSchema = (p: {
     name: p.name,
     // Search aliases must stay in both copies (prerender + hydrated) so the
     // initial HTML and the rendered DOM never declare different structured data.
-    ...(p.searchAliases?.length ? { alternativeName: p.searchAliases } : {}),
+    // (2026-10-14) alternativeName يحمل العلامة اللاتينية (nameEn) إضافةً
+    // للألقاب العربية: استعلامات البراند اللاتيني («kreva gel»، «dooz»،
+    // «lady era»، «procomil»… ≈ 25 ألف ظهور/شهر في ملف طلبات البحث) لم يكن
+    // لها نص علامة لا في العنوان ولا في السكيما للمنتجات التي لا يحمل اسمها
+    // العربي العلامة. السكيما قناة آمنة بلا تغيير نص ظاهر ولا كسر تكافؤ.
+    ...(p.nameEn || p.searchAliases?.length
+      ? {
+          alternativeName: [...(p.nameEn ? [p.nameEn] : []), ...(p.searchAliases ?? [])],
+        }
+      : {}),
     description: p.description,
     sku: p.id,
     ...(p.mpn?.trim() ? { mpn: p.mpn.trim() } : {}),

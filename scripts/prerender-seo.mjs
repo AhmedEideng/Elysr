@@ -35,7 +35,6 @@ const ROOT = resolve(__dirname, "..");
 const DIST = resolve(ROOT, "dist");
 const SITE_URL = (process.env.SITE_URL || "https://elysrmedical.store").replace(/\/$/, "");
 const SITE_NAME = "اليسر ميديكال";
-const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
 /** 🗂️ رقم إصدار الكاش من المصدر المركزي الوحيد. */
 const { version: CACHE_VERSION } = JSON.parse(
@@ -514,6 +513,7 @@ async function prerender() {
       itemListSchema,
       breadcrumbSchema,
       faqSchema,
+      productSchema,
     } = await vite.ssrLoadModule("/src/lib/seo.ts");
     seoMakeMetaDescription = seoMakeMetaDescriptionFn;
     const {
@@ -540,44 +540,6 @@ async function prerender() {
     const MIN_SHIPPING = Math.min(...SHIPPING_RATES);
     const MAX_SHIPPING = Math.max(...SHIPPING_RATES);
     const SHIPPING_FEES_TEXT = `تختلف حسب المحافظة (من ${MIN_SHIPPING} ج.م إلى ${MAX_SHIPPING} ج.م). الشحن مجاني للطلبات من ${FREE_SHIPPING_THRESHOLD} ج.م فأكثر.`;
-    const shippingBands = new Map();
-    for (const entry of GOVERNORATE_SHIPPING) {
-      const delivery = getShippingDeliveryWindow(entry.name);
-      const key = `${entry.shipping}:${delivery.key}`;
-      const band = shippingBands.get(key) ?? {
-        rate: entry.shipping,
-        regions: [],
-        delivery,
-      };
-      band.regions.push(entry.name);
-      shippingBands.set(key, band);
-    }
-    const merchantShippingDetails = [...shippingBands.values()].map(
-      ({ rate, regions, delivery }) => ({
-        "@type": "OfferShippingDetails",
-        shippingDestination: {
-          "@type": "DefinedRegion",
-          addressCountry: "EG",
-          addressRegion: regions,
-        },
-        shippingRate: { "@type": "MonetaryAmount", value: rate, currency: "EGP" },
-        deliveryTime: {
-          "@type": "ShippingDeliveryTime",
-          handlingTime: {
-            "@type": "QuantitativeValue",
-            minValue: 0,
-            maxValue: 0,
-            unitCode: "DAY",
-          },
-          transitTime: {
-            "@type": "QuantitativeValue",
-            minValue: delivery.minDays,
-            maxValue: delivery.maxDays,
-            unitCode: "DAY",
-          },
-        },
-      }),
-    );
     let articles = [];
     try {
       const mod = await vite.ssrLoadModule("/src/data/articles.ts");
@@ -1446,69 +1408,16 @@ ${homeArticlesBody}
             .map((r) => `<p><strong>${esc(r.name)}</strong> — ${r.rating}/5: ${esc(r.text)}</p>`)
             .join("")
         : "";
-      const productJsonLd = {
-        "@context": "https://schema.org",
-        "@type": "Product",
-        name: product.name,
-        // ألقاب بحثية بديلة (عامية) — إشارة مهيكلة لجوجل بنفس كلمة البحث المصرية
-        ...(product.searchAliases?.length ? { alternativeName: product.searchAliases } : {}),
-        description: product.description,
-        sku: product.id,
-        ...(product.mpn?.trim() ? { mpn: product.mpn.trim() } : {}),
-        ...(product.gtin?.trim() ? { gtin: product.gtin.trim() } : {}),
-        image: img,
-        ...(hasLegacyRating
-          ? {
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: productRating,
-                reviewCount: productReviews,
-                bestRating: 5,
-                worstRating: 1,
-              },
-            }
-          : {}),
-        // نفس مصفوفة الـ Review التي يبنيها src/lib/seo.ts بعد الـ hydration:
-        // المحتوى المرئي والـ markup متطابقان في النسختين (prerender + hydrated).
-        ...(hasLegacyRating && legacyList.length
-          ? {
-              review: legacyList.map((r) => ({
-                "@type": "Review",
-                author: { "@type": "Person", name: r.name },
-                ...(reviewDatePublished(r) ? { datePublished: reviewDatePublished(r) } : {}),
-                reviewBody: r.text,
-                reviewRating: {
-                  "@type": "Rating",
-                  ratingValue: r.rating,
-                  bestRating: 5,
-                  worstRating: 1,
-                },
-              })),
-            }
-          : {}),
-        ...(product.brand?.trim()
-          ? { brand: { "@type": "Brand", name: product.brand.trim() } }
-          : {}),
-        offers: {
-          "@type": "Offer",
-          price: product.price,
-          priceCurrency: "EGP",
-          availability:
-            product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-          url: canonical,
-          priceValidUntil,
-          validFrom: "2026-01-01",
-          shippingDetails: merchantShippingDetails,
-          hasMerchantReturnPolicy: {
-            "@type": "MerchantReturnPolicy",
-            applicableCountry: "EG",
-            returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
-            merchantReturnDays: 14,
-            returnMethod: "https://schema.org/ReturnByMail",
-            returnFees: "https://schema.org/ReturnFeesCustomerResponsibility",
-          },
-        },
-      };
+      // (2026-10-14) مصدر واحد: productSchema نفسها من seo.ts (نسخة الـ
+      // hydrated) — النسخة inline المنسوخة كانت آخر انزلاق سكيمَا (التقطه
+      // حارس التكافؤ فور تباعد alternativeName).
+      const productJsonLd = productSchema({
+        ...product,
+        approvedReviewSummary:
+          product.rating && product.reviews
+            ? { ratingValue: product.rating, reviewCount: product.reviews }
+            : undefined,
+      });
 
       const breadcrumb = {
         "@context": "https://schema.org",
