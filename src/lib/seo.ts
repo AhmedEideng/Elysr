@@ -139,20 +139,27 @@ export function makeProductMetaDescription(p: ProductMetaInput, maxLength = 155)
   const name = compactProductName(p.name);
   const hook = `${profile.hook}${productAudienceSuffix(p, profile.hook)}`;
   const availability = p.stock === 0 ? "غير متوفر حالياً" : "اطلب الآن";
+  // (2026-10-14) إصلاح «القاتل الخفي» للظهور: الوصف كان يبدأ بتكرار <title>
+  // حرفياً (84/259 صفحة) ويُغلَق بـ48 حرفاً مطابقة في كل المنتجات الـ83
+  // (CTA + العلامة) ⇒ نظام مقتطفات جوجل يصنفه قالبياً مكرراً فيتخلّى عنه
+  // ويخيط مقتطفاً من الجسم (وُثق حياً: علامات # و## وشرط وJSON وظهور سعر/تقييم
+  // ملتصق). الآن: الخطاف الفريد أولاً (بلا صدى العنوان)، اسم مختصر وسط
+  // الجملة للتمييز، وذيل وقائعي موحّد للمنتجات وفق معيار العلامة للمالك.
+  // العلامة تبقى في الوصف (معيار المالك: توحيد العلامة للمنتجات) لكن بعد
+  // معلومة فريدة لا في بداية السطر كما كان صدى العنوان.
   const brand = "اليسر ميديكال";
   const tail = `${availability}؛ شحن سري ودفع عند الاستلام. ${brand}.`;
-
   const variants = [
-    `${name} — ${hook}. ${tail}`,
-    `${compactProductName(p.name, 40)} — ${compactPhrase(hook, 44)}. ${tail}`,
-    `${compactProductName(p.name, 34)} — ${compactPhrase(hook, 34)}. ${tail}`,
+    `${hook} — ${name}. ${tail}`,
+    `${hook} — ${compactProductName(p.name, 34)}. ${tail}`,
+    `${compactPhrase(hook, 60)} — ${compactProductName(p.name, 30)}. ${tail}`,
   ];
 
   const complete = variants.find((variant) => variant.length <= maxLength);
   if (complete) return complete;
 
   // Keep the sentence complete even for a future unusually long product name.
-  return `${compactProductName(p.name, 30)} — ${tail}`;
+  return `${compactPhrase(hook, 50)}. ${tail}`;
 }
 const DEFAULT_OG = `${SITE_URL}/og-default.webp`;
 
