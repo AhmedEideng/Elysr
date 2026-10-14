@@ -62,6 +62,7 @@ type ProductMetaInput = {
   category?: ProductMetaCategory;
   description: string;
   stock?: number;
+  price?: number;
   rating?: number;
   reviews?: number;
   benefits?: string[];
@@ -138,28 +139,47 @@ export function makeProductMetaDescription(p: ProductMetaInput, maxLength = 155)
   const profile = resolveProductMetaProfile(p);
   const name = compactProductName(p.name);
   const hook = `${profile.hook}${productAudienceSuffix(p, profile.hook)}`;
-  const availability = p.stock === 0 ? "غير متوفر حالياً" : "اطلب الآن";
-  // (2026-10-14) إصلاح «القاتل الخفي» للظهور: الوصف كان يبدأ بتكرار <title>
-  // حرفياً (84/259 صفحة) ويُغلَق بـ48 حرفاً مطابقة في كل المنتجات الـ83
-  // (CTA + العلامة) ⇒ نظام مقتطفات جوجل يصنفه قالبياً مكرراً فيتخلّى عنه
-  // ويخيط مقتطفاً من الجسم (وُثق حياً: علامات # و## وشرط وJSON وظهور سعر/تقييم
-  // ملتصق). الآن: الخطاف الفريد أولاً (بلا صدى العنوان)، اسم مختصر وسط
-  // الجملة للتمييز، وذيل وقائعي موحّد للمنتجات وفق معيار العلامة للمالك.
-  // العلامة تبقى في الوصف (معيار المالك: توحيد العلامة للمنتجات) لكن بعد
-  // معلومة فريدة لا في بداية السطر كما كان صدى العنوان.
+  // (2026-10-14 — موافقة صريحة من المالكة «full_restore»): استعادة «الصيغة
+  // الرابحة» لما قبل 2026-09-13 بترتيب مصحح: تقييم حقيقي + عدد + سعر +
+  // خطاف الفائدة. هذه بيانات فريدة لكل منتج تمنع نظام مقتطفات جوجل من
+  // تصنيف الوصف قالبياً (الهبوط الموثّق بالوصف القالبي: 18/09 → 14/10 في
+  // VISIBILITY-DROP-INVESTIGATION). التقييم من نفس مصدر aggregateRating في
+  // السكيمَا (rating/reviews من بيانات المنتج) فلا يتباعد رقم عن الآخر.
+  // إصلاح b406a74 محفوظ: لا صدى للعنوان في بداية الوصف — النجوم أو الخطاف
+  // أولاً، والعلامة موحّدة في الذيل وفق معيار المالكة.
   const brand = "اليسر ميديكال";
-  const tail = `${availability}؛ شحن سري ودفع عند الاستلام. ${brand}.`;
-  const variants = [
-    `${hook} — ${name}. ${tail}`,
-    `${hook} — ${compactProductName(p.name, 34)}. ${tail}`,
-    `${compactPhrase(hook, 60)} — ${compactProductName(p.name, 30)}. ${tail}`,
-  ];
+  const hasApprovedStars = Boolean(
+    p.rating &&
+    p.reviews &&
+    Number.isFinite(p.rating) &&
+    p.rating >= 1 &&
+    p.rating <= 5 &&
+    Number.isInteger(p.reviews) &&
+    p.reviews >= 1,
+  );
+  const stars = hasApprovedStars ? `⭐${p.rating}/5 من ${p.reviews} تقييماً — ` : "";
+  const priceInline = p.price ? `، ${p.price} ج.م` : "";
+  const ship =
+    p.stock === 0 ? "غير متوفر حالياً — شحن سري عند التوفر." : "شحن سري ودفع عند الاستلام.";
+
+  const variants = stars
+    ? [
+        `${stars}${name}: ${hook}${priceInline}. ${ship} ${brand}.`,
+        `${stars}${compactProductName(p.name, 36)}: ${compactPhrase(hook, 46)}${priceInline}. ${ship} ${brand}.`,
+        `${stars}${compactProductName(p.name, 28)}${priceInline}: ${compactPhrase(hook, 38)}. ${ship} ${brand}.`,
+        `${stars}${compactProductName(p.name, 22)}${priceInline}. ${ship} ${brand}.`,
+      ]
+    : [
+        `${hook} — ${name}${priceInline}. ${ship} ${brand}.`,
+        `${hook} — ${compactProductName(p.name, 34)}${priceInline}. ${ship} ${brand}.`,
+        `${compactPhrase(hook, 60)} — ${compactProductName(p.name, 26)}${priceInline}. ${ship} ${brand}.`,
+      ];
 
   const complete = variants.find((variant) => variant.length <= maxLength);
   if (complete) return complete;
 
   // Keep the sentence complete even for a future unusually long product name.
-  return `${compactPhrase(hook, 50)}. ${tail}`;
+  return `${compactPhrase(hook, 50)}. ${ship} ${brand}.`;
 }
 const DEFAULT_OG = `${SITE_URL}/og-default.webp`;
 

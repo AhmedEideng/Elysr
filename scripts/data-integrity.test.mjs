@@ -187,19 +187,17 @@ try {
     );
     assert.doesNotMatch(
       description,
-      /\d+\s*ج\.م|السعر|حسب|تعليمات|وفق|النشرة|استشر/,
-      `Product meta description contains removed pricing/instruction copy: ${product.slug}`,
+      /السعر|حسب|تعليمات|وفق|النشرة|استشر/,
+      `Product meta description contains removed instruction copy: ${product.slug}`,
     );
+    // (2026-10-14) السعر الرقمي («520 ج.م») مسموح الآن بقرار صريح من المالكة
+    // (استعادة الصيغة الرابحة لما قبل 13/09) — كان محظوراً منذ 22/09.
     assert.match(
       description,
-      /اطلب الآن|غير متوفر حالياً/,
+      /شحن سري ودفع عند الاستلام|غير متوفر حالياً/,
       `Product meta availability missing: ${product.slug}`,
     );
-    assert.match(
-      description,
-      /شحن سري ودفع عند الاستلام/,
-      `Product meta shipping missing: ${product.slug}`,
-    );
+    assert.match(description, /شحن سري/, `Product meta shipping missing: ${product.slug}`);
     assert.match(description, /اليسر ميديكال/, `Product meta brand missing: ${product.slug}`);
     assert.match(
       description,

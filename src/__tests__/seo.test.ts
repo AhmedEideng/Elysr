@@ -97,9 +97,48 @@ describe("product metadata templates", () => {
     expect(description).toContain("مكمل غذائي");
     expect(description).not.toMatch(/\d+\s*ج\.م/);
     expect(description).not.toMatch(/السعر|تعليمات|وفق|النشرة/);
-    expect(description).toContain("اطلب الآن");
     expect(description).toContain("شحن سري ودفع عند الاستلام");
     expect(description).toContain("اليسر ميديكال");
     expect(description.endsWith(".")).toBe(true);
+  });
+
+  // (2026-10-14) «الصيغة الرابحة» المستعادة بقرار المالكة: تقييم حقيقي +
+  // سعر + خطاف فريد لكل منتج — بلا صدى للعنوان في البداية. الأرقام من نفس
+  // مصدر aggregateRating في السكيمَا (rating/reviews في بيانات المنتج).
+  it("restores the owner-approved rich formula (stars + price + hook, no title echo)", () => {
+    const rich = makeProductMetaDescription({
+      id: "m-01",
+      name: "كبسولات هامر أوف ثور الألمانية الأصلية المستوردة (Hammer of Thor)",
+      nameEn: "Original German Hammer of Thor Capsules",
+      category: "men",
+      description: "وصف طويل لا يستخدم كقص ميكانيكي داخل الوصف المختصر.",
+      price: 520,
+      stock: 10,
+      rating: 4.9,
+      reviews: 48,
+    });
+
+    expect(rich.length).toBeLessThanOrEqual(155);
+    expect(rich.startsWith("⭐4.9/5 من 48 تقييماً — ")).toBe(true);
+    expect(rich).toContain("520 ج.م");
+    expect(rich).toContain("شحن سري ودفع عند الاستلام");
+    expect(rich).toContain("اليسر ميديكال");
+    expect(rich.startsWith("كبسولات هامر")).toBe(false);
+    expect(rich.endsWith(".")).toBe(true);
+  });
+
+  it("omits stars when the product has no approved rating data", () => {
+    const plain = makeProductMetaDescription({
+      name: "كريم اختبار بلا تقييم (Test Cream)",
+      category: "men",
+      description: "وصف اختبار.",
+      price: 100,
+      stock: 5,
+    });
+
+    expect(plain.length).toBeLessThanOrEqual(155);
+    expect(plain).not.toContain("⭐");
+    expect(plain).toContain("100 ج.م");
+    expect(plain).toContain("شحن سري ودفع عند الاستلام");
   });
 });
