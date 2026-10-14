@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createServer } from "vite";
+import { callGemini } from "./gemini-client.mjs";
 
 const ROOT = process.cwd();
 const markerPath = resolve(ROOT, ".generated-article-slug");
@@ -127,49 +128,15 @@ EVIDENCE:\n${evidence
     )
     .join("\n\n")}`;
 
-  // 🔒 المفتاح في الـ header وليس في الـ URL + مهلة 60 ثانية لكل محاولة
-  // + fallback على الموديل التالي (نفس سلسلة موديلات الـ generator:
-  // Google اتوقف 2.5-flash لمستخدمي API الجدد 2026-09-14 → 3.6-flash على الأول)
-  const verifierModels = [
-    "gemini-3.6-flash",
-    "gemini-2.5-flash",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
-  ];
-  let response;
-  for (const model of verifierModels) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60_000);
-    try {
-      response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": apiKey,
-          },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: "application/json", temperature: 0 },
-          }),
-          signal: controller.signal,
-        },
-      );
-    } finally {
-      clearTimeout(timeout);
-    }
-    if (response.ok) break;
-    console.warn(`⚠️ Verifier model "${model}" failed (HTTP ${response.status}) — trying next...`);
-  }
-  if (!response.ok) {
-    throw new Error(
-      `Claim-support verifier failed: all models failed (last HTTP ${response.status})`,
-    );
-  }
-  const payload = await response.json();
-  const raw = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!raw) throw new Error("Claim-support verifier returned no result");
+  // 🔒 استدعاء Gemini من مصدر مشترك واحد (نفس سلسلة المولّد + retry العابرة)
+  const { text: raw } = await callGemini(
+    apiKey,
+    {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json", temperature: 0 },
+    },
+    { timeoutMs: 60_000, attempts: 2 },
+  );
   const verdict = JSON.parse(raw);
   if (verdict.supported !== true || (verdict.unsupportedClaims?.length ?? 0) > 0) {
     throw new Error(

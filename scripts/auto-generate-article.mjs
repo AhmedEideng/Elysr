@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { callGemini } from "./gemini-client.mjs";
 import sharp from "sharp";
 
 // 🔒 المسار الجذري ثابت ومستقل عن دليل التشغيل (cwd) — يضمن عمل السكربت من أي مكان.
@@ -239,70 +240,18 @@ JSON Schema:
 }
 `;
 
-  let articleData = null;
-
-  // 🚀 Using official Google Gemini API with automatic model fallbacks for maximum resilience
-  // ملاحظة (2026-09-14): Google اتوقف دعم 2.5/2.0/1.5-flash لمستخدمي API الجدد
-  // (404 "no longer available to new users — use models/gemini-3.6-flash")،
-  // فـ 3.6-flash على الأول والباقي fallback احتياطي.
-  const models = ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
-  let response = null;
-  let success = false;
-
-  for (const model of models) {
-    console.log(`🎁 Trying Google Gemini API model: "${model}"...`);
-    // 🔒 المفتاح في الـ header وليس في الـ URL (روابط الطلبات قد تسجل
-    // في logs/proxies/traces، والمفتاح في URL يظهر فيها نصياً)
-    // ⏱️ مهلة 120 ثانية لكل محاولة + fallback على الموديل التالي (retry موجود أصلاً)
-    const geminiController = new AbortController();
-    const geminiTimeout = setTimeout(() => geminiController.abort(), 120_000);
-    try {
-      response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": GEMINI_API_KEY,
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [{ text: `${systemPrompt}\n\n${topicInstruction}` }],
-              },
-            ],
-            generationConfig: {
-              responseMimeType: "application/json",
-            },
-          }),
-          signal: geminiController.signal,
-        },
-      );
-
-      if (response.ok) {
-        success = true;
-        const result = await response.json();
-        const text = result.candidates[0].content.parts[0].text;
-        articleData = JSON.parse(text);
-        console.log(`   ✅ Content successfully generated using model "${model}"!`);
-        break;
-      } else {
-        const errorText = await response.text();
-        console.warn(
-          `   ⚠️ Model "${model}" failed (status ${response.status}): ${errorText.slice(0, 200)}...`,
-        );
-      }
-    } catch (err) {
-      console.warn(`   ⚠️ Request for model "${model}" threw error: ${err.message}`);
-    } finally {
-      clearTimeout(geminiTimeout);
-    }
-  }
-
-  if (!success) {
-    console.error("❌ All Google Gemini API models failed to generate content.");
-    process.exit(1);
-  }
+  // 🚀 استدعاء Gemini من مصدر مشترك واحد (scripts/gemini-client.mjs):
+  // سلسلة موديلات موحدة + retry على الحالات العابرة — بعد أن أسقط انزلاق
+  // القائمتين المنفصلتين تشغيل publish-article في 2026-10-13.
+  const { text: geminiText } = await callGemini(
+    GEMINI_API_KEY,
+    {
+      contents: [{ parts: [{ text: `${systemPrompt}\n\n${topicInstruction}` }] }],
+      generationConfig: { responseMimeType: "application/json" },
+    },
+    { timeoutMs: 120_000, attempts: 3 },
+  );
+  const articleData = JSON.parse(geminiText);
 
   // Semantic validation before any side effect (slug dup check, image,
   // file write) — malformed output must never reach the repo.
