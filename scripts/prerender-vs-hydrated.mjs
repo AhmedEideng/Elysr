@@ -260,7 +260,7 @@ try {
       .sort((a, b) => a.id.localeCompare(b.id))
       .slice(0, 4);
     const hydratedProduct = {
-      title: makeProductMetaTitle(product.name),
+      title: makeProductMetaTitle(product.name, 70, product.titleLatin),
       description: makeProductMetaDescription(product),
       robots: "index,follow,max-image-preview:large,max-snippet:-1",
     };
@@ -774,7 +774,7 @@ try {
   for (const product of products) {
     const d = makeProductMetaDescription(product);
     if (d.length > 155) longDesc.push({ page: `/products/${product.slug}`, len: d.length });
-    const t = makeProductMetaTitle(product.name);
+    const t = makeProductMetaTitle(product.name, 70, product.titleLatin);
     if (t.endsWith("…")) longTitle.push({ page: `/products/${product.slug}`, title: t });
   }
   for (const article of articles) {

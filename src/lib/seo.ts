@@ -38,11 +38,17 @@ export function makeMetaDescription(text = "", maxLength = 155): string {
  * show the identical, untruncated product name — Google decides display
  * truncation itself.
  */
-export function makeProductMetaTitle(name: string, maxLength = 70): string {
+export function makeProductMetaTitle(name: string, maxLength = 70, titleLatin?: string): string {
   const clean = String(name).trim().replace(/\s+/g, " ");
-  if (clean.length <= maxLength) return clean;
+  // (2026-10-14 — موافقة المالكة): البراند اللاتيني يُلحق بعنوان الميتا حين
+  // يخلو الاسم من أي حروف لاتينية — أعلى الاستعلامات طلباً تبحث باللاتيني
+  // (kreva gel ~7.4k ظهور/شهر، dooz ~1.7k) والعنوان أقوى سطح لها. الميزانية
+  // تُحسب بعد حجز مكان اللاحقة حتى لا يُقص البراند اللاتيني أبداً.
+  const suffix = titleLatin && !/[A-Za-z]/.test(clean) ? ` | ${titleLatin}` : "";
+  const budget = maxLength - suffix.length;
+  if (clean.length <= budget) return `${clean}${suffix}`;
 
-  const cut = clean.slice(0, Math.max(1, maxLength - 1));
+  const cut = clean.slice(0, Math.max(1, budget - 1));
   const lastSpace = cut.lastIndexOf(" ");
   let base = lastSpace > 20 ? cut.slice(0, lastSpace) : cut;
   const openParen = base.lastIndexOf("(");
@@ -50,7 +56,7 @@ export function makeProductMetaTitle(name: string, maxLength = 70): string {
   if (openParen > closeParen && openParen > base.length - 28) {
     base = base.slice(0, openParen).trimEnd();
   }
-  return `${base.trimEnd()}…`;
+  return `${base.trimEnd()}…${suffix}`;
 }
 
 type ProductMetaCategory = "men" | "women" | "devices";

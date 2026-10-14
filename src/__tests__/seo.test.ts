@@ -84,6 +84,32 @@ describe("product metadata templates", () => {
     expect(title.endsWith("…")).toBe(true);
   });
 
+  // (2026-10-14 — موافقة المالكة «نفّذ دلوقتي»): البراند اللاتيني يُضاف
+  // لعنوان الميتا فقط حين يخلو الاسم من اللاتيني (kreva/dooz = أعلى طلب لاتيني).
+  it("appends titleLatin only when the name carries no Latin letters", () => {
+    const kreva = makeProductMetaTitle("جل كريفا الألماني المتطور للرجال (50 جم)", 70, "Kreva Gel");
+    expect(kreva).toBe("جل كريفا الألماني المتطور للرجال (50 جم) | Kreva Gel");
+    expect(kreva.length).toBeLessThanOrEqual(70);
+
+    const dooz = makeProductMetaTitle(
+      "كريم دوز 14000 الألماني الأصلي للتأخير للرجال (20 جم)",
+      70,
+      "Dooz 14000",
+    );
+    expect(dooz.endsWith(" | Dooz 14000")).toBe(true);
+    expect(dooz.length).toBeLessThanOrEqual(70);
+
+    const alreadyLatin = makeProductMetaTitle(
+      "أقراص هارد أون المزدوجة للرجال (Hard-On)",
+      70,
+      "Hard On",
+    );
+    expect(alreadyLatin).toBe("أقراص هارد أون المزدوجة للرجال (Hard-On)");
+
+    const noToken = makeProductMetaTitle("جل سوتارا المتطور للرجال (Sotara Gel)");
+    expect(noToken).toBe("جل سوتارا المتطور للرجال (Sotara Gel)");
+  });
+
   it("builds a complete, sentence-ended supplement description", () => {
     const description = makeProductMetaDescription({
       name: "كبسولات جينسنج 1650 للرجال (Ginseng 1650)",

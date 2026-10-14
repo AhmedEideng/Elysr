@@ -1385,7 +1385,7 @@ ${homeArticlesBody}
 
     for (const product of products) {
       // Same helper + default length as src/routes/products.$slug.tsx head().
-      const title = makeProductMetaTitle(product.name);
+      const title = makeProductMetaTitle(product.name, 70, product.titleLatin);
       // 🎯 وصف غني بالبيانات الفريدة (السعر، الشحن، ومعلومات المنتج) لمنع Google من إعادة كتابته بوصف الموقع العام
       const desc = makeProductMetaDescription(product);
       // absoluteProductImage() in src/lib/seo.ts (the hydrated copy) appends the

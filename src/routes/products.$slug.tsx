@@ -114,7 +114,11 @@ export const Route = createFileRoute("/products/$slug")({
       : `${SITE_URL}/og-default.webp`;
     return {
       meta: [
-        { title: loaderData?.product ? makeProductMetaTitle(loaderData.product.name) : "المنتج" },
+        {
+          title: loaderData?.product
+            ? makeProductMetaTitle(loaderData.product.name, 70, loaderData.product.titleLatin)
+            : "المنتج",
+        },
         {
           name: "description",
           content: loaderData?.product ? makeProductMetaDescription(loaderData.product) : "",
