@@ -20,52 +20,11 @@
  * ============================================================
  */
 
-import { createHash } from "node:crypto";
 import { getClientIp } from "./lib/request-ip.js";
+import { createEndpointRateLimiter } from "./lib/endpoint-rate-limiter.js";
 
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX_REPORTS = 30;
-const MEMORY_CLEANUP_INTERVAL_MS = 5 * 60_000;
-const MAX_MEMORY_ENTRIES = 20_000;
+const checkRateLimit = createEndpointRateLimiter({ windowMs: 60_000, max: 30 });
 const MAX_BODY_BYTES = 32_000;
-
-/** @type {Map<string, { start: number, count: number }>} */
-const rateLimitMap = new Map();
-let lastCleanup = Date.now();
-
-/** @param {string} ip */
-function hashIp(ip) {
-  return createHash("sha256").update(String(ip)).digest("hex").slice(0, 16);
-}
-
-function cleanupMemory() {
-  const now = Date.now();
-  if (now - lastCleanup < MEMORY_CLEANUP_INTERVAL_MS) return;
-  lastCleanup = now;
-  for (const [key, entry] of rateLimitMap) {
-    if (now - entry.start > RATE_LIMIT_WINDOW_MS) rateLimitMap.delete(key);
-  }
-}
-
-/** @param {string} key */
-function checkRateLimit(key) {
-  cleanupMemory();
-  const now = Date.now();
-  const hashed = hashIp(key);
-  if (!rateLimitMap.has(hashed) && rateLimitMap.size >= MAX_MEMORY_ENTRIES) {
-    // Evict the oldest window rather than allowing attacker-controlled keys
-    // to grow this process without bound.
-    const oldest = rateLimitMap.keys().next().value;
-    if (oldest) rateLimitMap.delete(oldest);
-  }
-  const entry = rateLimitMap.get(hashed);
-  if (!entry || now - entry.start > RATE_LIMIT_WINDOW_MS) {
-    rateLimitMap.set(hashed, { start: now, count: 1 });
-    return true;
-  }
-  entry.count += 1;
-  return entry.count <= RATE_LIMIT_MAX_REPORTS;
-}
 
 // 🔒 Sanitization ضد Log Injection + truncation لمنع حشر سجلات ضخمة.
 // القيم كلها من المتصفح — حتى لو "بنية داخلية" بنعتبرها معادية.

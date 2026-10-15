@@ -27,7 +27,7 @@ export interface RecentlyViewedItem {
 const STORAGE_KEY = "elysr_recently_viewed_v1";
 const MAX_ITEMS = 12;
 
-export const recentlyViewedStorage = {
+const recentlyViewedStorage = {
   read(): RecentlyViewedItem[] {
     if (typeof window === "undefined") return [];
     try {

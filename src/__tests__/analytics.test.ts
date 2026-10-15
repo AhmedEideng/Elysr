@@ -10,7 +10,6 @@ import {
   trackOutboundClick,
   trackPageView,
   trackPurchase,
-  trackReferralApplied,
   trackRemoveFromCart,
   trackRemoveFromWishlist,
   trackScrollMilestone,
@@ -343,7 +342,7 @@ describe("share_click, outbound_click, search, cta_click, web_vital", () => {
   });
 });
 
-describe("v3 ecommerce — view_item_list, select_item, view_cart, wishlist, promotion, referral", () => {
+describe("v3 ecommerce — view_item_list, select_item, view_cart, wishlist, promotion", () => {
   it("view_item_list captures list name + items", () => {
     w.dataLayer = [];
     trackViewItemList("men_category", [{ id: "m-01", name: "A", price: 100, qty: 1 }]);
@@ -394,22 +393,13 @@ describe("v3 ecommerce — view_item_list, select_item, view_cart, wishlist, pro
 
   it("view/select promotion", () => {
     w.dataLayer = [];
-    trackViewPromotion("referral_program", "referral_page");
+    trackViewPromotion("seasonal_offer", "home_banner");
     let e = lastDataLayerEntry() as Record<string, unknown>;
     expect(e.event).toBe("view_promotion");
-    expect(e.promotion_name).toBe("referral_program");
+    expect(e.promotion_name).toBe("seasonal_offer");
     w.dataLayer = [];
     trackSelectPromotion("diamond_promo", "diamond_25");
     e = lastDataLayerEntry() as Record<string, unknown>;
     expect(e.event).toBe("select_promotion");
-  });
-
-  it("referral_applied captures code + source", () => {
-    w.dataLayer = [];
-    trackReferralApplied("EL-ABC123", "url_param");
-    const e = lastDataLayerEntry() as Record<string, unknown>;
-    expect(e.event).toBe("referral_applied");
-    expect(e.referral_code).toBe("EL-ABC123");
-    expect(e.referral_source).toBe("url_param");
   });
 });

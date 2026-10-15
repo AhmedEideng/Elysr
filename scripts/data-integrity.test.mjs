@@ -157,9 +157,9 @@ try {
     "Every catalog product must have one reviewed Product Meta profile",
   );
 
-  // Product meta copy is intentionally sales-led and price-free. Keep the
-  // generated SPA/prerender template from drifting back to mechanical or
-  // instruction-heavy descriptions.
+  // (2026-10-15 — owner direction): use the raw first catalog benefit in
+  // product meta copy. The source benefit is not medically verified here; keep
+  // the implementation tied to the product record and within the snippet cap.
   for (const product of products) {
     const profile = PRODUCT_META_PROFILES[product.id];
     const description = makeProductMetaDescription(product);
@@ -177,7 +177,7 @@ try {
     if (profile.form === "device") {
       assert.match(
         description,
-        /جهاز|مضخة|طقم|pump|device/i,
+        /جهاز|مضخة|طقم|حقيبة|pump|device/i,
         `Device form missing: ${product.slug}`,
       );
     }
@@ -185,10 +185,13 @@ try {
       description.length <= 155,
       `Product meta description too long: ${product.slug} (${description.length})`,
     );
-    assert.doesNotMatch(
-      description,
-      /السعر|حسب|تعليمات|وفق|النشرة|استشر/,
-      `Product meta description contains removed instruction copy: ${product.slug}`,
+    const firstBenefit = String(product.benefits?.[0] ?? "")
+      .trim()
+      .replace(/\s+/g, " ");
+    assert.ok(firstBenefit, `Product first benefit missing: ${product.slug}`);
+    assert.ok(
+      description.includes(firstBenefit.slice(0, Math.min(15, firstBenefit.length))),
+      `Product meta description is missing its raw first-benefit excerpt: ${product.slug}`,
     );
     // (2026-10-14) السعر الرقمي («520 ج.م») مسموح الآن بقرار صريح من المالكة
     // (استعادة الصيغة الرابحة لما قبل 13/09) — كان محظوراً منذ 22/09.
@@ -786,6 +789,21 @@ try {
     appsScript,
     /currentHeaders\.indexOf\(expectedHeaders\[i\]\) === -1/,
     "Apps Script must repair missing headers even when the sheet column count matches",
+  );
+  assert.match(
+    appsScript,
+    /function readSheetHeaders\(sheet, columnCount\)/,
+    "Apps Script should use one header-normalization helper",
+  );
+  assert.match(
+    appsScript,
+    /const HIDDEN_ORDER_HEADERS = new Set\(\["قيمة الخصم", "خصم الباقة"\]\)/,
+    "Discount columns hidden from the Sheet must remain addressable by their headers",
+  );
+  assert.match(
+    appsScript,
+    /function hideOrderDiscountColumns\(\)[\s\S]*?hideDiscountColumnsOnSheet\(sheet\)/,
+    "Discount columns should be hidden through an explicit, repeatable migration",
   );
 
   const sitemap = readFileSync(resolve(ROOT, "public/sitemap.xml"), "utf-8");

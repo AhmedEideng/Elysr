@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import { thumbUrl, assetUrl } from "@/lib/cache";
+import { useProductImageState } from "../hooks/use-product-image-state";
 
 /**
  * 🖼️ Product Card Image — مكون منعزل لصورة بطاقة المنتج مع دعم الـ Responsive SrcSet.
@@ -23,24 +23,10 @@ export function ProductCardImage({
   alt: string;
   productId: string;
 }) {
-  const [loaded, setLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [loadedOnce, setLoadedOnce] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  // إعادة تعيين الحالات عند تغيير معرف المنتج لمنع تداخل الحالات في الـ SPA.
-  // مع معالجة الصور المخزنة مؤقتاً (Cached) التي تكون محملة مسبقاً وتملك complete === true.
-  useEffect(() => {
-    if (imgRef.current && imgRef.current.complete) {
-      setLoaded(true);
-      setLoadedOnce(true);
-      setFailed(false);
-    } else {
-      setLoaded(false);
-      setFailed(false);
-      setLoadedOnce(false);
-    }
-  }, [productId, image]);
+  const { imgRef, loaded, failed, loadedOnce, handleLoad, handleError } = useProductImageState(
+    productId,
+    image,
+  );
 
   if (!image || failed) {
     return (
@@ -71,11 +57,8 @@ export function ProductCardImage({
         width={480}
         height={480}
         className={`h-full w-full object-cover transition-all duration-700 ${loaded ? "scale-100 opacity-100" : "scale-105 opacity-0"}`}
-        onLoad={() => {
-          setLoaded(true);
-          setLoadedOnce(true);
-        }}
-        onError={() => setFailed(true)}
+        onLoad={handleLoad}
+        onError={handleError}
       />
     </div>
   );

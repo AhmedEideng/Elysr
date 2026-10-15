@@ -39,7 +39,6 @@ import {
   trackViewCart,
   trackWhatsAppClick,
 } from "@/lib/analytics";
-import { getReferrerCode } from "@/lib/referral";
 import { toast } from "sonner";
 import { getNextTier, PROMO_TAGLINE, isPromotionEnabled } from "@/lib/promo";
 import { assetUrl } from "@/lib/cache";
@@ -175,7 +174,6 @@ function CartPage() {
       price: i.price,
       originalPrice: i.originalPrice,
     }));
-    const referralCode = getReferrerCode();
     const payload = {
       orderId,
       orderType: "cart",
@@ -193,9 +191,6 @@ function CartPage() {
       subtotal: total,
       shipping,
       total: grandTotal,
-      // الخصم الفعلي = شريحة أو باقة — promoApplied يعكس أي خصم تم تطبيقه
-      promoApplied: discount > 0 || bundleDiscount > 0,
-      referralCode: referralCode || undefined,
     };
 
     // GA: cta + begin_checkout — اتقدم الطلب (مشاع للطريقتين)

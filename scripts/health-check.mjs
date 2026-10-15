@@ -112,10 +112,14 @@ for (const f of largest) {
 console.log();
 
 // ─────────────────────────────────────────────────────────
-// 5) Missing thumbnails (referenced in images/ but not in thumbs/)
+// 5) Missing product thumbnails (social/article assets are intentionally excluded)
 // ─────────────────────────────────────────────────────────
-const imageNames = new Set(imageFiles.map((f) => f.path.split("/").pop()));
-const thumbNames = new Set(thumbFiles.map((f) => f.path.split("/").pop()));
+const productImageFiles = imageFiles.filter((f) => {
+  const relativePath = relative(imagesDir, f.path).replace(/\\/g, "/");
+  return !relativePath.startsWith("og-articles/");
+});
+const imageNames = new Set(productImageFiles.map((f) => f.path.split(/[\\/]/).pop()));
+const thumbNames = new Set(thumbFiles.map((f) => f.path.split(/[\\/]/).pop()));
 const missingThumbs = [...imageNames].filter(
   (n) =>
     !n.startsWith("article-") &&

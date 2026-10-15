@@ -1,5 +1,6 @@
 import { createRateLimiter } from "./lib/rate-limiter.js";
 import { getClientIp } from "./lib/request-ip.js";
+import { getRequestOrigin, isAllowedOrigin, readPayload } from "./lib/request-guards.js";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -117,54 +118,6 @@ const rateLimiter = createRateLimiter({
   prefix: "submit-order",
 });
 
-/** @param {import("express").Request} req */
-function getRequestOrigin(req) {
-  const origin = req.headers.origin;
-  if (typeof origin === "string" && origin) return origin;
-  const referer = req.headers.referer;
-  if (typeof referer === "string" && referer) {
-    try {
-      return new URL(referer).origin;
-    } catch {
-      return undefined;
-    }
-  }
-  return undefined;
-}
-
-/** @param {import("express").Request} req */
-function isAllowedOrigin(req) {
-  const origin = getRequestOrigin(req);
-  if (origin && ALLOWED_ORIGINS.has(origin)) return true;
-  const secFetchSite = req.headers["sec-fetch-site"];
-  const host = req.headers.host ? `https://${req.headers.host}` : undefined;
-  return Boolean(
-    !origin &&
-    host &&
-    ALLOWED_ORIGINS.has(host) &&
-    (secFetchSite === "same-origin" || secFetchSite === "none"),
-  );
-}
-
-/** @param {import("express").Request} req */
-function readPayload(req) {
-  const contentLength = parseInt(req.headers["content-length"] || "0", 10);
-  if (contentLength > MAX_BODY_SIZE_BYTES) throw new Error("Payload too large");
-  if (typeof req.body === "string") {
-    if (Buffer.byteLength(req.body, "utf8") > MAX_BODY_SIZE_BYTES)
-      throw new Error("Payload too large");
-    return JSON.parse(req.body || "{}");
-  }
-  if (req.body !== undefined) {
-    // Vercel supplies an already-parsed object, so content-length is not
-    // sufficient when the request used chunked transfer encoding.
-    const serialized = JSON.stringify(req.body);
-    if (Buffer.byteLength(serialized, "utf8") > MAX_BODY_SIZE_BYTES)
-      throw new Error("Payload too large");
-  }
-  return req.body === undefined ? {} : req.body;
-}
-
 /** @param {unknown} value @param {number} maxLength */
 function isNonEmptyString(value, maxLength) {
   return typeof value === "string" && value.trim().length > 0 && value.length <= maxLength;
@@ -250,16 +203,6 @@ export function validateOrderPayload(payload) {
     (typeof payload.notes !== "string" || payload.notes.length > 300)
   )
     return "Invalid notes";
-  if (typeof payload.promoApplied !== "boolean") return "Invalid promoApplied";
-  if (
-    payload.referralCode !== undefined &&
-    (!isNonEmptyString(payload.referralCode, 11) ||
-      !/^EL-[A-Z0-9]{4,8}$/.test(payload.referralCode.trim().toUpperCase()))
-  ) {
-    return "Invalid referralCode";
-  }
-  if (payload.referralCode !== undefined)
-    payload.referralCode = payload.referralCode.trim().toUpperCase();
   if (typeof payload.bundleDiscount !== "number" || !Number.isFinite(payload.bundleDiscount)) {
     return "Invalid bundleDiscount";
   }
@@ -355,10 +298,6 @@ export function validateOrderPayload(payload) {
     return "Discount mismatch";
   }
 
-  // 🔒 promoApplied يُعاد حسابه من القيم الموثقة — لا نثق بقيمة العميل
-  // (باقة مكتملة = خصم باقة → true حتى لو discount الصريح = 0)
-  payload.promoApplied = calculatedDiscount > 0 || calculatedBundleDiscount > 0;
-
   const calculatedSubtotalAfterDiscount =
     calculatedSubtotal - calculatedDiscount - calculatedBundleDiscount;
   if (Number(payload.subtotal) !== calculatedSubtotalAfterDiscount) {
@@ -396,7 +335,8 @@ export default async function handler(req, res) {
 
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
-  if (!isAllowedOrigin(req)) return res.status(403).json({ error: "Forbidden origin" });
+  if (!isAllowedOrigin(req, ALLOWED_ORIGINS))
+    return res.status(403).json({ error: "Forbidden origin" });
 
   const clientIp = getClientIp(req);
   if (!(await rateLimiter.check(clientIp))) {
@@ -406,7 +346,7 @@ export default async function handler(req, res) {
   /** @type {Record<string, any> | null} */
   let payload = null;
   try {
-    payload = readPayload(req);
+    payload = readPayload(req, MAX_BODY_SIZE_BYTES);
   } catch {
     return res.status(400).json({ error: "Invalid JSON payload" });
   }
@@ -467,21 +407,12 @@ export default async function handler(req, res) {
     "subtotal",
     "shipping",
     "total",
-    "promoApplied",
-    "referralCode",
   ]);
   /** @type {Record<string, unknown>} */
   const safePayload = {};
   for (const key of ALLOWED_ORDER_FIELDS) {
     if (payload[key] !== undefined) safePayload[key] = payload[key];
   }
-
-  // 🔒 حماية IP العميل - نخزن hash فقط في الشيت لحماية الخصوصية، مع الاحتفاظ بآخر 3 أرقام للكشف عن الاحتيال
-  const { createHash } = await import("node:crypto");
-  const hashedIp =
-    clientIp !== "unknown"
-      ? createHash("sha256").update(clientIp).digest("hex").slice(0, 16)
-      : "unknown";
 
   const sheetsController = new AbortController();
   const sheetsTimeout = setTimeout(() => sheetsController.abort(), GOOGLE_SHEETS_TIMEOUT_MS);
@@ -495,8 +426,6 @@ export default async function handler(req, res) {
         // يحمي webhook من الكتابة المباشرة لو تسرّب الرابط
         data: JSON.stringify({
           ...safePayload,
-          clientIp: hashedIp,
-          clientIpHash: hashedIp,
           secret: SHEET_SECRET,
         }),
       }),

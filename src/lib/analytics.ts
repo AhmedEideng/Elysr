@@ -30,7 +30,6 @@
  *   search           — بحث الموقع (مخصص)
  *   outbound_click   — outbound link click
  *   file_download    — download click
- *   referral_applied — استخدام كود إحالة (viral loop)
  *
  * (2026-09-18) GA4 Audit:
  *   - page_title artifact (متزامن مع الـ fix بتاع useErrorTracking)
@@ -358,12 +357,5 @@ export function trackSelectPromotion(promoName: string, promoId?: string) {
   emit("select_promotion", {
     promotion_name: promoName,
     promotion_id: promoId ?? promoName,
-  });
-}
-
-export function trackReferralApplied(code: string, source: string) {
-  emit("referral_applied", {
-    referral_code: code,
-    referral_source: source,
   });
 }

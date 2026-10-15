@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
 import type { Product } from "@/data/product-types";
 import { assetUrl } from "@/lib/cache";
+import { useProductImageState } from "../hooks/use-product-image-state";
 
 /**
  * 🖼️ Product Image — مكون منعزل لصورة المنتج مع skeleton loading.
@@ -16,24 +16,10 @@ export function ProductImage({
   product: Product;
   categoryName: string;
 }) {
-  const [loaded, setLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [loadedOnce, setLoadedOnce] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  // إعادة تعيين الحالات عند تغيير معرف المنتج لمنع تداخل الحالات بين المنتجات المختلفة في الـ SPA.
-  // مع معالجة الصور المخزنة مؤقتاً (Cached) التي تكون محملة مسبقاً وتملك complete === true.
-  useEffect(() => {
-    if (imgRef.current && imgRef.current.complete) {
-      setLoaded(true);
-      setLoadedOnce(true);
-      setFailed(false);
-    } else {
-      setLoaded(false);
-      setFailed(false);
-      setLoadedOnce(false);
-    }
-  }, [product.id, product.image]);
+  const { imgRef, loaded, failed, loadedOnce, handleLoad, handleError } = useProductImageState(
+    product.id,
+    product.image,
+  );
 
   if (!product.image || failed) {
     return (
@@ -68,11 +54,8 @@ export function ProductImage({
         loading="eager"
         fetchPriority="high"
         decoding="async"
-        onLoad={() => {
-          setLoaded(true);
-          setLoadedOnce(true);
-        }}
-        onError={() => setFailed(true)}
+        onLoad={handleLoad}
+        onError={handleError}
         className={`h-full w-full object-cover transition-smooth duration-500 ${loaded ? "opacity-100 scale-100" : "opacity-0 scale-105"}`}
       />
     </div>

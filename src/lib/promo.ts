@@ -29,7 +29,7 @@ export const PROMO_ORDER_LABEL = "💎 مبادرة الرعاية الماسي�
  * نقسم الزمن إلى دورات ثابتة من 3 أيام متتالية تبدأ من 1 يناير 2026.
  */
 export const PROMO_CYCLE_DURATION_MS = 3 * 24 * 60 * 60 * 1000; // 3 أيام بالمللي ثانية
-export const PROMO_EPOCH_MS = new Date("2026-01-01T00:00:00Z").getTime(); // نقطة البداية الثابتة
+const PROMO_EPOCH_MS = new Date("2026-01-01T00:00:00Z").getTime(); // نقطة البداية الثابتة
 
 export function getPromoEndIso(now: Date = new Date()): string {
   const nowMs = now.getTime();

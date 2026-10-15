@@ -16,6 +16,7 @@
 
 import { createRateLimiter } from "./lib/rate-limiter.js";
 import { getClientIp } from "./lib/request-ip.js";
+import { isAllowedOrigin, readPayload } from "./lib/request-guards.js";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -69,54 +70,6 @@ const rateLimiter = createRateLimiter({
   max: 3,
   prefix: "submit-review",
 });
-
-/** @param {import("express").Request} req */
-function getRequestOrigin(req) {
-  const origin = req.headers.origin;
-  if (typeof origin === "string" && origin) return origin;
-  const referer = req.headers.referer;
-  if (typeof referer === "string" && referer) {
-    try {
-      return new URL(referer).origin;
-    } catch {
-      return undefined;
-    }
-  }
-  return undefined;
-}
-
-/** @param {import("express").Request} req */
-function isAllowedOrigin(req) {
-  const origin = getRequestOrigin(req);
-  if (origin && ALLOWED_ORIGINS.has(origin)) return true;
-  const secFetchSite = req.headers["sec-fetch-site"];
-  const host = req.headers.host ? `https://${req.headers.host}` : undefined;
-  return Boolean(
-    !origin &&
-    host &&
-    ALLOWED_ORIGINS.has(host) &&
-    (secFetchSite === "same-origin" || secFetchSite === "none"),
-  );
-}
-
-/** @param {import("express").Request} req */
-function readPayload(req) {
-  const contentLength = parseInt(req.headers["content-length"] || "0", 10);
-  if (contentLength > MAX_BODY_SIZE_BYTES) throw new Error("Payload too large");
-  if (typeof req.body === "string") {
-    if (Buffer.byteLength(req.body, "utf8") > MAX_BODY_SIZE_BYTES)
-      throw new Error("Payload too large");
-    return JSON.parse(req.body || "{}");
-  }
-  if (req.body !== undefined) {
-    // Vercel supplies an already-parsed object, so content-length is not
-    // sufficient when the request used chunked transfer encoding.
-    const serialized = JSON.stringify(req.body);
-    if (Buffer.byteLength(serialized, "utf8") > MAX_BODY_SIZE_BYTES)
-      throw new Error("Payload too large");
-  }
-  return req.body === undefined ? {} : req.body;
-}
 
 /**
  * التحقق الصارم من payload المراجعة — تُصدَّر للاختبار.
@@ -193,7 +146,7 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  if (!isAllowedOrigin(req)) {
+  if (!isAllowedOrigin(req, ALLOWED_ORIGINS)) {
     return res.status(403).json({ error: "Forbidden" });
   }
 
@@ -205,7 +158,7 @@ export default async function handler(req, res) {
   /** @type {Record<string, any> | null} */
   let payload = null;
   try {
-    payload = readPayload(req);
+    payload = readPayload(req, MAX_BODY_SIZE_BYTES);
   } catch {
     return res.status(400).json({ error: "Invalid JSON payload" });
   }

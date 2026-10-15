@@ -139,7 +139,7 @@ export function toBreadcrumbHref(url: string): string {
  * Record a breadcrumb — a user action that happened before an error.
  * Helps debug: "user clicked checkout, then the error happened."
  */
-export function addBreadcrumb(type: Breadcrumb["type"], message: string, data?: BreadcrumbData) {
+function addBreadcrumb(type: Breadcrumb["type"], message: string, data?: BreadcrumbData) {
   breadcrumbs.push({
     type,
     message,

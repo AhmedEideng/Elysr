@@ -47,7 +47,6 @@ function validPayload(qty = 1, governorate = "القاهرة") {
     subtotal,
     shipping,
     total: subtotal + shipping,
-    promoApplied: discount > 0,
   };
 }
 
@@ -86,7 +85,6 @@ function validBundlePayload(governorate = "القاهرة") {
       subtotal,
       shipping,
       total: subtotal + shipping,
-      promoApplied: discount > 0,
     };
   }
   throw new Error("No valid 3-member bundle found in bundles-db.json");
@@ -134,22 +132,6 @@ describe("submit-order payload validation", () => {
     expect(validateOrderPayload(payload)).toBeUndefined();
     expect(payload.governorate).toBe("القاهرة");
   });
-
-  it("accepts and normalizes a referral code for attribution", () => {
-    const payload = validPayload() as Record<string, unknown>;
-    payload.referralCode = " el-ab12cd ";
-    expect(validateOrderPayload(payload)).toBeUndefined();
-    expect(payload.referralCode).toBe("EL-AB12CD");
-  });
-
-  it.each(["EL-1", "not-a-code", "EL-TOO-LONG-CODE", 123])(
-    "rejects malformed referral code: %p",
-    (referralCode) => {
-      const payload = validPayload() as Record<string, unknown>;
-      payload.referralCode = referralCode;
-      expect(validateOrderPayload(payload)).toBe("Invalid referralCode");
-    },
-  );
 
   // (2026-09-16) validateOrderPayload is defensively typed for the expected
   // shape, but its whole job is to REJECT malformed runtime input (raw
@@ -211,7 +193,6 @@ describe("submit-order payload validation", () => {
     ["paymentMethod", "card", "Invalid paymentMethod"],
     ["address", "", "Invalid address"],
     ["notes", "x".repeat(301), "Invalid notes"],
-    ["promoApplied", "yes", "Invalid promoApplied"],
   ])("rejects invalid %s", (field, value, expected) => {
     const payload = validPayload() as Record<string, unknown>;
     payload[field] = value;
@@ -372,13 +353,23 @@ describe("submit-order HTTP handler", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const res = mockResponse();
-    await handler(mockRequest() as never, res as never);
+    await handler(
+      mockRequest({
+        body: { ...validPayload(), referralCode: "EL-ABC123", promoApplied: true },
+      }) as never,
+      res as never,
+    );
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({ success: true, orderId: "EL-SHEET-1" });
     expect(fetchMock).toHaveBeenCalledOnce();
     const body = String(fetchMock.mock.calls[0][1].body);
     expect(body).not.toContain("internalSecret");
+    const forwarded = JSON.parse(new URLSearchParams(body).get("data") || "{}");
+    expect(forwarded).not.toHaveProperty("referralCode");
+    expect(forwarded).not.toHaveProperty("promoApplied");
+    expect(forwarded).not.toHaveProperty("clientIp");
+    expect(forwarded).not.toHaveProperty("clientIpHash");
   });
 
   it("aborts a hanging Sheets request after 10 seconds and returns 504", async () => {

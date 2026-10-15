@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { seoLandingPages } from "@/data/landing-pages";
+import { products } from "@/data/products";
 import {
   makeProductMetaDescription,
   makeProductMetaTitle,
@@ -151,6 +152,33 @@ describe("product metadata templates", () => {
     expect(rich).toContain("اليسر ميديكال");
     expect(rich.startsWith("كبسولات هامر")).toBe(false);
     expect(rich.endsWith(".")).toBe(true);
+  });
+
+  it("includes a raw excerpt of the first benefit for every catalog product", () => {
+    expect(products).toHaveLength(83);
+
+    for (const catalogProduct of products) {
+      const rawBenefit = catalogProduct.benefits?.[0]?.trim().replace(/\s+/g, " ");
+      expect(rawBenefit, `Missing first benefit for ${catalogProduct.id}`).toBeTruthy();
+
+      const description = makeProductMetaDescription(catalogProduct);
+      expect(description.length).toBeLessThanOrEqual(155);
+      expect(description).toContain(rawBenefit!.slice(0, Math.min(15, rawBenefit!.length)));
+    }
+  });
+
+  it("preserves source benefit claims without rewriting them", () => {
+    const rawBenefit = "يحسن تدفق الدم ويضمن علاج الانتصاب بأمان";
+    const description = makeProductMetaDescription({
+      id: "m-unreviewed",
+      name: "منتج اختبار",
+      category: "men",
+      description: "وصف اختبار.",
+      benefits: [rawBenefit],
+      stock: 1,
+    });
+
+    expect(description).toContain(rawBenefit);
   });
 
   it("omits stars when the product has no approved rating data", () => {

@@ -19,10 +19,9 @@ import { Layout } from "@/components/layout/Layout";
 import { applyHreflang, applySeo } from "@/lib/seo";
 import { alternatesFor } from "@/data/en-pages";
 import { installErrorTracking } from "@/lib/error-tracking";
-import { trackPageView, trackReferralApplied } from "@/lib/analytics";
+import { trackPageView } from "@/lib/analytics";
 import { GlobalTrackers } from "@/components/GlobalTrackers";
 import { topicForArticle, topicForGuide, topicForProduct } from "@/data/topics";
-import { getReferrerFromUrl, saveReferrerCode } from "@/lib/referral";
 
 // 🛡️ تفعيل تتبع الأخطاء العالمي — يلتقط أي uncaught error أو promise rejection
 installErrorTracking();
@@ -91,6 +90,16 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 function RouteHeadSync() {
   const router = useRouter();
   const matches = useRouterState({ select: (s) => s.matches });
+
+  // تنظيف بيانات الإحالة القديمة المحفوظة محلياً بعد إيقاف البرنامج.
+  useEffect(() => {
+    try {
+      window.localStorage.removeItem("elysr_referral");
+      window.localStorage.removeItem("elysr_own_referral");
+    } catch {
+      /* storage may be unavailable; the referral state is no longer read */
+    }
+  }, []);
 
   useEffect(() => {
     let title: string | undefined;
@@ -196,17 +205,6 @@ function RouteHeadSync() {
       search: search || undefined,
       topic,
     });
-
-    // (2026-09-18 v3) Referral detection — ?ref=CODE
-    try {
-      const refCode = getReferrerFromUrl();
-      if (refCode) {
-        saveReferrerCode(refCode);
-        trackReferralApplied(refCode, "url_param");
-      }
-    } catch {
-      /* referral tracking failure — لا نمنع الصفحة */
-    }
   }, [matches, router]);
 
   return null;

@@ -16,9 +16,14 @@
  *          فلا تضبطي هذه الخاصية إطلاقاً (يُستخدم الشيت الحاوي تلقائياً).
  *   2. Vercel: تأكدي أن GOOGLE_SHEETS_WEBHOOK_SECRET مضبوط بنفس القيمة + Redeploy.
  *   3. Deploy → Manage deployments → New version.
- *   4. شغّلي setupAutoCleanupTrigger() مرة واحدة من المحرر (Run) —
+ *   4. شغّلي migrateOrderSheetColumns() مرة واحدة من المحرر (Run) —
+ *      يضيف وقت الطلب بجوار التاريخ ويستعيد أوقاته المتاحة، ثم يحذف الأعمدة:
+ *      عدد المنتجات، تم تطبيق خصم، كود الإحالة، IP العميل.
+ *   5. شغّلي hideOrderDiscountColumns() مرة واحدة من المحرر (Run) لإخفاء
+ *      "قيمة الخصم" و"خصم الباقة" دون حذف البيانات؛ ويمكن إظهارهما لاحقاً.
+ *   6. شغّلي setupAutoCleanupTrigger() مرة واحدة من المحرر (Run) —
  *      trigger التنظيف اليومي (PII بعد 90 يوم + المراجعات المرفوضة).
- *   5. اختبري: POST تجريبي + GET للمراجعات.
+ *   7. اختبري: POST تجريبي + GET للمراجعات.
  *
  * 🔒 السرور **مفيش في كود الملف** (2026-09-15): اتنقلت لـ Script
  * Properties (runtime) عشان ما تدخلش بالغلط في commit — الـ auto-publish
@@ -27,8 +32,8 @@
  *
  * التحسينات عن النسخة السابقة:
  *   1. ✅ عمود "حالة الطلب" — لتتبع (جديد / تم التأكيد / تم الشحن / مكتمل / ملغي)
- *   2. ✅ عمود "مصدر الطلب" — لتتبع من أين جاء (موقع / واتساب)
- *   3. ✅ عمود "IP العميل" — لكشف الطلبات المشبوهة
+ *   2. ✅ عمود "طريقة الطلب" — لتمييز واتساب عن الطلب المباشر
+ *   3. ✅ تحديد معدل الطلبات حسب IP في API دون حفظ IP ضمن سجل الطلب
  *   4. ✅ إشعار إيميل تلقائي عند كل طلب جديد
  *   5. ✅ حماية من الطلبات المكررة (نفس الـ orderId)
  *   6. ✅ تنسيق تلقائي للشيت (ألوان + عرض أعمدة)
@@ -117,6 +122,7 @@ function getSpreadsheet() {
 
 const COLUMNS = [
   { header: "التاريخ", key: "date", width: 140 },
+  { header: "وقت الطلب", key: "time", width: 105 },
   { header: "رقم الطلب", key: "orderId", width: 130 },
   { header: "حالة الطلب", key: "orderStatus", width: 100 },
   { header: "اسم العميل", key: "customerName", width: 150 },
@@ -127,7 +133,6 @@ const COLUMNS = [
   // معرفات المنتجات (ids) — للتحقق الآمن من "مشتري مؤكد" بمعرّف ثابت
   // لا يتغير بتغيير الاسم التسويقي (البحث بالاسم يبقى fallback للطلبات القديمة)
   { header: "معرفات المنتجات", key: "productIds", width: 120 },
-  { header: "عدد المنتجات", key: "itemCount", width: 90 },
   { header: "المجموع قبل الخصم", key: "subtotalBeforeDiscount", width: 120 },
   { header: "قيمة الخصم", key: "discount", width: 90 },
   { header: "خصم الباقة", key: "bundleDiscount", width: 90 },
@@ -137,10 +142,10 @@ const COLUMNS = [
   { header: "ملاحظات", key: "notes", width: 200 },
   { header: "طريقة الطلب", key: "orderMethod", width: 100 },
   { header: "نوع الطلب", key: "orderType", width: 90 },
-  { header: "تم تطبيق خصم", key: "promoApplied", width: 90 },
-  { header: "كود الإحالة", key: "referralCode", width: 110 },
-  { header: "IP العميل", key: "clientIp", width: 120 },
 ];
+
+// الأعمدة تبقى مخزنة ومستخدمة في الحسابات، لكن يمكن إخفاؤها عن العرض اليومي.
+const HIDDEN_ORDER_HEADERS = new Set(["قيمة الخصم", "خصم الباقة"]);
 
 const MAX_ITEMS = 50;
 const MAX_TEXT = {
@@ -152,8 +157,6 @@ const MAX_TEXT = {
   notes: 300,
   itemName: 150,
   orderMethod: 30,
-  referralCode: 11,
-  clientIp: 64,
 };
 
 const RATE_LIMIT_WINDOW_SEC = 60;
@@ -218,12 +221,6 @@ function doPost(e) {
     var notes = clean(data.notes, MAX_TEXT.notes);
     var orderMethod = clean(data.paymentMethod || "واتساب", MAX_TEXT.orderMethod);
     var orderType = normalizeOrderType(data.orderType);
-    var clientIp = clean(data.clientIp, MAX_TEXT.clientIp);
-    var promoApplied = data.promoApplied ? "نعم" : "لا";
-    var referralCode = clean(data.referralCode, MAX_TEXT.referralCode).toUpperCase();
-    if (referralCode && !/^EL-[A-Z0-9]{4,8}$/.test(referralCode)) {
-      throw new Error("Invalid referral code");
-    }
 
     if (!customerName) throw new Error("Missing customer name");
     if (!governorate) throw new Error("Missing governorate");
@@ -267,12 +264,11 @@ function doPost(e) {
       })
       .join(" | ");
 
-    var itemCount = items.reduce(function (sum, it) {
-      return sum + it.qty;
-    }, 0);
-
+    // يُنشأ الطابع الزمني داخل Apps Script وقت تسجيل الطلب؛ لا نأخذ الوقت من العميل.
+    var orderTimestamp = new Date();
     var rowValues = {
-      date: new Date(), // (2026-09-15) كائن Date حقيقي مش نص منطّق — cleanup موثوق للأبد
+      date: orderTimestamp, // كائن Date حقيقي؛ وقت الطلب المنفصل يُشتق من اللحظة نفسها
+      time: formatOrderTime(orderTimestamp),
       orderId: orderId,
       orderStatus: "جديد",
       customerName: customerName,
@@ -281,7 +277,6 @@ function doPost(e) {
       address: address || "سيتم تأكيده على واتساب",
       itemsText: itemsText,
       productIds: items.map(function (it) { return it.id; }).filter(Boolean).join(", "),
-      itemCount: itemCount,
       subtotalBeforeDiscount: subtotalBeforeDiscount,
       discount: discount,
       bundleDiscount: bundleDiscount,
@@ -291,9 +286,6 @@ function doPost(e) {
       notes: notes,
       orderMethod: orderMethod,
       orderType: orderType,
-      promoApplied: promoApplied,
-      referralCode: referralCode,
-      clientIp: clientIp,
     };
 
     appendRowByHeaders(sheet, COLUMNS, rowValues);
@@ -397,13 +389,13 @@ function hasVerifiedPurchase(phone, productId, productName) {
     var ordersSheet = ss.getSheetByName(SHEET_NAME);
     if (!ordersSheet || ordersSheet.getLastRow() <= 1) return "لا";
 
-    var headers = ordersSheet.getRange(1, 1, 1, ordersSheet.getLastColumn()).getValues()[0];
+    var headers = readSheetHeaders(ordersSheet);
     var phoneCol = -1;
     var itemsCol = -1;
     var statusCol = -1;
     var idsCol = -1;
     for (var i = 0; i < headers.length; i++) {
-      var h = String(headers[i]).trim();
+      var h = headers[i];
       if (h === "الهاتف") phoneCol = i + 1;
       else if (h === "المنتجات") itemsCol = i + 1;
       else if (h === "حالة الطلب") statusCol = i + 1;
@@ -557,10 +549,10 @@ function handleReviewsGet(params) {
 
       var sheet = getSpreadsheet().getSheetByName(REVIEWS_SHEET_NAME);
       if (sheet && sheet.getLastRow() > 1) {
-        var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+        var headers = readSheetHeaders(sheet);
         var colIdx = { productId: -1, status: -1, date: -1, rating: -1, name: -1, text: -1, verified: -1 };
         for (var i = 0; i < headers.length; i++) {
-          var h = String(headers[i]).trim();
+          var h = headers[i];
           if (h === "معرف المنتج") colIdx.productId = i + 1;
           else if (h === "الحالة") colIdx.status = i + 1;
           else if (h === "التاريخ") colIdx.date = i + 1;
@@ -609,14 +601,21 @@ function handleReviewsGet(params) {
 // Sheet Management
 // ============================================================
 
+// قراءة موحّدة لعناوين الصف الأول؛ تُستخدم في الكتابة والتحقق والترحيل.
+function readSheetHeaders(sheet, columnCount) {
+  if (typeof columnCount !== "number") columnCount = sheet.getLastColumn();
+  if (columnCount < 1) return [];
+  return sheet
+    .getRange(1, 1, 1, columnCount)
+    .getValues()[0]
+    .map(function (header) {
+      return String(header).trim();
+    });
+}
+
 function appendRowByHeaders(sheet, columns, valuesByKey) {
   var lastCol = Math.max(sheet.getLastColumn(), columns.length);
-  var existingHeaders = sheet
-    .getRange(1, 1, 1, lastCol)
-    .getValues()[0]
-    .map(function (h) {
-      return String(h).trim();
-    });
+  var existingHeaders = readSheetHeaders(sheet, lastCol);
 
   var headerToIndex = {};
   for (var i = 0; i < existingHeaders.length; i++) {
@@ -658,6 +657,35 @@ function getOrCreateSheet(name) {
   ]);
 }
 
+/** إخفاء أعمدة الخصم بالاسم فقط، من دون حذفها أو تغيير قيم الصفوف. */
+function hideDiscountColumnsOnSheet(sheet) {
+  var headers = readSheetHeaders(sheet);
+  var hiddenCount = 0;
+  for (var i = 0; i < headers.length; i++) {
+    if (HIDDEN_ORDER_HEADERS.has(headers[i]) && !sheet.isColumnHiddenByUser(i + 1)) {
+      sheet.hideColumns(i + 1);
+      hiddenCount++;
+    }
+  }
+  return hiddenCount;
+}
+
+/** تشغيل يدوي بعد نشر السكربت؛ آمنة عند الإعادة وتحافظ على البيانات. */
+function hideOrderDiscountColumns() {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var sheet = getSpreadsheet().getSheetByName(SHEET_NAME);
+    if (!sheet) throw new Error('Sheet "' + SHEET_NAME + '" not found');
+    var hiddenCount = hideDiscountColumnsOnSheet(sheet);
+    return hiddenCount
+      ? "تم إخفاء " + hiddenCount + " عمود خصم؛ البيانات لم تُحذف."
+      : "أعمدة الخصم مخفية بالفعل أو غير موجودة؛ لم تتغير البيانات.";
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 /** شيت المراجعات — أعمدة مختلفة عن شيت الطلبات */
 function getOrCreateReviewsSheet() {
   return getOrCreateSheetWithColumns(REVIEWS_SHEET_NAME, REVIEWS_COLUMNS, "status", [
@@ -665,6 +693,114 @@ function getOrCreateReviewsSheet() {
     REVIEW_STATUS_APPROVED,
     REVIEW_STATUS_REJECTED,
   ]);
+}
+
+/**
+ * يضمن وجود عمود "وقت الطلب" بجوار "التاريخ" في شيت الطلبات.
+ * عند إدراجه لأول مرة، تُملأ الصفوف القديمة من قيمة Date المحفوظة؛ الصفوف
+ * التي لا تحتوي وقتاً أصلياً تظل فارغة ولا نختلق لها وقتاً.
+ */
+function ensureOrderTimeColumn(sheet, backfillExisting) {
+  var lastColumn = sheet.getLastColumn();
+  if (lastColumn < 1) return { added: false, timeColumn: 0 };
+
+  var headers = readSheetHeaders(sheet, lastColumn);
+  var dateColumn = headers.indexOf("التاريخ") + 1;
+  var timeColumn = headers.indexOf("وقت الطلب") + 1;
+  var inserted = false;
+
+  if (dateColumn > 0 && timeColumn === 0) {
+    sheet.insertColumnAfter(dateColumn);
+    timeColumn = dateColumn + 1;
+    sheet
+      .getRange(1, timeColumn)
+      .setValue("وقت الطلب")
+      .setFontWeight("bold")
+      .setBackground("#1a73e8")
+      .setFontColor("#ffffff")
+      .setHorizontalAlignment("center")
+      .setVerticalAlignment("middle");
+    sheet.setColumnWidth(timeColumn, 105);
+    inserted = true;
+  }
+
+  if (dateColumn > 0 && timeColumn > 0 && (inserted || backfillExisting)) {
+    backfillOrderTimes(sheet, dateColumn, timeColumn);
+  }
+
+  return { added: inserted, timeColumn: timeColumn };
+}
+
+/** يملأ الأوقات الفارغة من الطابع الزمني الأصلي في عمود التاريخ فقط. */
+function backfillOrderTimes(sheet, dateColumn, timeColumn) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return;
+
+  var rowCount = lastRow - 1;
+  var dates = sheet.getRange(2, dateColumn, rowCount, 1).getValues();
+  var existingTimes = sheet.getRange(2, timeColumn, rowCount, 1).getValues();
+  var times = [];
+
+  for (var i = 0; i < rowCount; i++) {
+    var existing = existingTimes[i][0];
+    if (existing !== "" && existing !== null && typeof existing !== "undefined") {
+      times.push([existing]);
+      continue;
+    }
+
+    var timestamp = parseSheetDate(dates[i][0]);
+    times.push([timestamp ? formatOrderTime(timestamp) : ""]);
+  }
+
+  sheet.getRange(2, timeColumn, rowCount, 1).setValues(times);
+}
+
+/**
+ * شغّليها مرة واحدة بعد تحديث السكريبت.
+ * تضيف/تملأ عمود الوقت المجاور للتاريخ، ثم تحذف الأعمدة الملغاة بالاسم
+ * فقط. الحذف مقصود ويشمل بيانات تلك الأعمدة التاريخية؛ الدالة آمنة عند
+ * إعادة التشغيل ولا تحذف أعمدة أخرى.
+ */
+function removeObsoleteOrderColumns(sheet) {
+  var obsoleteHeaders = ["عدد المنتجات", "تم تطبيق خصم", "كود الإحالة", "IP العميل"];
+  var lastColumn = sheet.getLastColumn();
+  if (lastColumn < 1) return 0;
+
+  var headers = readSheetHeaders(sheet, lastColumn);
+  var columnsToDelete = [];
+
+  for (var i = 0; i < headers.length; i++) {
+    if (obsoleteHeaders.indexOf(headers[i]) !== -1) columnsToDelete.push(i + 1);
+  }
+
+  columnsToDelete.sort(function (a, b) {
+    return b - a;
+  });
+  for (var i = 0; i < columnsToDelete.length; i++) {
+    sheet.deleteColumn(columnsToDelete[i]);
+  }
+  return columnsToDelete.length;
+}
+
+function migrateOrderSheetColumns() {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var sheet = getSpreadsheet().getSheetByName(SHEET_NAME);
+    if (!sheet) throw new Error('Sheet "' + SHEET_NAME + '" not found');
+
+    var timeResult = ensureOrderTimeColumn(sheet, true);
+    if (!timeResult.timeColumn) throw new Error('Header "التاريخ" not found');
+
+    var deletedCount = removeObsoleteOrderColumns(sheet);
+    var finalHeaders = readSheetHeaders(sheet);
+    var finalTimeColumn = finalHeaders.indexOf("وقت الطلب") + 1;
+    if (finalTimeColumn > 0) sheet.setColumnWidth(finalTimeColumn, 105);
+
+    return "تم تجهيز وقت الطلب وحذف " + deletedCount + " عموداً ملغى";
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function getOrCreateSheetWithColumns(name, columns, statusKey, statusOptions) {
@@ -678,21 +814,21 @@ function getOrCreateSheetWithColumns(name, columns, statusKey, statusOptions) {
     return createFreshSheet(ss, name, expectedHeaders, columns, statusKey, statusOptions);
   }
 
+  // عمود الوقت يُدرج مباشرة بعد التاريخ في الشيتات الموجودة، وليس في آخر الأعمدة.
+  // عند الإدراج تُستعاد أوقات الصفوف القديمة من قيمة التاريخ المخزنة إن كانت متاحة.
+  var addedColumn = false;
+  if (name === SHEET_NAME) {
+    var timeColumnResult = ensureOrderTimeColumn(sheet, false);
+    var removedObsoleteColumns = removeObsoleteOrderColumns(sheet);
+    addedColumn = timeColumnResult.added || removedObsoleteColumns > 0;
+  }
+
   // تأكد من وجود كل الأعمدة المطلوبة حتى لو كان عدد الأعمدة الحالي
   // مساوياً للعدد المتوقع. النسخة القديمة كانت تفحص العدد فقط؛ فإذا
   // حُذف/تغيّر اسم عمود مع بقاء العدد نفسه، كانت الكتابات الجديدة تسقط
   // بصمت من appendRowByHeaders.
   var currentCols = sheet.getLastColumn();
-  var currentHeaders =
-    currentCols > 0
-      ? sheet
-          .getRange(1, 1, 1, currentCols)
-          .getValues()[0]
-          .map(function (h) {
-            return String(h).trim();
-          })
-      : [];
-  var addedColumn = false;
+  var currentHeaders = readSheetHeaders(sheet, currentCols);
 
   // أضف الأعمدة الناقصة فقط
   for (var i = 0; i < expectedHeaders.length; i++) {
@@ -709,6 +845,10 @@ function getOrCreateSheetWithColumns(name, columns, statusKey, statusOptions) {
     }
   }
   if (addedColumn) sheet.autoResizeColumns(1, sheet.getLastColumn());
+  if (name === SHEET_NAME) {
+    var timeHeaderPosition = currentHeaders.indexOf("وقت الطلب") + 1;
+    if (timeHeaderPosition > 0) sheet.setColumnWidth(timeHeaderPosition, 105);
+  }
 
   // (2026-09-30) ضمان استمرار تغطية الـ Data Validation لعمود الحالة
   // (النطاق القديم كان 999 صفاً فقط — وهذه الدعوة تتم لكل كتابة على أي حال)
@@ -823,9 +963,9 @@ function isDuplicateOrder(sheet, orderId) {
   var lastCol = sheet.getLastColumn();
   if (lastCol === 0) return false;
 
-  var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  var headers = readSheetHeaders(sheet, lastCol);
   for (var i = 0; i < headers.length; i++) {
-    if (String(headers[i]).trim() === "رقم الطلب") {
+    if (headers[i] === "رقم الطلب") {
       orderIdColIdx = i + 1;
       break;
     }
@@ -997,6 +1137,13 @@ function clampInt(value, min, max) {
   return Math.min(Math.max(n, min), max);
 }
 
+/** وقت الطلب بصيغة 24 ساعة، محسوب دائماً بتوقيت القاهرة من طابع الخادم. */
+function formatOrderTime(value) {
+  var d = value instanceof Date ? value : parseSheetDate(value);
+  if (!d) return "";
+  return Utilities.formatDate(d, "Africa/Cairo", "HH:mm:ss");
+}
+
 /**
  * تنسيق التاريخ المُعاد للموقع (المراجعات المعتمدة):
  * الخلايا تُحفظ ككائن Date منذ 2026-09-15 — وString(Date) كان يخرج بصيغة
@@ -1051,10 +1198,10 @@ function autoCleanupOldOrders() {
     if (!sheet) return;
     var lastRow = sheet.getLastRow();
     if (lastRow <= 1) return;
-    var dateColIdx = -1;
-    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var headers = readSheetHeaders(sheet);
+    var dateColIdx = 0;
     for (var i = 0; i < headers.length; i++) {
-      if (String(headers[i]).trim() === "التاريخ") { dateColIdx = i + 1; break; }
+      if (headers[i] === "التاريخ") { dateColIdx = i + 1; break; }
     }
     if (dateColIdx <= 0) return;
     var cutoff = new Date();
@@ -1091,10 +1238,10 @@ function cleanupOldRejectedReviews() {
     if (!sheet) return;
     var lastRow = sheet.getLastRow();
     if (lastRow <= 1) return;
-    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var headers = readSheetHeaders(sheet);
     var dateCol = -1, statusCol = -1;
     for (var i = 0; i < headers.length; i++) {
-      var h = String(headers[i]).trim();
+      var h = headers[i];
       if (h === "التاريخ") dateCol = i + 1;
       else if (h === "الحالة") statusCol = i + 1;
     }

@@ -4,7 +4,7 @@
  * This is intentionally separate from Product identity data: it does not
  * invent brand, MPN, GTIN, ratings, prices, or medical outcomes.
  */
-export type ProductMetaForm = "oral" | "topical" | "device";
+type ProductMetaForm = "oral" | "topical" | "device";
 
 export type ProductMetaProfile = {
   form: ProductMetaForm;

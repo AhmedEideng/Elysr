@@ -77,7 +77,6 @@ import {
   trackViewItem,
   trackViewItemList,
 } from "@/lib/analytics";
-import { getReferrerCode } from "@/lib/referral";
 
 export const Route = createFileRoute("/products/$slug")({
   component: ProductPage,
@@ -320,7 +319,6 @@ function ProductPage() {
         },
       ];
 
-      const referralCode = getReferrerCode();
       const payload = {
         orderId,
         orderType: "شراء فوري",
@@ -338,8 +336,6 @@ function ProductPage() {
         subtotal: subtotalAfterDiscount,
         shipping,
         total: grandTotal,
-        promoApplied: discount > 0,
-        referralCode: referralCode || undefined,
       };
 
       // GA: cta + begin_checkout — اتقدم الطلب

@@ -1116,6 +1116,11 @@
       "source": "/products/dooz-gel",
       "destination": "/products/dooz-14000-delay-cream",
       "permanent": true
+    },
+    {
+      "source": "/refer",
+      "destination": "/",
+      "permanent": true
     }
   ]
 }

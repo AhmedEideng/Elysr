@@ -1,0 +1,41 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/main.tsx",
+    "src/routes/**/*.{ts,tsx}",
+    "src/__tests__/**/*.{ts,tsx,js,jsx}",
+    "e2e/**/*.spec.ts",
+    "api/*.js",
+    "server/index.js",
+    "scripts/**/*.mjs",
+    "config/**/*.mjs",
+    "public/**/*.js",
+    "src/data/articles.ts",
+    "src/lib/site-config.ts",
+    "src/data/en-pages.ts",
+    "src/data/og-articles.generated.ts",
+    "src/data/landing-pages.ts",
+    "src/lib/cache.ts",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "eslint.config.js",
+    "src/**/*.css",
+    "public/**/*.css",
+    "index.html"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx,js,jsx,css}",
+    "api/**/*.js",
+    "server/**/*.js",
+    "scripts/**/*.mjs",
+    "config/**/*.mjs",
+    "public/**/*.{js,css}",
+    "e2e/**/*.{ts,tsx,js}",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "eslint.config.js",
+    "index.html"
+  ]
+}

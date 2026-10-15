@@ -31,6 +31,7 @@ const FORCE = process.argv.includes("--force");
 const VERBOSE = process.argv.includes("--verbose");
 
 const SKIP_PATTERNS = [/^hero-/, /^article-/, /^og-/, /^favicon/, /^logo/];
+const SKIP_DIRECTORIES = new Set(["thumbs", "thumbs-180", "thumbs-120", "og-articles"]);
 
 function shouldSkip(name) {
   return SKIP_PATTERNS.some((re) => re.test(name));
@@ -42,7 +43,7 @@ function walk(dir) {
     const full = join(dir, entry);
     const st = statSync(full);
     if (st.isDirectory()) {
-      if (entry === "thumbs" || entry === "thumbs-180" || entry === "thumbs-120") continue;
+      if (SKIP_DIRECTORIES.has(entry)) continue;
       out.push(...walk(full));
     } else if (/\.(png|jpe?g|webp)$/i.test(entry)) {
       out.push({ path: full, size: st.size, name: entry });

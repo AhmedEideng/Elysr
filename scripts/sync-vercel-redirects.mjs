@@ -324,6 +324,12 @@ async function syncRedirects() {
         permanent: true,
       },
       {
+        source: "/refer",
+        // برنامج الإحالة أُلغي؛ وجّه الروابط القديمة إلى الرئيسية.
+        destination: "/",
+        permanent: true,
+      },
+      {
         source: "/thank-you",
         // (2026-09-15) route legacy اتحذف — 301 لصفحة التأكيد الحالية
         // (الحماية لأي روابط خارجية قديمة / مشاركات)

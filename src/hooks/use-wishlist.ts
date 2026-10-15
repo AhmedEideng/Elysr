@@ -34,7 +34,7 @@ const MAX_ITEMS = 100;
  * Low-level helpers. Avoid using these directly in components —
  * prefer the `useWishlist()` hook which subscribes to changes.
  */
-export const wishlistStorage = {
+const wishlistStorage = {
   read(): WishlistItem[] {
     if (typeof window === "undefined") return [];
     try {

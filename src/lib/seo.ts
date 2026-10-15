@@ -136,23 +136,29 @@ function compactProductName(name: string, maxLength = 46): string {
 }
 
 /**
- * Builds a short, factual product-specific snippet instead of repeating a
- * category template. The reviewed profile contributes the product form and a
- * concrete pack/ingredient/feature hook; it never adds price, ratings, brand
- * identity, or medical outcomes that are not already in the product data.
+ * Keeps the catalog's raw first benefit wording, trimming only at a word
+ * boundary when the full snippet would exceed the meta-description budget.
+ */
+function compactRawBenefit(text: string, maxLength: number): string {
+  const clean = String(text).trim().replace(/\s+/g, " ");
+  if (clean.length <= maxLength) return clean;
+  if (maxLength <= 1) return "…";
+
+  const cut = clean.slice(0, maxLength - 1);
+  const lastSpace = cut.lastIndexOf(" ");
+  const base = lastSpace > 0 ? cut.slice(0, lastSpace) : cut;
+  return `${base.trimEnd()}…`;
+}
+
+/**
+ * Builds a product meta description from the catalog's raw first benefit when
+ * available. The benefit wording is not medically reviewed or rewritten here;
+ * it is only whitespace-normalized and clipped at a word boundary if needed.
  */
 export function makeProductMetaDescription(p: ProductMetaInput, maxLength = 155): string {
   const profile = resolveProductMetaProfile(p);
   const name = compactProductName(p.name);
   const hook = `${profile.hook}${productAudienceSuffix(p, profile.hook)}`;
-  // (2026-10-14 — موافقة صريحة من المالكة «full_restore»): استعادة «الصيغة
-  // الرابحة» لما قبل 2026-09-13 بترتيب مصحح: تقييم حقيقي + عدد + سعر +
-  // خطاف الفائدة. هذه بيانات فريدة لكل منتج تمنع نظام مقتطفات جوجل من
-  // تصنيف الوصف قالبياً (الهبوط الموثّق بالوصف القالبي: 18/09 → 14/10 في
-  // VISIBILITY-DROP-INVESTIGATION). التقييم من نفس مصدر aggregateRating في
-  // السكيمَا (rating/reviews من بيانات المنتج) فلا يتباعد رقم عن الآخر.
-  // إصلاح b406a74 محفوظ: لا صدى للعنوان في بداية الوصف — النجوم أو الخطاف
-  // أولاً، والعلامة موحّدة في الذيل وفق معيار المالكة.
   const brand = "اليسر ميديكال";
   const hasApprovedStars = Boolean(
     p.rating &&
@@ -167,6 +173,20 @@ export function makeProductMetaDescription(p: ProductMetaInput, maxLength = 155)
   const priceInline = p.price ? `، ${p.price} ج.م` : "";
   const ship =
     p.stock === 0 ? "غير متوفر حالياً — شحن سري عند التوفر." : "شحن سري ودفع عند الاستلام.";
+  const rawBenefit = p.benefits?.[0]?.trim().replace(/\s+/g, " ");
+
+  if (rawBenefit) {
+    const suffix = `${priceInline}. ${ship} ${brand}.`;
+    // Reserve enough room for a meaningful raw excerpt, then compact only the
+    // product name and benefit excerpt to keep the full template within 155.
+    const nameBudget = Math.max(1, Math.min(46, maxLength - stars.length - suffix.length - 26));
+    const benefitName = compactProductName(p.name, nameBudget);
+    const prefix = `${stars}${benefitName}: `;
+    const benefitBudget = maxLength - prefix.length - suffix.length;
+    const excerpt = compactRawBenefit(rawBenefit, benefitBudget);
+    const candidate = `${prefix}${excerpt}${suffix}`;
+    if (candidate.length <= maxLength) return candidate;
+  }
 
   const variants = stars
     ? [

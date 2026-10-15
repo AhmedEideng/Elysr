@@ -12,50 +12,10 @@
  * ============================================================
  */
 
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX_REPORTS = 50;
-const MEMORY_CLEANUP_INTERVAL_MS = 5 * 60_000; // كل 5 دقائق
-const MAX_MEMORY_ENTRIES = 20_000;
-/** @type {Map<string, { start: number, count: number }>} */
-const rateLimitMap = new Map();
-let lastCleanup = Date.now();
-
-// Use hashed IP like submit-order to avoid storing raw IPs in memory
-import { createHash } from "node:crypto";
 import { getClientIp } from "./lib/request-ip.js";
-/** @param {string} ip */
-function hashIp(ip) {
-  return createHash("sha256").update(String(ip)).digest("hex").slice(0, 16);
-}
+import { createEndpointRateLimiter } from "./lib/endpoint-rate-limiter.js";
 
-function cleanupMemory() {
-  const now = Date.now();
-  if (now - lastCleanup < MEMORY_CLEANUP_INTERVAL_MS) return;
-  lastCleanup = now;
-  for (const [key, entry] of rateLimitMap) {
-    if (now - entry.start > RATE_LIMIT_WINDOW_MS) {
-      rateLimitMap.delete(key);
-    }
-  }
-}
-
-/** @param {string} key */
-function checkRateLimit(key) {
-  cleanupMemory();
-  const now = Date.now();
-  const hashed = hashIp(key);
-  if (!rateLimitMap.has(hashed) && rateLimitMap.size >= MAX_MEMORY_ENTRIES) {
-    const oldest = rateLimitMap.keys().next().value;
-    if (oldest) rateLimitMap.delete(oldest);
-  }
-  const entry = rateLimitMap.get(hashed);
-  if (!entry || now - entry.start > RATE_LIMIT_WINDOW_MS) {
-    rateLimitMap.set(hashed, { start: now, count: 1 });
-    return true;
-  }
-  entry.count += 1;
-  return entry.count <= RATE_LIMIT_MAX_REPORTS;
-}
+const checkRateLimit = createEndpointRateLimiter({ windowMs: 60_000, max: 50 });
 
 const ALLOWED_ORIGINS = new Set(["https://elysrmedical.store", "https://www.elysrmedical.store"]);
 
