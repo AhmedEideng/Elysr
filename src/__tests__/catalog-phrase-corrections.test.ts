@@ -6,6 +6,11 @@ const byId = (id: string) => products.find((p) => p.id === id)!;
 describe("phrase-only catalog corrections", () => {
   it("preserves every non-copy catalog field, including names, prices, badges and bundles", () => {
     expect(products).toHaveLength(89);
+    // Owner-approved follow-up: Power 36 and Big Penis are each 250 EGP.
+    for (const id of ["m-38", "m-46"]) {
+      expect(byId(id).price).toBe(250);
+      expect(getProductFAQs(byId(id)).some((faq) => faq.answer.includes("250 جنيه"))).toBe(true);
+    }
     const copyFields = new Set(["description", "benefits", "ingredients", "usage"]);
     const fields = products.map((p) =>
       Object.fromEntries(
@@ -15,7 +20,7 @@ describe("phrase-only catalog corrections", () => {
       ),
     );
     expect(createHash("sha256").update(JSON.stringify(fields)).digest("hex")).toBe(
-      "fd2e48803294436100ccb87acf9146e1bbce0e2f3ba2db0988ea608345a6701f",
+      "9593c419affc3b82798499429f220da3c12ba071b8fdc796d000e97b589bb57d",
     );
   });
   it("corrects discrete ingredient and language errors without removing the original descriptions", () => {
