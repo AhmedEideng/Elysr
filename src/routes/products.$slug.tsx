@@ -502,7 +502,7 @@ function ProductPage() {
             </div>
             <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 font-bold text-emerald-700 border border-emerald-200">
               <ShieldCheck className="h-4 w-4" />
-              إرشادات وتحذيرات واضحة
+              إرشادات استخدام واضحة
             </div>
           </div>
 

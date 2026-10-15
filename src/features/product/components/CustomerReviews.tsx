@@ -132,7 +132,7 @@ export function CustomerReviews({
         <div>
           <h2 className="text-xl font-extrabold tracking-tight md:text-2xl">تجارب عملاء حقيقية</h2>
           <p className="mt-0.5 text-xs leading-5 text-muted-foreground md:text-sm">
-            مراجعات موثقة تُعرض بعد مراجعتها واعتمادها — دون أي تقييمات وهمية.
+            مراجعات موثقة تُعرض بعد مراجعتها واعتمادها.
           </p>
         </div>
       </div>

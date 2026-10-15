@@ -49,7 +49,7 @@
 | 🛍️ كتالوج التجار    | **82** منتجًا (RSS + CSV + TXT) مع `product_type` لكل منتج                                                                                                       |
 | ↪️ Redirects        | **175** تحويلًا دائمًا (HTTP 308 على Vercel) (معرّفات قديمة + منتجات محذوفة + slugs معاد تسميتها + 404s اللي طلعت من GSC)                                        |
 | 🖼️ الصور            | 148 صورة WebP أساسية + 269 مصغّرة عبر 3 مقاسات                                                                                                                   |
-| 🧪 الاختبارات       | **387** وحدة (Vitest) + **50** E2E (Playwright) + data-integrity + schema validation                                                                             |
+| 🧪 الاختبارات       | **391** وحدة (Vitest) + **52** E2E (Playwright) + data-integrity + schema validation                                                                             |
 
 ---
 
@@ -99,7 +99,7 @@
 | Routing    | TanStack Router (file-based، 25 ملف مسار)                                                                                              |
 | Styling    | Tailwind CSS 4 (ألوان Oklch، RTL كامل)                                                                                                 |
 | البحث      | Fuse.js (fuzzy، تحميل كسول) + مرادفات اللهجة المصرية (نقط ⇄ قطرات)                                                                     |
-| الاختبارات | Vitest (387) + Playwright (50 E2E) + data-integrity + JSON-LD validator                                                                |
+| الاختبارات | Vitest (391) + Playwright (52 E2E) + data-integrity + JSON-LD validator                                                                |
 | الاستضافة  | Vercel Edge CDN (أساسي) · Express + Docker (نشر ذاتي مدعوم)                                                                            |
 | الطلبات    | Google Apps Script → Google Sheets (ScriptLock + فحص تكرار كامل + هواتف دولية)                                                         |
 | SEO        | 286 صفحة مولّدة · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                                   |
@@ -143,8 +143,8 @@ npm run dev              # → http://localhost:8080
 | `npm run build:ssr`            | بناء + prerender لـ Express الخادم الذاتي              |
 | `npm start` / `start:dev`      | تشغيل الخادم الذاتي (إنتاج / watch)                    |
 | `npm run test`                 | حارس data-integrity (كتالوج، metadata، شبكة redirects) |
-| `npm run test:unit`            | اختبارات Vitest + أمان الـ API (387)                   |
-| `npm run test:e2e`             | باقة Playwright E2E (50)                               |
+| `npm run test:unit`            | اختبارات Vitest + أمان الـ API (391)                   |
+| `npm run test:e2e`             | باقة Playwright E2E (52)                               |
 | `npm run test:schemas`         | مجرّب JSON-LD لكل صفحة مولّدة                          |
 | `npm run test:sources`         | فحص متطلبات المصادر للمقالات الجديدة                   |
 | `npm run test:all`             | integrity + unit + build + schemas + health-check      |
@@ -250,7 +250,7 @@ Elysr/
 │   ├── release.mjs                 # سير bump الإصدار
 │   ├── sync-vercel-redirects.mjs   # مزامنة redirects مع الكتالوج
 │   └── health-check.mjs           # تدقيق الحزم/الصور والروابط وSEO head المولّد
-├── e2e/                     # 50 اختبارًا في 7 ملفات: 24 checkout + 9 محتوى + 2 كريفا + 3 الرئيسية + 3 النمو العضوي + 7 البحث والتحويل + 2 هيلتي
+├── e2e/                     # 52 اختبارًا في 8 ملفات: 24 checkout + 9 محتوى + 2 كريفا + 3 الرئيسية + 3 النمو العضوي + 7 البحث والتحويل + 2 هيلتي + 2 تصحيحات موضعية
 ├── server/index.js           # خادم Express للنشر الذاتي (نفس dist/ + نفس الـ API)
 ├── .github/workflows/ci.yml  # 7 وظائف CI (أدناه)
 ├── public/
@@ -279,7 +279,7 @@ Elysr/
 | الوظيفة                                     | البوابة                                                                      |
 | ------------------------------------------- | ---------------------------------------------------------------------------- |
 | 🔗 Corpus Source Liveness                   | روابط مصادر المقالات الفريدة (3 محاولات بتراجع + تصنيف السلطات غير المستقرة) |
-| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 387 اختبار وحدة/API · حارس الكتالوج+البيانات+شبكة redirects |
+| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 391 اختبار وحدة/API · حارس الكتالوج+البيانات+شبكة redirects |
 | 🛡 Security Audit                            | `npm audit --audit-level=high` على الشجرة المقفلة                            |
 | 🏗 Build • Prerender • Sitemaps              | Vite + 286 صفحة مولّدة + sitemaps                                            |
 | 🚦 Lighthouse Performance Budget            | موازِن أداء LHCI على الموقع المبنى                                           |
@@ -503,3 +503,7 @@ a(
 - Analytics list names never embed raw search input. `checkout_open`, `checkout_start`, `checkout_submit` distinguish form stages; `begin_checkout` occurs once on first editing per form session. `order_request` records duration and a fixed outcome only, never customer fields.
 - Official `web-vitals` computes CLS/INP/LCP once per document. `metric_id` supports deduplication; SPA route changes are not new document measurements. The old ten-second approximation is removed.
 - Bundles, their membership and 20% discount remain unchanged pending a separately approved replacement list and cost data.
+
+## التصحيحات الموضعية للكتالوج
+
+بعد رفض إعادة الكتابة الواسعة، أذن المالك بالمراجعة الثانية وتصحيح العبارات فقط ثم الدفع. مقارنة بالنسخة f5d889f، بقي 58 وصفًا حرفيًا وصُححت عبارات في 31 وصفًا؛ تغيّرت حقول نصية في 46 منتجًا. الأسماء والشارات والأسعار والمخزون والروابط والصور وكلمات البحث والباقات ثابتة. لم تُخترع جرعات رقمية؛ الاحتياطات الأساسية وحدود المعلومات باقية. وصف هيلتي النسائي ومكوناته ووصف هامر محفوظة. الاختبارات 391 وحدة و52 متصفح، مع إبقاء الإصدار 2.3.3 والكاش 106. [النطاق والاستثناءات والتحقق](docs/catalog-phrase-corrections.ar.md).
