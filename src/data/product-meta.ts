@@ -97,4 +97,5 @@ export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "d-05": { form: "device", hook: "مضخة يدوية بحلقات سيليكون لصلابة فيزيائية فورية آمنة" },
   "d-06": { form: "device", hook: "جهاز شد وإطالة بأحزمة سيليكون لاستخدام تدريجي منزلي" },
   "d-07": { form: "device", hook: "مضخة كهربائية تلقائية بشحن USB لشفط متزن وسلس" },
+  "d-08": { form: "device", hook: "مضخة كهربائية بشاشة رقمية و٩ سرعات" },
 };

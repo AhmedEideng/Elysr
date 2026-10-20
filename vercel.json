@@ -203,6 +203,11 @@
   ],
   "redirects": [
     {
+      "source": "/products/d-08",
+      "destination": "/products/digital-electric-vacuum-pump-9-speeds",
+      "permanent": true
+    },
+    {
       "source": "/products/m-01",
       "destination": "/products/hammer-of-thor-capsules",
       "permanent": true

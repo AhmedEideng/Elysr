@@ -2108,4 +2108,14 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://elysrmedical.store/en/products/devices" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://elysrmedical.store/products/devices" />
   </url>
+  <url>
+    <loc>https://elysrmedical.store/products/digital-electric-vacuum-pump-9-speeds</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://elysrmedical.store/images/digital-electric-vacuum-pump-9-speeds.webp</image:loc>
+      <image:title>مضخة التفريغ الكهربائية الاحترافية بشاشة رقمية — ٩ سرعات</image:title>
+    </image:image>
+  </url>
 </urlset>

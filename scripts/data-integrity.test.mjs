@@ -254,8 +254,8 @@ try {
 
   assert.equal(
     products.length,
-    83,
-    "Expected 83 products (five previously deleted products restored; five deleted products remain — black-horse-long-time-gel removed 2026-09-29 by owner decision)",
+    84,
+    "Expected 84 products including the 9-speed digital electric pump (d-08)",
   );
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
   // 🧭 Anti-drift: أرقام الكتالوج/المحتوى hardcoded في نصوص التسويق = درفت
@@ -489,8 +489,8 @@ try {
   }, {});
   assert.deepEqual(
     categories,
-    { men: 53, women: 23, devices: 7 },
-    "Unexpected category split (83 = 53 men / 23 women / 7 devices)",
+    { men: 53, women: 23, devices: 8 },
+    "Unexpected category split (84 = 53 men / 23 women / 8 devices)",
   );
 
   // (2026-09-15) JSON-LD OfferCatalog في index.html لازم يطابق كتالوج
