@@ -528,6 +528,21 @@ try {
     assert.deepEqual(duplicates(ids), [], "Duplicate @id in index.html JSON-LD graph");
   }
 
+  const { getArchivedReviewSummary, getProductReviews } = await vite.ssrLoadModule(
+    "/src/lib/legacy-product-reviews.ts",
+  );
+  for (const product of products) {
+    const archive = getArchivedReviewSummary(product.slug);
+    if (archive) {
+      assert.equal(product.rating, archive.rating, `Archive rating mismatch: ${product.slug}`);
+      assert.equal(product.reviews, archive.reviewCount, `Archive count mismatch: ${product.slug}`);
+    } else {
+      assert.equal(product.rating, undefined, `Unbacked rating: ${product.slug}`);
+      assert.equal(product.reviews, undefined, `Unbacked review count: ${product.slug}`);
+      assert.deepEqual(getProductReviews(product.slug, product.category).reviews, []);
+    }
+  }
+
   // Historical ratings are restored only for the archived products approved
   // by the owner. New products must not receive invented defaults or counts.
   for (const product of products) {

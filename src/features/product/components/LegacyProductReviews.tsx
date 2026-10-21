@@ -14,12 +14,14 @@ export function LegacyProductReviews({
   slug: string;
   maxVisibleReviews?: number;
 }) {
-  // تقييمات فريدة وثابتة لكل منتج (اختيار حتمي بحسب slug المنتج)
+  // Product-specific archive only; never substitute reviews from another product.
   const { reviews } = getProductReviews(
     slug,
     category,
     Math.min(reviewsCount, Math.max(1, maxVisibleReviews)),
   );
+
+  if (!reviews.length) return null;
 
   return (
     <section className="mt-8 mb-8 rounded-[2rem] border border-border/50 bg-card p-6 md:p-8 shadow-sm">

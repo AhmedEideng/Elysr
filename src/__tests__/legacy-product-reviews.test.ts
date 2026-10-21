@@ -1,14 +1,33 @@
+import { products } from "@/data/products";
 import { describe, expect, it } from "vitest";
-import { getProductReviews, reviewDatePublished } from "@/lib/legacy-product-reviews";
+import {
+  getProductReviews,
+  getArchivedReviewSummary,
+  reviewDatePublished,
+} from "@/lib/legacy-product-reviews";
 
 describe("archived customer reviews", () => {
-  it("returns a stable, non-empty review set for an archived product", () => {
-    const first = getProductReviews("hammer-of-thor-capsules", "men");
-    const second = getProductReviews("hammer-of-thor-capsules", "men");
+  it.each([
+    "hammer-of-thor-capsules",
+    "kreva-gel-for-men",
+    "dooz-14000-delay-cream",
+    "unknown-product",
+  ])("never borrows category reviews for %s", (slug) => {
+    expect(getProductReviews(slug, "men", 6)).toEqual({ reviews: [], rating: 0, reviewCount: 0 });
+    expect(getArchivedReviewSummary(slug)).toBeNull();
+  });
 
-    expect(first.reviews.length).toBeGreaterThanOrEqual(3);
-    expect(first).toEqual(second);
-    expect(first.reviews.every((review) => review.rating >= 1 && review.rating <= 5)).toBe(true);
+  it("derives catalog summaries only from complete product-specific archives", () => {
+    for (const product of products) {
+      const summary = getArchivedReviewSummary(product.slug);
+      if (summary) {
+        expect(product.rating).toBe(summary.rating);
+        expect(product.reviews).toBe(summary.reviewCount);
+      } else {
+        expect(product).not.toHaveProperty("rating");
+        expect(product).not.toHaveProperty("reviews");
+      }
+    }
   });
 
   it("preserves the supplied Vitamax archive and calculates its 4.5 average", () => {
