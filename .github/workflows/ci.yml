@@ -69,6 +69,11 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # Integrity checks compare generated catalogs against the current TS source.
+      # Generate inside the runner; do not commit or publish Merchant feeds here.
+      - name: Generate catalog artifacts for integrity checks
+        run: node scripts/generate-sitemap.mjs
+
       - name: Data integrity tests
         run: npm test
 
