@@ -3,9 +3,25 @@ import { join } from "node:path";
 
 import { expect, test } from "@playwright/test";
 
+import catalog from "../api/lib/products-db.json" with { type: "json" };
+import checkoutConfig from "../api/lib/config-db.json" with { type: "json" };
+
 test("customer can add a product, update quantity, calculate shipping and submit", async ({
   page,
 }) => {
+  // Derive expectations from the catalog instead of freezing an old selling price.
+  const product = catalog.find((item) => item.id === "m-60");
+  if (!product) throw new Error("Kreva is missing from the checkout test catalog");
+  const quantity = 2;
+  const subtotalBeforeDiscount = product.price * quantity;
+  const tier = checkoutConfig.PROMO_TIERS.find((item) => subtotalBeforeDiscount >= item.threshold);
+  const discount = tier ? Math.round(subtotalBeforeDiscount * tier.discount) : 0;
+  const destination = checkoutConfig.GOVERNORATE_SHIPPING.find((item) => item.name === "القاهرة");
+  if (!destination) throw new Error("Cairo shipping is missing from checkout config");
+  const shipping =
+    subtotalBeforeDiscount >= checkoutConfig.FREE_SHIPPING_THRESHOLD ? 0 : destination.shipping;
+  const total = subtotalBeforeDiscount - discount + shipping;
+
   let submittedPayload: Record<string, unknown> | undefined;
   await page.route("**/api/submit-order", async (route) => {
     submittedPayload = route.request().postDataJSON() as Record<string, unknown>;
@@ -30,21 +46,21 @@ test("customer can add a product, update quantity, calculate shipping and submit
   await page.locator("select").selectOption("القاهرة");
   await page.getByPlaceholder("المدينة، الشارع، رقم العمارة").fill("القاهرة، شارع الاختبار 10");
 
-  await expect(page.getByText("650 ج.م", { exact: true }).last()).toBeVisible();
+  await expect(page.getByText(`${total} ج.م`, { exact: true }).last()).toBeVisible();
   await page.getByRole("button", { name: /تأكيد الطلب المباشر/ }).click();
 
   await expect(page).toHaveURL(/\/order-confirmed$/);
   expect(submittedPayload).toBeTruthy();
   expect((submittedPayload!.items as Array<{ id: string; qty: number }>)[0]).toMatchObject({
     id: "m-60",
-    qty: 2,
+    qty: quantity,
   });
   expect(submittedPayload).toMatchObject({
     governorate: "القاهرة",
-    subtotalBeforeDiscount: 600,
-    discount: 0,
-    shipping: 50,
-    total: 650,
+    subtotalBeforeDiscount,
+    discount,
+    shipping,
+    total,
   });
 });
 
