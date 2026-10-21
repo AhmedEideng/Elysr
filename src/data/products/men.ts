@@ -182,7 +182,6 @@ export const men: Product[] = [
     slug: "dooz-14000-delay-cream",
     name: "كريم دوز 14000 الألماني الأصلي للتأخير للرجال (20 جم)",
     nameEn: "Dooz 14000 Delay Cream for Men (20g)",
-    titleLatin: "Dooz 14000",
     category: "men",
     price: 220,
     description:
@@ -1401,7 +1400,6 @@ export const men: Product[] = [
     slug: "kreva-gel-for-men",
     name: "جل كريفا الألماني المتطور للرجال (50 جم)",
     nameEn: "Kreva Gel – Advanced Formula for Men",
-    titleLatin: "Kreva Gel",
     category: "men",
     searchAliases: ["جيل"],
     price: 250,
