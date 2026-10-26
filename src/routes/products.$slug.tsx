@@ -34,6 +34,7 @@ import {
 import { ProductCard } from "@/components/ProductCard";
 import { CrossSellBundle } from "@/components/sections/CrossSellBundle";
 import { FAQ } from "@/components/FAQ";
+import { getProductFAQs } from "@/data/product-faqs";
 import { CustomerReviews } from "@/features/product/components/CustomerReviews";
 import { LegacyProductReviews } from "@/features/product/components/LegacyProductReviews";
 import { VISIBLE_REVIEW_COUNT } from "@/lib/legacy-product-reviews";
@@ -671,7 +672,7 @@ function ProductPage() {
       />
 
       {/* ── FAQ Section ── */}
-      <FAQ />
+      <FAQ items={getProductFAQs(product)} />
 
       {related.length > 0 && (
         <section className="mt-12">

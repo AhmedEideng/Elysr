@@ -526,7 +526,7 @@ async function prerender() {
       "/src/data/editorial-trust-signals.ts",
     );
     const { BUNDLE_DISCOUNT_RATE } = await vite.ssrLoadModule("/src/lib/bundle-discount.ts");
-    const { productFAQs } = await vite.ssrLoadModule("/src/data/product-faqs.ts");
+    const { getProductFAQs } = await vite.ssrLoadModule("/src/data/product-faqs.ts");
     const {
       GOVERNORATE_SHIPPING,
       SHIPPING_DELIVERY_TEXT,
@@ -1498,7 +1498,7 @@ ${homeArticlesBody}
         <section><h2>كيف يتم الشحن بسرية؟</h2><ul><li>يتم تغليف الطلب في عبوة محايدة بدون ذكر اسم المنتج.</li><li>لا تظهر طبيعة المنتج على الشحنة أو من الخارج.</li><li>يتم التواصل معك لتأكيد التفاصيل قبل الشحن.</li><li>بياناتك تُستخدم لإتمام الطلب والتوصيل فقط.</li></ul></section>
         <p><a href="${categoryUrl}">تصفح كل ${esc(categoryName)}</a></p>
         ${bundleBody}
-        <section><h2>الأسئلة الشائعة</h2>${productFAQs
+        <section><h2>الأسئلة الشائعة</h2>${getProductFAQs(product)
           .map((faq) => `<p><strong>${esc(faq.question)}</strong></p><p>${esc(faq.answer)}</p>`)
           .join("")}</section>
         ${relatedBody}

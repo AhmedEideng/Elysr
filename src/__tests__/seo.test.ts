@@ -196,3 +196,18 @@ describe("product metadata templates", () => {
     expect(plain).toContain("شحن سري ودفع عند الاستلام");
   });
 });
+
+// Kreva's useful product content must not regress into shipping-only copy.
+describe("Kreva product search context", () => {
+  it("keeps the price, title and URL stable without restoring unbacked ratings", () => {
+    const kreva = products.find((item) => item.id === "m-60")!;
+    expect(kreva.price).toBe(250);
+    expect(kreva.slug).toBe("kreva-gel-for-men");
+    expect(kreva.titleLatin).toBeUndefined();
+    expect(kreva.rating).toBeUndefined();
+    expect(kreva.reviews).toBeUndefined();
+    expect(kreva.searchAliases).toContain("كريفا جيل");
+    expect(kreva.description).toContain("إحساس مزدوج متدرج");
+    expect(kreva.description).not.toMatch(/راجع.*العبوة|حسب العبوة/);
+  });
+});

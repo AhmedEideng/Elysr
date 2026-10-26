@@ -146,6 +146,8 @@ const DEVICE_ARTICLES = ["vacuum-pump-complete-guide", "prostate-health-sexual-f
  * Get relevant article slugs for a product (2 articles)
  */
 export function getArticlesForProduct(product: Product): string[] {
+  // Keep educational context stable when product copy changes; not an efficacy claim.
+  if (product.id === "m-60") return ["premature-ejaculation", "delay-sprays-safe-use"];
   const text = `${product.name} ${product.nameEn} ${product.slug} ${product.description}`;
   const matched = new Set<string>();
 

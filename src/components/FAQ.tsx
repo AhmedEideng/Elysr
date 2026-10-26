@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronDown } from "lucide-react";
-import { productFAQs } from "@/data/product-faqs";
+import { productFAQs, type ProductFAQ } from "@/data/product-faqs";
 
 /**
  * FAQ Accordion مع ارتفاع ديناميكي.
@@ -8,14 +8,14 @@ import { productFAQs } from "@/data/product-faqs";
  * الإصلاح: كان يستخدم `max-h-40` ثابت مما يقطع الإجابات الطويلة.
  * الآن يقيس الارتفاع الحقيقي للمحتوى ويستخدمه في الـ transition.
  */
-export function FAQ() {
+export function FAQ({ items = productFAQs }: { items?: ProductFAQ[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <section className="mt-12 border-t pt-8" id="faq">
       <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">الأسئلة الشائعة</h2>
       <div className="max-w-2xl mx-auto space-y-4" role="list">
-        {productFAQs.map((faq, index) => (
+        {items.map((faq, index) => (
           <FaqItem
             key={index}
             question={faq.question}

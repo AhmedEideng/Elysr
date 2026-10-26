@@ -64,7 +64,7 @@ export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "m-55": { form: "topical", hook: "بخاخ هندي بليدوكايين لتأخير موضعي دون خدر كامل" },
   "m-56": { form: "oral", hook: "ساشيه عسل ملكي جبلي بالكرز في جرعة فردية" },
   "m-59": { form: "oral", hook: "أقراص أسترالية بتركيبة عشبية" },
-  "m-60": { form: "topical", hook: "جل مع زيت الكافيين والمينثول" },
+  "m-60": { form: "topical", hook: "جل كريفا موضعي للرجال بحجم 50 جم" },
   "m-61": { form: "oral", hook: "شوكولاتة تركية بتركيبة عشبية" },
   "m-62": { form: "topical", hook: "جل 50 جم مع الألوفيرا والبابونج" },
   "w-01": { form: "topical", hook: "بخاخ مائي للاستخدام الخارجي" },
