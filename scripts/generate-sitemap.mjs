@@ -687,6 +687,11 @@ ${optionalIdentifiers ? `${optionalIdentifiers}\n` : ""}      <g:identifier_exis
 User-agent: *
 Allow: /
 
+# نسخ الصور المرقّمة (?v=N) تتغيّر مع كل إصدار وتخلق روابط مكرّرة في تقرير
+# «تم الزحف - لم تتم الفهرسة». امنع زحفها؛ الصورة الأصلية بدون ?v= تبقى
+# قابلة للزحف والفهرسة عبر sitemap-images وبيانات المنتج.
+Disallow: /images/*?v=*
+
 # ملاحظة: صفحات /cart و /wishlist و /order-confirmed و /thank-you تحمل وسم
 # noindex في HTML مباشرة. لذا لا نضعها في Disallow هنا — لأن منع الزحف
 # (Disallow) يمنع Google من قراءة وسم noindex، والتكرار بينهما غير مفيد.
@@ -711,6 +716,7 @@ Disallow: /
 
 User-agent: Googlebot-Image
 Allow: /images/
+Disallow: /images/*?v=*
 Allow: /logo.png
 Allow: /og-default.webp
 Allow: /apple-touch-icon.png
