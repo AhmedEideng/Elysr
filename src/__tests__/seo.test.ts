@@ -211,3 +211,29 @@ describe("Kreva product search context", () => {
     expect(kreva.description).not.toMatch(/راجع.*العبوة|حسب العبوة/);
   });
 });
+
+// Package-1 growth fixes: query-aligned first benefits (meta source) and
+// product-specific FAQs for the high-impression / low-CTR pages.
+describe("high-opportunity product pages", () => {
+  it("keeps query-aligned meta benefits and specific FAQs", async () => {
+    const { getProductFAQs } = await import("@/data/product-faqs");
+    const byId = (id: string) => products.find((item) => item.id === id)!;
+
+    expect(byId("w-17").benefits[0]).toContain("فياجرا للنساء");
+    expect(byId("m-30").benefits[0]).toContain("إملا");
+    expect(byId("m-07").benefits[0]).toContain("دوز 14000");
+    expect(byId("w-03").benefits[0]).toContain("سبانش فلاي");
+    expect(byId("m-01").benefits[0]).toContain("هامر أوف ثور");
+
+    const hammerFaqs = getProductFAQs(byId("m-01"));
+    expect(hammerFaqs.some((f) => f.question.includes("طريقة استعمال هامر أوف ثور"))).toBe(true);
+    expect(hammerFaqs.some((f) => f.answer.includes("520 جنيه"))).toBe(true);
+
+    const doozFaqs = getProductFAQs(byId("m-07"));
+    expect(doozFaqs.some((f) => f.question.includes("Dooz Gel"))).toBe(true);
+
+    for (const product of products) {
+      expect(makeProductMetaDescription(product).length).toBeLessThanOrEqual(155);
+    }
+  });
+});
