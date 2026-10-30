@@ -313,6 +313,7 @@ mountApi("/api/submit-review", "../api/submit-review.js");
 mountApi("/api/reviews", "../api/reviews.js");
 mountApi("/api/csp-report", "../api/csp-report.js");
 mountApi("/api/errors", "../api/errors.js");
+mountApi("/api/ga-pageview", "../api/ga-pageview.js");
 app.use("/api", (_req, res) => res.status(404).json({ error: "API route not found" }));
 
 // ── Vercel platform stubs (self-hosted) ──

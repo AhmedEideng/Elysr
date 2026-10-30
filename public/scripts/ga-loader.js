@@ -12,13 +12,23 @@
       };
   }
 
+  // First-party measurement identity shared with the server-side fallback
+  // (/api/ga-pageview): if the cookie exists, gtag adopts the same client_id
+  // so a fallback page_view and later client events stay one GA4 user.
+  function readClientIdCookie() {
+    var match = document.cookie.match(/(?:^|; )elysr_ga_cid=(\d+\.\d+)/);
+    return match ? match[1] : null;
+  }
+
   function configureGA() {
     if (configured || typeof window === "undefined") return;
     configured = true;
     window.gtag("js", new Date());
     // GA4 config is queued before the SPA can emit its first page_view.
     // send_page_view=false is intentional: the router sends one page_view per route.
+    var sharedClientId = readClientIdCookie();
     window.gtag("config", measurementId, {
+      ...(sharedClientId ? { client_id: sharedClientId } : {}),
       transport_type: "beacon",
       send_page_view: false,
       cookie_domain: "auto",
@@ -35,8 +45,52 @@
     scriptLoaded = true;
     var s = document.createElement("script");
     s.async = true;
+    s.onload = function () {
+      window.__elysrGaLoaded = true;
+    };
     s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(measurementId);
     document.head.appendChild(s);
+  }
+
+  // Server-side fallback: if gtag.js is blocked or never loads, this visit
+  // would vanish from GA4. Send one first-party beacon instead; the server
+  // forwards it via Measurement Protocol. Fires only on failure, so normal
+  // visits are never double-counted.
+  var fallbackSent = false;
+  function sendServerFallback() {
+    if (window.__elysrGaLoaded || fallbackSent) return;
+    fallbackSent = true;
+    try {
+      var clientId = readClientIdCookie();
+      if (!clientId) {
+        clientId = Math.floor(Math.random() * 2147483647) + "." + Math.floor(Date.now() / 1000);
+        document.cookie =
+          "elysr_ga_cid=" + clientId + "; Max-Age=63072000; Path=/; SameSite=Lax; Secure";
+      }
+      var sessionId = window.sessionStorage.getItem("elysr_ga_sid");
+      if (!sessionId) {
+        sessionId = String(Math.floor(Date.now() / 1000));
+        window.sessionStorage.setItem("elysr_ga_sid", sessionId);
+      }
+      var payload = JSON.stringify({
+        client_id: clientId,
+        session_id: sessionId,
+        page_path: window.location.pathname,
+        page_title: document.title,
+      });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon("/api/ga-pageview", new Blob([payload], { type: "application/json" }));
+      } else {
+        fetch("/api/ga-pageview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload,
+          keepalive: true,
+        });
+      }
+    } catch (e) {
+      /* measurement fallback must never break the page */
+    }
   }
 
   if (typeof window !== "undefined") {
@@ -61,5 +115,10 @@
       window.addEventListener("load", startOnce, { once: true });
       setTimeout(startOnce, 3000);
     }
+    // Give gtag.js a fair window (load/3s start + network); only if it truly
+    // never arrived do we report the landing page_view from the server.
+    setTimeout(sendServerFallback, 8000);
+    // …or the moment the visitor leaves, whichever comes first.
+    window.addEventListener("pagehide", sendServerFallback);
   }
 })();
