@@ -237,3 +237,36 @@ describe("high-opportunity product pages", () => {
     }
   });
 });
+
+// Package-2: same treatment for the next high-impression / low-CTR cluster.
+describe("package-2 product pages", () => {
+  it("keeps query-aligned meta benefits and differentiating FAQs", async () => {
+    const { getProductFAQs } = await import("@/data/product-faqs");
+    const byId = (id: string) => products.find((item) => item.id === id)!;
+
+    for (const id of [
+      "m-15",
+      "w-02",
+      "m-05",
+      "m-48",
+      "m-32",
+      "w-05",
+      "m-12",
+      "m-17",
+      "m-37",
+      "m-45",
+    ]) {
+      expect(getProductFAQs(byId(id)).length, id).toBeGreaterThan(4);
+      expect(makeProductMetaDescription(byId(id)).length, id).toBeLessThanOrEqual(155);
+    }
+    expect(
+      getProductFAQs(byId("m-48")).some((f) => f.question.includes("الفرق بين تيتان جل")),
+    ).toBe(true);
+    expect(
+      getProductFAQs(byId("m-32")).some((f) => f.question.includes("الفرق بين تيتان جل جولد")),
+    ).toBe(true);
+    expect(
+      getProductFAQs(byId("w-05")).some((f) => f.question.includes("العسل الملكي للنساء")),
+    ).toBe(true);
+  });
+});
