@@ -1789,7 +1789,7 @@ export const seoLandingPages: SeoLandingPage[] = [
       },
     ],
     primaryKeyword: "سيلدينافيل دابوكستين",
-    relatedKeywords: ["حبوب انتصاب وتأخير", "سيلدينافيل ودابوكستين", "130/60"],
+    relatedKeywords: ["حبوب انتصاب وتأخير", "سيلدينافيل ودابوكستين", "هارد أون 190", "130/60"],
   },
   {
     slug: "erection-delay-combo-products",

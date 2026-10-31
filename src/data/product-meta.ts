@@ -45,7 +45,7 @@ export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "m-31": { form: "topical", hook: "جل مائي 50 جم مع فيتامين E" },
   "m-32": { form: "topical", hook: "جل موضعي مع فيتامين E" },
   "m-33": { form: "topical", hook: "كريم موضعي مع الجينسنج والجنكو" },
-  "m-34": { form: "oral", hook: "أقراص بسيلدينافيل 130 مجم ودابوكستين 60 مجم" },
+  "m-34": { form: "oral", hook: "أقراص هارد أون 190 مجم (سيلدينافيل 130 + دابوكستين 60)" },
   "m-35": { form: "topical", hook: "كريم موضعي بزيوت القرنفل والحلبة" },
   "m-37": { form: "oral", hook: "أقراص بتادالافيل 20 مجم في عبوة 30 قرصاً" },
   "m-38": { form: "oral", hook: "أقراص تجمع سيلدينافيل ودابوكستين" },
