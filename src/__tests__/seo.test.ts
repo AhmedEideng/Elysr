@@ -155,7 +155,7 @@ describe("product metadata templates", () => {
   });
 
   it("includes a raw excerpt of the first benefit for every catalog product", () => {
-    expect(products).toHaveLength(85);
+    expect(products).toHaveLength(86);
 
     for (const catalogProduct of products) {
       const rawBenefit = catalogProduct.benefits?.[0]?.trim().replace(/\s+/g, " ");

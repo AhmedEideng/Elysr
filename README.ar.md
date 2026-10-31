@@ -30,7 +30,7 @@
 ### لماذا "بلا قاعدة بيانات"؟
 
 - ✅ كل البيانات (منتجات، مقالات، صفحات SEO) في ملفات **TypeScript** ثابتة
-- ✅ توليد **274 صفحة تطبيقية** كاملة في وقت البناء
+- ✅ توليد **275 صفحة تطبيقية** كاملة في وقت البناء
 - ✅ استضافة على **Vercel Edge CDN** (سرعة + تكلفة منخفضة) + بديل **Express + Docker** للنشر الذاتي
 - ✅ الطلبات والمراجعات تُرسل إلى **Google Sheets** عبر Google Apps Script (ScriptLock + فحص تكرار كامل)
 
@@ -40,15 +40,15 @@
 
 | المقياس                   | القيمة                                                                                               |
 | ------------------------- | ---------------------------------------------------------------------------------------------------- |
-| 📦 المنتجات               | **85** (54 رجال · 23 نساء · 8 أجهزة) — 4 عناصر تاريخية ما زالت محذوفة؛ تمت إعادة 6 منتجات بقرار المالك       |
-| 🛒 تغطية الكتالوج         | **85** — **85** في كتالوج الموقع · **79** في Merchant feed (6 منتجات بمواد دوائية موصوفة مستثناة من الـ feed فقط — قرار المالك 2026-09-28؛ صفحاتها منشورة ومفهرسة)                           |
+| 📦 المنتجات               | **86** (55 رجال · 23 نساء · 8 أجهزة) — 4 عناصر تاريخية ما زالت محذوفة؛ تمت إعادة 6 منتجات بقرار المالك       |
+| 🛒 تغطية الكتالوج         | **86** — **86** في كتالوج الموقع · **80** في Merchant feed (6 منتجات بمواد دوائية موصوفة مستثناة من الـ feed فقط — قرار المالك 2026-09-28؛ صفحاتها منشورة ومفهرسة)                           |
 | 📚 المقالات               | **63** مقالًا توعويًا بمصادر طبية موثوقة (NIH/Mayo/NHS/…)                                            |
 | 🎯 صفحات الدليل           | **106** صفحة دليل (قوائم أسعار ومقارنات منتجات وصفحات توصيل للمناطق؛ مع تحذيرات طبية للأدلة الدوائية)                                                             |
-| 📄 الصفحات المولّدة       | **274** (16 ثابتة + 85 صفحة منتج + 63 مقالًا + 106 دليلًا + 4 صفحات إنجليزية)                                                     |
-| 🗺️ روابط sitemap          | **270** (البحث الشامل مشمول عبر `SearchAction` في JSON-LD، مش قالب sitemap)                          |
-| 🛍️ كتالوج التجار          | **79** منتجًا (RSS + CSV + TXT) مع `product_type` لكل منتج                                                                      |
-| ↪️ Redirects              | **179** قاعدة 301 دائمة (معرّفات قديمة + منتجات محذوفة + slugs معاد تسميتها + 404s اللي طلعت من GSC) |
-| 🖼️ الصور                  | 144 صورة WebP أساسية + 257 مصغّرة عبر 3 مقاسات                                                      |
+| 📄 الصفحات المولّدة       | **275** (16 ثابتة + 86 صفحة منتج + 63 مقالًا + 106 دليلًا + 4 صفحات إنجليزية)                                                     |
+| 🗺️ روابط sitemap          | **271** (البحث الشامل مشمول عبر `SearchAction` في JSON-LD، مش قالب sitemap)                          |
+| 🛍️ كتالوج التجار          | **80** منتجًا (RSS + CSV + TXT) مع `product_type` لكل منتج                                                                      |
+| ↪️ Redirects              | **180** قاعدة 301 دائمة (معرّفات قديمة + منتجات محذوفة + slugs معاد تسميتها + 404s اللي طلعت من GSC) |
+| 🖼️ الصور                  | 145 صورة WebP أساسية + 260 مصغّرة عبر 3 مقاسات                                                      |
 | 🧪 الاختبارات             | **303** وحدة (Vitest) + **19** E2E (Playwright) + data-integrity + schema validation                 |
 
 ---
@@ -58,7 +58,7 @@
 ```
 المتصفح ──→ Vercel Edge CDN (dist/ ثابت)
                 │
-                ├── 274 صفحة مولّدة مسبقًا (SEO meta + JSON-LD كاملة)
+                ├── 275 صفحة مولّدة مسبقًا (SEO meta + JSON-LD كاملة)
                 ├── /search?q=…          (SPA — بحث الكتالوج)
                 │
                 ├── /api/submit-order  ──┐
@@ -94,7 +94,7 @@
 | الاختبارات | Vitest (303) + Playwright (19 E2E) + data-integrity + JSON-LD validator                                                                 |
 | الاستضافة  | Vercel Edge CDN (أساسي) · Express + Docker (نشر ذاتي مدعوم)                                                                             |
 | الطلبات    | Google Apps Script → Google Sheets (ScriptLock + فحص تكرار كامل + هواتف دولية)                                                          |
-| SEO        | 274 صفحة مولّدة · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                             |
+| SEO        | 275 صفحة مولّدة · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                             |
 | الصور      | WebP فقط (sharp، 700–800px، q45–55) + alt/title وصفية                                                                                   |
 | الأمان     | CSP · HSTS · COOP/OAC · Report-To · NEL · CORS صارم · rate limits بمعرّفات IP مُجزّأة · HMAC لقراءة المراجعات · error tracking بلا PII |
 
@@ -130,7 +130,7 @@ npm run dev              # → http://localhost:8080
 | الأمر                     | الوصف                                                        |
 | ------------------------- | ------------------------------------------------------------ |
 | `npm run dev`             | خادم التطوير (port 8080)                                     |
-| `npm run build`           | بناء الإنتاج + sitemaps + prerender لـ 274 صفحة        |
+| `npm run build`           | بناء الإنتاج + sitemaps + prerender لـ 275 صفحة        |
 | `npm run preview`         | معاينة بناء الإنتاج محليًا                                   |
 | `npm run build:ssr`       | بناء + prerender لـ Express الخادم الذاتي                    |
 | `npm start` / `start:dev` | تشغيل الخادم الذاتي (إنتاج / watch)                          |
@@ -174,7 +174,7 @@ npm run dev              # → http://localhost:8080
 
 ### 🛡️ امتثال المنتجات والمحتوى
 
-- **ظهور الكتالوج** — الكتالوج يحتوي 85 منتجًا؛ أربعة عناصر تاريخية ما زالت
+- **ظهور الكتالوج** — الكتالوج يحتوي 86 منتجًا؛ أربعة عناصر تاريخية ما زالت
   محذوفة، والمنتجات الخمسة التي أعادها المالك تظهر طبيعيًا. لا توجد سياسة حظر
   استثناء Merchant feed للمواد الدوائية الموصوفة فقط (قرار مالك) — صفحاتها تبقى منشورة.
 - **حارس العبارات الطبية في CI** — قائمة محكّمة من العبارات المطلقة تُفحص عبر
@@ -198,7 +198,7 @@ Elysr/
 │   │   └── Accessibility.tsx # Skip-to-content + Live regions + focus trap
 │   ├── features/product/     # CustomerReviews + مكونات المنتج + hooks/use-product-image-state
 │   ├── data/
-│   │   ├── products.ts       # 85 منتجًا + محددات البحث والمرادفات
+│   │   ├── products.ts       # 86 منتجًا + محددات البحث والمرادفات
 │   │   ├── products/         # men.ts · women.ts · devices.ts (مصدر الكتالوج)
 │   │   ├── articles.ts       # 63 مقالًا بمصادر موثوقة
 │   │   ├── landing-pages.ts  # 106 صفحة دليل (مصدر build؛ تُقدّم JSON لكل slug وقت التشغيل)
@@ -230,8 +230,8 @@ Elysr/
 │       ├── request-guards.js         # فحوص origin وحجم payload المشتركة
 │       └── request-ip.js             # استخراج IP موثوق من المنصة
 ├── scripts/
-│   ├── prerender-seo.mjs           # 274 صفحة HTML + JSON-LD (Product/ItemList/FAQ/Breadcrumb)
-│   ├── generate-sitemap.mjs        # sitemaps (270) + feed (79) + robots + security.txt
+│   ├── prerender-seo.mjs           # 275 صفحة HTML + JSON-LD (Product/ItemList/FAQ/Breadcrumb)
+│   ├── generate-sitemap.mjs        # sitemaps (271) + feed (80) + robots + security.txt
 │   ├── check-source-links.mjs      # حيوية المصادر الكاملة (3 محاولات + تصنيف السلطات)
 │   ├── validate-schemas.mjs        # مجرّب JSON-LD لكل مخططات كل الصفحات
 │   ├── validate-article-sources.mjs # فحص دعم الادعاءات بالمصادر (مقالات جديدة)
@@ -246,9 +246,9 @@ Elysr/
 ├── server/index.js           # خادم Express للنشر الذاتي (نفس dist/ + نفس الـ API)
 ├── .github/workflows/ci.yml  # 5 وظائف CI (أدناه)
 ├── public/
-│   ├── images/               # 144 WebP أساسية + 257 مصغّرة في thumbs/ وthumbs-180/ وthumbs-120/
+│   ├── images/               # 145 WebP أساسية + 260 مصغّرة في thumbs/ وthumbs-180/ وthumbs-120/
 │   ├── landing-pages/        # 96 JSON لكل slug (مصدر بيانات وقت التشغيل)
-│   ├── sitemap.xml           # 270 رابط
+│   ├── sitemap.xml           # 271 رابط
 │   ├── sitemap-images.xml    # 141 رابط صورة
 │   ├── sitemap-index.xml
 │   ├── sw.js                 # kill-switch هجرة PWA (يلغي نفسه، network-only)
@@ -256,7 +256,7 @@ Elysr/
 │   └── .well-known/security.txt
 ├── google-apps-script.gs     # الـ webhook: طلبات + مراجعات + تحقق HMAC + سر كتابة
 │                             # + دالة trigger التنظيف اليومي (setupAutoCleanupTrigger)
-├── vercel.json               # 12 مجموعة headers أمان + 179 redirect + rewrites
+├── vercel.json               # 12 مجموعة headers أمان + 180 redirect + rewrites
 ├── Dockerfile · docker-compose.yml
 ├── SECURITY.md · CHANGELOG.md · ANALYSIS.md
 └── index.html
@@ -273,7 +273,7 @@ Elysr/
 | 🔗 Corpus Source Liveness                   | 60 رابط مصدر فريدًا (3 محاولات بتراجع + تصنيف السلطات غير المستقرة)                   |
 | 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 303 اختبار وحدة/API · حارس الكتالوج+البيانات+شبكة redirects |
 | 🛡 Security Audit                            | `npm audit --audit-level=high` على الشجرة المقفلة                                     |
-| 🏗 Build • Prerender • Sitemaps              | Vite + 274 صفحة مولّدة + sitemaps                                               |
+| 🏗 Build • Prerender • Sitemaps              | Vite + 275 صفحة مولّدة + sitemaps                                               |
 | 🚦 Lighthouse Performance Budget            | موازِن أداء LHCI على الموقع المبنى                                                    |
 
 محليًا: `npm run ci` (lint + typecheck + test:all) و`npm run test:e2e`.
@@ -287,9 +287,9 @@ Elysr/
 CI/CD تلقائي على كل push إلى `main`:
 
 1. `vite build` → `dist/` محسّن ومقسّم
-2. `generate-sitemap.mjs` → sitemaps (270) + robots + security.txt + landing JSON
-3. `prerender-seo.mjs` → 274 صفحة مولّدة بـ SEO meta + JSON-LD كامل
-4. Vercel يقدّم `dist/` من Edge CDN مع 12 مجموعة headers أمان + 179 redirect
+2. `generate-sitemap.mjs` → sitemaps (271) + robots + security.txt + landing JSON
+3. `prerender-seo.mjs` → 275 صفحة مولّدة بـ SEO meta + JSON-LD كامل
+4. Vercel يقدّم `dist/` من Edge CDN مع 12 مجموعة headers أمان + 180 redirect
 
 بعد النشر: قدّمي `sitemap-index.xml` + `sitemap-images.xml` في Google Search Console
 واتفقي GA4 DebugView (المحمّل مؤجل 2ث + أول تفاعل مع `send_page_view:false`، والتطبيق

@@ -13,6 +13,7 @@ export type ProductMetaProfile = {
 
 export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "m-08": { form: "oral", hook: "5 كروت × قرصين، إجمالي 10 أقراص للعلبة" },
+  "m-63": { form: "oral", hook: "30 كبسولة بمستخلصات نباتية وزنك وفيتاميني B6 وB12" },
   "m-01": { form: "oral", hook: "30 كبسولة ألمانية مستوردة" },
   "m-02": { form: "oral", hook: "30 كبسولة بجينسنج كوري أحمر وماكا" },
   // The catalog name says capsules while the lead description says tablets;

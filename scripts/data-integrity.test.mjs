@@ -252,7 +252,7 @@ try {
     }
   }
 
-  assert.equal(products.length, 85, "Expected 85 products including restored Over Time (m-08)");
+  assert.equal(products.length, 86, "Expected 86 products including Tri Force (m-63)");
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
   const overtime = products.find((p) => p.id === "m-08");
   assert.equal(overtime?.slug, "overtime-erection-delay");
@@ -496,8 +496,8 @@ try {
   }, {});
   assert.deepEqual(
     categories,
-    { men: 54, women: 23, devices: 8 },
-    "Unexpected category split (85 = 54 men / 23 women / 8 devices)",
+    { men: 55, women: 23, devices: 8 },
+    "Unexpected category split (86 = 55 men / 23 women / 8 devices)",
   );
 
   // (2026-09-15) JSON-LD OfferCatalog في index.html لازم يطابق كتالوج
