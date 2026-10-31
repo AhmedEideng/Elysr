@@ -5,6 +5,30 @@ All notable changes to **Elysr Medical** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — 2026-Q4
+
+### 🚀 SEO growth packages (2026-10-31)
+
+- **Package 1–3 (GSC-driven)**: query-aligned meta/FAQs for 15 high-impression
+  products, search-intent titles for 3 dormant education articles,
+  Procomil price corrections (420/550 EGP) synced across catalog, feed and sitemaps.
+- **Package 4**: live-catalog price-list pages (men/women), 3 comparison pages
+  (delay products, Cialis vs Viagra, Procomil cream vs spray), and 5 gap
+  articles (Hammer of Thor benefits/harms, 7 delay-product mistakes,
+  women's complete guide, original-vs-fake guide, Hard On guide) — all
+  topic-assigned and source-backed.
+- **Merchant feed**: every item now carries `product_type` (section × form)
+  in XML/CSV/TXT, guarded by a data-integrity assertion.
+- **Regional delivery pages restored**: Cairo/Giza, Alexandria, Delta,
+  Upper Egypt and women-in-Cairo landing pages rebuilt with unique,
+  region-specific content (real shipping fees/windows from
+  `GOVERNORATE_SHIPPING`); all other legacy redirects (old product slugs,
+  ID URLs, www/http variants) intentionally kept as permanent 301s.
+  `viagra-vs-cialis-egypt` and `tadalafil-products-guide` now redirect
+  to the dedicated comparison page.
+- **Docs**: README.md + README.ar.md refreshed to current production
+  numbers (273 pages, 63 articles, 106 guides, 180 redirects, 303 tests).
+
 ## [Unreleased] — 2026-Q3
 
 ### 🧹 Third external audit — implementation batch (2026-09-15)

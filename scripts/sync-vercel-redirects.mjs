@@ -196,7 +196,7 @@ async function syncRedirects() {
       },
       {
         source: "/products/guides/tadalafil-products-guide",
-        destination: "/products/guides/best-delay-products-egypt",
+        destination: "/products/guides/cialis-vs-viagra-comparison",
         permanent: true,
       },
       // ── GSC "Not found (404)" cleanup (2026-10-07): 24 legacy URLs ما زالت
@@ -213,7 +213,7 @@ async function syncRedirects() {
       },
       {
         source: "/products/guides/viagra-vs-cialis-egypt",
-        destination: "/products/guides/best-erection-support-products",
+        destination: "/products/guides/cialis-vs-viagra-comparison",
         permanent: true,
       },
       {
@@ -350,37 +350,12 @@ async function syncRedirects() {
       },
       // Consolidated SEO guide aliases retained after thin pages were removed.
       {
-        source: "/products/guides/marital-products-giza",
-        destination: "/products/guides/sexual-health-products",
-        permanent: true,
-      },
-      {
-        source: "/products/guides/marital-products-alexandria",
-        destination: "/products/guides/sexual-health-products",
-        permanent: true,
-      },
-      {
         source: "/products/guides/delay-products-cairo",
         destination: "/products/guides/men-delay-products",
         permanent: true,
       },
       {
         source: "/products/guides/erection-products-cairo",
-        destination: "/products/guides/sexual-health-products",
-        permanent: true,
-      },
-      {
-        source: "/products/guides/women-products-cairo",
-        destination: "/products/guides/women-intimacy-products",
-        permanent: true,
-      },
-      {
-        source: "/products/guides/marital-products-delta",
-        destination: "/products/guides/sexual-health-products",
-        permanent: true,
-      },
-      {
-        source: "/products/guides/marital-products-upper-egypt",
         destination: "/products/guides/sexual-health-products",
         permanent: true,
       },
