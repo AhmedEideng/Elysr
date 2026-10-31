@@ -83,7 +83,13 @@ describe("searchAllPublicProducts (global /search?q=)", () => {
 
     it("'حبوب' finds the capsule products (named كبسولات ...)", () => {
       const ids = new Set(searchAllPublicProducts("حبوب").map((p) => p.id));
-      for (const id of ["m-01", "m-02", "m-04", "w-10"]) expect(ids.has(id)).toBe(true);
+      for (const id of ["m-01", "m-02", "m-04", "m-46", "m-53", "m-63"])
+        expect(ids.has(id)).toBe(true);
+      // Chewing gum must not be labeled as pills or as a prescription drug.
+      const gumAliases = products.find((p) => p.id === "w-10")?.searchAliases ?? [];
+      expect(gumAliases).not.toContain("حبوب");
+      expect(gumAliases).not.toContain("فياجرا نسائية");
+      expect(products.find((p) => p.id === "w-22")?.searchAliases).not.toContain("فياجرا نسائية");
     });
 
     it("'الصلابة' finds the strength products whose text only says الانتصاب", () => {

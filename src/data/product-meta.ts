@@ -18,9 +18,7 @@ export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "w-25": { form: "oral", hook: "قطرات بينك شوت للنساء 30 مل بإل-أرجينين" },
   "m-01": { form: "oral", hook: "30 كبسولة ألمانية مستوردة" },
   "m-02": { form: "oral", hook: "30 كبسولة بجينسنج كوري أحمر وماكا" },
-  // The catalog name says capsules while the lead description says tablets;
-  // use a neutral count until the package is verified.
-  "m-03": { form: "oral", hook: "عبوة 10 وحدات مع الجنكو والزعفران" },
+  "m-03": { form: "oral", hook: "عبوة 30 كبسولة مع الجنكو والزعفران" },
   "m-04": { form: "oral", hook: "30 كبسولة جينسنج كوري أحمر بتركيز 1650 مجم للطاقة" },
   "m-05": { form: "topical", hook: "كريم عشبي صيني بالشيزاندرا والسالفيا" },
   "m-06": { form: "topical", hook: "جل تأخير مائي سريع الامتصاص للتلطيف وإطالة اللقاء" },

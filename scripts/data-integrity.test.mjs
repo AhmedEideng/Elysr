@@ -36,6 +36,15 @@ try {
     getBundleProductType,
   } = await vite.ssrLoadModule("/src/data/products.ts");
   const { articles } = await vite.ssrLoadModule("/src/data/articles.ts");
+  const { getProductFAQs } = await vite.ssrLoadModule("/src/data/product-faqs.ts");
+  for (const product of products) {
+    const questions = getProductFAQs(product).map((faq) => faq.question);
+    assert.equal(
+      new Set(questions).size,
+      questions.length,
+      `Duplicate FAQ questions: ${product.id}`,
+    );
+  }
   const { seoLandingPages } = await vite.ssrLoadModule("/src/data/landing-pages.ts");
   const promo = await vite.ssrLoadModule("/src/lib/promo.ts");
   const bundle = await vite.ssrLoadModule("/src/lib/bundle-discount.ts");

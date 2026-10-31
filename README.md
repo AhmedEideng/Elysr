@@ -19,7 +19,7 @@ _Original marital & sexual-health products for Egypt — discreet shipping to al
 ![TanStack](https://img.shields.io/badge/TanStack_Router-FF4154?logo=reactrouter&logoColor=white)
 ![Node](https://img.shields.io/badge/Node_24-339933?logo=node.js&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000?logo=vercel&logoColor=white)
-![Version](https://img.shields.io/badge/Version-2.3.2-5b8def?style=flat)
+![Version](https://img.shields.io/badge/Version-2.3.3-5b8def?style=flat)
 ![Pages](https://img.shields.io/badge/Pre--rendered_Pages-277-success?style=flat)
 ![Tests](https://img.shields.io/badge/Tests-303_passing-success?style=flat)
 
@@ -381,11 +381,11 @@ Local equivalents: `npm run ci` (lint + typecheck + test:all) and `npm run test:
 
 ## Current release and loading behavior
 
-**Version 2.3.2 · asset cache 105 · documentation reviewed 2026-10-31.**
+**Version 2.3.3 · asset cache 106 · documentation reviewed 2026-10-31.**
 
 - Version lives in `package.json` and `package-lock.json`; cache version lives in
   `config/cache-version.json` and is consumed through `CACHE_VERSION`.
-  Keep the explicit `ga-loader.js?v=105` in `index.html` synchronized.
+  Keep the explicit `ga-loader.js?v=106` in `index.html` synchronized.
 - With JavaScript enabled, the initial static fallback is hidden until React
   mounts the actual UI. There is **no standalone hero or skeleton flash**.
   The hero preload remains; images may finish loading after the UI appears.
