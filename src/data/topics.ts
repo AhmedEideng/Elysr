@@ -123,6 +123,7 @@ export const TOPICS: Topic[] = [
     ],
     productIds: [
       "m-01",
+      "m-08",
       "m-02",
       "m-03",
       "m-04",

@@ -252,12 +252,19 @@ try {
     }
   }
 
-  assert.equal(
-    products.length,
-    84,
-    "Expected 84 products including the 9-speed digital electric pump (d-08)",
-  );
+  assert.equal(products.length, 85, "Expected 85 products including restored Over Time (m-08)");
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
+  const overtime = products.find((p) => p.id === "m-08");
+  assert.equal(overtime?.slug, "overtime-erection-delay");
+  assert.equal(overtime.price, 350);
+  assert.equal(overtime.stock, 5000);
+  assert.equal(siteConfig.isMerchantFeedExcluded(overtime), true);
+  assert.ok(!vercel.redirects.some((r) => r.source === "/products/overtime-erection-delay"));
+  assert.equal(
+    vercel.redirects.find((r) => r.source === "/products/m-08")?.destination,
+    "/products/overtime-erection-delay",
+  );
+
   // 🧭 Anti-drift: أرقام الكتالوج/المحتوى hardcoded في نصوص التسويق = درفت
   // حتمي مع أي تغيير في الكتالوج أو المقالات. الـ UI لازم يقرأ الـ counts
   // ديناميكياً (products.length / articles.length / seoLandingPages.length).
@@ -489,8 +496,8 @@ try {
   }, {});
   assert.deepEqual(
     categories,
-    { men: 53, women: 23, devices: 8 },
-    "Unexpected category split (84 = 53 men / 23 women / 8 devices)",
+    { men: 54, women: 23, devices: 8 },
+    "Unexpected category split (85 = 54 men / 23 women / 8 devices)",
   );
 
   // (2026-09-15) JSON-LD OfferCatalog في index.html لازم يطابق كتالوج

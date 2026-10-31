@@ -694,12 +694,7 @@
     },
     {
       "source": "/products/m-08",
-      "destination": "/products/men",
-      "permanent": true
-    },
-    {
-      "source": "/products/overtime-erection-delay",
-      "destination": "/products/men",
+      "destination": "/products/overtime-erection-delay",
       "permanent": true
     },
     {

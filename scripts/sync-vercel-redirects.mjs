@@ -60,10 +60,9 @@ async function syncRedirects() {
       },
       { source: "/products/m-51", destination: "/products/men", permanent: true },
       { source: "/products/m-10", destination: "/products/men", permanent: true },
-      { source: "/products/m-08", destination: "/products/men", permanent: true },
       {
-        source: "/products/overtime-erection-delay",
-        destination: "/products/men",
+        source: "/products/m-08",
+        destination: "/products/overtime-erection-delay",
         permanent: true,
       },
       {
