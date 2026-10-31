@@ -406,25 +406,8 @@ function buildHtml(template, opts) {
   // users, assistive technology, and crawlers instead of being a clipped
   // crawler-only copy.
   if (bodyContent) {
-    // (2026-09-28) قرار المالك: هيكل first-paint محايد يظهر فقط عند وجود
-    // JavaScript (صنف html.js) ويختفي فور تركيب React؛ بلا JavaScript يبقى
-    // مخفياً وتظهر النسخة الثابتة الكاملة نفسها.
-    // Home only: ship the real hero <img> in the initial document so the LCP
-    // element paints with the first render instead of waiting for hydration
-    // (~700KB of JS on a mid-range phone). Markup mirrors
-    // src/components/sections/Hero.tsx exactly (classes, aspect-ratio, srcset,
-    // alt, width/height) so the hydrated swap is geometry-identical (CLS 0).
-    // It lives OUTSIDE the aria-hidden skeleton so its alt stays exposed.
-    const heroReal = heroPreload
-      ? `<div class="relative w-full overflow-hidden bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50" style="aspect-ratio:1200 / 663">` +
-        `<img src="${assetUrl("/images/hero-banner.webp")}" srcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" sizes="100vw" alt="منتجات أصلية للصحة الزوجية للرجال والنساء — مع شحن سري — دفع عند الاستلام — شحن سريع لجميع المحافظات" class="block h-full w-full object-cover" loading="eager" fetchpriority="high" decoding="async" width="1200" height="663" style="width:100%;height:100%;object-fit:cover;display:block" />` +
-        `</div>`
-      : "";
-    const skeleton =
-      `<div data-prerender-skeleton aria-hidden="true">` +
-      `${heroPreload ? "" : `<div data-sk="hero"></div>`}<div data-sk="row"></div><div data-sk="row"></div>` +
-      `<div data-sk="grid"><div></div><div></div><div></div><div></div></div>` +
-      `</div>`;
+    // Keep the no-JS content and link graph, but do not paint a standalone
+    // hero or placeholder shell before React mounts the actual page.
     const visibleFallback = `<div data-prerender-content dir="${dir}" style="max-width:1120px;margin:0 auto;padding:32px 16px 48px;color:#14213d;font-family:Arial,sans-serif;line-height:1.8;">${bodyContent}</div>`;
     // First-paint HTML shipped with ZERO internal links (all navigation is
     // client-rendered), so Google's first pass saw no link graph and left
@@ -439,7 +422,7 @@ function buildHtml(template, opts) {
       `</nav>`;
     html = html.replace(
       '<div id="root"></div>',
-      `<div id="root">${heroReal}${skeleton}${staticNav}${visibleFallback}</div>`,
+      `<div id="root">${staticNav}${visibleFallback}</div>`,
     );
   }
 

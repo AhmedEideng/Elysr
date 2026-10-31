@@ -109,16 +109,10 @@
         overflow-x: hidden !important;
         width: 100% !important;
       }
-      /* ── First-paint skeleton (2026-09-28، قرار المالك) ──
-         مع JavaScript: تُخفى النسخة الثابتة النصية ويُظهر هيكل محايد يطابق
-         هندسة الصفحة حتى يركّب React المحتوى، فلا يرى الزائر كتلة نصية سادة.
-         بلا JavaScript: لا يُضاف صنف html.js (السكربت المضمّن مسموح بـ hash في
-         CSP) فتبقى النسخة الثابتة الكاملة ظاهرة كما هي للزاحف والزائر.
-         وإن فشل الـ bundle في التركيب خلال 4 ثوانٍ يُزال الصنف وتعود النسخة. */
-      [data-prerender-skeleton] {
-        display: none;
-      }
-      html.js [data-prerender-content] {
+      /* With JavaScript, keep the first paint blank until React replaces
+         the static fallback with the real page. No-JS/error fallback stays available. */
+      html.js [data-prerender-content],
+      html.js [data-prerender-nav] {
         display: none;
       }
       /* Static internal-link nav shipped in first-paint HTML (link graph for
@@ -136,60 +130,6 @@
       [data-prerender-nav] a {
         color: #14213d;
         text-decoration: underline;
-      }
-      html.js [data-prerender-skeleton] {
-        display: block;
-        max-width: 1280px;
-        margin: 0 auto;
-        padding: 76px 16px 24px;
-      }
-      html.js [data-prerender-skeleton] [data-sk] {
-        display: block;
-        border-radius: 14px;
-        background: linear-gradient(90deg, #e8eef2 25%, #f4f8fa 50%, #e8eef2 75%);
-        background-size: 200% 100%;
-        animation: elysr-sk 1.2s ease-in-out infinite;
-      }
-      html.js [data-prerender-skeleton] [data-sk="hero"] {
-        height: 168px;
-        margin-bottom: 20px;
-        border-radius: 24px;
-      }
-      html.js [data-prerender-skeleton] [data-sk="row"] {
-        height: 22px;
-        margin-bottom: 12px;
-      }
-      html.js [data-prerender-skeleton] [data-sk="grid"] {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
-        margin-top: 24px;
-      }
-      html.js [data-prerender-skeleton] [data-sk="grid"] > div {
-        height: 132px;
-        border-radius: 14px;
-        background: linear-gradient(90deg, #e8eef2 25%, #f4f8fa 50%, #e8eef2 75%);
-        background-size: 200% 100%;
-        animation: elysr-sk 1.2s ease-in-out infinite;
-      }
-      @media (max-width: 768px) {
-        html.js [data-prerender-skeleton] [data-sk="grid"] {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        html.js [data-prerender-skeleton] [data-sk],
-        html.js [data-prerender-skeleton] [data-sk="grid"] > div {
-          animation: none;
-        }
-      }
-      @keyframes elysr-sk {
-        0% {
-          background-position: 200% 0;
-        }
-        100% {
-          background-position: -200% 0;
-        }
       }
     </style>
     <!-- علم الطلة الأولى: مسموح بـ sha256 في CSP (config/security-headers.mjs) -->

@@ -116,8 +116,16 @@ try {
       CSP_POLICY.includes(flagHash),
       `CSP script-src missing hash ${flagHash} for the first-paint flag script`,
     );
-    assert.match(indexHtml, /\[data-prerender-skeleton\]\s*\{\s*display:\s*none/);
-    assert.match(indexHtml, /html\.js \[data-prerender-content\]\s*\{\s*display:\s*none/);
+    assert.match(
+      indexHtml,
+      /html\.js \[data-prerender-content\],\s*html\.js \[data-prerender-nav\]\s*\{\s*display:\s*none/,
+    );
+    const prerenderSource = readFileSync(resolve(ROOT, "scripts/prerender-seo.mjs"), "utf-8");
+    assert.ok(
+      !prerenderSource.includes("data-prerender-skeleton"),
+      "Do not restore the partial loading shell",
+    );
+    assert.ok(!prerenderSource.includes("const heroReal"), "Do not paint the homepage hero alone");
     assert.equal(
       gaVersion,
       cacheConfig.version,
