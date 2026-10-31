@@ -37,11 +37,14 @@ export interface SheetSubmitResult {
   error?: string;
 }
 
+// Longer than the API's 10-second upstream deadline, so it can report its result.
+export const ORDER_SUBMIT_TIMEOUT_MS = 15_000;
+
 /** إرسال الطلب للشيت مع إرجاع نتيجة واضحة للطلب المباشر */
 export async function submitToGoogleSheets(
   data: Record<string, unknown>,
   /** مهلة اختيارية (ms) — بعد انتهائها يُقطع الطلب ويُعامل كفشل (fallback عند المنادى). */
-  timeoutMs?: number,
+  timeoutMs: number = ORDER_SUBMIT_TIMEOUT_MS,
 ): Promise<SheetSubmitResult> {
   const controller = new AbortController();
   const timer = timeoutMs ? setTimeout(() => controller.abort(), timeoutMs) : undefined;

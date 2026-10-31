@@ -4,7 +4,7 @@ import { useProductImageState } from "../hooks/use-product-image-state";
 /**
  * 🖼️ Product Card Image — مكون منعزل لصورة بطاقة المنتج مع دعم الـ Responsive SrcSet.
  *
- * يستقبل product.image + product.emoji ويعرض الصورة مع skeleton loading.
+ * يستقبل product.image + product.emoji ويعرض الصورة دون تأخير opacity أو skeleton.
  * يُستخدم مع key={product.id} من ProductCard لضمان إعادة إنشائه بالكامل
  * عند تغيير المنتج، مما يحل مشكلة تعليق حالة الصورة بين التنقلات في الـ SPA.
  *
@@ -17,16 +17,15 @@ export function ProductCardImage({
   emoji,
   alt,
   productId,
+  priority = false,
 }: {
   image?: string;
   emoji: string;
   alt: string;
   productId: string;
+  priority?: boolean;
 }) {
-  const { imgRef, loaded, failed, loadedOnce, handleLoad, handleError } = useProductImageState(
-    productId,
-    image,
-  );
+  const { imgRef, failed, handleLoad, handleError } = useProductImageState(productId, image);
 
   if (!image || failed) {
     return (
@@ -45,18 +44,18 @@ export function ProductCardImage({
 
   return (
     <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-[#f0f9ff] via-white to-[#fef9c3]">
-      {!loaded && !loadedOnce && <div className="absolute inset-0 skeleton" />}
       <img
         ref={imgRef}
         src={srcUrl}
         srcSet={srcSetUrl}
         sizes="(max-width: 640px) 180px, (max-width: 1024px) 240px, 300px"
         alt={alt}
-        loading="lazy"
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : undefined}
         decoding="async"
         width={480}
         height={480}
-        className={`h-full w-full object-cover transition-all duration-700 ${loaded ? "scale-100 opacity-100" : "scale-105 opacity-0"}`}
+        className="h-full w-full object-cover"
         onLoad={handleLoad}
         onError={handleError}
       />

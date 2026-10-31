@@ -405,6 +405,9 @@ test("whatsapp cart order takes the customer straight to WhatsApp (same tab, no 
   // نفس التبويب ينتقل لـ wa.me مباشرة — بدون /thank-you وبدون زر تاني
   await page.waitForURL(/wa\.me\/201098088206/, { timeout: 10_000 });
   expect(page.url()).not.toContain("/thank-you");
+  const message = new URL(page.url()).searchParams.get("text") ?? "";
+  const krevaPrice = catalog.find((item) => item.id === "m-60")!.price;
+  expect(message).toContain(`عدد العبوات: 1\nسعر العبوة: ${krevaPrice} ج.م`);
 
   // الطلب سُجّل فعلاً (sendBeacon وصل للـ API)
   await page.waitForTimeout(100);
@@ -511,4 +514,109 @@ test("complete bundle applies the real 20% bundle discount (exclusive with tier)
     shipping,
     total,
   });
+});
+
+test("retry after a lost order response and refresh retains the same order ID", async ({
+  page,
+}) => {
+  const ids: string[] = [];
+  await page.route("**/api/submit-order", async (route) => {
+    ids.push(route.request().postDataJSON().orderId);
+    if (ids.length === 1) return route.abort("connectionreset");
+    return route.fulfill({ json: { success: true } });
+  });
+  await page.goto("/products/kreva-gel-for-men");
+  await page.getByRole("button", { name: "إضافة للسلة", exact: true }).click();
+  await page.goto("/cart");
+  const fill = async () => {
+    await page.getByRole("button", { name: /طلب مباشر/ }).click();
+    await page.getByPlaceholder("اكتب اسمك هنا").fill("عميل اختبار إعادة المحاولة");
+    await page.getByPlaceholder("01xxxxxxxxx").fill("01012345678");
+    await page.locator("select").selectOption("القاهرة");
+    await page.getByPlaceholder("المدينة، الشارع، رقم العمارة").fill("عنوان الاختبار المحلي");
+  };
+  await fill();
+  await page.getByRole("button", { name: /تأكيد الطلب المباشر/ }).click();
+  await expect(page.getByText(/تعذر تسجيل طلبك/)).toBeVisible();
+  await page.reload();
+  await fill();
+  await page.getByRole("button", { name: /تأكيد الطلب المباشر/ }).click();
+  await expect(page).toHaveURL(/order-confirmed/);
+  expect(ids).toHaveLength(2);
+  expect(ids[1]).toBe(ids[0]);
+  const stored = await page.evaluate(() => sessionStorage.getItem("elysr_pending_orders_v1"));
+  expect(stored).not.toContain("01012345678");
+  expect(stored).not.toContain(ids[0]);
+});
+
+test("oversized restored cart explains the 100-unit limit without sending an order", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "elysr_cart_v3",
+      JSON.stringify([
+        { id: "m-60", qty: 99 },
+        { id: "m-18", qty: 2 },
+      ]),
+    );
+  });
+  let requests = 0;
+  await page.route("**/api/submit-order", (route) => {
+    requests++;
+    return route.fulfill({ json: { success: true } });
+  });
+  await page.goto("/cart");
+  await expect(page.getByRole("alert").filter({ hasText: "سلّتك تحتوي على" })).toContainText("101");
+  await page.getByRole("button", { name: /طلب مباشر/ }).click();
+  await expect(page.getByRole("button", { name: /تأكيد الطلب المباشر/ })).toBeDisabled();
+  await expect(page.getByRole("button", { name: /زيادة كمية/ }).first()).toBeDisabled();
+  expect(requests).toBe(0);
+  await page
+    .getByRole("button", { name: /تقليل كمية/ })
+    .first()
+    .click();
+  await expect(page.getByRole("alert").filter({ hasText: "سلّتك تحتوي على" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /تأكيد الطلب المباشر/ })).toBeEnabled();
+});
+
+test("first category cards use eager images without an opacity loading gate", async ({ page }) => {
+  await page.goto("/products/men");
+  const cards = page.locator("main img[width='480'][height='480']");
+  await expect(cards.first()).toHaveAttribute("loading", "eager");
+  await expect(cards.nth(3)).toHaveAttribute("fetchpriority", "high");
+  await expect(cards.nth(4)).toHaveAttribute("loading", "lazy");
+  await expect(cards.first()).toHaveCSS("opacity", "1");
+});
+
+test("multi-product WhatsApp message keeps each quantity next to its explicit label", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "elysr_cart_v3",
+      JSON.stringify([
+        { id: "m-18", qty: 2 },
+        { id: "m-60", qty: 3 },
+      ]),
+    ),
+  );
+  await page.route("**/api/submit-order", (route) => route.fulfill({ json: { success: true } }));
+  await page.route("**/wa.me/**", (route) =>
+    route.fulfill({ contentType: "text/html", body: "<html></html>" }),
+  );
+  await page.goto("/cart");
+  await page.getByPlaceholder("اكتب اسمك هنا").fill("عميل اختبار التنسيق");
+  await page.getByPlaceholder("01xxxxxxxxx").fill("01012345678");
+  await page.locator("select").selectOption("القاهرة");
+  await page.getByRole("button", { name: /تأكيد عبر واتساب/ }).click();
+  await page.waitForURL(/wa\.me\/201098088206/);
+  const message = new URL(page.url()).searchParams.get("text") ?? "";
+  for (const [id, qty] of [
+    ["m-18", 2],
+    ["m-60", 3],
+  ] as const) {
+    const price = catalog.find((item) => item.id === id)!.price;
+    expect(message).toContain(`عدد العبوات: ${qty}\nسعر العبوة: ${price} ج.م`);
+  }
 });

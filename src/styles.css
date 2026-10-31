@@ -424,3 +424,15 @@ body {
   width: 0;
   height: 0;
 }
+
+/* Skip offscreen layout/paint without removing content or introducing loading placeholders. */
+.home-below-fold > section,
+.home-below-fold > div {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 700px;
+}
+
+.product-card-deferred {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 450px;
+}

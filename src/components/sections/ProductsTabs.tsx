@@ -65,7 +65,7 @@ export function ProductsTabs() {
         <div className="text-center mb-8">
           <h2 className="text-3xl font-black md:text-4xl">تسوق حسب الفئة</h2>
           <p className="mt-2 text-muted-foreground">
-            اكتشف منتجاتنا الأصلية مع ضمان الفاعلية والأمان
+            قارن المكونات وأشكال الاستخدام لاختيار ما يناسب احتياجك
           </p>
         </div>
 

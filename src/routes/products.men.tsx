@@ -150,10 +150,11 @@ function CategoryPage() {
         </div>
       ) : (
         <div className="grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {items.map((p) => (
+          {items.map((p, index) => (
             <ProductCard
               key={p.id}
               product={p}
+              priority={index < 4}
               listName={query ? `men_search_${query}` : "men_category"}
             />
           ))}

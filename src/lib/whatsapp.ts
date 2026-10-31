@@ -99,10 +99,14 @@ export const buildOrderMessage = (
   lines.push("المنتجات:");
   items.forEach((it, i) => {
     const unitPrice = it.originalPrice ?? it.price;
-    const lineTotal = unitPrice * it.qty;
-    lines.push(`${i + 1}. ${sanitizeForMsg(it.name, 150)} × ${it.qty} = ${lineTotal} ج.م`);
+    // Arabic labels on separate paragraphs avoid ambiguous RTL/LTR equations.
+    // Each amount is explicitly identified for both one-item and multi-item orders.
+    lines.push(`المنتج ${i + 1}: ${sanitizeForMsg(it.name, 150)}`);
+    lines.push(`عدد العبوات: ${it.qty}`);
+    lines.push(`سعر العبوة: ${unitPrice} ج.م`);
     const linkKey = it.slug ?? it.id;
     if (linkKey) lines.push(`${origin}/products/${linkKey}`);
+    if (i < items.length - 1) lines.push("");
   });
 
   lines.push("");

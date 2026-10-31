@@ -207,6 +207,7 @@ function buildHtml(template, opts) {
     noindex = false,
     heroPreload = false,
     preloadImage = "",
+    preloadProducts = [],
     // (2026-09-17) بيانات الصورة لمشاركة الـ OG — الأبعاد الحقيقية للملف
     // (مش أبعاد العرض) + alt وصفية (SEO + accessibility + معاينة المشاركة).
     imageAlt,
@@ -380,6 +381,16 @@ function buildHtml(template, opts) {
       "</head>",
       `  <link rel="preload" as="image" href="${assetUrl("/images/hero-banner-480.webp")}" imagesrcset="${assetUrl("/images/hero-banner-480.webp")} 480w, ${assetUrl("/images/hero-banner-640.webp")} 640w, ${assetUrl("/images/hero-banner-768.webp")} 768w, ${assetUrl("/images/hero-banner-960.webp")} 960w, ${assetUrl("/images/hero-banner.webp")} 1200w" imagesizes="100vw" fetchpriority="high" />
 </head>`,
+    );
+  }
+
+  for (const product of preloadProducts.slice(0, 4)) {
+    if (!product.image) continue;
+    const thumb = (folder) => assetUrl(product.image.replace("/images/", `/images/${folder}/`));
+    const srcset = `${thumb("thumbs-120")} 240w, ${thumb("thumbs-180")} 360w, ${thumb("thumbs")} 480w, ${assetUrl(product.image)} 800w`;
+    html = html.replace(
+      "</head>",
+      `<link rel="preload" as="image" href="${esc(thumb("thumbs"))}" imagesrcset="${esc(srcset)}" imagesizes="(max-width: 640px) 180px, (max-width: 1024px) 240px, 300px" fetchpriority="high" />\n</head>`,
     );
   }
 
@@ -1328,6 +1339,7 @@ ${homeArticlesBody}
         jsonLd,
         // (2026-09-17) og-default 1200×631 (الأبعاد الافتراضية في buildHtml)
         imageAlt: r.title,
+        preloadProducts: catItems,
         preloadImage:
           r.path === "/education" && articles[0]?.image ? assetUrl(articles[0].image) : "",
         // The visible SSG fallback carries the canonical H1 and is replaced

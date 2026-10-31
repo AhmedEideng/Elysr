@@ -15,7 +15,15 @@ import {
   trackRemoveFromWishlist,
 } from "@/lib/analytics";
 
-export function ProductCard({ product, listName }: { product: Product; listName?: string }) {
+export function ProductCard({
+  product,
+  listName,
+  priority = false,
+}: {
+  product: Product;
+  listName?: string;
+  priority?: boolean;
+}) {
   const { add } = useCart();
   const { has: hasInWishlist, toggle: toggleWishlist } = useWishlist();
   const promoOn = isPromotionEnabled();
@@ -25,7 +33,7 @@ export function ProductCard({ product, listName }: { product: Product; listName?
   const effectiveListName = listName ?? "general_product_list";
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-primary/10 bg-gradient-to-br from-white via-[#f0f9ff] to-[#fefce8] shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(0,109,166,0.2)] hover:border-primary/30">
+    <div className="product-card-deferred group relative flex flex-col overflow-hidden rounded-[2rem] border border-primary/10 bg-gradient-to-br from-white via-[#f0f9ff] to-[#fefce8] shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(0,109,166,0.2)] hover:border-primary/30">
       <span
         className={`absolute left-4 top-4 z-20 rounded-full px-3 py-1 text-[10px] font-black tracking-wide shadow-lg ${useBadge.className}`}
       >
@@ -108,6 +116,7 @@ export function ProductCard({ product, listName }: { product: Product; listName?
             emoji={product.emoji}
             alt={product.name}
             productId={product.id}
+            priority={priority}
           />
         ) : (
           <div

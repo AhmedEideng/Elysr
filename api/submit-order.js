@@ -1,3 +1,4 @@
+import { MAX_ORDER_UNITS } from "../config/order-limits.js";
 import { createRateLimiter } from "./lib/rate-limiter.js";
 import { getClientIp } from "./lib/request-ip.js";
 import { getRequestOrigin, isAllowedOrigin, readPayload } from "./lib/request-guards.js";
@@ -108,7 +109,7 @@ const MAX_BODY_SIZE_BYTES = 64_000;
 // (2026-09-15) سقف إجمالي وحدات الطلب (مجموع كل الكميات) — حماية من طلبات
 // هدامة (50 SKU × 5000 = 250,000 وحدة). 100 = سخي جدًا لعميل حقيقي
 // وواقعي كحد تشغيلي (الشحن يدوي).
-const MAX_ORDER_UNITS = 100;
+
 export const GOOGLE_SHEETS_TIMEOUT_MS = 10_000;
 
 // Fast per-instance limit; Google Apps Script applies a second per-phone limit.

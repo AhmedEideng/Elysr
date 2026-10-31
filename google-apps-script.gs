@@ -257,12 +257,9 @@ function doPost(e) {
     var shipping = numberOrZero(data.shipping);
     var total = numberOrZero(data.total);
 
-    // المنتجات كنص مع روابط
-    var itemsText = items
-      .map(function (it) {
-        return it.name + " × " + it.qty + " = " + it.price * it.qty + " ج.م";
-      })
-      .join(" | ");
+    // Explicit labeled lines: mixed Arabic/Latin names must not make qty/price
+    // appear swapped. This is display only; numeric columns stay unchanged.
+    var itemsText = formatOrderItemsText(items);
 
     // يُنشأ الطابع الزمني داخل Apps Script وقت تسجيل الطلب؛ لا نأخذ الوقت من العميل.
     var orderTimestamp = new Date();
@@ -638,6 +635,16 @@ function appendRowByHeaders(sheet, columns, valuesByKey) {
     sheet.insertRowsAfter(sheet.getMaxRows(), 500);
   }
   sheet.getRange(nextRow, 1, 1, row.length).setValues([row]);
+  if (valuesByKey.itemsText !== undefined && headerToIndex["المنتجات"]) {
+    // Presentation is best-effort: a formatting error must not turn an already
+    // recorded order into a reported failure.
+    try {
+      sheet.getRange(nextRow, headerToIndex["المنتجات"]).setWrap(true);
+    } catch (formatError) {
+      console.warn("Could not wrap the new products cell");
+    }
+  }
+
 
   // تلوين الصف الجديد بلون خفيف للتمييز
   if (nextRow % 2 === 0) {
@@ -1062,6 +1069,17 @@ function checkRateLimit(key) {
 // ============================================================
 // Helpers
 // ============================================================
+
+/** Format normalized items for the products cell and order notification email. */
+function formatOrderItemsText(items) {
+  return items.map(function (it, index) {
+    return [
+      "المنتج " + (index + 1) + ": " + it.name,
+      "عدد العبوات: " + it.qty,
+      "سعر العبوة: " + it.price + " ج.م",
+    ].join("\n");
+  }).join("\n\n");
+}
 
 function normalizeItems(rawItems) {
   if (!Array.isArray(rawItems)) return [];

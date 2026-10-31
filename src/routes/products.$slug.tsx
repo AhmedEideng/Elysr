@@ -1,3 +1,5 @@
+import { getOrderAttempt, completeOrderAttempt } from "@/lib/order-attempt";
+import { MAX_ORDER_UNITS } from "../../config/order-limits.js";
 import { useScrollTracking } from "@/hooks/use-scroll-tracking";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
@@ -55,12 +57,7 @@ interface LinkedArticle {
   image?: string;
 }
 
-import {
-  generateOrderId,
-  isValidEgyptianPhone,
-  sanitizeInput,
-  normalizeEgyptianPhone,
-} from "@/lib/utils";
+import { isValidEgyptianPhone, sanitizeInput, normalizeEgyptianPhone } from "@/lib/utils";
 import {
   EGYPT_GOVERNORATES,
   getShippingCost,
@@ -280,6 +277,10 @@ function ProductPage() {
   const submitQuickWhatsAppOrder = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isOrdering) return;
+    if (qty > MAX_ORDER_UNITS) {
+      toast.error(`الحد الأقصى للطلب ${MAX_ORDER_UNITS} وحدة`);
+      return;
+    }
 
     if (!quickCustomer.name || !quickCustomer.phone || !quickCustomer.governorate) {
       toast.error("اكتب الاسم ورقم الهاتف والمحافظة أولاً");
@@ -302,7 +303,6 @@ function ProductPage() {
         address: quickCustomer.address ? sanitizeInput(quickCustomer.address, 200) : "",
       };
 
-      orderId = generateOrderId();
       const subtotal = product.price * qty;
       const tier = isPromotionEnabled() ? getPromoTier(subtotal) : null;
       const discount = tier ? Math.round(subtotal * tier.discount) : 0;
@@ -320,8 +320,7 @@ function ProductPage() {
         },
       ];
 
-      const payload = {
-        orderId,
+      const orderData = {
         orderType: "شراء فوري",
         paymentMethod: "واتساب",
         customerName: sc.name,
@@ -339,6 +338,9 @@ function ProductPage() {
         total: grandTotal,
       };
 
+      orderId = await getOrderAttempt(orderData);
+      const payload = { ...orderData, orderId };
+
       // GA: cta + begin_checkout — اتقدم الطلب
       trackCtaClick("quick_order_submit", `/products/${product.slug}`, {
         product_id: product.id,
@@ -347,12 +349,13 @@ function ProductPage() {
       trackBeginCheckout(orderItems, grandTotal, shipping);
 
       // 🔒 (2026-09-15) نفس إصلاح السلة: sendBeacon مش تأكيد وصول.
-      // بنستنى النتيجة الفعلية (مهلة 8 ثوانٍ): نجاح → GA purchase +
+      // بنستنى النتيجة الفعلية (مهلة 15 ثانية): نجاح → GA purchase +
       // (مفيش سلة هنا تمسح). فشل → beacon كمحاولة أخيرة + تحذير —
       // نص الطلب يوصلنا عبر رسالة واتساب نفسها (قناة مزدوجة) بس من
       // غير GA purchase (صدق الإيرادات).
-      const submitResult = await submitToGoogleSheets(payload, 8_000);
+      const submitResult = await submitToGoogleSheets(payload);
       if (submitResult.success) {
+        completeOrderAttempt(orderId);
         // GA: purchase — سُجل فعلياً في الشيت
         trackPurchase(orderId, orderItems, grandTotal, shipping, discount);
         trackOrderSuccess(orderId, "whatsapp");
@@ -390,7 +393,7 @@ function ProductPage() {
 
   // (2026-09-16) Product.stock مطلوب (canonical من الكتالوج) — الـ
   // `?? 10` كان dead code بيخبي أي مشكلة data integrity محتملة.
-  const maxStock = product.stock;
+  const maxStock = Math.min(product.stock, MAX_ORDER_UNITS);
   const atStockLimit = qty >= maxStock;
   const categoryName =
     product.category === "men"

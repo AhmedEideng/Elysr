@@ -1,3 +1,5 @@
+import { getOrderAttempt, completeOrderAttempt } from "@/lib/order-attempt";
+import { MAX_ORDER_UNITS } from "../../config/order-limits.js";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
@@ -15,12 +17,7 @@ import {
 import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/data/product-types";
 import { waLink, buildOrderMessage } from "@/lib/whatsapp";
-import {
-  generateOrderId,
-  isValidEgyptianPhone,
-  sanitizeInput,
-  normalizeEgyptianPhone,
-} from "@/lib/utils";
+import { isValidEgyptianPhone, sanitizeInput, normalizeEgyptianPhone } from "@/lib/utils";
 import {
   EGYPT_GOVERNORATES,
   submitToGoogleSheets,
@@ -124,7 +121,15 @@ function CartPage() {
     }
   }, [items, total]);
 
+  const totalUnits = items.reduce((sum, item) => sum + item.qty, 0);
+  const overOrderLimit = totalUnits > MAX_ORDER_UNITS;
+
   const checkout = async () => {
+    if (submitting) return;
+    if (overOrderLimit) {
+      toast.error(`الحد الأقصى للطلب ${MAX_ORDER_UNITS} وحدة. قلّل الكمية ثم أعد المحاولة.`);
+      return;
+    }
     if (items.length === 0) {
       toast.error("السلة فارغة");
       return;
@@ -165,7 +170,6 @@ function CartPage() {
 
     // Split name for better Meta matching (first + last)
 
-    const orderId = generateOrderId();
     const orderItems = items.map((i) => ({
       id: i.id,
       slug: i.slug,
@@ -174,8 +178,7 @@ function CartPage() {
       price: i.price,
       originalPrice: i.originalPrice,
     }));
-    const payload = {
-      orderId,
+    const orderData = {
       orderType: "cart",
       paymentMethod: method === "whatsapp" ? "واتساب" : "طلب مباشر",
       customerName: sc.name,
@@ -192,6 +195,9 @@ function CartPage() {
       shipping,
       total: grandTotal,
     };
+
+    const orderId = await getOrderAttempt(orderData);
+    const payload = { ...orderData, orderId };
 
     // GA: cta + begin_checkout — اتقدم الطلب (مشاع للطريقتين)
     trackCtaClick(method === "whatsapp" ? "checkout_whatsapp" : "checkout_direct", "/cart", {
@@ -222,13 +228,14 @@ function CartPage() {
 
       // 🔒 (2026-09-15) sendBeacon لم يعد يُعد تأكيداً — إنه يعني "المتصفح
       // قبل البيانات" وليس "السيرفر استلم الطلب". بنستنى النتيجة الفعلية
-      // (مهلة 8 ثوانٍ) قبل أي قرار:
+      // (مهلة 15 ثانية) قبل أي قرار:
       //   نجاح → GA purchase + مسح السلة (الطلب موجود في الشيت فعلياً)
       //   فشل  → beacon كمحاولة أخيرة (الـ payload يفضل حي في المتصفح) +
       //          تحذير للعميل + نص الطلب يوصلنا برضه عبر رسالة واتساب
       //          نفسها (قناة مزدوجة) — بس من غير GA purchase (صدق الإيرادات)
-      const submitResult = await submitToGoogleSheets(payload, 8_000);
+      const submitResult = await submitToGoogleSheets(payload);
       if (submitResult.success) {
+        completeOrderAttempt(orderId);
         // GA: purchase — سُجل فعلياً في الشيت
         trackPurchase(orderId, orderItems, grandTotal, shipping, discount + bundleDiscount);
         trackOrderSuccess(orderId, "whatsapp");
@@ -247,11 +254,11 @@ function CartPage() {
       return;
     } else {
       // 🔒 (2026-09-15) مفيش "نجاح" قبل معرفة النتيجة: بنستنى الرد الفعلي
-      // (مهلة 8 ثوانٍ) والزر يبقى في حالة submitting أثناء الانتظار.
+      // (مهلة 15 ثانية) والزر يبقى في حالة submitting أثناء الانتظار.
       // نجاح → GA purchase + مسح السلة + صفحة التأكيد.
       // فشل  → السلة محفوظة لإعادة المحاولة + قناة بديلة (واتساب) —
       //         لا فقدان صامت ولا شاشة نجاح مضللة.
-      const result = await submitToGoogleSheets(payload, 8_000);
+      const result = await submitToGoogleSheets(payload);
 
       try {
         sessionStorage.setItem("elysr_last_order_id", orderId);
@@ -260,6 +267,7 @@ function CartPage() {
       }
 
       if (result.success) {
+        completeOrderAttempt(orderId);
         // GA: purchase — سُجل فعلياً في الشيت (فشل التسجيل = مفيش revenue)
         trackPurchase(orderId, orderItems, grandTotal, shipping, discount + bundleDiscount);
         trackOrderSuccess(orderId, "direct");
@@ -320,11 +328,20 @@ function CartPage() {
   return (
     <div className="container mx-auto px-4 py-6 md:py-10 overflow-x-hidden max-w-full">
       <h1 className="text-2xl sm:text-3xl font-black mb-6 md:mb-8 text-gradient">سلة التسوق</h1>
+      <p className="mb-4 text-sm text-muted-foreground">
+        الحد الأقصى للطلب {MAX_ORDER_UNITS} وحدة من جميع المنتجات.
+      </p>
+      {overOrderLimit && (
+        <p role="alert" className="mb-4 rounded-xl border border-destructive p-4 text-destructive">
+          الحد الأقصى للطلب {MAX_ORDER_UNITS} وحدة. سلّتك تحتوي على {totalUnits} وحدة؛ قلّل الكمية
+          لإكمال الطلب.
+        </p>
+      )}
 
       <div className="flex flex-col lg:flex-row gap-6 w-full max-w-full">
         <div className="flex-1 lg:w-2/3 space-y-3 w-full max-w-full">
           {items.map((it) => {
-            const atLimit = isStockLimitReached(it.id);
+            const atLimit = isStockLimitReached(it.id) || totalUnits >= MAX_ORDER_UNITS;
             return (
               <div
                 key={it.id}
@@ -582,7 +599,7 @@ function CartPage() {
 
             <button
               onClick={checkout}
-              disabled={submitting}
+              disabled={submitting || overOrderLimit}
               className={`w-full mt-6 rounded-full px-4 sm:px-6 py-3 sm:py-4 font-bold text-white shadow-elegant transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-2 text-sm sm:text-base ${method === "whatsapp" ? "bg-[#25D366] hover:bg-[#1ebd57] shadow-[#25d366]/20" : "bg-gradient-brand shadow-primary/20"}`}
             >
               {submitting ? (
