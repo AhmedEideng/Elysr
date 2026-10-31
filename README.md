@@ -36,22 +36,23 @@ _Original marital & sexual-health products for Egypt — discreet shipping to al
 ## Overview
 
 Elysr Medical is a production Arabic (RTL) e-commerce store serving Egypt. It runs
-entirely on static pre-rendered pages — no database, no server runtime required.
+on static pre-rendered storefront pages, with server-side API endpoints for orders,
+reviews and error reporting. No application database is required.
 Orders flow through a hardened serverless API into Google Sheets; customer reviews
 flow through the same webhook into a moderated reviews sheet.
 
-| Metric             | Value                                                                                                                               |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Products           | **88** (56 men · 24 women · 8 devices) — 4 legacy items remain deleted; six previously removed products restored by owner decision |
-| Catalog coverage   | **88** — 88 in the site catalog · 81 in the Merchant feed (7 prescription-active items excluded from the feed only — owner decision 2026-09-28; their pages stay live and indexed)                  |
-| Articles           | **63** educational health articles with trusted medical sources (NIH/Mayo/NHS/…)                                                    |
-| SEO landing pages  | **106** long-form guide pages (price lists, product comparisons and regional delivery pages; drug-guide pages retain medical safety warnings)                                      |
-| Pre-rendered pages | **277** (16 static + 88 product routes + 63 articles + 106 guides + 4 English pages)                                                                         |
-| Sitemap URLs       | **273** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)                                         |
-| Catalog feed       | **81** items (Google Shopping RSS/CSV/TXT, price + availability + `product_type` per product)                                                                |
-| Redirects          | **182** permanent 301s (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                                       |
-| Images             | 147 source WebP + 266 thumbnails across three sizes                                                                                  |
-| Tests              | **303** unit (Vitest) + **19** E2E (Playwright) + data-integrity + schema validation                                                |
+| Metric             | Value                                                                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Products           | **88** (56 men · 24 women · 8 devices) — 4 legacy items remain deleted; six previously removed products restored by owner decision                                              |
+| Catalog coverage   | **88** in the site catalog · 81 in the Merchant feed (7 prescription-active items excluded from the feed only — owner decision 2026-09-28; their pages stay live and indexable) |
+| Articles           | **63** educational health articles with trusted medical sources (NIH/Mayo/NHS/…)                                                                                                |
+| SEO landing pages  | **106** long-form guide pages (price lists, product comparisons and regional delivery pages; drug-guide pages retain medical safety warnings)                                   |
+| Pre-rendered pages | **277** (16 static + 88 product routes + 63 articles + 106 guides + 4 English pages)                                                                                            |
+| Sitemap URLs       | **273** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)                                                                                     |
+| Catalog feed       | **81** items (Google Shopping RSS/CSV/TXT, price + availability + `product_type` per product)                                                                                   |
+| Redirects          | **182** permanent redirects (HTTP 308 on Vercel) (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                                                         |
+| Images             | 147 source WebP + 266 thumbnails across three sizes                                                                                                                             |
+| Tests              | **303** unit (Vitest) + **19** E2E (Playwright) + data-integrity + schema validation                                                                                            |
 
 ---
 
@@ -82,10 +83,10 @@ the same API handlers — identical behavior, no Vercel dependency.
   build-time-generated `products-db.json` / `bundles-db.json` before anything is
   written to the sheet.
 - **Catalog availability policy** — m-36, m-43, m-47 and w-24 remain permanently
-  deleted; m-34, m-37, m-38, m-45 and w-17 were restored by the owner. The restoration
-  excluded from the Merchant feed only (owner decision 2026-09-28,
+  deleted; m-08, m-34, m-37, m-38, m-45 and w-17 were restored by the owner.
+  Prescription-active products are excluded from the Merchant feed only (owner decision 2026-09-28,
   `isMerchantFeedExcluded` in `src/lib/site-config.ts`); their pages stay
-  published and indexed. The feed carries `product_type` (section × form)
+  published and indexable. The feed carries `product_type` (section × form)
   for all 81 eligible in-stock items.
 - **Reviews are moderated by design** — submissions land in a "قيد المراجعة"
   (pending) state; only owner-approved rows are ever served. The read endpoint is
@@ -209,7 +210,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 
 - Fuzzy instant suggestions in the header dialog (Fuse.js, lazy-loaded, Ctrl/Cmd+K)
   with an **"عرض كل النتائج"** (show all results) link.
-- Dedicated results page `/search?q=…` across **all categories** — indexed via the
+- Dedicated results page `/search?q=…` across **all categories** — described by the
   `SearchAction` JSON-LD and the sitemap search template, so Google search results
   land on real result pages.
 - Egyptian dialect synonyms are bidirectional (`نقط` ⇄ `قطرات`) in both the page
@@ -239,13 +240,13 @@ the same API handlers — identical behavior, no Vercel dependency.
 ### 🛡️ Product & content compliance
 
 - **Catalog visibility** — 88 products are maintained in the site catalog; four
-  legacy items remain deleted and the five owner-restored products are visible
+  legacy items remain deleted and the six owner-restored products are visible
   normally. Prescription-active items are excluded from the Merchant
   feed only (owner decision 2026-09-28) — never from the catalog or sitemap.
 - **Medical copy policy** — medical wording is handled editorially rather than by
   a fixed forbidden-keyword list; source-support validation for new articles remains
   available through `npm run test:sources`.
-- **Source liveness CI** — all 60 unique article source URLs are re-checked on every
+- **Source liveness CI** — all unique article source URLs are re-checked on every
   push (3-attempt backoff; flaky primary authorities classified, true 404s fail).
 
 ---
@@ -303,25 +304,38 @@ writing an order.
 ```ts
 // src/data/products/men.ts (or women.ts / devices.ts) — append to the array
 {
-  id: "m-68",                              // next sequential ID
+  id: "m-65",                              // example only: verify the ID is unused
   slug: "your-product-slug",               // URL-friendly English name
   name: "اسم المنتج",                       // Arabic display name
   nameEn: "Product Name",                   // English name (catalog data)
   category: "men",                          // men | women | devices
   price: 300,                               // EGP
-  description: "وصف تفصيلي للمنتج…",        // ≥ 81 chars — reviewed product copy
+  description: "وصف تفصيلي للمنتج…",        // ≥ 80 chars — reviewed product copy
   benefits: ["فائدة 1", "فائدة 2"],         // 5–7 benefits
   ingredients: "المكونات مع أدوارها…",
   usage: "طريقة الاستخدام + تحذيرات…",
   image: "/images/your-product-slug.webp",  // slug-based (must match slug)
-  stock: 100,
+  emoji: "💊",
+  stock: 100,                               // confirmed inventory only
   // searchAliases?: ["كلمة محلية شائعة"],   // optional: dialect/search synonyms
 }
 ```
 
-Then add the image (800×800 WebP) to `public/images/your-product-slug.webp` and its
-thumbnails to `public/images/thumbs/` and `thumbs-180/`. Run `npm run build` —
-sitemap, prerender, feed, and the API's `products-db.json` all update automatically.
+Complete the integration before publishing:
+
+1. Add an 800×800 WebP and thumbnails: `thumbs/` **480×480**, `thumbs-180/`
+   **360×360**, `thumbs-120/` **240×240**. Directory names describe CSS use,
+   not the actual file dimensions. Preserve the image proportions.
+2. Assign the product ID in `src/data/topics.ts`; add a factual hook in
+   `product-meta.ts` and product-specific questions in `product-faqs.ts`.
+3. Run `npm run sync:redirects` to generate the ID-to-slug redirect. For a restored
+   URL, remove its old redirect from both `legacyAliases` in the sync script and
+   `vercel.json` before syncing. Never redirect a live product page away.
+4. Update catalog-count assertions, the category `OfferCatalog` counts in
+   `index.html`, and these READMEs. Do not invent ratings, identifiers or stock.
+5. Run `npm run build`, then `npm run ci` and `npm run health-check`.
+   Build regenerates the sitemap, page HTML, feed and API catalog files.
+   Review generated diffs; feed changes require owner approval before publishing.
 
 > ⚠️ Product copy is reviewed as part of the normal editorial/content workflow;
 > CI no longer blocks a fixed list of medical-claim keywords.
@@ -342,8 +356,9 @@ a(
 );
 ```
 
+Assign every new article to a topic in `src/data/topics.ts`.
 Every article needs **≥ 3 trusted https sources**; `npm run test:sources` validates
-claim→source support, and the corpus-wide liveness CI re-checks every source URL on
+source requirements, and the corpus-wide liveness CI re-checks every source URL on
 every push.
 
 ---
@@ -352,15 +367,47 @@ every push.
 
 Five jobs on every push (plus a weekly Saturday source-liveness cron):
 
-| Job                                         | Gate                                                                                          |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| 🔗 Corpus Source Liveness                   | All 60 unique article source URLs checked (bot-blocked authorities are classified separately) |
-| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc --noEmit` · 303 unit/API tests · catalog+metadata+redirect-graph guard          |
-| 🛡 Security Audit                            | `npm audit --audit-level=high` on the locked tree                                             |
-| 🏗 Build • Prerender • Sitemaps              | Vite build + 277-page prerender + sitemap artifacts                                           |
-| 🚦 Lighthouse Performance Budget            | LHCI performance budgets on the built site                                                    |
+| Job                                         | Gate                                                                                       |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 🔗 Corpus Source Liveness                   | All unique article source URLs checked (bot-blocked authorities are classified separately) |
+| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc --noEmit` · 303 unit/API tests · catalog+metadata+redirect-graph guard       |
+| 🛡 Security Audit                            | `npm audit --audit-level=high` on the locked tree                                          |
+| 🏗 Build • Prerender • Sitemaps              | Vite build + 277-page prerender + sitemap artifacts                                        |
+| 🚦 Lighthouse Performance Budget            | LHCI performance budgets on the built site                                                 |
 
 Local equivalents: `npm run ci` (lint + typecheck + test:all) and `npm run test:e2e`.
+
+---
+
+## Current release and loading behavior
+
+**Version 2.3.2 · asset cache 105 · documentation reviewed 2026-10-31.**
+
+- Version lives in `package.json` and `package-lock.json`; cache version lives in
+  `config/cache-version.json` and is consumed through `CACHE_VERSION`.
+  Keep the explicit `ga-loader.js?v=105` in `index.html` synchronized.
+- With JavaScript enabled, the initial static fallback is hidden until React
+  mounts the actual UI. There is **no standalone hero or skeleton flash**.
+  The hero preload remains; images may finish loading after the UI appears.
+- No-JS visitors retain static content and navigation. If the initial JavaScript
+  startup flag is not set within four seconds, the fallback becomes visible.
+  This is not a guarantee that every runtime/render error is recoverable.
+- Header uses the transparent 250×94 logo; footer uses the 200×200 square mark
+  without the old invert filter. These are raster assets, not SVG originals.
+- Recent catalog additions: Over Time (restored), Tri Force 30 capsules,
+  Cialis 20 mg / 4 tablets, and Pink Shot 30 ml. The Cialis 30-tablet URL is
+  unchanged. Pink Shot is included in the feed; prescription-active items remain excluded.
+
+### Safe release checklist
+
+1. Review content, medical sources and generated artifacts; do not infer dosages
+   or manufacturer certification from promotional imagery.
+2. Run the checks above. `npm run release -- patch` updates package/lock versions,
+   increments cache, synchronizes the GA asset URL, and creates a local commit/tag.
+   It **does not build or push**; review its staged changes first.
+3. Rebuild after a version/cache bump, review generated changes, and commit them.
+4. Push only with owner approval. Check live URLs, prices, images, redirects and
+   feed inclusion after deployment completes. Feed inclusion does not mean Google approval.
 
 ---
 
@@ -432,7 +479,7 @@ description (usage instructions stripped), link, `image_link` (cache-versioned),
 (official taxonomy IDs), `product_type` (store taxonomy: section × product form),
 and an honest `identifier_exists=no` (no GTIN/MPN is ever invented — a data-integrity
 test enforces this). Seven prescription-active items are excluded from the feed only
-by owner decision (2026-09-28); their pages remain live and indexed.
+by owner decision (2026-09-28); their pages remain live and indexable.
 
 Still pending an explicit owner decision before any Shopping submission: the
 `g:adult` policy path — (a) site-wide adult-oriented, (b) per-product classification
