@@ -1743,6 +1743,8 @@ ${homeArticlesBody}
           url: canonical,
           inLanguage: "ar-EG",
           about: page.primaryKeyword,
+          ...(page.sources?.length ? { citation: page.sources.map((source) => source.url) } : {}),
+          ...(page.updatedAt ? { dateModified: page.updatedAt } : {}),
         };
 
         const breadcrumb = {
@@ -1827,6 +1829,7 @@ ${homeArticlesBody}
             <p>${esc(page.intro)}</p>
             <section><p><strong>علامات الاختيار الواعي</strong></p><ul><li>اختيار واعٍ</li><li>شحن سري داخل مصر</li><li>تنبيه طبي واضح</li></ul></section>
             ${sections}
+            ${page.sources?.length ? `<section aria-label="مصادر الدليل"><h2>المصادر والمراجع</h2>${page.updatedAt ? `<p>آخر تحديث للمحتوى: <time datetime="${esc(page.updatedAt)}">${esc(page.updatedAt)}</time></p>` : ""}<ol>${page.sources.map((source) => `<li><a href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">${esc(source.title)}</a> — ${esc(source.publisher)}</li>`).join("")}</ol></section>` : ""}
             <h2>ابدأ من الأقسام الحالية</h2>
             <ul>${links}</ul>
             ${selectedProducts.length > 0 ? `<h2>منتجات مختارة مرتبطة بالبحث</h2><ul>${productsBody}</ul>` : ""}

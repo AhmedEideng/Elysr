@@ -1,3 +1,4 @@
+import { restoredNutritionArticle } from "./restored-nutrition-article";
 export interface ArticleSource {
   title: string;
   url: string;
@@ -373,6 +374,7 @@ const a = (
 };
 
 export const articles: Article[] = [
+  { ...restoredNutritionArticle, author: articleAuthor, reviewer: articleReviewer },
   {
     image: "/images/article-ginseng-guide-hero.webp",
     slug: "red-korean-ginseng-energy-endurance-benefits",

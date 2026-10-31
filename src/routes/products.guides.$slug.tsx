@@ -98,6 +98,8 @@ function SeoLandingPageComponent() {
       url: `https://elysrmedical.store/products/guides/${page.slug}`,
       inLanguage: "ar-EG",
       about: page.primaryKeyword,
+      ...(page.sources?.length ? { citation: page.sources.map((source) => source.url) } : {}),
+      ...(page.updatedAt ? { dateModified: page.updatedAt } : {}),
     });
     injectJsonLd(
       "breadcrumb",
@@ -173,7 +175,7 @@ function SeoLandingPageComponent() {
           </div>
         </section>
 
-        <section className="mt-8 grid gap-5 md:grid-cols-3">
+        <section className={`mt-8 grid gap-5 ${page.sources?.length ? "" : "md:grid-cols-3"}`}>
           {page.sections.map((section) => (
             <div key={section.heading} className="rounded-3xl border bg-card p-5 shadow-sm">
               <h2 className="mb-3 text-xl font-black">{section.heading}</h2>
@@ -182,11 +184,41 @@ function SeoLandingPageComponent() {
           ))}
         </section>
 
+        {page.sources && page.sources.length > 0 && (
+          <section
+            className="mt-8 rounded-3xl border bg-card p-5 leading-8"
+            aria-label="مصادر الدليل"
+          >
+            <h2 className="text-xl font-black">المصادر والمراجع</h2>
+            {page.updatedAt && (
+              <p className="text-sm text-muted-foreground">
+                آخر تحديث للمحتوى: <time dateTime={page.updatedAt}>{page.updatedAt}</time>
+              </p>
+            )}
+            <ol className="mt-3 list-inside list-decimal space-y-2">
+              {page.sources.map((source) => (
+                <li key={source.url}>
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary underline"
+                  >
+                    {source.title}
+                  </a>
+                  <span className="text-sm text-muted-foreground"> — {source.publisher}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
         <section className="mt-10 rounded-[2rem] border border-primary/10 bg-gradient-soft p-5 md:p-7">
           <h2 className="text-2xl font-black">ابدأ من الأقسام الحالية</h2>
           <p className="mt-2 text-sm leading-7 text-muted-foreground">
-            هذه الصفحة لا تضيف قسماً جديداً في الشركة؛ هي دليل يساعدك على الوصول للقسم المناسب حسب
-            كلمة البحث والاحتياج.
+            {page.sources?.length
+              ? "قراءات مرتبطة تساعدك على متابعة السؤال الذي يهمك، مع فصل المعلومات العامة عن بيانات أي منتج محدد."
+              : "هذه الصفحة لا تضيف قسماً جديداً في الشركة؛ هي دليل يساعدك على الوصول للقسم المناسب حسب كلمة البحث والاحتياج."}
           </p>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {page.links.map((link) => (

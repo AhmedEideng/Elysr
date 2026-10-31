@@ -4,7 +4,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://elysrmedical.store/</loc>
-    <lastmod>2026-10-11</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://elysrmedical.store/" />
@@ -13,7 +13,7 @@
   </url>
   <url>
     <loc>https://elysrmedical.store/products/men</loc>
-    <lastmod>2026-09-29</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://elysrmedical.store/products/men" />
@@ -22,7 +22,7 @@
   </url>
   <url>
     <loc>https://elysrmedical.store/products/women</loc>
-    <lastmod>2026-09-20</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://elysrmedical.store/products/women" />
@@ -31,7 +31,7 @@
   </url>
   <url>
     <loc>https://elysrmedical.store/products/devices</loc>
-    <lastmod>2026-09-29</lastmod>
+    <lastmod>2026-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="https://elysrmedical.store/products/devices" />
@@ -964,6 +964,16 @@
     <image:image>
       <image:loc>https://elysrmedical.store/images/digital-electric-vacuum-pump-9-speeds.webp</image:loc>
       <image:title>مضخة التفريغ الكهربائية الاحترافية بشاشة رقمية — ٩ سرعات</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://elysrmedical.store/education/nutrition-mental-health-testosterone-balance</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://elysrmedical.store/images/article-nutrition-libido.webp</image:loc>
+      <image:title>التغذية والمزاج والتستوستيرون: كيف تفرّق بين الإرهاق ونقص الهرمون؟</image:title>
     </image:image>
   </url>
   <url>
@@ -2228,6 +2238,48 @@
   </url>
   <url>
     <loc>https://elysrmedical.store/products/guides/women-products-cairo</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://elysrmedical.store/products/guides/viagra-vs-cialis-egypt</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://elysrmedical.store/products/guides/sildenafil-products-guide</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://elysrmedical.store/products/guides/emla-delay-guide</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://elysrmedical.store/products/guides/delay-spray-for-men-egypt</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://elysrmedical.store/products/guides/procomil-spray-guide</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://elysrmedical.store/products/guides/viagra-products-egypt</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://elysrmedical.store/products/guides/fake-vs-original-performance-products</loc>
     <lastmod>2026-10-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>

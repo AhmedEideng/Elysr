@@ -1,3 +1,4 @@
+import { restoredLandingPages } from "./restored-landing-pages";
 import { ARTICLE_COUNT } from "./articles-cards.generated";
 import { products } from "./products";
 
@@ -33,6 +34,8 @@ export interface SeoLandingPage {
   relatedKeywords: string[];
   /** true = إخفاء الصفحة من محركات البحث (noindex) + استبعادها من sitemap */
   noindex?: boolean;
+  sources?: { title: string; url: string; publisher: string }[];
+  updatedAt?: string;
 }
 
 export const seoLandingPages: SeoLandingPage[] = [
@@ -7180,4 +7183,5 @@ export const seoLandingPages: SeoLandingPage[] = [
       "منتجات نسائية الجيزة",
     ],
   },
+  ...restoredLandingPages,
 ];

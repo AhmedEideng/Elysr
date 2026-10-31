@@ -24,6 +24,18 @@ async function syncRedirects() {
 
   try {
     const { products } = await vite.ssrLoadModule("/src/data/products.ts");
+    // Explicitly restored content may retire its old redirect; all other
+    // accidental deletions still fail the safety guard below.
+    const { restoredLandingPages } = await vite.ssrLoadModule(
+      "/src/data/restored-landing-pages.ts",
+    );
+    const { restoredNutritionArticle } = await vite.ssrLoadModule(
+      "/src/data/restored-nutrition-article.ts",
+    );
+    const restoredPaths = new Set([
+      ...restoredLandingPages.map((page) => `/products/guides/${page.slug}`),
+      `/education/${restoredNutritionArticle.slug}`,
+    ]);
     const productRedirects = [];
     const seen = new Set();
 
@@ -211,73 +223,33 @@ async function syncRedirects() {
         permanent: true,
       },
       {
-        source: "/products/guides/viagra-vs-cialis-egypt",
-        destination: "/products/guides/cialis-vs-viagra-comparison",
-        permanent: true,
-      },
-      {
-        source: "/products/guides/sildenafil-products-guide",
-        destination: "/products/guides/best-erection-support-products",
-        permanent: true,
-      },
-      {
-        source: "/products/guides/emla-delay-guide",
-        destination: "/products/guides/best-delay-products-egypt",
-        permanent: true,
-      },
-      {
-        source: "/products/guides/delay-spray-for-men-egypt",
-        destination: "/products/guides/best-delay-products-egypt",
-        permanent: true,
-      },
-      {
-        source: "/products/guides/procomil-spray-guide",
-        destination: "/products/procomil-delay-cream-20g",
-        permanent: true,
-      },
-      {
-        source: "/products/guides/viagra-products-egypt",
-        destination: "/products/guides/best-erection-support-products",
-        permanent: true,
-      },
-      {
-        source: "/products/guides/fake-vs-original-performance-products",
-        destination: "/education/product-safety-checklist",
-        permanent: true,
-      },
-      {
-        source: "/education/nutrition-mental-health-testosterone-balance",
-        destination: "/education",
-        permanent: true,
-      },
-      {
         source: "/products/fox-170-sildenafil-tablets",
-        destination: "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
+        destination: "/products/guides/sildenafil-products-guide",
         permanent: true,
       },
       {
         source: "/products/viagra-1-2-3-2-10-tablets",
-        destination: "/products/viagra-20-tablets",
+        destination: "/products/guides/viagra-products-egypt",
         permanent: true,
       },
       {
         source: "/products/royal-honey-malaysian",
-        destination: "/products/royal-honey-gold-vip",
+        destination: "/products/guides/royal-honey-products",
         permanent: true,
       },
       {
         source: "/products/lovezone-vaginal-gel",
-        destination: "/products/lovezone-drops-by-mouth",
+        destination: "/products/women",
         permanent: true,
       },
       {
         source: "/products/60-minutes-delay-men-delay-gel",
-        destination: "/products/stallion-delay-gel",
+        destination: "/products/guides/best-delay-products-egypt",
         permanent: true,
       },
       {
         source: "/products/hilti-wonderful-honey-for-men",
-        destination: "/products/royal-honey",
+        destination: "/products/guides/royal-honey-products",
         permanent: true,
       },
       {
@@ -446,6 +418,9 @@ async function syncRedirects() {
     ];
 
     for (const redirect of legacyAliases) {
+      if (restoredPaths.has(redirect.source)) {
+        throw new Error(`Restored content must not redirect: ${redirect.source}`);
+      }
       if (!seen.has(redirect.source)) {
         productRedirects.push(redirect);
         seen.add(redirect.source);
@@ -456,7 +431,9 @@ async function syncRedirects() {
     // ومش في قائمة السكربت = السكربت مش المصدر الكامل → نرفض الكتابة
     // (الـ redirects الجديدة تتضاف للسكربت الأول، مش للـ JSON مباشرة).
     const newBySource = new Map(productRedirects.map((r) => [r.source, r]));
-    const dropped = (vercel.redirects || []).filter((r) => !newBySource.has(r.source));
+    const dropped = (vercel.redirects || []).filter(
+      (r) => !newBySource.has(r.source) && !restoredPaths.has(r.source),
+    );
     if (dropped.length > 0) {
       console.error("✗ Sync refused — these existing redirects are missing from the script list:");
       for (const r of dropped) {
@@ -468,7 +445,9 @@ async function syncRedirects() {
 
     // نقدر الترتيب الحالي: نحدّث كل entry في مكانه (لو اتغيرت الوجهة)،
     // ونضيف الجديد في الآخر — idempotent (نفس الملف → صفر diff).
-    const merged = (vercel.redirects || []).map((r) => newBySource.get(r.source) || r);
+    const merged = (vercel.redirects || [])
+      .filter((r) => !restoredPaths.has(r.source))
+      .map((r) => newBySource.get(r.source) || r);
     const existingSources = new Set((vercel.redirects || []).map((r) => r.source));
     for (const r of productRedirects) {
       if (!existingSources.has(r.source)) merged.push(r);

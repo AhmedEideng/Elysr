@@ -61,4 +61,4 @@ export const featuredArticleCards: ArticleCard[] = [
 ];
 
 /** عدد المقالات التوعوية إجمالاً (أرقام ديناميكية في الواجهة — بلا hardcode). */
-export const ARTICLE_COUNT = 63;
+export const ARTICLE_COUNT = 64;

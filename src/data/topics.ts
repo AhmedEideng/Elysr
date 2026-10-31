@@ -63,6 +63,9 @@ export const TOPICS: Topic[] = [
       "pelvic-floor-men-advanced",
     ],
     guideSlugs: [
+      "emla-delay-guide",
+      "delay-spray-for-men-egypt",
+      "procomil-spray-guide",
       "complete-guide-premature-ejaculation-delay",
       "best-delay-products-egypt",
       "premature-ejaculation-products",
@@ -111,6 +114,9 @@ export const TOPICS: Topic[] = [
       "men-health-checkups",
     ],
     guideSlugs: [
+      "viagra-vs-cialis-egypt",
+      "sildenafil-products-guide",
+      "viagra-products-egypt",
       "erectile-dysfunction-products-egypt",
       "best-erection-support-products",
       "weak-erection-young-men",
@@ -220,6 +226,7 @@ export const TOPICS: Topic[] = [
     pillarSlug: "safe-supplements",
     pillarTitle: "كيف تختار مكمل غذائي آمن؟",
     articleSlugs: [
+      "nutrition-mental-health-testosterone-balance",
       "safe-supplements",
       "red-korean-ginseng-energy-endurance-benefits",
       "peruvian-maca-root-benefits-for-vitality-and-energy",
@@ -362,6 +369,7 @@ export const TOPICS: Topic[] = [
       "how-to-spot-original-vs-fake-products",
     ],
     guideSlugs: [
+      "fake-vs-original-performance-products",
       "daily-intimate-hygiene-men-women",
       "discreet-shipping-privacy-explained",
       "doctor-consultation-before-products",

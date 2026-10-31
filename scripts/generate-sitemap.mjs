@@ -799,6 +799,8 @@ Sitemap: ${SITE_URL}/sitemap-images.xml
         primaryKeyword: page.primaryKeyword,
         relatedKeywords: page.relatedKeywords,
         noindex: page.noindex,
+        sources: page.sources,
+        updatedAt: page.updatedAt,
       };
       writeFileSync(
         resolve(landingPagesDir, `${page.slug}.json`),
