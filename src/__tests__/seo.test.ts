@@ -270,3 +270,16 @@ describe("package-2 product pages", () => {
     ).toBe(true);
   });
 });
+
+// Package-3: search-intent titles/excerpts for the dormant education articles.
+describe("package-3 education articles", () => {
+  it("keeps intent-led titles for the three articles", async () => {
+    const { articles } = await import("@/data/articles");
+    const bySlug = (slug: string) =>
+      articles.find((a: { slug: string }) => a.slug === slug) as
+        { title: string; excerpt: string } | undefined;
+    expect(bySlug("delay-sprays-safe-use")?.title).toContain("طريقة الاستخدام");
+    expect(bySlug("max-filler-breast-guide")?.title).toContain("الأصلي");
+    expect(bySlug("medications-affecting-libido")?.title).toContain("القائمة الكاملة");
+  });
+});
