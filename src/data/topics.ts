@@ -123,6 +123,7 @@ export const TOPICS: Topic[] = [
     ],
     productIds: [
       "m-01",
+      "m-64",
       "m-63",
       "m-08",
       "m-02",
@@ -185,6 +186,7 @@ export const TOPICS: Topic[] = [
     ],
     productIds: [
       "w-01",
+      "w-25",
       "w-02",
       "w-03",
       "w-04",

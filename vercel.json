@@ -1101,6 +1101,16 @@
       "source": "/products/m-63",
       "destination": "/products/tri-force-30-capsules",
       "permanent": true
+    },
+    {
+      "source": "/products/m-64",
+      "destination": "/products/cialis-tadalafil-20mg-4-tablets",
+      "permanent": true
+    },
+    {
+      "source": "/products/w-25",
+      "destination": "/products/provocative-pink-shot-30ml",
+      "permanent": true
     }
   ]
 }

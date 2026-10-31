@@ -260,8 +260,13 @@ try {
     }
   }
 
-  assert.equal(products.length, 86, "Expected 86 products including Tri Force (m-63)");
+  assert.equal(products.length, 88, "Expected 88 products including Pink Shot (w-25)");
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
+  const cialisFour = products.find((p) => p.id === "m-64");
+  assert.equal(cialisFour?.slug, "cialis-tadalafil-20mg-4-tablets");
+  assert.equal(cialisFour.price, 450);
+  assert.equal(siteConfig.isMerchantFeedExcluded(cialisFour), true);
+  assert.ok(products.some((p) => p.id === "m-37" && p.slug === "cialis-tadalafil-20mg-30-tablets"));
   const overtime = products.find((p) => p.id === "m-08");
   assert.equal(overtime?.slug, "overtime-erection-delay");
   assert.equal(overtime.price, 350);
@@ -504,8 +509,8 @@ try {
   }, {});
   assert.deepEqual(
     categories,
-    { men: 55, women: 23, devices: 8 },
-    "Unexpected category split (86 = 55 men / 23 women / 8 devices)",
+    { men: 56, women: 24, devices: 8 },
+    "Unexpected category split (88 = 56 men / 24 women / 8 devices)",
   );
 
   // (2026-09-15) JSON-LD OfferCatalog في index.html لازم يطابق كتالوج
