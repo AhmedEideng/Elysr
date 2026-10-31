@@ -20,7 +20,7 @@ import {
   Sparkles,
   Heart,
 } from "lucide-react";
-import logoMonoSmall from "@/assets/logo-small.webp";
+import logoHeader from "@/assets/logo-mono.webp";
 import logoSquare from "@/assets/logo-square.webp";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
@@ -176,11 +176,11 @@ export function Header() {
         <div className="container mx-auto flex h-14 items-center justify-between gap-4 px-4 md:h-16">
           <Link to="/" className="flex items-center">
             <img
-              src={logoMonoSmall}
+              src={logoHeader}
               alt="اليسر ميديكال — أكبر شركة متخصصة في المنتجات الأصلية"
               className="h-11 w-auto object-contain md:h-12"
-              width={130}
-              height={49}
+              width={250}
+              height={94}
               // Keep the small brand mark below the home hero's high-priority LCP image.
               fetchPriority="low"
               decoding="async"

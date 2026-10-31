@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { MessageCircle, Mail, MapPin, Sparkles } from "lucide-react";
-import logo from "@/assets/logo-small.webp";
+import logo from "@/assets/logo-square.webp";
 import { COMPANY, waLink } from "@/lib/whatsapp";
 import { PROMO_TIERS } from "@/lib/promo";
 
@@ -59,11 +59,11 @@ export function Footer() {
               <img
                 src={logo}
                 alt="اليسر"
-                width={48}
-                height={48}
+                width={200}
+                height={200}
                 loading="lazy"
                 decoding="async"
-                className="h-12 w-14 shrink-0 object-contain brightness-0 invert"
+                className="h-14 w-14 shrink-0 rounded-xl bg-white p-1 object-contain"
               />
               <div>
                 <div className="text-lg font-black">{COMPANY.name}</div>
