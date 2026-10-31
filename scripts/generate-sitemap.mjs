@@ -592,6 +592,29 @@ ${articleImageEntries}
       return "2915"; // fallback: Personal Care
     };
 
+    // 🏷️ Product Type (تصنيف المتجر الداخلي لـ Merchant Center): يساعد Google
+    // على فهم بنية الكتالوج (قسم × شكل المنتج) بدل ترك التصنيف للتخمين وحده.
+    // نفس ترتيب كشف الشكل في feedCategory عشان التصنيفين ما يتناقضوش.
+    const feedProductType = (p) => {
+      const section =
+        p.category === "men"
+          ? "منتجات الرجال"
+          : p.category === "women"
+            ? "منتجات النساء"
+            : "أجهزة طبية";
+      if (p.category === "devices") return `${section} > أجهزة الصحة الزوجية`;
+      const n = `${p.name} ${p.nameEn || ""}`;
+      if (/بخاخ|سبراي|سبراى|جل\b|جيل\b|كريم|مناديل|spray|\bgel\b|cream|wipes/i.test(n))
+        return `${section} > منتجات موضعية`;
+      if (/عسل|honey/i.test(n)) return `${section} > عسل ملكي`;
+      if (/شوكولاتة|شيكولاته|chocolate|علكة|\bgum\b|بنكهة/i.test(n))
+        return `${section} > شوكولاتة وعلكات`;
+      if (/قهوة|coffee/i.test(n)) return `${section} > قهوة`;
+      if (/كبسول|أقراص|أكياس|قطرات|capsules?|tablets?|drops?|nutriceutical/i.test(n))
+        return `${section} > مكملات فموية`;
+      return `${section} > منتجات عناية`;
+    };
+
     const feedRow = (p) => ({
       id: p.id,
       title: p.name,
@@ -606,6 +629,7 @@ ${articleImageEntries}
       availability: p.stock > 0 ? "in stock" : "out of stock",
       price: `${p.price} EGP`,
       google_product_category: feedCategory(p),
+      product_type: feedProductType(p),
     });
 
     const catalogXml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -635,6 +659,7 @@ ${optionalIdentifiers ? `${optionalIdentifiers}\n` : ""}      <g:identifier_exis
       <g:availability>${row.availability}</g:availability>
       <g:price>${row.price}</g:price>
       <g:google_product_category>${esc(row.google_product_category)}</g:google_product_category>
+      <g:product_type>${esc(row.product_type)}</g:product_type>
     </item>`;
   })
   .join("\n")}
@@ -658,6 +683,7 @@ ${optionalIdentifiers ? `${optionalIdentifiers}\n` : ""}      <g:identifier_exis
       "availability",
       "price",
       "google_product_category",
+      "product_type",
     ];
     const feedRows = catalogProducts.map(feedRow);
     const csvEscape = (v) => {

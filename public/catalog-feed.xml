@@ -15,6 +15,7 @@
       <g:availability>in stock</g:availability>
       <g:price>520 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>m-02</g:id>
@@ -27,6 +28,7 @@
       <g:availability>in stock</g:availability>
       <g:price>350 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>m-03</g:id>
@@ -39,6 +41,7 @@
       <g:availability>in stock</g:availability>
       <g:price>380 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>m-04</g:id>
@@ -51,6 +54,7 @@
       <g:availability>in stock</g:availability>
       <g:price>350 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>m-05</g:id>
@@ -63,6 +67,7 @@
       <g:availability>in stock</g:availability>
       <g:price>290 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-06</g:id>
@@ -75,6 +80,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-07</g:id>
@@ -87,6 +93,7 @@
       <g:availability>in stock</g:availability>
       <g:price>220 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-09</g:id>
@@ -99,6 +106,7 @@
       <g:availability>in stock</g:availability>
       <g:price>500 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-11</g:id>
@@ -111,6 +119,7 @@
       <g:availability>in stock</g:availability>
       <g:price>400 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-12</g:id>
@@ -123,6 +132,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-13</g:id>
@@ -135,6 +145,7 @@
       <g:availability>in stock</g:availability>
       <g:price>230 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-14</g:id>
@@ -147,6 +158,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>m-15</g:id>
@@ -159,6 +171,7 @@
       <g:availability>in stock</g:availability>
       <g:price>180 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>m-16</g:id>
@@ -171,6 +184,7 @@
       <g:availability>in stock</g:availability>
       <g:price>400 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-17</g:id>
@@ -183,6 +197,7 @@
       <g:availability>in stock</g:availability>
       <g:price>200 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-18</g:id>
@@ -195,6 +210,7 @@
       <g:availability>in stock</g:availability>
       <g:price>160 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-19</g:id>
@@ -207,6 +223,7 @@
       <g:availability>in stock</g:availability>
       <g:price>400 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-20</g:id>
@@ -219,6 +236,7 @@
       <g:availability>in stock</g:availability>
       <g:price>200 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-21</g:id>
@@ -231,6 +249,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-22</g:id>
@@ -243,6 +262,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-23</g:id>
@@ -255,6 +275,7 @@
       <g:availability>in stock</g:availability>
       <g:price>220 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-24</g:id>
@@ -267,6 +288,7 @@
       <g:availability>in stock</g:availability>
       <g:price>200 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-25</g:id>
@@ -279,6 +301,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>m-26</g:id>
@@ -291,6 +314,7 @@
       <g:availability>in stock</g:availability>
       <g:price>200 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>m-27</g:id>
@@ -303,6 +327,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>m-28</g:id>
@@ -315,6 +340,7 @@
       <g:availability>in stock</g:availability>
       <g:price>750 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-29</g:id>
@@ -327,6 +353,7 @@
       <g:availability>in stock</g:availability>
       <g:price>150 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-30</g:id>
@@ -339,6 +366,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-31</g:id>
@@ -351,6 +379,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-32</g:id>
@@ -363,6 +392,7 @@
       <g:availability>in stock</g:availability>
       <g:price>400 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-33</g:id>
@@ -375,6 +405,7 @@
       <g:availability>in stock</g:availability>
       <g:price>220 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-35</g:id>
@@ -387,6 +418,7 @@
       <g:availability>in stock</g:availability>
       <g:price>350 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-39</g:id>
@@ -399,6 +431,7 @@
       <g:availability>in stock</g:availability>
       <g:price>350 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-40</g:id>
@@ -411,6 +444,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>m-41</g:id>
@@ -423,6 +457,7 @@
       <g:availability>in stock</g:availability>
       <g:price>420 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-42</g:id>
@@ -435,6 +470,7 @@
       <g:availability>in stock</g:availability>
       <g:price>400 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>m-44</g:id>
@@ -447,6 +483,7 @@
       <g:availability>in stock</g:availability>
       <g:price>580 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-46</g:id>
@@ -459,6 +496,7 @@
       <g:availability>in stock</g:availability>
       <g:price>200 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>m-48</g:id>
@@ -471,6 +509,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-49</g:id>
@@ -483,6 +522,7 @@
       <g:availability>in stock</g:availability>
       <g:price>400 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>m-52</g:id>
@@ -495,6 +535,7 @@
       <g:availability>in stock</g:availability>
       <g:price>240 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-53</g:id>
@@ -507,6 +548,7 @@
       <g:availability>in stock</g:availability>
       <g:price>275 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>m-54</g:id>
@@ -519,6 +561,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>m-55</g:id>
@@ -531,6 +574,7 @@
       <g:availability>in stock</g:availability>
       <g:price>550 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-56</g:id>
@@ -543,6 +587,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>m-59</g:id>
@@ -555,6 +600,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>m-60</g:id>
@@ -569,6 +615,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>m-61</g:id>
@@ -581,6 +628,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>m-62</g:id>
@@ -593,6 +641,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات الرجال &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>w-01</g:id>
@@ -605,6 +654,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>w-02</g:id>
@@ -617,6 +667,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>w-03</g:id>
@@ -629,6 +680,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>w-04</g:id>
@@ -641,6 +693,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>w-05</g:id>
@@ -653,6 +706,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>w-06</g:id>
@@ -665,6 +719,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>w-07</g:id>
@@ -677,6 +732,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>w-08</g:id>
@@ -689,6 +745,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>1868</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; قهوة</g:product_type>
     </item>
     <item>
       <g:id>w-09</g:id>
@@ -701,6 +758,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>4947</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; عسل ملكي</g:product_type>
     </item>
     <item>
       <g:id>w-10</g:id>
@@ -713,6 +771,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>w-11</g:id>
@@ -725,6 +784,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>w-12</g:id>
@@ -737,6 +797,7 @@
       <g:availability>in stock</g:availability>
       <g:price>300 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>w-13</g:id>
@@ -749,6 +810,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>w-14</g:id>
@@ -761,6 +823,7 @@
       <g:availability>in stock</g:availability>
       <g:price>200 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>w-15</g:id>
@@ -773,6 +836,7 @@
       <g:availability>in stock</g:availability>
       <g:price>280 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>w-16</g:id>
@@ -785,6 +849,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>w-18</g:id>
@@ -797,6 +862,7 @@
       <g:availability>in stock</g:availability>
       <g:price>200 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>w-19</g:id>
@@ -809,6 +875,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>w-20</g:id>
@@ -821,6 +888,7 @@
       <g:availability>in stock</g:availability>
       <g:price>450 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>w-21</g:id>
@@ -833,6 +901,7 @@
       <g:availability>in stock</g:availability>
       <g:price>200 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>w-22</g:id>
@@ -845,6 +914,7 @@
       <g:availability>in stock</g:availability>
       <g:price>250 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; مكملات فموية</g:product_type>
     </item>
     <item>
       <g:id>w-23</g:id>
@@ -857,6 +927,7 @@
       <g:availability>in stock</g:availability>
       <g:price>150 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; منتجات موضعية</g:product_type>
     </item>
     <item>
       <g:id>d-01</g:id>
@@ -869,6 +940,7 @@
       <g:availability>in stock</g:availability>
       <g:price>4000 EGP</g:price>
       <g:google_product_category>778</g:google_product_category>
+      <g:product_type>أجهزة طبية &gt; أجهزة الصحة الزوجية</g:product_type>
     </item>
     <item>
       <g:id>d-02</g:id>
@@ -881,6 +953,7 @@
       <g:availability>in stock</g:availability>
       <g:price>2400 EGP</g:price>
       <g:google_product_category>778</g:google_product_category>
+      <g:product_type>أجهزة طبية &gt; أجهزة الصحة الزوجية</g:product_type>
     </item>
     <item>
       <g:id>d-03</g:id>
@@ -893,6 +966,7 @@
       <g:availability>in stock</g:availability>
       <g:price>700 EGP</g:price>
       <g:google_product_category>778</g:google_product_category>
+      <g:product_type>أجهزة طبية &gt; أجهزة الصحة الزوجية</g:product_type>
     </item>
     <item>
       <g:id>d-04</g:id>
@@ -905,6 +979,7 @@
       <g:availability>in stock</g:availability>
       <g:price>800 EGP</g:price>
       <g:google_product_category>2915</g:google_product_category>
+      <g:product_type>أجهزة طبية &gt; أجهزة الصحة الزوجية</g:product_type>
     </item>
     <item>
       <g:id>d-05</g:id>
@@ -917,6 +992,7 @@
       <g:availability>in stock</g:availability>
       <g:price>850 EGP</g:price>
       <g:google_product_category>778</g:google_product_category>
+      <g:product_type>أجهزة طبية &gt; أجهزة الصحة الزوجية</g:product_type>
     </item>
     <item>
       <g:id>d-06</g:id>
@@ -929,6 +1005,7 @@
       <g:availability>in stock</g:availability>
       <g:price>2850 EGP</g:price>
       <g:google_product_category>778</g:google_product_category>
+      <g:product_type>أجهزة طبية &gt; أجهزة الصحة الزوجية</g:product_type>
     </item>
     <item>
       <g:id>d-07</g:id>
@@ -941,6 +1018,7 @@
       <g:availability>in stock</g:availability>
       <g:price>3000 EGP</g:price>
       <g:google_product_category>778</g:google_product_category>
+      <g:product_type>أجهزة طبية &gt; أجهزة الصحة الزوجية</g:product_type>
     </item>
     <item>
       <g:id>d-08</g:id>
@@ -953,6 +1031,7 @@
       <g:availability>in stock</g:availability>
       <g:price>4500 EGP</g:price>
       <g:google_product_category>778</g:google_product_category>
+      <g:product_type>أجهزة طبية &gt; أجهزة الصحة الزوجية</g:product_type>
     </item>
   </channel>
 </rss>

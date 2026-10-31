@@ -58,6 +58,7 @@ export const TOPICS: Topic[] = [
       "premature-ejaculation",
       "physiological-methods-for-stamina-and-timing-without-numbing",
       "delay-sprays-safe-use",
+      "why-delay-product-did-not-work-7-mistakes",
       "kegel-exercises",
       "pelvic-floor-men-advanced",
     ],
@@ -104,6 +105,7 @@ export const TOPICS: Topic[] = [
     pillarTitle: "ضعف الانتصاب: الأسباب والحلول",
     articleSlugs: [
       "erectile-dysfunction",
+      "hard-on-sildenafil-dapoxetine-guide",
       "testosterone-and-age",
       "prostate-health-sexual-function",
       "men-health-checkups",
@@ -151,6 +153,7 @@ export const TOPICS: Topic[] = [
     pillarTitle: "صحة المرأة الجنسية: حقائق علمية",
     articleSlugs: [
       "women-orgasm",
+      "women-products-complete-guide",
       "womens-libido-boosters",
       "vaginal-health-basics",
       "menopause-intimacy-guide",
@@ -225,6 +228,7 @@ export const TOPICS: Topic[] = [
       "aphrodisiacs-real",
       "natural-honey-dates-benefits",
       "royal-honey-benefits",
+      "hammer-of-thor-benefits-and-harms",
       "fertility-supplements-guide",
       "best-selling-products-guide",
     ],
@@ -351,6 +355,7 @@ export const TOPICS: Topic[] = [
       // للاستشهاد (محرك الـ backlinks الطبيعية)
       "sexual-health-glossary",
       "product-safety-checklist",
+      "how-to-spot-original-vs-fake-products",
     ],
     guideSlugs: [
       "daily-intimate-hygiene-men-women",

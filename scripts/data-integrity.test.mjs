@@ -844,6 +844,11 @@ try {
     "Every catalog feed item must have an official Google product category",
   );
   assert.equal(
+    (catalogFeed.match(/<g:product_type>/g) || []).length,
+    feedProducts.length,
+    "Every catalog feed item must declare a store product_type for Merchant Center",
+  );
+  assert.equal(
     (catalogFeed.match(/<g:identifier_exists>/g) || []).length,
     feedProducts.length,
     "Every catalog feed item must declare identifier_exists",
