@@ -713,10 +713,13 @@ ${optionalIdentifiers ? `${optionalIdentifiers}\n` : ""}      <g:identifier_exis
 User-agent: *
 Allow: /
 
-# نسخ الصور المرقّمة (?v=N) تتغيّر مع كل إصدار وتخلق روابط مكرّرة في تقرير
-# «تم الزحف - لم تتم الفهرسة». امنع زحفها؛ الصورة الأصلية بدون ?v= تبقى
-# قابلة للزحف والفهرسة عبر sitemap-images وبيانات المنتج.
-Disallow: /images/*?v=*
+# Product pages and images must remain crawlable, including cache-versioned
+# image URLs (?v=) used by the storefront and Google Merchant product feed.
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
 
 # ملاحظة: صفحات /cart و /wishlist و /order-confirmed و /thank-you تحمل وسم
 # noindex في HTML مباشرة. لذا لا نضعها في Disallow هنا — لأن منع الزحف
@@ -739,13 +742,6 @@ User-agent: CCBot
 Disallow: /
 User-agent: Bytespider
 Disallow: /
-
-User-agent: Googlebot-Image
-Allow: /images/
-Disallow: /images/*?v=*
-Allow: /logo.png
-Allow: /og-default.webp
-Allow: /apple-touch-icon.png
 
 Sitemap: ${SITE_URL}/sitemap-index.xml
 Sitemap: ${SITE_URL}/sitemap.xml

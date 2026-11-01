@@ -1,3 +1,4 @@
+import { articlePublicationDates } from "./article-publication-dates";
 import type { Article } from "./articles";
 
 export const restoredNutritionArticle: Omit<Article, "author" | "reviewer"> = {
@@ -10,8 +11,8 @@ export const restoredNutritionArticle: Omit<Article, "author" | "reviewer"> = {
   emoji: "🥗",
   image: "/images/article-nutrition-libido.webp",
   autoReviewed: true,
-  publishedAt: "2026-10-31",
-  updatedAt: "2026-10-31",
+  publishedAt: articlePublicationDates["nutrition-mental-health-testosterone-balance"],
+  updatedAt: "2026-11-01",
   keyTakeaways: [
     "الإرهاق وضعف الرغبة وتغير المزاج لا تثبت وحدها نقص التستوستيرون.",
     "تشخيص النقص يجمع الأعراض مع تحاليل صباحية منخفضة متكررة، لا نتيجة واحدة عابرة.",
