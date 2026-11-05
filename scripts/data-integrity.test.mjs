@@ -202,6 +202,19 @@ try {
       description.length <= 155,
       `Product meta description too long: ${product.slug} (${description.length})`,
     );
+    // Explicit owner exception: Kreva uses its literal 17 August meta, not
+    // the later first-benefit/shipping template. Keep an exact regression guard.
+    if (product.id === "m-60") {
+      assert.equal(
+        description,
+        "جل كريفا الألماني المتطور للرجال (Kreva Gel 50GM) هو تركيبة جل كريمي متخصصة ثنائية المفعول (ساخن وبارد) مصممة بعناية لدعم الأداء الذكوري والتحكم الكامل في…",
+      );
+      assert.equal(product.price, 250);
+      assert.equal(product.stock, 5000);
+      assert.equal(product.rating, undefined);
+      assert.equal(product.reviews, undefined);
+      continue;
+    }
     const firstBenefit = String(product.benefits?.[0] ?? "")
       .trim()
       .replace(/\s+/g, " ");

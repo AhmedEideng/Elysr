@@ -156,6 +156,10 @@ function compactRawBenefit(text: string, maxLength: number): string {
  * it is only whitespace-normalized and clipped at a word boundary if needed.
  */
 export function makeProductMetaDescription(p: ProductMetaInput, maxLength = 155): string {
+  // Owner-requested 17 August 2026 copy restoration, scoped to Kreva only.
+  // The historical page used the first 155 characters of its description.
+  if (p.id === "m-60") return makeMetaDescription(p.description, maxLength);
+
   const profile = resolveProductMetaProfile(p);
   const name = compactProductName(p.name);
   const hook = `${profile.hook}${productAudienceSuffix(p, profile.hook)}`;

@@ -330,7 +330,10 @@ export const matchesProductQuery = (p: Product, q: string): boolean => {
     return true;
   }
 
-  return (p.searchAliases ?? []).some((a) => {
+  // Keep Kreva discoverable in on-site search without adding aliases back to
+  // its restored historical page copy or Product structured data.
+  const aliases = p.searchAliases ?? (p.id === "m-60" ? ["جيل", "كريفا جيل", "كريفا چل"] : []);
+  return aliases.some((a) => {
     const al = a.toLowerCase();
     // مطابقة كاملة، أو المصطلح جزء من اللقب ("سبراي" ← "سبراي تأخير")،
     // أو اللقب جزء من المصطلح ("سبراي ريمانز" ← "سبراي") — بلا ضوضاء للكلمات القصيرة

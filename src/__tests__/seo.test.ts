@@ -154,10 +154,10 @@ describe("product metadata templates", () => {
     expect(rich.endsWith(".")).toBe(true);
   });
 
-  it("includes a raw excerpt of the first benefit for every catalog product", () => {
+  it("includes a raw first-benefit excerpt except for the approved Kreva historical meta", () => {
     expect(products).toHaveLength(88);
 
-    for (const catalogProduct of products) {
+    for (const catalogProduct of products.filter((p) => p.id !== "m-60")) {
       const rawBenefit = catalogProduct.benefits?.[0]?.trim().replace(/\s+/g, " ");
       expect(rawBenefit, `Missing first benefit for ${catalogProduct.id}`).toBeTruthy();
 
@@ -199,16 +199,32 @@ describe("product metadata templates", () => {
 
 // Kreva's useful product content must not regress into shipping-only copy.
 describe("Kreva product search context", () => {
-  it("keeps the price, title and URL stable without restoring unbacked ratings", () => {
+  it("restores August 17 content with current price and stock, without ratings", async () => {
     const kreva = products.find((item) => item.id === "m-60")!;
     expect(kreva.price).toBe(250);
     expect(kreva.slug).toBe("kreva-gel-for-men");
     expect(kreva.titleLatin).toBeUndefined();
     expect(kreva.rating).toBeUndefined();
     expect(kreva.reviews).toBeUndefined();
-    expect(kreva.searchAliases).toContain("كريفا جيل");
-    expect(kreva.description).toContain("إحساس مزدوج متدرج");
+    expect(kreva.stock).toBe(5000);
+    expect(kreva.searchAliases).toBeUndefined();
+    expect(kreva.description).toContain("هو تركيبة جل كريمي متخصصة ثنائية المفعول (ساخن وبارد)");
+    expect(makeProductMetaDescription(kreva)).toBe(
+      "جل كريفا الألماني المتطور للرجال (Kreva Gel 50GM) هو تركيبة جل كريمي متخصصة ثنائية المفعول (ساخن وبارد) مصممة بعناية لدعم الأداء الذكوري والتحكم الكامل في…",
+    );
+    expect(kreva.usage).toBe(
+      "اغسل المنطقة جيداً وجففها. ضع طبقة رقيقة من جل كريفا على العضو ودلكه بلطف لمدة 2 إلى 5 دقائق حتى يمتص تماماً. اتركه لمدة 15 إلى 20 دقيقة، ثم اغسل العضو جيداً بالماء والصابون قبل الجماع. للاستخدام الخارجي فقط. تجنب ملامسة العينين أو الجروح المفتوحة. توقف فوراً إذا ظهر أي تهيج أو احمرار، واستشر صيدلياً أو طبيباً.",
+    );
+    const schema = productSchema(kreva);
+    expect(schema).not.toHaveProperty("aggregateRating");
+    expect(schema).not.toHaveProperty("review");
     expect(kreva.description).not.toMatch(/راجع.*العبوة|حسب العبوة/);
+    const { getProductFAQs } = await import("@/data/product-faqs");
+    const faqs = getProductFAQs(kreva);
+    expect(faqs).toHaveLength(4);
+    expect(faqs[1].answer).toBe(
+      "يتم التوصيل داخل القاهرة والجيزة خلال 24-48 ساعة عمل. أما باقي محافظات الجمهورية فيستغرق الشحن من 2 إلى 4 أيام عمل كحد أقصى.",
+    );
   });
 });
 

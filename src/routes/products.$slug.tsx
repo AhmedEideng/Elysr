@@ -669,10 +669,12 @@ function ProductPage() {
       ) : null}
 
       {/* 📝 المراجعات الجديدة المعتمدة فقط + نموذج المشاركة */}
-      <CustomerReviews
-        productId={product.id}
-        maxVisibleReviews={product.rating && product.reviews ? 1 : 4}
-      />
+      {product.id !== "m-60" ? (
+        <CustomerReviews
+          productId={product.id}
+          maxVisibleReviews={product.rating && product.reviews ? 1 : 4}
+        />
+      ) : null}
 
       {/* ── FAQ Section ── */}
       <FAQ items={getProductFAQs(product)} />
