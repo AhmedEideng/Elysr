@@ -209,7 +209,7 @@ try {
         description,
         "جل كريفا الألماني المتطور للرجال (Kreva Gel 50GM) هو تركيبة جل كريمي متخصصة ثنائية المفعول (ساخن وبارد) مصممة بعناية لدعم الأداء الذكوري والتحكم الكامل في…",
       );
-      assert.equal(product.price, 250);
+      assert.equal(product.price, 300);
       assert.equal(product.stock, 5000);
       assert.equal(product.rating, undefined);
       assert.equal(product.reviews, undefined);

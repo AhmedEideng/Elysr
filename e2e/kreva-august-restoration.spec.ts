@@ -36,7 +36,7 @@ for (const width of [390, 1280]) {
         "https://elysrmedical.store/products/kreva-gel-for-men",
       );
       const schema = JSON.parse((await page.locator("script#ldjson-product").textContent())!);
-      expect(Number(schema.offers.price)).toBe(250);
+      expect(Number(schema.offers.price)).toBe(300);
       expect(schema.offers.availability).toBe("https://schema.org/InStock");
       expect(schema.aggregateRating).toBeUndefined();
       expect(schema.review).toBeUndefined();

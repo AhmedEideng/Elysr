@@ -201,7 +201,7 @@ describe("product metadata templates", () => {
 describe("Kreva product search context", () => {
   it("restores August 17 content with current price and stock, without ratings", async () => {
     const kreva = products.find((item) => item.id === "m-60")!;
-    expect(kreva.price).toBe(250);
+    expect(kreva.price).toBe(300);
     expect(kreva.slug).toBe("kreva-gel-for-men");
     expect(kreva.titleLatin).toBeUndefined();
     expect(kreva.rating).toBeUndefined();

@@ -620,3 +620,49 @@ test("multi-product WhatsApp message keeps each quantity next to its explicit la
     expect(message).toContain(`عدد العبوات: ${qty}\nسعر العبوة: ${price} ج.م`);
   }
 });
+
+test("Sotara 400 and Kreva 300 stay synchronized through page, schema, cart and checkout", async ({
+  page,
+  request,
+}) => {
+  const cases = [
+    { id: "m-31", slug: "sotara-gel-50gm", price: 400 },
+    { id: "m-60", slug: "kreva-gel-for-men", price: 300 },
+  ];
+  let payload: Record<string, unknown> | undefined;
+  await page.route("**/api/submit-order", async (route) => {
+    payload = route.request().postDataJSON();
+    await route.fulfill({ json: { success: true, orderId: payload!.orderId } });
+  });
+  for (const product of cases) {
+    expect(catalog.find((p) => p.id === product.id)?.price).toBe(product.price);
+    const response = await request.get(`/products/${product.slug}`);
+    expect(response.status()).toBe(200);
+    const html = await response.text();
+    const schemas = [
+      ...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g),
+    ].map((m) => JSON.parse(m[1]));
+    expect(Number(schemas.find((s) => s["@type"] === "Product").offers.price)).toBe(product.price);
+    await page.goto(`/products/${product.slug}`);
+    await expect(page.locator("script#ldjson-product")).toBeAttached();
+    const schema = JSON.parse((await page.locator("script#ldjson-product").textContent())!);
+    expect(Number(schema.offers.price)).toBe(product.price);
+    await expect(page.getByText(`${product.price} ج.م`, { exact: true }).first()).toBeVisible();
+    await page.getByRole("button", { name: "إضافة للسلة", exact: true }).click();
+  }
+  await page.goto("/cart");
+  await page.getByRole("button", { name: /طلب مباشر/ }).click();
+  await page.getByPlaceholder("اكتب اسمك هنا").fill("اختبار السعر");
+  await page.getByPlaceholder("01xxxxxxxxx").fill("01012345678");
+  await page.locator("select").selectOption("القاهرة");
+  await page.getByPlaceholder("المدينة، الشارع، رقم العمارة").fill("القاهرة، عنوان اختبار محلي");
+  await page.getByRole("button", { name: /تأكيد الطلب المباشر/ }).click();
+  await expect(page).toHaveURL(/\/order-confirmed$/);
+  expect(payload?.subtotalBeforeDiscount).toBe(700);
+  expect(payload?.items).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ id: "m-31", qty: 1 }),
+      expect.objectContaining({ id: "m-60", qty: 1 }),
+    ]),
+  );
+});
