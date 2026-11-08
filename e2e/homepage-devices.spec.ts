@@ -38,3 +38,48 @@ test("manual pump costs 800 on the page, in schema and in the cart", async ({ pa
   await page.goto("/cart");
   await expect(page.getByText("800 ج.م", { exact: true }).first()).toBeVisible();
 });
+
+test("requested concern products are in the same order before and after React renders", async ({
+  page,
+  request,
+}) => {
+  const groups = [
+    {
+      label: "علاجات التأخير",
+      slugs: ["sotara-gel-50gm", "procomil-spray-indian", "emla-7-5-lidocaine-prilocaine-cream"],
+    },
+    {
+      label: "القوة والأداء",
+      slugs: [
+        "ginseng-1650-capsules",
+        "tri-force-30-capsules",
+        "powerfully-up-advanced-male-performance-formula",
+      ],
+    },
+    {
+      label: "الرغبة والإثارة للنساء",
+      slugs: ["provocative-pink-shot-30ml", "beauty-love", "connubial-drops"],
+    },
+  ];
+  const html = await (await request.get("/")).text();
+  await page.goto("/");
+  for (const group of groups) {
+    const rawSection = html.split(`<h3>${group.label}</h3>`)[1]?.split("</ul>")[0];
+    expect(rawSection).toBeTruthy();
+    const rawSlugs = [
+      ...rawSection!.matchAll(/href="https:\/\/elysrmedical\.store\/products\/([^"/]+)"/g),
+    ].map((m) => m[1]);
+    expect(rawSlugs).toEqual(group.slugs);
+    const section = page
+      .locator("div.group.rounded-2xl")
+      .filter({ has: page.getByRole("heading", { name: group.label, exact: true }) });
+    await expect(section).toHaveCount(1);
+    const links = section.locator('a[href^="/products/"]');
+    const hrefs = await links.evaluateAll((items) =>
+      items.map((item) => item.getAttribute("href")),
+    );
+    expect(
+      hrefs.filter((href) => group.slugs.some((slug) => href === `/products/${slug}`)),
+    ).toEqual(group.slugs.map((slug) => `/products/${slug}`));
+  }
+});

@@ -49,7 +49,7 @@
 | 🛍️ كتالوج التجار    | **81** منتجًا (RSS + CSV + TXT) مع `product_type` لكل منتج                                                                                                       |
 | ↪️ Redirects        | **174** تحويلًا دائمًا (HTTP 308 على Vercel) (معرّفات قديمة + منتجات محذوفة + slugs معاد تسميتها + 404s اللي طلعت من GSC)                                        |
 | 🖼️ الصور            | 147 صورة WebP أساسية + 266 مصغّرة عبر 3 مقاسات                                                                                                                   |
-| 🧪 الاختبارات       | **341** وحدة (Vitest) + **37** E2E (Playwright) + data-integrity + schema validation                                                                             |
+| 🧪 الاختبارات       | **345** وحدة (Vitest) + **38** E2E (Playwright) + data-integrity + schema validation                                                                             |
 
 ---
 
@@ -91,7 +91,7 @@
 | Routing    | TanStack Router (file-based، 25 ملف مسار)                                                                                              |
 | Styling    | Tailwind CSS 4 (ألوان Oklch، RTL كامل)                                                                                                 |
 | البحث      | Fuse.js (fuzzy، تحميل كسول) + مرادفات اللهجة المصرية (نقط ⇄ قطرات)                                                                     |
-| الاختبارات | Vitest (341) + Playwright (37 E2E) + data-integrity + JSON-LD validator                                                                |
+| الاختبارات | Vitest (345) + Playwright (38 E2E) + data-integrity + JSON-LD validator                                                                |
 | الاستضافة  | Vercel Edge CDN (أساسي) · Express + Docker (نشر ذاتي مدعوم)                                                                            |
 | الطلبات    | Google Apps Script → Google Sheets (ScriptLock + فحص تكرار كامل + هواتف دولية)                                                         |
 | SEO        | 285 صفحة مولّدة · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                                   |
@@ -135,8 +135,8 @@ npm run dev              # → http://localhost:8080
 | `npm run build:ssr`            | بناء + prerender لـ Express الخادم الذاتي              |
 | `npm start` / `start:dev`      | تشغيل الخادم الذاتي (إنتاج / watch)                    |
 | `npm run test`                 | حارس data-integrity (كتالوج، metadata، شبكة redirects) |
-| `npm run test:unit`            | اختبارات Vitest + أمان الـ API (341)                   |
-| `npm run test:e2e`             | باقة Playwright E2E (37)                               |
+| `npm run test:unit`            | اختبارات Vitest + أمان الـ API (345)                   |
+| `npm run test:e2e`             | باقة Playwright E2E (38)                               |
 | `npm run test:schemas`         | مجرّب JSON-LD لكل صفحة مولّدة                          |
 | `npm run test:sources`         | فحص متطلبات المصادر للمقالات الجديدة                   |
 | `npm run test:all`             | integrity + unit + build + schemas + health-check      |
@@ -242,7 +242,7 @@ Elysr/
 │   ├── release.mjs                 # سير bump الإصدار
 │   ├── sync-vercel-redirects.mjs   # مزامنة redirects مع الكتالوج
 │   └── health-check.mjs           # تدقيق الحزم/الصور والروابط وSEO head المولّد
-├── e2e/                     # 37 اختبارًا في 4 ملفات: 24 checkout + 9 محتوى + 2 كريفا + 2 أجهزة
+├── e2e/                     # 38 اختبارًا في 4 ملفات: 24 checkout + 9 محتوى + 2 كريفا + 3 أقسام الرئيسية
 ├── server/index.js           # خادم Express للنشر الذاتي (نفس dist/ + نفس الـ API)
 ├── .github/workflows/ci.yml  # 7 وظائف CI (أدناه)
 ├── public/
@@ -271,7 +271,7 @@ Elysr/
 | الوظيفة                                     | البوابة                                                                      |
 | ------------------------------------------- | ---------------------------------------------------------------------------- |
 | 🔗 Corpus Source Liveness                   | روابط مصادر المقالات الفريدة (3 محاولات بتراجع + تصنيف السلطات غير المستقرة) |
-| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 341 اختبار وحدة/API · حارس الكتالوج+البيانات+شبكة redirects |
+| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 345 اختبار وحدة/API · حارس الكتالوج+البيانات+شبكة redirects |
 | 🛡 Security Audit                            | `npm audit --audit-level=high` على الشجرة المقفلة                            |
 | 🏗 Build • Prerender • Sitemaps              | Vite + 285 صفحة مولّدة + sitemaps                                            |
 | 🚦 Lighthouse Performance Budget            | موازِن أداء LHCI على الموقع المبنى                                           |
@@ -317,6 +317,10 @@ npm audit --audit-level=high
 
 - المضخة اليدوية `d-03` / `manual-ved-pump`: **800 جنيه**؛ يجب مزامنة السعر المكتوب داخل الوصف. الأسئلة الشائعة والميتا والخلاصة وكتالوج الخادم تعتمد على مصدر البيانات.
 - سوتارا `m-31`: **400 جنيه**؛ كريفا `m-60`: **300 جنيه**.
+- قسم علاجات التأخير بالترتيب: **سوتارا (`m-31`)**، **بخاخ بروكوميل الهندي (`m-55`)**، **إملا (`m-30`)**.
+- القوة والأداء: **جينسنج 1650 (`m-04`)**، **تري فورس (`m-63`)**، **كبسولات باورفلي أب (`m-03`)**، وليس الأقراص `m-49`.
+- الرغبة والإثارة للنساء: **بينك شوت (`w-25`)**، **لبان بيوتي لوف (`w-10`)**، **كونيبال (`w-15`)**.
+- نُقلت كونيبال من المختارات العلوية لمنع التكرار، وتكتمل المختارات الستة بتيتان جولد `m-32`. أُلغي استبعاد الكبسولات `m-03` من الرئيسية، مع إبقاء الأقراص `m-49` مستبعدة.
 - الأجهزة الثلاثة في قسم الرئيسية: **SAWFT (`d-05`)**، **كونسا (`d-07`)**، **الرقمية 9 سرعات (`d-08`)**. المصدر المشترك للواجهة وHTML المولّد هو `HOMEPAGE_CONCERN_CANDIDATES` في `src/data/products.ts`.
 - جهاز بيج برو للصدر `d-04` مستبعد من جميع أقسام منتجات الرئيسية عبر `HOMEPAGE_EXCLUDED_PRODUCT_IDS`، لكنه باقٍ في صفحة الأجهزة والكتالوج.
 - كريفا تحتفظ بوصف وميتا 17 أغسطس، مع السعر والمخزون الحاليين ونموذج مراجعات بإشراف، دون إعادة التقييمات التاريخية.

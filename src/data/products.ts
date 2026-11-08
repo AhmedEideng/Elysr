@@ -90,7 +90,6 @@ export const getProductsByCategory = (cat: ProductCategory) => {
  */
 export const HOMEPAGE_EXCLUDED_PRODUCT_IDS = new Set([
   "m-02", // Boost Up MAN
-  "m-03", // Powerfully Up
   "m-49", // Power Fully Up Advanced
   "d-04", // Big Bro: excluded from the homepage by owner request
 ]);
@@ -105,24 +104,22 @@ export const isHomepageProductEligible = (product: Pick<Product, "id">): boolean
  * تلقائياً بدل ثلاث نسخ مكررة كانت تبتعد عن بعضها صامتاً.
  */
 export const HOMEPAGE_CONCERN_CANDIDATES = {
-  delay: ["m-44", "m-30", "m-14", "m-19", "m-55", "m-48"],
-  strength: ["m-11", "m-02", "m-01", "m-04", "m-03", "m-49", "m-52", "m-20", "m-32"],
+  delay: ["m-31", "m-55", "m-30"],
+  strength: ["m-04", "m-63", "m-03"],
   devices: ["d-05", "d-07", "d-08", "d-01", "d-02", "d-03", "d-06"],
-  women: ["w-13", "w-15", "w-05", "w-11", "w-01", "w-03", "w-04"],
+  women: ["w-25", "w-10", "w-15"],
 } as const;
 
 const HOME_FEATURED_ORDER = [
-  // 🎯 المنتجات الـ VIP التي ستباع فوراً بفضل قوة اسمها وشعبيتها:
-  "m-11", //  1. 🔥 عسل فيتامكس دبل شوت للرجال (الأكثر طلباً ورواجاً بالشركة)
-  "m-01", //  2. 💊 كبسولات هامر أوف ثور للرجال (المنتج الجديد الفاخر بمظهره وتصميمه الألماني الجديد)
-  "m-44", //  3. 💊 بخاخ ريمانز دووز 14000 (أقوى منتج تأخير وأكثرهم شهرة)
-  "m-60", //  4. 🧴 جل كريفا الألماني المتطور للرجال (منتج التأخير الموضعي — إحساس مزدوج بدون تخدير)
-  "w-15", //  5. 🌸 قطرات كونيبال للنساء (حل سريع ومطلوب جداً)
-  "w-13", //  6. 🍬 علكة جولدن جم للنساء (حلت محل ليدي إيرا في الواجهة الرئيسية)
+  "m-11", // Vitamax
+  "m-01", // Hammer of Thor
+  "m-44", // Dooz 14000
+  "m-60", // Kreva
+  "w-13", // Golden Gum
+  "m-32", // Titan Gold; Connubial now belongs to the women's concern section
 
-  // الباقي يمكن تركه في المصفوفة لاستخدامه كمنتجات ذات صلة أو مقترحات:
-  "m-02", // كبسولات بوست أب MAN (خارج المنتجات الستة الرئيسية)
-  "m-32", // جل تيتان جولد (منتجات ذات صلة/مقترحات)
+  // Reserve products for the featured selection.
+  "m-02", // Boost Up MAN remains excluded from the homepage
   "m-52",
   "w-07",
   "w-04",

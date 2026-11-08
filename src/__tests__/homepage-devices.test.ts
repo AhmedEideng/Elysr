@@ -28,3 +28,32 @@ describe("homepage device selection and manual pump price", () => {
     expect(pump.stock).toBe(5000);
   });
 });
+
+describe("owner-selected homepage concern sections", () => {
+  it.each([
+    ["delay", ["m-31", "m-55", "m-30"]],
+    ["strength", ["m-04", "m-63", "m-03"]],
+    ["women", ["w-25", "w-10", "w-15"]],
+  ] as const)("keeps the exact requested %s products in order", (key, expected) => {
+    const featured = new Set(getFeaturedProducts().map((p) => p.id));
+    const actual = HOMEPAGE_CONCERN_CANDIDATES[key]
+      .filter((id) => !featured.has(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id))
+      .slice(0, 3);
+    expect(actual).toEqual(expected);
+    for (const id of actual) expect(products.some((p) => p.id === id)).toBe(true);
+  });
+  it("moves Connubial out of featured and enables capsules without enabling tablets", () => {
+    const featured = getFeaturedProducts().map((p) => p.id);
+    expect(featured).toHaveLength(6);
+    expect(featured).not.toContain("w-15");
+    expect(featured).toContain("m-32");
+    expect(HOMEPAGE_EXCLUDED_PRODUCT_IDS.has("m-03")).toBe(false);
+    expect(HOMEPAGE_EXCLUDED_PRODUCT_IDS.has("m-49")).toBe(true);
+    const concernIds = Object.values(HOMEPAGE_CONCERN_CANDIDATES).flatMap((ids) =>
+      ids
+        .filter((id) => !featured.includes(id) && !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(id))
+        .slice(0, 3),
+    );
+    expect(new Set([...featured, ...concernIds]).size).toBe(18);
+  });
+});

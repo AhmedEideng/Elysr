@@ -21,7 +21,7 @@ _Original marital & sexual-health products for Egypt — discreet shipping to al
 ![Vercel](https://img.shields.io/badge/Vercel-000?logo=vercel&logoColor=white)
 ![Version](https://img.shields.io/badge/Version-2.3.3-5b8def?style=flat)
 ![Pages](https://img.shields.io/badge/Pre--rendered_Pages-285-success?style=flat)
-![Tests](https://img.shields.io/badge/Tests-341_passing-success?style=flat)
+![Tests](https://img.shields.io/badge/Tests-345_passing-success?style=flat)
 
 </div>
 
@@ -52,7 +52,7 @@ flow through the same webhook into a moderated reviews sheet.
 | Catalog feed       | **81** items (Google Shopping RSS/CSV/TXT, price + availability + `product_type` per product)                                                                                   |
 | Redirects          | **174** permanent redirects (HTTP 308 on Vercel) (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                                                         |
 | Images             | 147 source WebP + 266 thumbnails across three sizes                                                                                                                             |
-| Tests              | **341** unit (Vitest) + **37** E2E (Playwright) + data-integrity + schema validation                                                                                            |
+| Tests              | **345** unit (Vitest) + **38** E2E (Playwright) + data-integrity + schema validation                                                                                            |
 
 ---
 
@@ -109,7 +109,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 | Routing   | TanStack Router (file-based, 25 route modules)                                                                              |
 | Styling   | Tailwind CSS 4 (Oklch colors, full RTL)                                                                                     |
 | Search    | Fuse.js (fuzzy, lazy-loaded) + Egyptian dialect synonyms (نقط ⇄ قطرات)                                                      |
-| Tests     | Vitest (341 unit) + Playwright (37 E2E) + data-integrity + JSON-LD schema validator                                         |
+| Tests     | Vitest (345 unit) + Playwright (38 E2E) + data-integrity + JSON-LD schema validator                                         |
 | Hosting   | Vercel Edge CDN (primary) · self-hosted Express + Docker (supported)                                                        |
 | Orders    | Google Apps Script → Google Sheets (ScriptLock, full duplicate scan, intl phones)                                           |
 | SEO       | 285 pre-rendered pages · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                 |
@@ -184,7 +184,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 │   ├── checkout.spec.ts        # 24 E2E tests: checkout, search, reviews, prices, 404s
 │   ├── restored-content.spec.ts # 9 restored-content checks
 │   ├── kreva-august-restoration.spec.ts # 2 mobile/desktop content + review-form checks
-│   └── homepage-devices.spec.ts # 2 homepage selection + pump-price checks
+│   └── homepage-devices.spec.ts # 3 homepage selection + pump-price checks
 ├── server/
 │   └── index.js                # Self-hosted Express server (same dist/ + same API handlers)
 ├── .github/workflows/ci.yml    # 7 CI jobs (see Testing & CI)
@@ -290,8 +290,8 @@ writing an order.
 | `npm run build:ssr`            | Build + prerender for the self-hosted Express server     |
 | `npm start` / `start:dev`      | Run the self-hosted server (production / watch)          |
 | `npm run test`                 | Data-integrity guard (catalog, metadata, redirect graph) |
-| `npm run test:unit`            | Vitest unit + API security tests (341)                   |
-| `npm run test:e2e`             | Playwright E2E suite (37)                                |
+| `npm run test:unit`            | Vitest unit + API security tests (345)                   |
+| `npm run test:e2e`             | Playwright E2E suite (38)                                |
 | `npm run test:schemas`         | JSON-LD validator over every pre-rendered page           |
 | `npm run test:sources`         | New-article claim→source support check                   |
 | `npm run test:all`             | integrity + unit + build + schemas + health-check        |
@@ -374,7 +374,7 @@ Seven jobs on every push (plus a weekly Saturday source-liveness cron):
 | Job                                         | Gate                                                                                       |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | 🔗 Corpus Source Liveness                   | All unique article source URLs checked (bot-blocked authorities are classified separately) |
-| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc --noEmit` · 341 unit/API tests · catalog+metadata+redirect-graph guard       |
+| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc --noEmit` · 345 unit/API tests · catalog+metadata+redirect-graph guard       |
 | 🛡 Security Audit                            | `npm audit --audit-level=high` on the locked tree                                          |
 | 🏗 Build • Prerender • Sitemaps              | Vite build + 285-page prerender + sitemap artifacts                                        |
 | 🚦 Lighthouse Performance Budget            | LHCI performance budgets on the built site                                                 |
@@ -422,6 +422,10 @@ workflow, not a generic catalog test; it needs an article target and its service
 - `d-03` / `manual-ved-pump`: **800 EGP**. Keep the price mentioned in the
   description synchronized; FAQ/meta/feed and server catalog derive from source data.
 - Sotara (`m-31`): **400 EGP**; Kreva (`m-60`): **300 EGP**.
+- Homepage delay cards, in order: **Sotara (`m-31`)**, **Indian Procomil spray (`m-55`)**, **Emla (`m-30`)**.
+- Strength cards: **Ginseng 1650 (`m-04`)**, **Tri Force (`m-63`)**, **Powerfully Up capsules (`m-03`)** — not Power Fully Up tablets (`m-49`).
+- Women's concern cards: **Pink Shot (`w-25`)**, **Beauty Love gum (`w-10`)**, **Connubial (`w-15`)**.
+- Connubial moves out of the top featured grid to avoid duplication; Titan Gold (`m-32`) fills the sixth featured slot. The prior homepage exclusion for capsules `m-03` is lifted; the tablets `m-49` remain excluded.
 - Homepage medical-device cards: **SAWFT (`d-05`)**, **Konsa (`d-07`)**,
   **9-speed digital pump (`d-08`)**. Selection comes from
   `HOMEPAGE_CONCERN_CANDIDATES` in `src/data/products.ts`, shared by React and prerender.
