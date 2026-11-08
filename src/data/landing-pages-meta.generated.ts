@@ -113,7 +113,7 @@ export const landingPagesMeta: LandingPageMeta[] = [
   { slug: "best-energy-honey-for-men", title: "أفضل عسل طاقة للرجال — مقارنة وتجارب" },
   { slug: "women-intimacy-guide-beginners", title: "دليل المنتجات النسائية للمتزوجات — أول مرة" },
   { slug: "whatsapp-order-guide", title: "الطلب عبر واتساب — أسرع وأسهل طريقة" },
-  { slug: "most-popular-products-egypt", title: "أكثر المنتجات مبيعاً في مصر — الأكثر طلباً" },
+  { slug: "most-popular-products-egypt", title: "مختارات من منتجات الصحة الزوجية في مصر" },
   {
     slug: "marital-products-comparison-guide",
     title: "مقارنة بين أنواع المنتجات الزوجية — كبسولات vs عسل vs جل vs بخاخ",

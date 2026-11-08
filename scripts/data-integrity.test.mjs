@@ -993,51 +993,30 @@ try {
   assert.equal(promo.isPromotionEnabled(new Date("2026-06-26T00:00:00Z")), true);
   assert.equal(promo.isPromotionEnabled(new Date("2027-01-02T00:00:00Z")), true);
 
-  // 🧪 Smart Dynamic recommendations integrity test
+  // Editorial relevance: never pad a list to six unrelated products.
   const { getProductsForArticle } = await vite.ssrLoadModule("/src/lib/internal-links.ts");
-
-  // 👩 Test women's article smart dynamic recommendation:
-  const womenProductIds = getProductsForArticle("omega-3-omega-6-benefits-skin-cell-elasticity");
-  assert.equal(
-    womenProductIds.length,
-    6,
-    "Expected exactly 6 product recommendations for women's article",
-  );
   assert.deepEqual(
-    duplicates(womenProductIds),
+    getProductsForArticle("omega-3-omega-6-benefits-skin-cell-elasticity"),
     [],
-    "No duplicate recommendations allowed in women's article",
+    "No omega supplement is stocked: do not recommend unrelated women's products",
   );
-  for (const id of womenProductIds) {
-    const product = products.find((p) => p.id === id);
-    assert.ok(product, `Recommended missing product ID ${id}`);
-    assert.equal(
-      product.category,
-      "women",
-      `Women's article recommended a non-women product ${id} (${product.category})`,
-    );
-  }
-
-  // 👨 Test men's article smart dynamic recommendation:
-  const menProductIds = getProductsForArticle("peruvian-maca-root-energy-vitality-men-women");
-  assert.equal(
-    menProductIds.length,
-    6,
-    "Expected exactly 6 product recommendations for men's article",
-  );
-  assert.deepEqual(
-    duplicates(menProductIds),
-    [],
-    "No duplicate recommendations allowed in men's article",
-  );
-  for (const id of menProductIds) {
-    const product = products.find((p) => p.id === id);
-    assert.ok(product, `Recommended missing product ID ${id}`);
-    assert.equal(
-      product.category,
-      "men",
-      `Men's article recommended a non-men product ${id} (${product.category})`,
-    );
+  assert.deepEqual(getProductsForArticle("peruvian-maca-root-energy-vitality-men-women"), ["m-02"]);
+  assert.deepEqual(getProductsForArticle("red-korean-ginseng-energy-endurance-benefits"), [
+    "m-04",
+    "m-02",
+  ]);
+  const womenProductIds = getProductsForArticle("women-products-complete-guide");
+  assert.ok(womenProductIds.length > 0, "The women's product guide must retain relevant products");
+  for (const id of womenProductIds)
+    assert.equal(products.find((p) => p.id === id)?.category, "women");
+  for (const article of articles) {
+    const ids = getProductsForArticle(article.slug);
+    assert.deepEqual(duplicates(ids), [], `Duplicate recommendations in ${article.slug}`);
+    for (const id of ids)
+      assert.ok(
+        products.some((p) => p.id === id),
+        `Unknown recommendation ${id}`,
+      );
   }
 
   // ── vercel.json route sources must compile with the SAME engine Vercel

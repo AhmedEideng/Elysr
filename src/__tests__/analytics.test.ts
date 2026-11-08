@@ -72,7 +72,7 @@ describe("analytics event plumbing", () => {
     const entry = lastDataLayerEntry() as Record<string, unknown>;
     expect(entry.event).toBe("purchase");
     expect(entry.transaction_id).toBe("EL-TEST123");
-    expect(entry.value).toBe(250);
+    expect(entry.value).toBe(200);
     expect(entry.shipping).toBe(50);
     expect(entry.discount).toBe(10);
     expect(entry.currency).toBe("EGP");
@@ -90,7 +90,7 @@ describe("analytics event plumbing", () => {
     );
     const entry = lastDataLayerEntry() as Record<string, unknown>;
     expect(entry.event).toBe("begin_checkout");
-    expect(entry.value).toBe(300);
+    expect(entry.value).toBe(230);
     expect(entry.shipping).toBe(70);
     expect(entry.items).toHaveLength(2);
   });
@@ -363,7 +363,7 @@ describe("v3 ecommerce — view_item_list, select_item, view_cart, wishlist, pro
     trackSelectItem("search_عسل", { id: "m-01", name: "A", price: 100, qty: 1 });
     const e = lastDataLayerEntry() as Record<string, unknown>;
     expect(e.event).toBe("select_item");
-    expect(e.item_list_name).toBe("search_عسل");
+    expect(e.item_list_name).toBe("search_results");
   });
 
   it("view_cart captures value + items", () => {

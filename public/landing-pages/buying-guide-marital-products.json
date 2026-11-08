@@ -30,6 +30,11 @@
   ],
   "links": [
     {
+      "label": "تصفح اختيارات الكتالوج",
+      "href": "/products/guides/most-popular-products-egypt",
+      "description": "معلومات تفصيلية تساعدك قبل الطلب."
+    },
+    {
       "label": "أفضل المنتجات للمتزوجين",
       "href": "/products/guides/best-products-for-married-couples",
       "description": "دليل اختيار حسب الاحتياج."
@@ -46,11 +51,12 @@
     }
   ],
   "productIds": [
-    "m-42",
-    "w-13",
+    "m-31",
     "m-04",
-    "m-44",
-    "m-15"
+    "w-25",
+    "w-10",
+    "d-03",
+    "d-07"
   ],
   "faqs": [
     {

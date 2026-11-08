@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { ProductCard } from "@/components/ProductCard";
+import { ProductCatalog } from "@/components/ProductCatalog";
 import { PageHero } from "@/components/PageHero";
 import { CategoryFAQ, type CategoryFAQItem } from "@/components/CategoryFAQ";
 import {
@@ -11,7 +11,6 @@ import {
   breadcrumbSchema,
   faqSchema,
 } from "@/lib/seo";
-import { trackViewItemList } from "@/lib/analytics";
 
 const DEVICES_CATEGORY_FAQS: CategoryFAQItem[] = [
   {
@@ -85,10 +84,6 @@ function CategoryPage() {
       ]),
     );
     injectJsonLd("faq", faqSchema(DEVICES_CATEGORY_FAQS));
-    trackViewItemList(
-      "devices_category",
-      items.map((p) => ({ id: p.id, name: p.name, price: p.price, qty: 1 })),
-    );
     return () => {
       clearJsonLd("itemlist");
       clearJsonLd("breadcrumb");
@@ -104,11 +99,7 @@ function CategoryPage() {
         description="أجهزة ومستلزمات طبية موثوقة مختارة بعناية، مع جودة عالية وشحن سري لكل المحافظات لتجربة أكثر أماناً واحترافية."
       />
 
-      <div className="grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {items.map((p, index) => (
-          <ProductCard key={p.id} product={p} priority={index < 4} listName="devices_category" />
-        ))}
-      </div>
+      <ProductCatalog items={items} category="devices" listName="devices_category" />
 
       <CategoryFAQ
         title="أسئلة شائعة عن الأجهزة والمستلزمات الطبية"

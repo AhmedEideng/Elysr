@@ -1,3 +1,4 @@
+import { useCheckoutFunnel } from "@/hooks/use-checkout-funnel";
 import { getOrderAttempt, completeOrderAttempt } from "@/lib/order-attempt";
 import { MAX_ORDER_UNITS } from "../../config/order-limits.js";
 import { useScrollTracking } from "@/hooks/use-scroll-tracking";
@@ -65,7 +66,6 @@ import {
   beaconOrderToSheets,
 } from "@/lib/governorates";
 import {
-  trackBeginCheckout,
   trackCtaClick,
   trackOrderFailed,
   trackOrderSuccess,
@@ -179,6 +179,20 @@ function ProductPage() {
     address: "",
   });
 
+  const quickSubtotal = product.price * qty;
+  const quickTier = isPromotionEnabled() ? getPromoTier(quickSubtotal) : null;
+  const quickDiscount = quickTier ? Math.round(quickSubtotal * quickTier.discount) : 0;
+  const quickShipping = quickCustomer.governorate
+    ? getShippingCost(quickCustomer.governorate, quickSubtotal)
+    : 0;
+  const funnel = useCheckoutFunnel(
+    "quick_order",
+    [{ id: product.id, name: product.name, price: product.price, qty }],
+    quickSubtotal - quickDiscount + quickShipping,
+    quickShipping,
+    quickOrderOpen,
+  );
+
   // ♿ Focus trap — يحبس Tab داخل النموذج ويعيد الفوكس عند الإغلاق
   const focusTrapRef = useFocusTrap<HTMLFormElement>(quickOrderOpen);
 
@@ -277,6 +291,7 @@ function ProductPage() {
   const submitQuickWhatsAppOrder = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isOrdering) return;
+    funnel.submit();
     if (qty > MAX_ORDER_UNITS) {
       toast.error(`الحد الأقصى للطلب ${MAX_ORDER_UNITS} وحدة`);
       return;
@@ -346,7 +361,6 @@ function ProductPage() {
         product_id: product.id,
         qty,
       });
-      trackBeginCheckout(orderItems, grandTotal, shipping);
 
       // 🔒 (2026-09-15) نفس إصلاح السلة: sendBeacon مش تأكيد وصول.
       // بنستنى النتيجة الفعلية (مهلة 15 ثانية): نجاح → GA purchase +
@@ -761,6 +775,7 @@ function ProductPage() {
           <form
             ref={focusTrapRef}
             onSubmit={submitQuickWhatsAppOrder}
+            onChangeCapture={funnel.start}
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-md rounded-[2rem] border bg-card p-5 shadow-2xl animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0"
           >

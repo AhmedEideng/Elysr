@@ -1,3 +1,4 @@
+import { useCheckoutFunnel } from "@/hooks/use-checkout-funnel";
 import { getOrderAttempt, completeOrderAttempt } from "@/lib/order-attempt";
 import { MAX_ORDER_UNITS } from "../../config/order-limits.js";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -28,7 +29,6 @@ import {
   qualifiesForFreeShipping,
 } from "@/lib/governorates";
 import {
-  trackBeginCheckout,
   trackCtaClick,
   trackOrderFailed,
   trackOrderSuccess,
@@ -89,6 +89,7 @@ function CartPage() {
     ? getShippingCost(customer.governorate, subtotalBeforeDiscount)
     : 0;
   const grandTotal = total + shipping;
+  const funnel = useCheckoutFunnel("cart", items, grandTotal, shipping, items.length > 0);
 
   // ☀️ شريحة الخصم التالية لتحفيز العميل على زيادة المشتريات
   // (يتوقف العرض عند اكتمال باقة — الخصم المطبق وقتها هو خصم الباقة فقط)
@@ -126,6 +127,7 @@ function CartPage() {
 
   const checkout = async () => {
     if (submitting) return;
+    funnel.submit();
     if (overOrderLimit) {
       toast.error(`الحد الأقصى للطلب ${MAX_ORDER_UNITS} وحدة. قلّل الكمية ثم أعد المحاولة.`);
       return;
@@ -204,7 +206,6 @@ function CartPage() {
       items_count: items.length,
       value: grandTotal,
     });
-    trackBeginCheckout(orderItems, grandTotal, shipping);
 
     if (method === "whatsapp") {
       const msg = buildOrderMessage(
@@ -510,7 +511,7 @@ function CartPage() {
           </div>
 
           {/* Form & Method Section */}
-          <div className="order-2 space-y-5">
+          <div className="order-2 space-y-5" onChangeCapture={funnel.start}>
             <h2 className="text-lg sm:text-xl font-bold">بيانات التوصيل</h2>
             <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-muted rounded-2xl">
               <button

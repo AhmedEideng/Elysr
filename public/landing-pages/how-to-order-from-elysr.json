@@ -26,6 +26,16 @@
   ],
   "links": [
     {
+      "label": "الطلب عبر واتساب",
+      "href": "/products/guides/whatsapp-order-guide",
+      "description": "معلومات تفصيلية تساعدك قبل الطلب."
+    },
+    {
+      "label": "الخدمة والخصوصية قبل الشراء",
+      "href": "/products/guides/why-buy-from-elysr-medical",
+      "description": "معلومات تفصيلية تساعدك قبل الطلب."
+    },
+    {
       "label": "الشحن السري",
       "href": "/shipping",
       "description": "تفاصيل التغليف المحايد."
@@ -36,13 +46,7 @@
       "description": "كل اللي محتاج تعرفه عن الدفع."
     }
   ],
-  "productIds": [
-    "m-23",
-    "w-10",
-    "m-01",
-    "m-31",
-    "m-54"
-  ],
+  "productIds": [],
   "faqs": [
     {
       "question": "هل لازم أعمل حساب على الموقع؟",

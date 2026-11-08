@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SearchX } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { useEffect } from "react";
+import { suggestProductSearch } from "@/lib/product-search";
 import { trackSiteSearch, trackViewItemList } from "@/lib/analytics";
 
 const PAGE_TITLE = "نتائج البحث";
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/search")({
     const items = searchAllPublicProducts(q);
     return {
       items,
+      suggestions: items.length === 0 ? suggestProductSearch(products, q) : [],
       query: typeof qRaw === "string" ? qRaw.trim() : "",
       total: products.length,
     };
@@ -55,7 +57,7 @@ export const Route = createFileRoute("/search")({
 });
 
 function SearchResultsPage() {
-  const { items, query, total } = Route.useLoaderData();
+  const { items, query, total, suggestions } = Route.useLoaderData();
 
   // (2026-09-18 v2) Search tracking دقيق: query + results_count الحقيقي
   // (2026-09-18 v3) + view_item_list للبحث
@@ -65,7 +67,7 @@ function SearchResultsPage() {
     }
     if (items.length > 0) {
       trackViewItemList(
-        query ? `search_${query}` : "search_all",
+        query ? "search_results" : "search_all",
         items.map((p) => ({ id: p.id, name: p.name, price: p.price, qty: 1 })),
       );
     }
@@ -91,6 +93,21 @@ function SearchResultsPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             جرّب كلمة أقصر أو اسأل فريقنا عبر واتساب — نساعدك في اختيار الأنسب بسرية تامة.
           </p>
+          {suggestions.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <p>هل تقصد أحد هذه الأسماء؟</p>
+              {suggestions.map((p) => (
+                <Link
+                  key={p.id}
+                  to="/search"
+                  search={{ q: p.name }}
+                  className="block text-primary underline"
+                >
+                  {p.name}
+                </Link>
+              ))}
+            </div>
+          )}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
               to="/products/men"
@@ -127,13 +144,13 @@ function SearchResultsPage() {
               </Link>
             </div>
           ) : null}
-          <div className="grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div data-search-results className="grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {items.map((p, index) => (
               <ProductCard
                 key={p.id}
                 product={p}
                 priority={index < 4}
-                listName={query ? `search_${query}` : "search_all"}
+                listName={query ? "search_results" : "search_all"}
               />
             ))}
           </div>

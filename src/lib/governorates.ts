@@ -1,3 +1,4 @@
+import { trackOrderRequest } from "@/lib/analytics";
 /**
  * قائمة محافظات مصر + مصاريف الشحن.
  * (2026-09-15) المصدر الوحيد للحقيقة هو `src/lib/site-config.ts` —
@@ -46,6 +47,8 @@ export async function submitToGoogleSheets(
   /** مهلة اختيارية (ms) — بعد انتهائها يُقطع الطلب ويُعامل كفشل (fallback عند المنادى). */
   timeoutMs: number = ORDER_SUBMIT_TIMEOUT_MS,
 ): Promise<SheetSubmitResult> {
+  const startedAt = Date.now();
+  let outcome: "success" | "rejected" | "timeout" | "network_error" = "network_error";
   const controller = new AbortController();
   const timer = timeoutMs ? setTimeout(() => controller.abort(), timeoutMs) : undefined;
   try {
@@ -58,17 +61,21 @@ export async function submitToGoogleSheets(
     });
 
     if (!response.ok) {
+      outcome = "rejected";
       const text = await response.text().catch(() => "");
       throw new Error(`Google Sheets responded with ${response.status}: ${text.slice(0, 200)}`);
     }
 
     const result = (await response.json()) as SheetSubmitResult;
     if (!result?.success) {
+      outcome = "rejected";
       throw new Error(result?.error || "Google Sheets rejected the order");
     }
 
+    outcome = "success";
     return result;
   } catch (err) {
+    if (controller.signal.aborted) outcome = "timeout";
     console.error("Google Sheets:", err);
     // Privacy by design: never persist customer name/phone/address in localStorage.
     // WhatsApp remains the primary confirmation channel; direct checkout keeps the
@@ -79,6 +86,7 @@ export async function submitToGoogleSheets(
     };
   } finally {
     if (timer) clearTimeout(timer);
+    trackOrderRequest(Date.now() - startedAt, outcome);
   }
 }
 

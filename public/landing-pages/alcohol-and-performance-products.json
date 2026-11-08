@@ -40,12 +40,7 @@
       "description": "بديل صحي"
     }
   ],
-  "productIds": [
-    "m-21",
-    "m-09",
-    "m-28",
-    "m-15"
-  ],
+  "productIds": [],
   "faqs": [
     {
       "question": "هل كمية صغيرة من الكحول آمنة؟",

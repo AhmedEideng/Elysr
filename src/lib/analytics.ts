@@ -22,7 +22,7 @@
  *   view_promotion   — عرض بانر/عرض ترويجي
  *   select_promotion — الضغط على بانر/عرض
  *   begin_checkout   — تقديم الطلب (قبل التسجيل)
- *   purchase         — الطلب اتسجل فعلياً في الشيت (أو إرسال beacon)
+ *   purchase         — الطلب اتسجل فعلياً في الشيت؛ ليس تأكيد تحصيل نقدي
  *   scroll_milestone — قراءة 50%/90% (event مخصص لتجنب التصادم مع
  *                      GA4's built-in `scroll` من Enhanced Measurement)
  *   share_click      — مشاركة واتساب (click event بخصائص)
@@ -151,12 +151,33 @@ export function trackRemoveFromCart(item: TrackItem) {
   });
 }
 
+/** Order totals include delivery; GA4 merchandise revenue must not.
+ * Allocate discounts proportionally to line totals. Rounding is to Egyptian
+ * piastres per line; unit prices retain precision for quantities > 1.
+ * This is analytics-only: checkout, WhatsApp and Sheets totals are unchanged.
+ */
+export function orderAnalyticsFinancials(items: TrackItem[], total: number, shipping: number) {
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const value = Math.round(Math.max(0, Math.min(subtotal, total - shipping)) * 100) / 100;
+  let allocatedCents = 0;
+  const targetCents = Math.round(value * 100);
+  const mapped = gaItems(items).map((item, index) => {
+    const cents =
+      index === items.length - 1
+        ? targetCents - allocatedCents
+        : Math.floor(subtotal > 0 ? (targetCents * item.price * item.quantity) / subtotal : 0);
+    allocatedCents += cents;
+    const price = item.quantity > 0 ? cents / (100 * item.quantity) : 0;
+    return { ...item, price, discount: Math.max(0, item.price - price) };
+  });
+  return { value, items: mapped };
+}
+
 export function trackBeginCheckout(items: TrackItem[], value: number, shipping: number) {
   emit("begin_checkout", {
     currency: GA_CURRENCY,
-    value: Math.round(value),
+    ...orderAnalyticsFinancials(items, value, shipping),
     shipping: Math.round(shipping),
-    items: gaItems(items),
   });
 }
 
@@ -258,7 +279,7 @@ export function trackOrderFailed(orderId: string, method: "whatsapp" | "direct")
 }
 
 /**
- * purchase = الإيراد في GA4. value = إجمالي الطلب (شامل الشحن)،
+ * purchase = قيمة المنتجات بعد الخصومات دون الشحن في GA4. مدخل value هو إجمالي الطلب،
  * shipping/discount بيسنوا فراديتهم للتحليل.
  */
 export function trackPurchase(
@@ -271,10 +292,9 @@ export function trackPurchase(
   emit("purchase", {
     transaction_id: orderId,
     currency: GA_CURRENCY,
-    value: Math.round(value),
+    ...orderAnalyticsFinancials(items, value, shipping),
     shipping: Math.round(shipping),
     discount: Math.round(discount),
-    items: gaItems(items),
   });
 }
 
@@ -296,9 +316,11 @@ export function trackWebVital(
   name: "LCP" | "CLS" | "INP" | "FCP" | "TTFB",
   value: number,
   rating: string,
+  metricId?: string,
 ) {
   emit("web_vital", {
     metric_name: name,
+    ...(metricId ? { metric_id: metricId } : {}),
     metric_value: Math.round(value * 1000) / 1000,
     metric_rating: rating,
   });
@@ -306,17 +328,23 @@ export function trackWebVital(
 
 // ── (2026-09-18 v3) E-commerce List & Promotion Events ──
 
+export function analyticsListName(name: string): string {
+  if (name.startsWith("men_search_")) return "men_search_results";
+  if (name.startsWith("search_")) return name === "search_all" ? name : "search_results";
+  return safeAnalyticsText(name);
+}
+
 export function trackViewItemList(listName: string, items: TrackItem[]) {
   if (items.length === 0) return;
   emit("view_item_list", {
-    item_list_name: listName,
+    item_list_name: analyticsListName(listName),
     items: gaItems(items),
   });
 }
 
 export function trackSelectItem(listName: string, item: TrackItem) {
   emit("select_item", {
-    item_list_name: listName,
+    item_list_name: analyticsListName(listName),
     items: gaItems([item]),
   });
 }
@@ -358,4 +386,18 @@ export function trackSelectPromotion(promoName: string, promoId?: string) {
     promotion_name: promoName,
     promotion_id: promoId ?? promoName,
   });
+}
+
+/** Funnel stages never include field values, phone numbers or addresses. */
+export function trackCheckoutStage(
+  stage: "open" | "start" | "submit",
+  context: "cart" | "quick_order",
+) {
+  emit(`checkout_${stage}`, { checkout_context: context });
+}
+export function trackOrderRequest(
+  durationMs: number,
+  outcome: "success" | "rejected" | "timeout" | "network_error",
+) {
+  emit("order_request", { duration_ms: Math.round(durationMs), request_outcome: outcome });
 }

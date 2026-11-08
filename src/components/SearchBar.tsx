@@ -2,12 +2,11 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Search, X } from "lucide-react";
 import { formatPrice, type Product } from "@/data/product-types";
-import { expandSearchTerm } from "@/lib/search-terms";
+import { rankProductSearch, suggestProductSearch } from "@/lib/product-search";
 import { thumbUrl } from "@/lib/cache";
-import Fuse from "fuse.js";
 
 /**
- * بحث فوري ومرن (Fuzzy Search) في المنتجات مع dropdown للنتائج.
+ * بحث فوري بنفس محرك صفحة النتائج، مع اقتراحات إملائية منفصلة.
  * - يتعامل مع الأخطاء الإملائية.
  * - فتح بـ Ctrl/Cmd+K
  * - يدعم لوحة المفاتيح (↑ ↓ Enter Esc)
@@ -26,22 +25,6 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
     inputRef.current?.focus();
   }, []);
 
-  // إعداد Fuse.js مرة واحدة — بعد تحميل المنتجات كسولاً
-  const fuse = useMemo(() => {
-    if (!products) return null;
-    return new Fuse(products, {
-      keys: [
-        { name: "name", weight: 2 },
-        { name: "nameEn", weight: 1 },
-        { name: "description", weight: 0.5 },
-        // ألقاب البحثية (عامية) — "سبراي" يجد منتج "بخاخ" في الاقتراحات
-        { name: "searchAliases", weight: 0.8 },
-      ],
-      threshold: 0.4, // قيمة التسامح مع الأخطاء الإملائية (0 دقيق جداً، 1 غير دقيق)
-      ignoreLocation: true,
-    });
-  }, [products]);
-
   // عند أول حرف يكتبه المستخدم → حمّل الكتالوج (مرة واحدة فقط)
   useEffect(() => {
     if (!products && q.trim().length > 0) {
@@ -49,22 +32,14 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
     }
   }, [q, products]);
 
-  const allResults = useMemo(() => {
-    const term = q.trim();
-    if (!term || !fuse) return [];
-    // نبحث بالمصطلح وبتوسيعه المرادفي (نقط/قطرات) وندمج النتائج بدون تكرار
-    const seen = new Set<string>();
-    const merged: Product[] = [];
-    for (const t of expandSearchTerm(term)) {
-      for (const result of fuse.search(t)) {
-        if (!seen.has(result.item.id)) {
-          seen.add(result.item.id);
-          merged.push(result.item);
-        }
-      }
-    }
-    return merged;
-  }, [q, fuse]);
+  const allResults = useMemo(
+    () => (products && q.trim() ? rankProductSearch(products, q) : []),
+    [products, q],
+  );
+  const suggestions = useMemo(
+    () => (products && q.trim() && !allResults.length ? suggestProductSearch(products, q) : []),
+    [products, q, allResults.length],
+  );
 
   // أعلى 8 اقتراحات في الـ dropdown؛ بقية النتائج في صفحة /search?q=
   const results = allResults.slice(0, 8);
@@ -124,6 +99,21 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
           {results.length === 0 ? (
             <div className="p-6 text-center text-sm text-muted-foreground">
               لا توجد نتائج للبحث «{q}»
+              {suggestions.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  <p>هل تقصد أحد هذه الأسماء؟</p>
+                  {suggestions.map((p) => (
+                    <button
+                      type="button"
+                      key={p.id}
+                      className="block w-full text-primary underline"
+                      onClick={() => setQ(p.name)}
+                    >
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             <ul role="listbox">
@@ -167,7 +157,7 @@ export function SearchBar({ onClose }: { onClose?: () => void }) {
             </ul>
           )}
 
-          {/* بقية النتائج في صفحة /search?q= — لينك قابل للمشاركة/الفهرسة */}
+          {/* بقية النتائج في صفحة /search?q= — لينك قابل للمشاركة؛ صفحة النتائج noindex */}
           {allResults.length > 0 && (
             <button
               onClick={() => {

@@ -22,6 +22,11 @@
   ],
   "links": [
     {
+      "label": "تفاصيل توصيل القاهرة والجيزة",
+      "href": "/products/guides/women-products-cairo",
+      "description": "معلومات تفصيلية تساعدك قبل الطلب."
+    },
+    {
       "label": "كل منتجات النساء",
       "href": "/products/women",
       "description": "تصفح قسم النساء كاملًا مع التفاصيل."
@@ -60,7 +65,8 @@
     "w-20",
     "w-21",
     "w-22",
-    "w-23"
+    "w-23",
+    "w-25"
   ],
   "faqs": [
     {

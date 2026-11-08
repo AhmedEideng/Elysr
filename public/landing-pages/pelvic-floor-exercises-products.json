@@ -40,13 +40,7 @@
       "description": "VED devices"
     }
   ],
-  "productIds": [
-    "m-27",
-    "w-22",
-    "m-02",
-    "m-41",
-    "m-61"
-  ],
+  "productIds": [],
   "faqs": [
     {
       "question": "كم يستغرق ظهور نتائج كيجل؟",

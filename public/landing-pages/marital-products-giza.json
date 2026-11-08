@@ -22,6 +22,11 @@
   ],
   "links": [
     {
+      "label": "توصيل منتجات النساء في القاهرة والجيزة",
+      "href": "/products/guides/women-products-cairo",
+      "description": "معلومات تفصيلية تساعدك قبل الطلب."
+    },
+    {
       "label": "أسعار منتجات الرجال كاملة",
       "href": "/products/guides/men-products-prices-egypt",
       "description": "قائمة الأسعار المحدثة لكل منتجات الرجال."
@@ -38,14 +43,12 @@
     }
   ],
   "productIds": [
-    "m-60",
-    "m-07",
-    "m-30",
-    "m-17",
-    "m-45",
-    "m-37",
-    "m-15",
-    "m-05"
+    "m-31",
+    "m-04",
+    "w-25",
+    "w-10",
+    "d-03",
+    "d-07"
   ],
   "faqs": [
     {

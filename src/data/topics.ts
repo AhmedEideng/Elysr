@@ -215,6 +215,7 @@ export const TOPICS: Topic[] = [
       "w-21",
       "w-22",
       "w-23",
+      "d-04",
     ],
   },
   {
@@ -301,7 +302,7 @@ export const TOPICS: Topic[] = [
       "traction-device-safety",
       "medical-devices-for-marital-health",
     ],
-    productIds: ["d-01", "d-02", "d-03", "d-04", "d-05", "d-06", "d-07", "d-08"],
+    productIds: ["d-03", "d-05", "d-07", "d-08", "d-01", "d-02", "d-06"],
   },
   {
     id: "couples",

@@ -51,7 +51,7 @@ export const articlesMeta: ArticleMeta[] = [
     slug: "red-korean-ginseng-energy-endurance-benefits",
     title: "الجينسنج الكوري الأحمر: الطاقة والتحمل البدني",
     excerpt:
-      "دليل صيدلاني يكشف الآلية الفسيولوجية للجينسنج الكوري الأحمر في زيادة إنتاج ATP وتحسين التحمل البدني دون إجهاد الجهاز العصبي، مع جرعات آمنة ونصائح عملية.",
+      "ماذا تقول الأبحاث عن الجينسنج الكوري الأحمر والتعب والأداء الرياضي؟ توضيح حدود الدليل والتداخلات الدوائية قبل اختيار مكمل.",
     image: "/images/article-ginseng-guide-hero.webp",
     category: "men",
     readMin: 5,
@@ -75,7 +75,7 @@ export const articlesMeta: ArticleMeta[] = [
     slug: "peruvian-maca-root-benefits-for-vitality-and-energy",
     title: "جذور الماكا البيروفية: الطاقة والحيوية",
     excerpt:
-      "اكتشف كيف تعمل جذور الماكا البيروفية كأقوى التكيفات النباتية لدعم إنتاج الطاقة الخلوية وتخفيف الإجهاد اليومي لدى الرجال والنساء بطريقة فسيولوجية آمنة.",
+      "قراءة في أدلة الماكا للطاقة والرغبة: الفرق بين الدراسات الصغيرة والنتائج المؤكدة، ولماذا لا تكفي آليات المختبر لإثبات فائدة المنتج.",
     image: "/images/article-nutrition-libido.webp",
     category: "men",
     readMin: 5,
@@ -99,7 +99,7 @@ export const articlesMeta: ArticleMeta[] = [
     slug: "peruvian-maca-root-energy-vitality-men-women",
     title: "الماكا البيروفية للطاقة والحيوية",
     excerpt:
-      "دراسة صيدلانية شاملة حول دور جذور الماكا التكيفية في تحفيز الطاقة الخلوية وتحسين الأداء البدني والأنوثة والذكورة دون الإخلال بالتوازن الهرموني.",
+      "دليل عملي لاحتياطات الماكا للرجال والنساء: التحاليل والحمل والأدوية، والأسئلة التي تساعد على تقييم المستحضر قبل استعماله.",
     image: "/images/article-nutrition-libido.webp",
     category: "men",
     readMin: 5,

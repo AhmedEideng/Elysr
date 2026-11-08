@@ -174,7 +174,7 @@ export function Footer() {
                 to="/medical-review-board"
                 className="text-white/60 hover:text-white transition-colors"
               >
-                سياسة المراجعة الطبية والتحريرية
+                شفافية المحتوى والمسؤولية التحريرية
               </Link>
             </div>
           </div>

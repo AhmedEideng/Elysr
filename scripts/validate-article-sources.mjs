@@ -53,6 +53,7 @@ const TRUSTED_DOMAINS = [
   "harvard.edu",
   "hopkinsmedicine.org",
   "msdmanuals.com",
+  "mskcc.org",
 ];
 
 const STOP_WORDS = new Set([

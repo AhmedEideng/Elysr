@@ -49,7 +49,7 @@ export function ArticleContentWithAds({
               {ad && (
                 <div className="my-8 rounded-3xl bg-primary/5 p-4 sm:p-6 border border-primary/10 shadow-sm relative overflow-hidden group">
                   <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl z-10">
-                    الحل المقترح
+                    منتج مرتبط بالموضوع
                   </div>
                   <div className="flex flex-col sm:flex-row items-center gap-6">
                     <div className="w-full sm:w-1/3 max-w-[220px]">

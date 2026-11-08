@@ -3,6 +3,7 @@ import { women } from "./products/women";
 import { devices } from "./products/devices";
 import type { Product, ProductCategory } from "@/data/product-types";
 import { expandSearchTerm } from "@/lib/search-terms";
+import { productSearchScore, rankProductSearch } from "@/lib/product-search";
 
 export { expandSearchTerm };
 
@@ -313,34 +314,7 @@ export const getProductBySlug = (slug: string) => products.find((p) => p.slug ==
  * 2) مطابقة بألقاب المنتج البحثية (searchAliases) — مثال: "سبراي" يطابق
  *    منتج "بخاخ ..." حتى لو الكلمة غير مكتوبة في أي حقل من حقوله.
  */
-export const matchesProductQuery = (p: Product, q: string): boolean => {
-  const term = q.trim();
-  if (!term) return false;
-  const t = term.toLowerCase();
-
-  if (
-    expandSearchTerm(term).some((w) =>
-      [p.name, p.nameEn, p.slug, p.description, p.ingredients ?? ""].some((field) =>
-        field.toLowerCase().includes(w.toLowerCase()),
-      ),
-    )
-  ) {
-    return true;
-  }
-
-  // Keep Kreva discoverable in on-site search without adding aliases back to
-  // its restored historical page copy or Product structured data.
-  const aliases = p.searchAliases ?? (p.id === "m-60" ? ["جيل", "كريفا جيل", "كريفا چل"] : []);
-  return aliases.some((a) => {
-    const al = a.toLowerCase();
-    // مطابقة كاملة، أو المصطلح جزء من اللقب ("سبراي" ← "سبراي تأخير")،
-    // أو اللقب جزء من المصطلح ("سبراي ريمانز" ← "سبراي") — بلا ضوضاء للكلمات القصيرة
-    if (al === t) return true;
-    if (t.length >= 3 && al.includes(t)) return true;
-    if (al.length >= 3 && t.includes(al)) return true;
-    return false;
-  });
-};
+export const matchesProductQuery = (p: Product, q: string): boolean => productSearchScore(p, q) > 0;
 
 /**
  * بحث شامل في كل المنتجات (رجالي/نساء/أجهزة) — محرك صفحة /search?q={search_term_string}.
@@ -348,6 +322,5 @@ export const matchesProductQuery = (p: Product, q: string): boolean => {
  * (مثال: "نقط" ← منتجات "قطرات" والعكس)، بدون شبكة، قابل للاختبار.
  */
 export const searchAllPublicProducts = (q: string): Product[] => {
-  if (!q.trim()) return products;
-  return products.filter((p) => matchesProductQuery(p, q));
+  return rankProductSearch(products, q);
 };

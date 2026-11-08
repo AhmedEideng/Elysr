@@ -49,7 +49,7 @@
 | 🛍️ كتالوج التجار    | **81** منتجًا (RSS + CSV + TXT) مع `product_type` لكل منتج                                                                                                       |
 | ↪️ Redirects        | **174** تحويلًا دائمًا (HTTP 308 على Vercel) (معرّفات قديمة + منتجات محذوفة + slugs معاد تسميتها + 404s اللي طلعت من GSC)                                        |
 | 🖼️ الصور            | 147 صورة WebP أساسية + 266 مصغّرة عبر 3 مقاسات                                                                                                                   |
-| 🧪 الاختبارات       | **345** وحدة (Vitest) + **38** E2E (Playwright) + data-integrity + schema validation                                                                             |
+| 🧪 الاختبارات       | **380** وحدة (Vitest) + **47** E2E (Playwright) + data-integrity + schema validation                                                                             |
 
 ---
 
@@ -91,7 +91,7 @@
 | Routing    | TanStack Router (file-based، 25 ملف مسار)                                                                                              |
 | Styling    | Tailwind CSS 4 (ألوان Oklch، RTL كامل)                                                                                                 |
 | البحث      | Fuse.js (fuzzy، تحميل كسول) + مرادفات اللهجة المصرية (نقط ⇄ قطرات)                                                                     |
-| الاختبارات | Vitest (345) + Playwright (38 E2E) + data-integrity + JSON-LD validator                                                                |
+| الاختبارات | Vitest (380) + Playwright (47 E2E) + data-integrity + JSON-LD validator                                                                |
 | الاستضافة  | Vercel Edge CDN (أساسي) · Express + Docker (نشر ذاتي مدعوم)                                                                            |
 | الطلبات    | Google Apps Script → Google Sheets (ScriptLock + فحص تكرار كامل + هواتف دولية)                                                         |
 | SEO        | 285 صفحة مولّدة · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                                   |
@@ -135,8 +135,8 @@ npm run dev              # → http://localhost:8080
 | `npm run build:ssr`            | بناء + prerender لـ Express الخادم الذاتي              |
 | `npm start` / `start:dev`      | تشغيل الخادم الذاتي (إنتاج / watch)                    |
 | `npm run test`                 | حارس data-integrity (كتالوج، metadata، شبكة redirects) |
-| `npm run test:unit`            | اختبارات Vitest + أمان الـ API (345)                   |
-| `npm run test:e2e`             | باقة Playwright E2E (38)                               |
+| `npm run test:unit`            | اختبارات Vitest + أمان الـ API (380)                   |
+| `npm run test:e2e`             | باقة Playwright E2E (47)                               |
 | `npm run test:schemas`         | مجرّب JSON-LD لكل صفحة مولّدة                          |
 | `npm run test:sources`         | فحص متطلبات المصادر للمقالات الجديدة                   |
 | `npm run test:all`             | integrity + unit + build + schemas + health-check      |
@@ -242,7 +242,7 @@ Elysr/
 │   ├── release.mjs                 # سير bump الإصدار
 │   ├── sync-vercel-redirects.mjs   # مزامنة redirects مع الكتالوج
 │   └── health-check.mjs           # تدقيق الحزم/الصور والروابط وSEO head المولّد
-├── e2e/                     # 38 اختبارًا في 4 ملفات: 24 checkout + 9 محتوى + 2 كريفا + 3 أقسام الرئيسية
+├── e2e/                     # 47 اختبارًا في 6 ملفات: 24 checkout + 9 محتوى + 2 كريفا + 3 الرئيسية + 3 النمو العضوي + 6 البحث والتحويل
 ├── server/index.js           # خادم Express للنشر الذاتي (نفس dist/ + نفس الـ API)
 ├── .github/workflows/ci.yml  # 7 وظائف CI (أدناه)
 ├── public/
@@ -271,7 +271,7 @@ Elysr/
 | الوظيفة                                     | البوابة                                                                      |
 | ------------------------------------------- | ---------------------------------------------------------------------------- |
 | 🔗 Corpus Source Liveness                   | روابط مصادر المقالات الفريدة (3 محاولات بتراجع + تصنيف السلطات غير المستقرة) |
-| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 345 اختبار وحدة/API · حارس الكتالوج+البيانات+شبكة redirects |
+| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 380 اختبار وحدة/API · حارس الكتالوج+البيانات+شبكة redirects |
 | 🛡 Security Audit                            | `npm audit --audit-level=high` على الشجرة المقفلة                            |
 | 🏗 Build • Prerender • Sitemaps              | Vite + 285 صفحة مولّدة + sitemaps                                            |
 | 🚦 Lighthouse Performance Budget            | موازِن أداء LHCI على الموقع المبنى                                           |
@@ -477,3 +477,21 @@ a(
 [الموقع](https://elysrmedical.store) · [واتساب](https://wa.me/201098088206) · [إيميل](mailto:info@elysrmedical.store)
 
 </div>
+
+### صيانة النمو العضوي والتحويل
+
+- اختيارات الأدلة والمقالات تربط المنتج بموضوعه صراحةً؛ لا تُملأ قوائم المقالات الصحية تلقائيًا بمنتجات غير مرتبطة.
+- دليلا أسعار الرجال والنساء يستمدان المنتجات من الكتالوج مباشرةً.
+- قيمة الشراء وبدء الطلب في GA4 تستبعد الشحن وتوزع الخصم على أسعار العناصر؛ إجمالي السلة وواتساب والشيت لم يتغير. تسجيل طلب الدفع عند الاستلام ليس تحصيلًا نقديًا.
+- تحرير موثق لثلاثة مقالات عن الجينسنج والماكا مع بقاء الروابط وتواريخ النشر؛ لا يمثل اعتمادًا طبيًا بشريًا مستقلًا.
+- [دليل التشغيل والمواد المطلوبة والقياس والتوزيع](docs/organic-growth-operations.ar.md). أذن المالك بنشر الحزمة بعد الاختبارات. لا تُرسل طلبات أو تقييمات حقيقية أثناء الاختبار ولا تُعدل حسابات خارجية. الباقات وخصوماتها باقية دون تغيير بقرار المالك.
+
+- بناءً على طلب المالك، الصور والفيديوهات الإضافية وتعبئة المواصفات وبيانات المصنع والباركود خارج النطاق الحالي؛ صور المنتجات وبياناتها الحالية محفوظة كما هي.
+
+### Search, catalogue controls and measurement
+
+- Search suggestions and results share one normalized, token-aware ranking engine; spelling suggestions are explicit, not automatic medical substitutes. Published names and URLs are unchanged.
+- Categories have local type/price filters and price sorting; default ordering stays intact, with no new indexable filter URLs.
+- Analytics list names never embed raw search input. `checkout_open`, `checkout_start`, `checkout_submit` distinguish form stages; `begin_checkout` occurs once on first editing per form session. `order_request` records duration and a fixed outcome only, never customer fields.
+- Official `web-vitals` computes CLS/INP/LCP once per document. `metric_id` supports deduplication; SPA route changes are not new document measurements. The old ten-second approximation is removed.
+- Bundles, their membership and 20% discount remain unchanged pending a separately approved replacement list and cost data.

@@ -7,7 +7,6 @@
  */
 
 import type { Product } from "@/data/product-types";
-import { articlesMeta as articles } from "@/data/articles-meta.generated";
 
 // ─── Product → Article Mapping ───
 // Based on product name/slug keywords → relevant article slugs
@@ -134,13 +133,7 @@ const ARTICLE_RULES: { test: RegExp; articles: string[] }[] = [
   },
 ];
 
-const WOMEN_ARTICLES = [
-  "womens-libido-boosters",
-  "menopause-intimacy-guide",
-  "vaginal-health-basics",
-];
 const MEN_ARTICLES = ["testosterone-and-age", "exercise-sexual-performance"];
-const DEVICE_ARTICLES = ["vacuum-pump-complete-guide", "prostate-health-sexual-function"];
 
 /**
  * Get relevant article slugs for a product (2 articles)
@@ -148,7 +141,20 @@ const DEVICE_ARTICLES = ["vacuum-pump-complete-guide", "prostate-health-sexual-f
 export function getArticlesForProduct(product: Product): string[] {
   // Keep educational context stable when product copy changes; not an efficacy claim.
   if (product.id === "m-60") return ["premature-ejaculation", "delay-sprays-safe-use"];
-  const text = `${product.name} ${product.nameEn} ${product.slug} ${product.description}`;
+  // Category precedes broad words such as energy, capsule, spray or ginseng.
+  if (product.category === "women") {
+    if (product.id === "w-20") return ["max-filler-breast-guide", "body-image-confidence"];
+    if (["w-14", "w-16"].includes(product.id))
+      return ["vaginal-health-basics", "women-products-complete-guide"];
+    return ["women-products-complete-guide", "womens-libido-boosters"];
+  }
+  if (product.category === "devices") {
+    if (product.id === "d-04") return ["body-image-confidence", "myths-vs-facts-sexual-health"];
+    if (product.id === "d-06")
+      return ["device-maintenance-hygiene", "myths-vs-facts-sexual-health"];
+    return ["vacuum-pump-complete-guide", "device-maintenance-hygiene"];
+  }
+  const text = `${product.name} ${product.nameEn} ${product.slug}`;
   const matched = new Set<string>();
 
   for (const rule of ARTICLE_RULES) {
@@ -160,12 +166,7 @@ export function getArticlesForProduct(product: Product): string[] {
   }
 
   // Add category-based fallbacks
-  const fallbacks =
-    product.category === "women"
-      ? WOMEN_ARTICLES
-      : product.category === "devices"
-        ? DEVICE_ARTICLES
-        : MEN_ARTICLES;
+  const fallbacks = MEN_ARTICLES;
 
   for (const slug of fallbacks) {
     matched.add(slug);
@@ -175,276 +176,27 @@ export function getArticlesForProduct(product: Product): string[] {
 }
 
 // ─── Article → Product Mapping ───
-const PRODUCT_RULES: { articleSlug: string; productIds: string[] }[] = [
-  {
-    articleSlug: "erectile-dysfunction",
-    productIds: ["m-01", "m-02", "m-04", "d-01", "d-02"],
-  },
-  {
-    articleSlug: "premature-ejaculation",
-    productIds: ["m-05", "m-06", "m-35", "m-48", "m-60"],
-  },
-  { articleSlug: "delay-sprays-safe-use", productIds: ["m-05", "m-35", "m-60", "m-48"] },
-  {
-    articleSlug: "royal-honey-benefits",
-    productIds: ["m-52", "m-12", "m-20", "m-13", "m-22"],
-  },
-  { articleSlug: "safe-supplements", productIds: ["m-01", "m-02", "m-03", "m-04", "m-09"] },
-  { articleSlug: "nutrition-libido", productIds: ["m-01", "m-02", "m-04", "m-52", "w-05", "w-07"] },
-  {
-    articleSlug: "womens-libido-boosters",
-    productIds: ["w-02", "w-15", "w-07", "w-05", "w-04", "w-16"],
-  },
-  { articleSlug: "women-orgasm", productIds: ["w-02", "w-15", "w-14", "w-16", "w-05", "w-07"] },
-  { articleSlug: "kegel-exercises", productIds: ["d-01", "d-02", "w-16", "m-05", "m-35"] },
-  { articleSlug: "sleep-and-sex", productIds: ["m-01", "m-02", "m-04", "w-05", "m-52", "m-42"] },
-  {
-    articleSlug: "stress-and-libido",
-    productIds: ["m-01", "m-02", "m-04", "w-05", "w-02", "m-52"],
-  },
-  {
-    articleSlug: "sexual-health-basics",
-    productIds: ["m-01", "m-09", "w-02", "w-05", "d-01", "m-52"],
-  },
-  { articleSlug: "aphrodisiacs-real", productIds: ["m-01", "m-02", "m-04", "m-52", "w-07"] },
-  { articleSlug: "hormonal-changes", productIds: ["m-01", "m-04", "w-05", "w-02", "w-14", "w-16"] },
-  {
-    articleSlug: "when-to-see-doctor",
-    productIds: ["m-01", "d-01", "w-02", "w-14", "m-04", "m-48"],
-  },
-  {
-    articleSlug: "max-filler-breast-guide",
-    productIds: ["w-20", "d-04", "w-14", "w-16", "w-05", "w-07"],
-  },
-  {
-    articleSlug: "body-image-confidence",
-    productIds: ["w-20", "d-04", "d-06", "w-14", "m-48", "m-01"],
-  },
-  {
-    articleSlug: "communication-couples",
-    productIds: ["m-01", "w-05", "w-02", "m-52", "w-14", "w-15"],
-  },
-  {
-    articleSlug: "contraception-options",
-    productIds: ["w-05", "w-02", "w-14", "w-16", "w-15", "w-07"],
-  },
-  { articleSlug: "post-partum-recovery", productIds: ["w-14", "w-16", "w-05", "w-02", "w-15"] },
-  {
-    articleSlug: "masturbation-myths",
-    productIds: ["m-01", "m-02", "m-09", "w-02", "m-52", "m-04"],
-  },
-  { articleSlug: "foods-to-avoid", productIds: ["m-01", "m-02", "m-04", "m-52", "w-05", "w-07"] },
-  { articleSlug: "std-prevention", productIds: ["w-14", "w-16", "m-01", "w-05", "m-09", "m-52"] },
-  {
-    articleSlug: "aging-and-intimacy",
-    productIds: ["m-01", "m-04", "w-05", "w-14", "d-01", "m-52"],
-  },
-  {
-    articleSlug: "prostate-health-sexual-function",
-    productIds: ["m-01", "m-04", "d-01", "d-02", "m-09", "m-52"],
-  },
-  {
-    articleSlug: "testosterone-and-age",
-    productIds: ["m-02", "m-04", "m-01", "m-52", "m-09", "m-20"],
-  },
-  {
-    articleSlug: "vacuum-pump-complete-guide",
-    productIds: ["d-01", "d-02", "d-03", "d-05", "d-07", "m-01"],
-  },
-  {
-    articleSlug: "drug-interactions-sexual-products",
-    productIds: ["m-05", "m-06", "m-09", "d-01", "m-48", "m-35"],
-  },
-  {
-    articleSlug: "side-effects-management",
-    productIds: ["m-06", "m-09", "m-01", "w-14", "m-48", "m-05"],
-  },
-  {
-    articleSlug: "zinc-sexual-health",
-    productIds: ["m-01", "m-04", "m-02", "m-52", "m-09", "w-05"],
-  },
-  {
-    articleSlug: "omega3-circulation-performance",
-    productIds: ["m-02", "m-01", "m-04", "d-01", "m-52", "m-09"],
-  },
-  {
-    articleSlug: "ginseng-complete-guide",
-    productIds: ["m-04", "m-02", "m-01", "m-52", "m-03", "m-09"],
-  },
-  {
-    articleSlug: "menopause-intimacy-guide",
-    productIds: ["w-14", "w-16", "w-02", "w-05", "w-07", "w-15"],
-  },
-  { articleSlug: "vaginal-health-basics", productIds: ["w-14", "w-16", "w-05", "w-02", "w-07"] },
-  {
-    articleSlug: "first-night-anxiety-guide",
-    productIds: ["m-01", "m-52", "w-14", "w-07", "m-09", "w-05"],
-  },
-  {
-    articleSlug: "relationship-routine-revive",
-    productIds: ["w-04", "w-06", "m-48", "m-01", "w-05", "m-52"],
-  },
-  {
-    articleSlug: "buying-first-product-guide",
-    productIds: ["m-01", "m-52", "w-07", "w-14", "m-09", "d-01"],
-  },
-  {
-    articleSlug: "myths-vs-facts-sexual-health",
-    productIds: ["m-01", "m-52", "w-02", "w-07", "m-09", "d-01"],
-  },
-  {
-    articleSlug: "estrogen-progesterone-women-guide",
-    productIds: ["w-14", "w-16", "w-02", "w-05", "w-07", "w-15"],
-  },
-  {
-    articleSlug: "exercise-sexual-performance",
-    productIds: ["m-02", "m-04", "m-01", "d-01", "m-52", "w-16"],
-  },
-  {
-    articleSlug: "best-selling-products-guide",
-    productIds: ["m-01", "m-02", "m-04", "m-52", "m-26", "w-02", "w-07"],
-  },
-  {
-    articleSlug: "chronic-diseases-intimacy",
-    productIds: ["m-01", "m-04", "d-01", "w-14", "m-09", "m-52"],
-  },
-  {
-    articleSlug: "fertility-supplements-guide",
-    productIds: ["m-02", "m-52", "m-04", "m-01", "w-14", "w-05"],
-  },
-  {
-    articleSlug: "pre-marriage-health-guide",
-    productIds: ["m-01", "m-52", "w-14", "w-16", "w-07", "m-09"],
-  },
-  {
-    articleSlug: "medications-affecting-libido",
-    productIds: ["m-01", "m-04", "d-01", "m-02", "w-14", "m-09"],
-  },
-  {
-    articleSlug: "men-health-checkups",
-    productIds: ["m-04", "m-01", "d-01", "m-02", "m-52", "m-09"],
-  },
-  {
-    articleSlug: "intimacy-after-fifty",
-    productIds: ["w-14", "m-04", "d-01", "m-52", "w-16", "m-01"],
-  },
-  {
-    articleSlug: "natural-honey-dates-benefits",
-    productIds: ["m-52", "m-11", "m-20", "w-07", "w-05"],
-  },
-  {
-    articleSlug: "sexual-health-during-ramadan",
-    productIds: ["m-52", "m-04", "w-14", "m-01", "m-11", "w-07"],
-  },
-  {
-    articleSlug: "pelvic-floor-men-advanced",
-    productIds: ["d-01", "m-02", "m-05", "m-35", "m-48", "m-60"],
-  },
-  {
-    articleSlug: "device-maintenance-hygiene",
-    productIds: ["d-01", "d-02", "d-03", "d-05", "d-06", "d-07"],
-  },
-];
+// Explicit topical matches, not medical endorsements. Health-only articles have no sales fallback.
+const ARTICLE_PRODUCTS: Record<string, string[]> = {
+  "premature-ejaculation": ["m-31", "m-55", "m-30", "m-60"],
+  "delay-sprays-safe-use": ["m-55", "m-41", "m-44"],
+  "why-delay-product-did-not-work-7-mistakes": ["m-55", "m-30", "m-60"],
+  "royal-honey-benefits": ["m-18", "m-11", "m-12", "m-20"],
+  "womens-libido-boosters": ["w-25", "w-10", "w-15"],
+  "women-products-complete-guide": ["w-25", "w-10", "w-15", "w-05", "w-17"],
+  "max-filler-breast-guide": ["w-20"],
+  "vacuum-pump-complete-guide": ["d-03", "d-05", "d-07", "d-08", "d-01", "d-02"],
+  "device-maintenance-hygiene": ["d-03", "d-05", "d-07", "d-08", "d-06"],
+  "ginseng-complete-guide": ["m-04", "m-02"],
+  "red-korean-ginseng-energy-endurance-benefits": ["m-04", "m-02"],
+  "peruvian-maca-root-benefits-for-vitality-and-energy": ["m-02"],
+  "peruvian-maca-root-energy-vitality-men-women": ["m-02"],
+  "hammer-of-thor-benefits-and-harms": ["m-01"],
+  "hard-on-sildenafil-dapoxetine-guide": ["m-34"],
+};
 
-/**
- * Get product IDs relevant to an article (6 products) — Smart Dynamic Recommendation
- */
 export function getProductsForArticle(articleSlug: string): string[] {
-  // 1. Check if we have an explicit hardcoded rule for this article:
-  const rule = PRODUCT_RULES.find((r) => r.articleSlug === articleSlug);
-  if (rule) return rule.productIds.slice(0, 6);
-
-  // 2. If no hardcoded rule, find the article dynamically in our articles database:
-  const article = articles.find((a) => a.slug === articleSlug);
-  if (article) {
-    const category = article.category ? article.category.toLowerCase() : "";
-    // excerpt بدل content: الـ content في ملف مولّد منفصل (مش بيتحمّل مع الـ meta).
-    // ده fallback heuristic بس (الـ category + PRODUCT_RULES هم الأساس) — كفاية.
-    const titleAndContent = `${article.title} ${article.excerpt}`.toLowerCase();
-
-    // Determine target category based on article category first:
-    let isWomen = category === "women" || category === "صحة المرأة";
-    let isDevices = category === "devices" || category === "أجهزة";
-    let isMen = category === "men" || category === "صحة الرجل" || category === "صحة الرجال";
-
-    // Fallback to keyword matching only if no explicit category is matched:
-    if (!isWomen && !isDevices && !isMen) {
-      isWomen =
-        titleAndContent.includes("نساء") ||
-        titleAndContent.includes("سيدات") ||
-        titleAndContent.includes("سيدة") ||
-        titleAndContent.includes("أنثى") ||
-        titleAndContent.includes("بشرة") ||
-        titleAndContent.includes("جلد");
-
-      isDevices =
-        titleAndContent.includes("جهاز") ||
-        titleAndContent.includes("مضخة") ||
-        titleAndContent.includes("pump") ||
-        titleAndContent.includes("شد") ||
-        titleAndContent.includes("تمرين");
-
-      isMen =
-        titleAndContent.includes("رجال") ||
-        titleAndContent.includes("رجل") ||
-        titleAndContent.includes("انتصاب") ||
-        titleAndContent.includes("صلابة") ||
-        titleAndContent.includes("سرعة") ||
-        titleAndContent.includes("تأخير");
-    }
-
-    // Dynamic product selection based on content keywords:
-    if (isWomen) {
-      if (
-        titleAndContent.includes("عسل") ||
-        titleAndContent.includes("شوكولاته") ||
-        titleAndContent.includes("طاقة")
-      ) {
-        return ["w-05", "w-12", "w-08", "w-02", "w-15", "w-16"]; // Honey/chocolate/coffee first
-      }
-      if (
-        titleAndContent.includes("قطرات") ||
-        titleAndContent.includes("نقط") ||
-        titleAndContent.includes("برود")
-      ) {
-        return ["w-02", "w-15", "w-16", "w-05", "w-12"]; // Drops first (w-24 اتحذفت 2026-09-07)
-      }
-      return ["w-02", "w-15", "w-16", "w-05", "w-12", "w-04"];
-    }
-
-    if (isDevices) {
-      return ["d-01", "d-02", "d-04", "d-03", "d-05", "d-07"];
-    }
-
-    if (isMen) {
-      if (
-        titleAndContent.includes("عسل") ||
-        titleAndContent.includes("غذاء") ||
-        titleAndContent.includes("طاقة")
-      ) {
-        return ["m-11", "m-52", "m-12", "m-14", "m-02", "m-49"]; // Honey/Ginseng/Power (كريفا خارجها — توجيه تأخير فقط)
-      }
-      if (
-        titleAndContent.includes("سرعة") ||
-        titleAndContent.includes("تأخير") ||
-        titleAndContent.includes("توقيت") ||
-        titleAndContent.includes("تخدير")
-      ) {
-        return ["m-60", "m-48", "m-05", "m-35"]; // منتجات تأخير موضعية آمنة (كريما/جل/بخاخ عشبي)
-      }
-      if (
-        titleAndContent.includes("انتصاب") ||
-        titleAndContent.includes("صلابة") ||
-        titleAndContent.includes("ضعف")
-      ) {
-        return ["m-01", "m-02", "m-11", "m-03"]; // Erection (كريفا خارجها — منتج تأخير وليس انتصاب)
-      }
-      return ["m-11", "m-60", "m-02", "m-48", "m-03"];
-    }
-  }
-
-  // Absolute general fallback: return popular products from each category
-  return ["m-11", "w-02", "w-15", "d-01", "m-60", "m-48"];
+  return [...(ARTICLE_PRODUCTS[articleSlug] ?? [])];
 }
 
 /**
