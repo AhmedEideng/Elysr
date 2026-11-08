@@ -86,12 +86,13 @@ export const getProductsByCategory = (cat: ProductCategory) => {
 };
 
 /** منتجات طلبت الإدارة عدم إظهارها في أي قسم من أقسام الصفحة الرئيسية.
- * (التلاتة استبعاد تجاري/عرضي قديم، وليس حظرًا دوائيًا.)
+ * استبعاد عرضي من الرئيسية فقط؛ تظل المنتجات متاحة في صفحات أقسامها.
  */
 export const HOMEPAGE_EXCLUDED_PRODUCT_IDS = new Set([
   "m-02", // Boost Up MAN
   "m-03", // Powerfully Up
   "m-49", // Power Fully Up Advanced
+  "d-04", // Big Bro: excluded from the homepage by owner request
 ]);
 
 export const isHomepageProductEligible = (product: Pick<Product, "id">): boolean =>
@@ -106,7 +107,7 @@ export const isHomepageProductEligible = (product: Pick<Product, "id">): boolean
 export const HOMEPAGE_CONCERN_CANDIDATES = {
   delay: ["m-44", "m-30", "m-14", "m-19", "m-55", "m-48"],
   strength: ["m-11", "m-02", "m-01", "m-04", "m-03", "m-49", "m-52", "m-20", "m-32"],
-  devices: ["d-01", "d-02", "d-03", "d-04", "d-05"],
+  devices: ["d-05", "d-07", "d-08", "d-01", "d-02", "d-03", "d-06"],
   women: ["w-13", "w-15", "w-05", "w-11", "w-01", "w-03", "w-04"],
 } as const;
 

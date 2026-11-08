@@ -30,7 +30,7 @@
 ### لماذا "بلا قاعدة بيانات"؟
 
 - ✅ كل البيانات (منتجات، مقالات، صفحات SEO) في ملفات **TypeScript** ثابتة
-- ✅ توليد **277 صفحة تطبيقية** كاملة في وقت البناء
+- ✅ توليد **285 صفحة تطبيقية** كاملة في وقت البناء
 - ✅ استضافة على **Vercel Edge CDN** (سرعة + تكلفة منخفضة) + بديل **Express + Docker** للنشر الذاتي
 - ✅ الطلبات والمراجعات تُرسل إلى **Google Sheets** عبر Google Apps Script (ScriptLock + فحص تكرار كامل)
 
@@ -42,14 +42,14 @@
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 📦 المنتجات         | **88** (56 رجال · 24 نساء · 8 أجهزة) — 4 عناصر تاريخية ما زالت محذوفة؛ تمت إعادة 6 منتجات بقرار المالك                                                           |
 | 🛒 تغطية الكتالوج   | **88** في كتالوج الموقع · **81** في Merchant feed (7 منتجات بمواد دوائية موصوفة مستثناة من الـ feed فقط — قرار المالك 2026-09-28؛ صفحاتها منشورة وقابلة للفهرسة) |
-| 📚 المقالات         | **63** مقالًا توعويًا بمصادر طبية موثوقة (NIH/Mayo/NHS/…)                                                                                                        |
-| 🎯 صفحات الدليل     | **106** صفحة دليل (قوائم أسعار ومقارنات منتجات وصفحات توصيل للمناطق؛ مع تحذيرات طبية للأدلة الدوائية)                                                            |
-| 📄 الصفحات المولّدة | **277** (16 ثابتة + 88 صفحة منتج + 63 مقالًا + 106 دليلًا + 4 صفحات إنجليزية)                                                                                    |
-| 🗺️ روابط sitemap    | **273** (البحث الشامل مشمول عبر `SearchAction` في JSON-LD، مش قالب sitemap)                                                                                      |
+| 📚 المقالات         | **64** مقالًا توعويًا بمصادر طبية موثوقة (NIH/Mayo/NHS/…)                                                                                                        |
+| 🎯 صفحات الدليل     | **113** صفحة دليل (قوائم أسعار ومقارنات منتجات وصفحات توصيل للمناطق؛ مع تحذيرات طبية للأدلة الدوائية)                                                            |
+| 📄 الصفحات المولّدة | **285** (16 ثابتة + 88 صفحة منتج + 64 مقالًا + 113 دليلًا + 4 صفحات إنجليزية)                                                                                    |
+| 🗺️ روابط sitemap    | **281** (البحث الشامل مشمول عبر `SearchAction` في JSON-LD، مش قالب sitemap)                                                                                      |
 | 🛍️ كتالوج التجار    | **81** منتجًا (RSS + CSV + TXT) مع `product_type` لكل منتج                                                                                                       |
-| ↪️ Redirects        | **182** تحويلًا دائمًا (HTTP 308 على Vercel) (معرّفات قديمة + منتجات محذوفة + slugs معاد تسميتها + 404s اللي طلعت من GSC)                                        |
+| ↪️ Redirects        | **174** تحويلًا دائمًا (HTTP 308 على Vercel) (معرّفات قديمة + منتجات محذوفة + slugs معاد تسميتها + 404s اللي طلعت من GSC)                                        |
 | 🖼️ الصور            | 147 صورة WebP أساسية + 266 مصغّرة عبر 3 مقاسات                                                                                                                   |
-| 🧪 الاختبارات       | **303** وحدة (Vitest) + **19** E2E (Playwright) + data-integrity + schema validation                                                                             |
+| 🧪 الاختبارات       | **341** وحدة (Vitest) + **37** E2E (Playwright) + data-integrity + schema validation                                                                             |
 
 ---
 
@@ -58,13 +58,13 @@
 ```
 المتصفح ──→ Vercel Edge CDN (dist/ ثابت)
                 │
-                ├── 277 صفحة مولّدة مسبقًا (SEO meta + JSON-LD كاملة)
+                ├── 285 صفحة مولّدة مسبقًا (SEO meta + JSON-LD كاملة)
                 ├── /search?q=…          (SPA — بحث الكتالوج)
                 │
                 ├── /api/submit-order  ──┐
                 ├── /api/submit-review ──┼──→ Google Apps Script ──→ Google Sheets
                 └── /api/reviews       ──┘   ▲ محمي: HMAC بتواقيع single-use
-                                             │ + سر كتابة اختياري (WEBHOOK_SECRET)
+                                             │ + سر كتابة إلزامي (WEBHOOK_SECRET)
 
 بديل النشر الذاتي: server/index.js (Express) يقدّم نفس dist/
 ونفس معالجات الـ API — نفس السلوك تمامًا بدون اعتماد على Vercel.
@@ -77,7 +77,7 @@
 - **حالة الكتالوج الحالية** — المنتجات المحذوفة نهائيًا هي m-36 وm-43 وm-47 وw-24؛ أعاد المالك m-08 وm-34 وm-37 وm-38 وm-45 وw-17 للعرض. منتجات المواد الدوائية الموصوفة مستثناة من Merchant feed فقط (قرار المالك 2026-09-28) وتبقى منشورة وقابلة للفهرسة على الموقع.
 - **المراجعات بإشراف بالضرورة** — كل مراجعة تصل بحالة "قيد المراجعة"؛ لا يُعرض إلا ما اعتمده المالك. مسار القراءة موقّع بـ HMAC-SHA256 بتواقيع قصيرة العمر وnonces أحادية الاستخدام.
 - **فحوصات التكامل في CI** — تتحقق من الكتالوج والـ metadata المولّدة والـ redirects
-  وأهلية الـ feed واتساق schema؛ لا توجد قائمة كلمات ثابتة تمنع صياغة المحتوى الطبي.
+  وأهلية الـ feed واتساق schema، مع اختبارات محددة لمنع عودة أخطاء النصوص؛ نجاحها ليس إثباتًا طبيًا.
 - **فرز ذكي** — صفحات الفئات ترتب حسب: المخزون → مميز → درجة الشعبية → السعر.
 
 ---
@@ -88,13 +88,13 @@
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | Framework  | React 19 + TypeScript 6                                                                                                                |
 | Build      | Vite 8 (تقسيم كود: vendor-react/router/icons/search/toast + كتالوجات منفصلة)                                                           |
-| Routing    | TanStack Router (file-based، 21 مسارًا)                                                                                                |
+| Routing    | TanStack Router (file-based، 25 ملف مسار)                                                                                              |
 | Styling    | Tailwind CSS 4 (ألوان Oklch، RTL كامل)                                                                                                 |
 | البحث      | Fuse.js (fuzzy، تحميل كسول) + مرادفات اللهجة المصرية (نقط ⇄ قطرات)                                                                     |
-| الاختبارات | Vitest (303) + Playwright (19 E2E) + data-integrity + JSON-LD validator                                                                |
+| الاختبارات | Vitest (341) + Playwright (37 E2E) + data-integrity + JSON-LD validator                                                                |
 | الاستضافة  | Vercel Edge CDN (أساسي) · Express + Docker (نشر ذاتي مدعوم)                                                                            |
 | الطلبات    | Google Apps Script → Google Sheets (ScriptLock + فحص تكرار كامل + هواتف دولية)                                                         |
-| SEO        | 277 صفحة مولّدة · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                                   |
+| SEO        | 285 صفحة مولّدة · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                                   |
 | الصور      | WebP فقط (sharp، 700–800px، q45–55) + alt/title وصفية                                                                                  |
 | الأمان     | CSP · HSTS · COOP/OAC · Report-To · NEL · CORS صارم · rate limits بمعرّفات IP مُجزّأة · HMAC لقراءة المراجعات · error tracking بلا PII |
 
@@ -108,41 +108,41 @@ git clone https://github.com/AhmedEideng/Elysr.git
 cd Elysr
 nvm use                  # يقرأ من .nvmrc
 
-npm install
+npm ci
 npm run dev              # → http://localhost:8080
 ```
 
 ### متغيرات البيئة
 
-المتغيران الوحيدان المطلوبان: `GOOGLE_SHEETS_WEBHOOK_URL` و`SITE_URL`.
+كتابة الطلبات والمراجعات في الإنتاج تحتاج `GOOGLE_SHEETS_WEBHOOK_URL` و`GOOGLE_SHEETS_WEBHOOK_SECRET`، مع ضبط `SITE_URL` على أصل الموقع. قراءة المراجعات المعتمدة تحتاج أيضًا `GOOGLE_SHEETS_REVIEWS_TOKEN`.
 لا حاجة لـ Redis أو خدمة rate-limit خارجية: الـ API يطبّق حدودًا داخلية بمعرّفات IP مُجزّأة، وApps Script يطبّق حدًا ثانيًا لكل هاتف قبل كتابة الطلب.
 
 | المتغير                        | مطلوب        | الغرض                                                                                                                                                       |
 | ------------------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GOOGLE_SHEETS_WEBHOOK_URL`    | ✅           | رابط Web App الخاص بـ Apps Script (طلبات + مراجعات)                                                                                                         |
 | `SITE_URL`                     | ✅           | الأصل الرسمي (canonicals، feeds، OG tags)                                                                                                                   |
-| `GOOGLE_SHEETS_REVIEWS_TOKEN`  | ⚠️ للمراجعات | مفتاح HMAC لقراءة المراجعات (يجب أن يطابق `REVIEW_READ_TOKEN` في السكريبت؛ بدونها قسم المراجعات معطّل بصمت)                                                 |
+| `GOOGLE_SHEETS_REVIEWS_TOKEN`  | ⚠️ للمراجعات | مفتاح HMAC لقراءة المراجعات (يجب أن يطابق `REVIEW_READ_TOKEN` في السكريبت؛ بدونها تعود قائمة مراجعات فارغة؛ نموذج الكتابة يبقى ظاهرًا)                      |
 | `GOOGLE_SHEETS_WEBHOOK_SECRET` | **إلزامي**   | سر كتابة مشترك (يجب أن يطابق `WEBHOOK_SECRET` في السكريبت). Fail-closed: بدون السر، السكريبت يرفض **كل** الكتابات — اضبط الاتنين أو الموقع مش هيستقبل طلبات |
 | `VITE_ERROR_SINK_URL`          | اختياري      | منفذ أخطاء متوافق مع Sentry (console فقط في dev)                                                                                                            |
 
 ### الأوامر
 
-| الأمر                     | الوصف                                                  |
-| ------------------------- | ------------------------------------------------------ |
-| `npm run dev`             | خادم التطوير (port 8080)                               |
-| `npm run build`           | بناء الإنتاج + sitemaps + prerender لـ 277 صفحة        |
-| `npm run preview`         | معاينة بناء الإنتاج محليًا                             |
-| `npm run build:ssr`       | بناء + prerender لـ Express الخادم الذاتي              |
-| `npm start` / `start:dev` | تشغيل الخادم الذاتي (إنتاج / watch)                    |
-| `npm run test`            | حارس data-integrity (كتالوج، metadata، شبكة redirects) |
-| `npm run test:unit`       | اختبارات Vitest + أمان الـ API (303)                   |
-| `npm run test:e2e`        | باقة Playwright E2E (19)                               |
-| `npm run test:schemas`    | مجرّب JSON-LD لكل صفحة مولّدة                          |
-| `npm run test:sources`    | فحص متطلبات المصادر للمقالات الجديدة                   |
-| `npm run test:all`        | integrity + unit + build + schemas                     |
-| `npm run ci`              | lint + typecheck + test:all                            |
-| `npm run audit:deps`      | `npm audit --audit-level=high`                         |
-| `npm run release`         | سير bump الإصدار ورقم الكاش                            |
+| الأمر                          | الوصف                                                  |
+| ------------------------------ | ------------------------------------------------------ |
+| `npm run dev`                  | خادم التطوير (port 8080)                               |
+| `npm run build`                | بناء الإنتاج + sitemaps + prerender لـ 285 صفحة        |
+| `npm run preview`              | معاينة بناء الإنتاج محليًا                             |
+| `npm run build:ssr`            | بناء + prerender لـ Express الخادم الذاتي              |
+| `npm start` / `start:dev`      | تشغيل الخادم الذاتي (إنتاج / watch)                    |
+| `npm run test`                 | حارس data-integrity (كتالوج، metadata، شبكة redirects) |
+| `npm run test:unit`            | اختبارات Vitest + أمان الـ API (341)                   |
+| `npm run test:e2e`             | باقة Playwright E2E (37)                               |
+| `npm run test:schemas`         | مجرّب JSON-LD لكل صفحة مولّدة                          |
+| `npm run test:sources`         | فحص متطلبات المصادر للمقالات الجديدة                   |
+| `npm run test:all`             | integrity + unit + build + schemas + health-check      |
+| `npm run ci`                   | lint + typecheck + test:all                            |
+| `npm audit --audit-level=high` | `npm audit --audit-level=high`                         |
+| `npm run release`              | سير bump الإصدار ورقم الكاش                            |
 
 ---
 
@@ -152,7 +152,7 @@ npm run dev              # → http://localhost:8080
 
 - اقتراحات فورية فاصلة (Fuse.js، Ctrl/Cmd+K) في مربع الهيدر + رابط **"عرض كل النتائج"**.
 - صفحة نتائج مخصصة `/search?q=…` لكل الفئات — موصوفة عبر `SearchAction` (JSON-LD)
-  وقالب البحث في الـ sitemap، فنتائج بحث جوجل تصل لصفحات نتائج حقيقية.
+  دون إدراج قالب صفحات نتائج البحث في الـ sitemap.
 - مرادفات اللهجة المصرية ثنائية الاتجاه (`نقط` ⇄ `قطرات`) في مُطابق الصفحة وفهرس الاقتراحات.
 
 ### ⭐ مراجعات عملاء حقيقية بمراجعة يدوية
@@ -178,7 +178,7 @@ npm run dev              # → http://localhost:8080
   وأربعة منتجات تاريخية تظل محذوفة. تُستثنى سبعة منتجات بمواد دوائية موصوفة
   من Merchant feed فقط، دون حذف صفحاتها أو روابطها من sitemap.
 - **فحوص CI** — تتحقق من تكامل البيانات والميتا والتحويلات والسكيما وأهلية الخلاصة؛
-  لا توجد قائمة كلمات ثابتة تمنع العبارات الطبية. المراجعة التحريرية مسؤولية مستقلة.
+  توجد اختبارات محددة لأخطاء النصوص، ولا تُغني عن المراجعة التحريرية والطبية المستقلة.
 - **المصادر** — تُراجع متطلبات مصادر المقالات وحيوية الروابط بأدوات مخصصة؛
   نجاح الاختبار لا يُعد إثباتًا طبيًا آليًا لكل ادعاء.
 
@@ -189,7 +189,7 @@ npm run dev              # → http://localhost:8080
 ```
 Elysr/
 ├── src/
-│   ├── routes/               # 21 مسارًا (file-based) — يتضمن /search
+│   ├── routes/               # 25 ملف مسار (file-based) — يتضمن /search
 │   ├── components/
 │   │   ├── sections/         # Hero, FeaturedProducts, ShopByConcern, RecentlyViewed…
 │   │   ├── layout/           # Header (مربع البحث), Footer, Layout
@@ -200,8 +200,8 @@ Elysr/
 │   ├── data/
 │   │   ├── products.ts       # 88 منتجًا + محددات البحث والمرادفات
 │   │   ├── products/         # men.ts · women.ts · devices.ts (مصدر الكتالوج)
-│   │   ├── articles.ts       # 63 مقالًا بمصادر موثوقة
-│   │   ├── landing-pages.ts  # 106 صفحة دليل (مصدر build؛ تُقدّم JSON لكل slug وقت التشغيل)
+│   │   ├── articles.ts       # 64 مقالًا بمصادر موثوقة
+│   │   ├── landing-pages.ts  # 113 صفحة دليل (مصدر build؛ تُقدّم JSON لكل slug وقت التشغيل)
 │   │   ├── product-types.ts  # واجهات TypeScript
 │   │   └── product-faqs.ts   # مخططات الأسئلة الشائعة المشتركة
 │   ├── lib/
@@ -230,8 +230,8 @@ Elysr/
 │       ├── request-guards.js         # فحوص origin وحجم payload المشتركة
 │       └── request-ip.js             # استخراج IP موثوق من المنصة
 ├── scripts/
-│   ├── prerender-seo.mjs           # 277 صفحة HTML + JSON-LD (Product/ItemList/FAQ/Breadcrumb)
-│   ├── generate-sitemap.mjs        # sitemaps (273) + feed (81) + robots + security.txt
+│   ├── prerender-seo.mjs           # 285 صفحة HTML + JSON-LD (Product/ItemList/FAQ/Breadcrumb)
+│   ├── generate-sitemap.mjs        # sitemaps (281) + feed (81) + robots + security.txt
 │   ├── check-source-links.mjs      # حيوية المصادر الكاملة (3 محاولات + تصنيف السلطات)
 │   ├── validate-schemas.mjs        # مجرّب JSON-LD لكل مخططات كل الصفحات
 │   ├── validate-article-sources.mjs # فحص متطلبات المصادر (مقالات جديدة)
@@ -242,21 +242,21 @@ Elysr/
 │   ├── release.mjs                 # سير bump الإصدار
 │   ├── sync-vercel-redirects.mjs   # مزامنة redirects مع الكتالوج
 │   └── health-check.mjs           # تدقيق الحزم/الصور والروابط وSEO head المولّد
-├── e2e/checkout.spec.ts      # 19 اختبار Playwright (checkout، بحث، مراجعات، 404s، حذفات)
+├── e2e/                     # 37 اختبارًا في 4 ملفات: 24 checkout + 9 محتوى + 2 كريفا + 2 أجهزة
 ├── server/index.js           # خادم Express للنشر الذاتي (نفس dist/ + نفس الـ API)
-├── .github/workflows/ci.yml  # 5 وظائف CI (أدناه)
+├── .github/workflows/ci.yml  # 7 وظائف CI (أدناه)
 ├── public/
 │   ├── images/               # 147 WebP أساسية + 266 مصغّرة في thumbs/ وthumbs-180/ وthumbs-120/
-│   ├── landing-pages/        # 106 JSON لكل slug (مصدر بيانات وقت التشغيل)
-│   ├── sitemap.xml           # 273 رابط
-│   ├── sitemap-images.xml    # 141 رابط صورة
+│   ├── landing-pages/        # 113 JSON لكل slug (مصدر بيانات وقت التشغيل)
+│   ├── sitemap.xml           # 281 رابط
+│   ├── sitemap-images.xml    # 152 رابط صورة
 │   ├── sitemap-index.xml
 │   ├── sw.js                 # kill-switch هجرة PWA (يلغي نفسه، network-only)
 │   ├── scripts/ga-loader.js  # تحميل GA4 مؤجل (2ث + تفاعل، send_page_view:false)
 │   └── .well-known/security.txt
 ├── google-apps-script.gs     # الـ webhook: طلبات + مراجعات + تحقق HMAC + سر كتابة
 │                             # + دالة trigger التنظيف اليومي (setupAutoCleanupTrigger)
-├── vercel.json               # 12 مجموعة headers أمان + 182 redirect + rewrites
+├── vercel.json               # 12 مجموعة headers أمان + 174 redirect + rewrites
 ├── Dockerfile · docker-compose.yml
 ├── SECURITY.md · CHANGELOG.md · ANALYSIS.md
 └── index.html
@@ -266,23 +266,38 @@ Elysr/
 
 ## 🧪 الاختبارات وCI
 
-خمس وظائف على كل push (+ فحص أسبوعي يوم السبت للمصادر):
+سبع وظائف على كل push (+ فحص أسبوعي يوم السبت للمصادر):
 
 | الوظيفة                                     | البوابة                                                                      |
 | ------------------------------------------- | ---------------------------------------------------------------------------- |
 | 🔗 Corpus Source Liveness                   | روابط مصادر المقالات الفريدة (3 محاولات بتراجع + تصنيف السلطات غير المستقرة) |
-| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 303 اختبار وحدة/API · حارس الكتالوج+البيانات+شبكة redirects |
+| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 341 اختبار وحدة/API · حارس الكتالوج+البيانات+شبكة redirects |
 | 🛡 Security Audit                            | `npm audit --audit-level=high` على الشجرة المقفلة                            |
-| 🏗 Build • Prerender • Sitemaps              | Vite + 277 صفحة مولّدة + sitemaps                                            |
+| 🏗 Build • Prerender • Sitemaps              | Vite + 285 صفحة مولّدة + sitemaps                                            |
 | 🚦 Lighthouse Performance Budget            | موازِن أداء LHCI على الموقع المبنى                                           |
 
-محليًا: `npm run ci` (lint + typecheck + test:all) و`npm run test:e2e`.
+توجد وظيفتان إضافيتان في workflow: **Lighthouse Mobile** و**Playwright E2E**.
+
+للمراجعة المحلية، ابدأ بالبناء لمزامنة بيانات الكتالوج المولّدة:
+
+```bash
+npm run build
+npm run ci
+npx playwright install --with-deps chromium
+npm run test:e2e -- --workers=1
+npm audit --audit-level=high
+```
+
+`npm run ci` لا يشغّل Playwright أو Lighthouse أو فحص روابط المصادر الخارجية.
+فحص حيوية الروابط منفصل عبر `npm run check-source-links`.
+الأمر `npm run test:sources -- <article-slug>` مخصص للتحقق من مقال جديد،
+ويحتاج تحديد المقال وإعداد الخدمة؛ ليس اختبارًا عامًا للكتالوج.
 
 ---
 
 ## الإصدار الحالي وسلوك التحميل
 
-**الإصدار 2.3.3 · الكاش 106 · آخر مراجعة للتوثيق 2026-10-31.**
+**الإصدار 2.3.3 · الكاش 106. التوثيق متزامن مع تحديث الكتالوج وأجهزة الرئيسية الحالي.**
 
 - الإصدار في `package.json` و`package-lock.json`، ورقم الكاش في
   `config/cache-version.json` ويُستهلك عبر `CACHE_VERSION`.
@@ -297,6 +312,15 @@ Elysr/
   الملفات صور نقطية وليست SVG أصلية.
 - الإضافات الأخيرة: استعادة أوفر تايم، تري فورس 30 كبسولة، سياليس 20 مجم
   عبوة 4 أقراص، وبينك شوت 30 مل. رابط سياليس 30 قرصًا لم يتغير.
+
+### الأسعار الحالية واختيار أجهزة الرئيسية
+
+- المضخة اليدوية `d-03` / `manual-ved-pump`: **800 جنيه**؛ يجب مزامنة السعر المكتوب داخل الوصف. الأسئلة الشائعة والميتا والخلاصة وكتالوج الخادم تعتمد على مصدر البيانات.
+- سوتارا `m-31`: **400 جنيه**؛ كريفا `m-60`: **300 جنيه**.
+- الأجهزة الثلاثة في قسم الرئيسية: **SAWFT (`d-05`)**، **كونسا (`d-07`)**، **الرقمية 9 سرعات (`d-08`)**. المصدر المشترك للواجهة وHTML المولّد هو `HOMEPAGE_CONCERN_CANDIDATES` في `src/data/products.ts`.
+- جهاز بيج برو للصدر `d-04` مستبعد من جميع أقسام منتجات الرئيسية عبر `HOMEPAGE_EXCLUDED_PRODUCT_IDS`، لكنه باقٍ في صفحة الأجهزة والكتالوج.
+- كريفا تحتفظ بوصف وميتا 17 أغسطس، مع السعر والمخزون الحاليين ونموذج مراجعات بإشراف، دون إعادة التقييمات التاريخية.
+- البناء يزامن ملفات Feed وAPI؛ راجع فروقها قبل النشر بموافقة المالك. نجاح النشر لا يضمن الفهرسة أو قبول Merchant.
 
 ### خطوات إصدار آمن
 
@@ -323,12 +347,12 @@ Elysr/
 
 ### Vercel (الأساسي)
 
-CI/CD تلقائي على كل push إلى `main`:
+CI/CD تلقائي على كل push إلى `main`، وترتيب `npm run build` هو:
 
-1. `vite build` → `dist/` محسّن ومقسّم
-2. `generate-sitemap.mjs` → sitemaps (273) + robots + security.txt + landing JSON
-3. `prerender-seo.mjs` → 277 صفحة مولّدة بـ SEO meta + JSON-LD كامل
-4. Vercel يقدّم `dist/` من Edge CDN مع 12 مجموعة headers أمان + 182 redirect
+1. `prebuild` يشغّل `generate-sitemap.mjs`: خرائط الموقع (281 رابطًا)، والخلاصات، وكتالوج API، وملفات robots/security وlanding JSON.
+2. `vite build` يبني `dist/` ويقسّم الحزم.
+3. `prerender-seo.mjs` يولّد 285 صفحة، ثم `inject-critical-css.mjs` يحقن CSS الحرج.
+4. Vercel يقدّم `dist/` مع 12 مجموعة headers و174 تحويلًا دائمًا.
 
 بعد النشر: قدّمي `sitemap-index.xml` + `sitemap-images.xml` في Google Search Console
 واتفقي GA4 DebugView (المحمّل مؤجل 2ث + أول تفاعل مع `send_page_view:false`، والتطبيق
