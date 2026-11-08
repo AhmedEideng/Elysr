@@ -49,7 +49,7 @@
 | 🛍️ كتالوج التجار    | **81** منتجًا (RSS + CSV + TXT) مع `product_type` لكل منتج                                                                                                       |
 | ↪️ Redirects        | **174** تحويلًا دائمًا (HTTP 308 على Vercel) (معرّفات قديمة + منتجات محذوفة + slugs معاد تسميتها + 404s اللي طلعت من GSC)                                        |
 | 🖼️ الصور            | 147 صورة WebP أساسية + 266 مصغّرة عبر 3 مقاسات                                                                                                                   |
-| 🧪 الاختبارات       | **380** وحدة (Vitest) + **47** E2E (Playwright) + data-integrity + schema validation                                                                             |
+| 🧪 الاختبارات       | **380** وحدة (Vitest) + **48** E2E (Playwright) + data-integrity + schema validation                                                                             |
 
 ---
 
@@ -91,7 +91,7 @@
 | Routing    | TanStack Router (file-based، 25 ملف مسار)                                                                                              |
 | Styling    | Tailwind CSS 4 (ألوان Oklch، RTL كامل)                                                                                                 |
 | البحث      | Fuse.js (fuzzy، تحميل كسول) + مرادفات اللهجة المصرية (نقط ⇄ قطرات)                                                                     |
-| الاختبارات | Vitest (380) + Playwright (47 E2E) + data-integrity + JSON-LD validator                                                                |
+| الاختبارات | Vitest (380) + Playwright (48 E2E) + data-integrity + JSON-LD validator                                                                |
 | الاستضافة  | Vercel Edge CDN (أساسي) · Express + Docker (نشر ذاتي مدعوم)                                                                            |
 | الطلبات    | Google Apps Script → Google Sheets (ScriptLock + فحص تكرار كامل + هواتف دولية)                                                         |
 | SEO        | 285 صفحة مولّدة · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                                   |

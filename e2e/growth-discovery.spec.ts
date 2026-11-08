@@ -55,6 +55,7 @@ for (const category of ["men", "women", "devices"]) {
       .locator('[data-catalog-results] a[href^="/products/"]')
       .evaluateAll((links) => links.map((a) => a.getAttribute("href")));
     await page.getByLabel("ترتيب المنتجات", { exact: true }).selectOption("price-asc");
+    await page.getByRole("button", { name: "تحديد السعر", exact: true }).click();
     await page.getByLabel("السعر إلى", { exact: true }).fill("1000");
     await expect
       .poll(async () => {
@@ -129,6 +130,7 @@ test("mobile filters recover from an empty range without horizontal overflow", a
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/products/men");
   await page.getByLabel("نوع المنتج", { exact: true }).selectOption("spray");
+  await page.getByRole("button", { name: "تحديد السعر", exact: true }).click();
   await page.getByLabel("السعر من", { exact: true }).fill("1000");
   await page.getByLabel("السعر إلى", { exact: true }).fill("1");
   await expect(
@@ -139,4 +141,31 @@ test("mobile filters recover from an empty range without horizontal overflow", a
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),
   ).toBe(true);
+});
+
+test("compact catalog toolbar keeps price controls optional and keyboard accessible", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/products/women");
+  const toolbar = page.locator("[data-catalog-toolbar]");
+  await expect(toolbar).toBeVisible();
+  expect((await toolbar.boundingBox())!.height).toBeLessThan(140);
+  await expect(page.getByLabel("السعر من", { exact: true })).toHaveCount(0);
+  await expect(toolbar).not.toContainText("توصية علاجية");
+  await expect(toolbar.getByRole("link")).toHaveCount(0);
+  const price = page.getByRole("button", { name: "تحديد السعر", exact: true });
+  await price.click();
+  await expect(price).toHaveAttribute("aria-expanded", "true");
+  await page.getByLabel("السعر من", { exact: true }).fill("200");
+  await page.keyboard.press("Escape");
+  await expect(price).toBeFocused();
+  await expect(price).toHaveAttribute("aria-expanded", "false");
+  await price.click();
+  await expect(page.getByLabel("السعر من", { exact: true })).toHaveValue("200");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole("heading", { level: 1 }).click();
+  await expect(price).toHaveAttribute("aria-expanded", "false");
+  await page.getByRole("button", { name: "مسح الفلاتر", exact: true }).click();
+  await expect(page.getByRole("button", { name: "مسح الفلاتر", exact: true })).toHaveCount(0);
 });

@@ -52,7 +52,7 @@ flow through the same webhook into a moderated reviews sheet.
 | Catalog feed       | **81** items (Google Shopping RSS/CSV/TXT, price + availability + `product_type` per product)                                                                                   |
 | Redirects          | **174** permanent redirects (HTTP 308 on Vercel) (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                                                         |
 | Images             | 147 source WebP + 266 thumbnails across three sizes                                                                                                                             |
-| Tests              | **380** unit (Vitest) + **47** E2E (Playwright) + data-integrity + schema validation                                                                                            |
+| Tests              | **380** unit (Vitest) + **48** E2E (Playwright) + data-integrity + schema validation                                                                                            |
 
 ---
 
@@ -109,7 +109,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 | Routing   | TanStack Router (file-based, 25 route modules)                                                                              |
 | Styling   | Tailwind CSS 4 (Oklch colors, full RTL)                                                                                     |
 | Search    | Fuse.js (fuzzy, lazy-loaded) + Egyptian dialect synonyms (نقط ⇄ قطرات)                                                      |
-| Tests     | Vitest (380 unit) + Playwright (47 E2E) + data-integrity + JSON-LD schema validator                                         |
+| Tests     | Vitest (380 unit) + Playwright (48 E2E) + data-integrity + JSON-LD schema validator                                         |
 | Hosting   | Vercel Edge CDN (primary) · self-hosted Express + Docker (supported)                                                        |
 | Orders    | Google Apps Script → Google Sheets (ScriptLock, full duplicate scan, intl phones)                                           |
 | SEO       | 285 pre-rendered pages · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                 |
