@@ -169,7 +169,7 @@
       <g:identifier_exists>no</g:identifier_exists>
       <g:condition>new</g:condition>
       <g:availability>in stock</g:availability>
-      <g:price>180 EGP</g:price>
+      <g:price>200 EGP</g:price>
       <g:google_product_category>4748</g:google_product_category>
       <g:product_type>منتجات الرجال &gt; شوكولاتة وعلكات</g:product_type>
     </item>
@@ -952,6 +952,19 @@
       <g:price>300 EGP</g:price>
       <g:google_product_category>525</g:google_product_category>
       <g:product_type>منتجات النساء &gt; مكملات فموية</g:product_type>
+    </item>
+    <item>
+      <g:id>w-26</g:id>
+      <g:title>شوكولاتة هيلتي الداكنة للنساء (HILTI) — 50 جم</g:title>
+      <g:description>اختاري لمسة مختلفة مع شوكولاتة هيلتي الداكنة للنساء (HILTI Bitter Chocolate)، بعبوتها الوردية المميزة ووزنها 50 جم. اختيار لمحبات الشوكولاتة الداكنة يجمع الشكل الأنيق مع عبوة يسهل التعرف عليها عند إعادة الطلب. النسخة النسائية المعروضة بالصورة متاحة بسعر 200 جنيه للعبوة؛ أضيفيها إلى سلتك وأكملي طلبك بخطوات بسيطة. يصلك طلبك بتغليف خارجي محايد يحافظ على خصوصيتك، مع الدفع عند الاستلام وتكلفة شحن واضحة حسب المحافظة.</g:description>
+      <g:link>https://elysrmedical.store/products/hilti-bitter-chocolate-for-women</g:link>
+      <g:image_link>https://elysrmedical.store/images/hilti-bitter-chocolate-for-women.webp?v=106</g:image_link>
+      <g:identifier_exists>no</g:identifier_exists>
+      <g:condition>new</g:condition>
+      <g:availability>in stock</g:availability>
+      <g:price>200 EGP</g:price>
+      <g:google_product_category>4748</g:google_product_category>
+      <g:product_type>منتجات النساء &gt; شوكولاتة وعلكات</g:product_type>
     </item>
     <item>
       <g:id>d-01</g:id>

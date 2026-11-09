@@ -12,6 +12,7 @@ export type ProductMetaProfile = {
 };
 
 export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
+  "w-26": { form: "oral", hook: "شوكولاتة هيلتي الداكنة للنساء بعبوة وردية 50 جم" },
   "m-08": { form: "oral", hook: "5 كروت × قرصين، إجمالي 10 أقراص للعلبة" },
   "m-63": { form: "oral", hook: "30 كبسولة بمستخلصات نباتية وزنك وفيتاميني B6 وB12" },
   "m-64": { form: "oral", hook: "4 أقراص مغلفة، تادالافيل 20 مجم لكل قرص" },

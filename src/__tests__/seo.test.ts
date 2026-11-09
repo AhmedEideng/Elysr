@@ -155,7 +155,7 @@ describe("product metadata templates", () => {
   });
 
   it("includes a raw first-benefit excerpt except for the approved Kreva historical meta", () => {
-    expect(products).toHaveLength(88);
+    expect(products).toHaveLength(89);
 
     for (const catalogProduct of products.filter((p) => p.id !== "m-60")) {
       const rawBenefit = catalogProduct.benefits?.[0]?.trim().replace(/\s+/g, " ");

@@ -62,11 +62,29 @@ const KREVA_AUGUST_17_FAQS: ProductFAQ[] = [
 /** Shared by React and prerender; catalog prices must never be copied by hand. */
 export function getProductFAQs(product: { id: string; price: number }): ProductFAQ[] {
   const specific = PRODUCT_FAQ_BUILDERS[product.id];
-  if (specific) return [...specific(product.price), ...productFAQs];
+  if (specific) {
+    // Do not attach a blanket authenticity claim to the new owner-supplied listing.
+    const shared =
+      product.id === "w-26"
+        ? productFAQs.filter((faq) => faq.question !== "هل المنتجات أصلية؟")
+        : productFAQs;
+    return [...specific(product.price), ...shared];
+  }
   return product.id === "m-60" ? KREVA_AUGUST_17_FAQS : productFAQs;
 }
 
 const PRODUCT_FAQ_BUILDERS: Record<string, (price: number) => ProductFAQ[]> = {
+  "w-26": (price) => [
+    {
+      question: "ما سعر شوكولاتة هيلتي للنساء وحجم العبوة؟",
+      answer: `السعر ${price} جنيه للعبوة الوردية بوزن 50 جم. السعر للعبوة كاملة، وتُحسب تكلفة الشحن حسب المحافظة عند إتمام الطلب.`,
+    },
+    {
+      question: "كيف أميّز النسخة النسائية المعروضة؟",
+      answer:
+        "المنتج المعروض هو شوكولاتة HILTI Bitter Chocolate في العبوة الوردية الظاهرة بالصورة، والمكتوب عليها 50 Gram. له صفحة مستقلة عن نسخة الرجال.",
+    },
+  ],
   "w-25": (price) => [
     {
       question: "ما سعر بينك شوت وحجم الزجاجة؟",

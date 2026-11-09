@@ -247,6 +247,7 @@ function pickVariedBundleSuggestions(product: Product, preferredIds: string[] = 
     (candidate) =>
       candidate.category === product.category &&
       candidate.id !== product.id &&
+      candidate.id !== "w-26" &&
       candidate.stock > 0 &&
       !getOralSolidForm(candidate) &&
       !preferredIdsSet.has(candidate.id),
@@ -300,6 +301,9 @@ function pickVariedBundleSuggestions(product: Product, preferredIds: string[] = 
 
 /** محرك البيع المتقاطع (Cross Sell Engine) */
 export const getCrossSellsForProduct = (product: Product): Product[] => {
+  // Preserve the owner-approved existing bundles; new HILTI women is sold separately
+  // until complementary bundle alternatives are approved.
+  if (product.id === "w-26") return [];
   // أي cross-sell يدوي يظل له الأولوية، ثم نكمله تلقائياً حتى تصبح الباقة 3 منتجات.
   // الاقتراحات الفموية الصلبة تُستبعد هنا عمداً حتى لا تختلط الأقراص بالكبسولات.
   return pickVariedBundleSuggestions(product, product.crossSell ?? []);

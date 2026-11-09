@@ -282,7 +282,7 @@ try {
     }
   }
 
-  assert.equal(products.length, 88, "Expected 88 products including Pink Shot (w-25)");
+  assert.equal(products.length, 89, "Expected 89 products including HILTI women (w-26)");
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
   const cialisFour = products.find((p) => p.id === "m-64");
   assert.equal(cialisFour?.slug, "cialis-tadalafil-20mg-4-tablets");
@@ -531,8 +531,8 @@ try {
   }, {});
   assert.deepEqual(
     categories,
-    { men: 56, women: 24, devices: 8 },
-    "Unexpected category split (88 = 56 men / 24 women / 8 devices)",
+    { men: 56, women: 25, devices: 8 },
+    "Unexpected category split (89 = 56 men / 25 women / 8 devices)",
   );
 
   // (2026-09-15) JSON-LD OfferCatalog في index.html لازم يطابق كتالوج

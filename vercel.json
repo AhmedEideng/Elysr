@@ -1071,6 +1071,11 @@
       "source": "/products/w-25",
       "destination": "/products/provocative-pink-shot-30ml",
       "permanent": true
+    },
+    {
+      "source": "/products/w-26",
+      "destination": "/products/hilti-bitter-chocolate-for-women",
+      "permanent": true
     }
   ]
 }
