@@ -13,7 +13,9 @@ test("HILTI women is discoverable, has working responsive images and a 200 EGP o
   const slug = "hilti-bitter-chocolate-for-women";
   const response = await request.get(`/products/${slug}`);
   expect(response.status()).toBe(200);
-  expect(await response.text()).toContain("شوكولاتة هيلتي");
+  const html = await response.text();
+  expect(html).toContain("ليست كل اللحظات الجميلة بحاجة إلى مناسبة");
+  expect(html).toContain("الإبيميديوم (عشبة العنزة)");
   await page.goto("/products/women");
   await page.getByLabel("نوع المنتج", { exact: true }).selectOption("chocolate");
   const cardLink = page.locator(`[data-catalog-results] a[href="/products/${slug}"]`).first();
@@ -32,6 +34,13 @@ test("HILTI women is discoverable, has working responsive images and a 200 EGP o
   const schema = JSON.parse((await page.locator("script#ldjson-product").textContent())!);
   expect(Number(schema.offers.price)).toBe(200);
   expect(schema.aggregateRating).toBeUndefined();
+  await expect(page.getByText("المكونات / التركيبة", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("الإبيميديوم (عشبة العنزة)، مستخلص الجينسنغ، كاكاو طبيعي، نكهات طبيعية.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.getByText(/ليست كل اللحظات الجميلة بحاجة إلى مناسبة/).first()).toBeVisible();
   const hero = page.locator('img[fetchpriority="high"]').first();
   await expect
     .poll(() => hero.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth === 800))

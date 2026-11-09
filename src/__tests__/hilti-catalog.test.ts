@@ -22,7 +22,11 @@ describe("owner-approved HILTI catalogue update", () => {
     expect(getBundleProductType(women)).toBe("chocolate");
     expect(women).not.toHaveProperty("rating");
     expect(women).not.toHaveProperty("reviews");
-    expect(women).not.toHaveProperty("ingredients");
+    expect(women.ingredients).toBe(
+      "الإبيميديوم (عشبة العنزة)، مستخلص الجينسنغ، كاكاو طبيعي، نكهات طبيعية.",
+    );
+    expect(women.description).toContain("ليست كل اللحظات الجميلة بحاجة إلى مناسبة");
+    expect(women.description).not.toMatch(/200|أضيفي|سلتك|المصدر|المتجر/);
     expect(women).not.toHaveProperty("gtin");
   });
   it("changes the men's price without changing its URL or stock", () => {

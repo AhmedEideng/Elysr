@@ -47,11 +47,19 @@
 | 📄 الصفحات المولّدة | **286** (16 ثابتة + 89 صفحة منتج + 64 مقالًا + 113 دليلًا + 4 صفحات إنجليزية)                                                                                    |
 | 🗺️ روابط sitemap    | **282** (البحث الشامل مشمول عبر `SearchAction` في JSON-LD، مش قالب sitemap)                                                                                      |
 | 🛍️ كتالوج التجار    | **82** منتجًا (RSS + CSV + TXT) مع `product_type` لكل منتج                                                                                                       |
-| ↪️ Redirects        | **174** تحويلًا دائمًا (HTTP 308 على Vercel) (معرّفات قديمة + منتجات محذوفة + slugs معاد تسميتها + 404s اللي طلعت من GSC)                                        |
-| 🖼️ الصور            | 147 صورة WebP أساسية + 266 مصغّرة عبر 3 مقاسات                                                                                                                   |
+| ↪️ Redirects        | **175** تحويلًا دائمًا (HTTP 308 على Vercel) (معرّفات قديمة + منتجات محذوفة + slugs معاد تسميتها + 404s اللي طلعت من GSC)                                        |
+| 🖼️ الصور            | 148 صورة WebP أساسية + 269 مصغّرة عبر 3 مقاسات                                                                                                                   |
 | 🧪 الاختبارات       | **387** وحدة (Vitest) + **50** E2E (Playwright) + data-integrity + schema validation                                                                             |
 
 ---
+
+## تحديث هيلتي والوصف المعتمد
+
+- هيلتي النسائي (`w-26`، `/products/hilti-bitter-chocolate-for-women`): **200 جنيه**، مخزون **300 عبوة**، وعبوة وردية **50 جم**. سعر الرجالي (`m-15`) يظل **200 جنيه**.
+- الوصف المعتمد «غيّري الروتين بطريقتك» يظهر بفقرات، دون سعر أو دعوة للإضافة للسلة أو ذكر المصدر والمتجر داخل النص التسويقي.
+- قسم **المكونات / التركيبة** منفصل: الإبيميديوم (عشبة العنزة)، مستخلص الجينسنغ، كاكاو طبيعي ونكهات طبيعية. اعتمد المالك [صفحة Beauty Expert](https://beauty-exprt.com/products/شوكولاتة-هيلتي-للسيدات?variant=46709814001822) مصدرًا للأسماء؛ هذا ليس اعتماد مصنع أو تحققًا معمليًا مستقلًا. لم تُنقل تراكيز أو جرعة جديدة أو عدد 10 قطع أو وعود هرمونية أو ضمانات سلامة.
+- الصور تبقى **WebP بمقاسات 800 و480 و360 و240 بكسل**. لا تغيير للرابط أو السعر أو المخزون أو احتياطات الاستخدام أو الباقات أو اختيارات الرئيسية أو إصدار الكاش ضمن تعديل الوصف.
+- تتزامن صفحة المنتج وكتالوج API وملفات الفيد عند البناء، دون إرسال إلى Merchant Center أو تغيير لحساب خارجي. تفاصيل المصدر وتأكيد المالك السابق لهوية المنتج موثقة في [ملاحظات التشغيل](docs/organic-growth-operations.ar.md#11-متابعة-وصف-هيلتي-النسائي-وقسم-المكونات).
 
 ## 🏗️ البنية
 
@@ -136,7 +144,7 @@ npm run dev              # → http://localhost:8080
 | `npm start` / `start:dev`      | تشغيل الخادم الذاتي (إنتاج / watch)                    |
 | `npm run test`                 | حارس data-integrity (كتالوج، metadata، شبكة redirects) |
 | `npm run test:unit`            | اختبارات Vitest + أمان الـ API (387)                   |
-| `npm run test:e2e`             | باقة Playwright E2E (47)                               |
+| `npm run test:e2e`             | باقة Playwright E2E (50)                               |
 | `npm run test:schemas`         | مجرّب JSON-LD لكل صفحة مولّدة                          |
 | `npm run test:sources`         | فحص متطلبات المصادر للمقالات الجديدة                   |
 | `npm run test:all`             | integrity + unit + build + schemas + health-check      |
@@ -246,17 +254,17 @@ Elysr/
 ├── server/index.js           # خادم Express للنشر الذاتي (نفس dist/ + نفس الـ API)
 ├── .github/workflows/ci.yml  # 7 وظائف CI (أدناه)
 ├── public/
-│   ├── images/               # 147 WebP أساسية + 266 مصغّرة في thumbs/ وthumbs-180/ وthumbs-120/
+│   ├── images/               # 148 WebP أساسية + 269 مصغّرة في thumbs/ وthumbs-180/ وthumbs-120/
 │   ├── landing-pages/        # 113 JSON لكل slug (مصدر بيانات وقت التشغيل)
 │   ├── sitemap.xml           # 282 رابط
-│   ├── sitemap-images.xml    # 152 رابط صورة
+│   ├── sitemap-images.xml    # 153 رابط صورة
 │   ├── sitemap-index.xml
 │   ├── sw.js                 # kill-switch هجرة PWA (يلغي نفسه، network-only)
 │   ├── scripts/ga-loader.js  # تحميل GA4 مؤجل (2ث + تفاعل، send_page_view:false)
 │   └── .well-known/security.txt
 ├── google-apps-script.gs     # الـ webhook: طلبات + مراجعات + تحقق HMAC + سر كتابة
 │                             # + دالة trigger التنظيف اليومي (setupAutoCleanupTrigger)
-├── vercel.json               # 12 مجموعة headers أمان + 174 redirect + rewrites
+├── vercel.json               # 12 مجموعة headers أمان + 175 redirect + rewrites
 ├── Dockerfile · docker-compose.yml
 ├── SECURITY.md · CHANGELOG.md · ANALYSIS.md
 └── index.html

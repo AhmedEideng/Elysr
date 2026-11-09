@@ -50,11 +50,19 @@ flow through the same webhook into a moderated reviews sheet.
 | Pre-rendered pages | **286** (16 static + 89 product routes + 64 articles + 113 guides + 4 English pages)                                                                                            |
 | Sitemap URLs       | **282** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)                                                                                     |
 | Catalog feed       | **82** items (Google Shopping RSS/CSV/TXT, price + availability + `product_type` per product)                                                                                   |
-| Redirects          | **174** permanent redirects (HTTP 308 on Vercel) (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                                                         |
-| Images             | 147 source WebP + 266 thumbnails across three sizes                                                                                                                             |
+| Redirects          | **175** permanent redirects (HTTP 308 on Vercel) (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                                                         |
+| Images             | 148 source WebP + 269 thumbnails across three sizes                                                                                                                             |
 | Tests              | **387** unit (Vitest) + **50** E2E (Playwright) + data-integrity + schema validation                                                                                            |
 
 ---
+
+## HILTI catalogue and approved copy
+
+- Women's HILTI (`w-26`, `/products/hilti-bitter-chocolate-for-women`): **200 EGP**, stock **300**, pink **50 g** packaging; men's HILTI (`m-15`) remains **200 EGP**.
+- The owner-approved “غيّري الروتين بطريقتك” description is displayed in paragraphs without a price, add-to-cart call to action, or retailer attribution inside the marketing copy.
+- The separate **Ingredients / composition** section lists epimedium, ginseng extract, natural cocoa and natural flavours. The owner selected the [Beauty Expert listing](https://beauty-exprt.com/products/شوكولاتة-هيلتي-للسيدات?variant=46709814001822) as the source; this is retailer-sourced information, not independent manufacturer or laboratory verification. No concentrations, new dosage, ten-piece pack count or hormonal/safety guarantees were adopted.
+- Image sizes remain **800 / 480 / 360 / 240 px WebP**. Product URL, stock, usage precautions, existing bundles, homepage selections and cache version are unchanged by this copy revision.
+- Build output synchronizes the product page, API catalogue and feed files; no Merchant Center submission or account change is performed. Source history and the owner's earlier product-identity confirmation are recorded in [the operating notes](docs/organic-growth-operations.ar.md#11-متابعة-وصف-هيلتي-النسائي-وقسم-المكونات).
 
 ## Architecture
 
@@ -184,22 +192,25 @@ the same API handlers — identical behavior, no Vercel dependency.
 │   ├── checkout.spec.ts        # 24 E2E tests: checkout, search, reviews, prices, 404s
 │   ├── restored-content.spec.ts # 9 restored-content checks
 │   ├── kreva-august-restoration.spec.ts # 2 mobile/desktop content + review-form checks
-│   └── homepage-devices.spec.ts # 3 homepage selection + pump-price checks
+│   ├── homepage-devices.spec.ts # 3 homepage selection + pump-price checks
+│   ├── organic-growth.spec.ts  # 3 guide/content checks
+│   ├── growth-discovery.spec.ts # 7 search/filter/checkout measurement checks
+│   └── hilti-catalog.spec.ts   # 2 HILTI copy/ingredients/image/search/cart checks
 ├── server/
 │   └── index.js                # Self-hosted Express server (same dist/ + same API handlers)
 ├── .github/workflows/ci.yml    # 7 CI jobs (see Testing & CI)
 ├── public/
-│   ├── images/                 # 147 source WebP + 266 thumbnails in thumbs/, thumbs-180/, and thumbs-120/
+│   ├── images/                 # 148 source WebP + 269 thumbnails in thumbs/, thumbs-180/, and thumbs-120/
 │   ├── landing-pages/          # 113 per-slug JSON (runtime data source for guide pages)
 │   ├── sitemap.xml             # 282 URLs
-│   ├── sitemap-images.xml      # 152 image URLs
+│   ├── sitemap-images.xml      # 153 image URLs
 │   ├── sitemap-index.xml       # Sitemap index
 │   ├── sw.js                   # PWA migration kill-switch (self-unregistering, network-only)
 │   ├── scripts/ga-loader.js    # Delayed GA4 loader (2s + interaction, send_page_view:false)
 │   └── .well-known/security.txt # RFC 9116 security policy
 ├── google-apps-script.gs       # Webhook: orders + reviews + HMAC verification +
 │                               # write-secret gate + daily auto-cleanup trigger helper
-├── vercel.json                 # 12 security header sets + 174 redirects + rewrites
+├── vercel.json                 # 12 security header sets + 175 redirects + rewrites
 ├── Dockerfile / docker-compose.yml
 ├── SECURITY.md · CHANGELOG.md · ANALYSIS.md
 └── index.html                  # SPA shell with SEO meta + delayed GA loader
@@ -291,7 +302,7 @@ writing an order.
 | `npm start` / `start:dev`      | Run the self-hosted server (production / watch)          |
 | `npm run test`                 | Data-integrity guard (catalog, metadata, redirect graph) |
 | `npm run test:unit`            | Vitest unit + API security tests (387)                   |
-| `npm run test:e2e`             | Playwright E2E suite (47)                                |
+| `npm run test:e2e`             | Playwright E2E suite (50)                                |
 | `npm run test:schemas`         | JSON-LD validator over every pre-rendered page           |
 | `npm run test:sources`         | New-article claim→source support check                   |
 | `npm run test:all`             | integrity + unit + build + schemas + health-check        |
@@ -461,7 +472,7 @@ Automatic CI/CD on every push to `main`. The build pipeline:
 3. `prerender-seo.mjs` → 286 pre-rendered pages with full SEO meta + JSON-LD;
    `inject-critical-css.mjs` injects critical CSS afterward.
 4. Vercel serves `dist/` from the Edge CDN with 12 security header sets
-   (HSTS, CSP, COOP, Report-To, NEL, …) + 174 legacy redirects
+   (HSTS, CSP, COOP, Report-To, NEL, …) + 175 legacy redirects
 
 After deploying: submit `sitemap-index.xml` + `sitemap-images.xml` in Google Search
 Console and check GA4 DebugView for accurate tracking (the GA loader is delayed by
