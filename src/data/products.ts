@@ -215,7 +215,7 @@ export const getBundleProductType = (
   if (/شيكول|شوكول|chocolate/.test(text)) return "chocolate";
   if (/بخاخ|spray/.test(text)) return "spray";
   if (/قطر|قطرات|drops/.test(text)) return "drops";
-  if (/علك|gum/.test(text)) return "gum";
+  if (/علك|لبان|gum/.test(text)) return "gum";
   if (/مناديل|wipes/.test(text)) return "wipes";
   if (/أكياس|sachet/.test(text)) return "sachet";
   if (/قهوة|coffee/.test(text)) return "coffee";
@@ -248,6 +248,8 @@ function pickVariedBundleSuggestions(product: Product, preferredIds: string[] = 
       candidate.category === product.category &&
       candidate.id !== product.id &&
       candidate.id !== "w-26" &&
+      // Marcin's form correction must not reshuffle the approved bundle pool.
+      candidate.id !== "w-21" &&
       candidate.stock > 0 &&
       !getOralSolidForm(candidate) &&
       !preferredIdsSet.has(candidate.id),

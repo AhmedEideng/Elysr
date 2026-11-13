@@ -90,7 +90,7 @@ export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "w-18": { form: "oral", hook: "قطرات فموية تذوب في المشروبات قبل العلاقة بـ60 دقيقة" },
   "w-19": { form: "oral", hook: "شوكولاتة داكنة بتركيبة عشبية" },
   "w-20": { form: "topical", hook: "كريم بحمض الهيالورونيك والكولاجين" },
-  "w-21": { form: "oral", hook: "أقراص فموية للنساء بنكهة الكرز" },
+  "w-21": { form: "oral", hook: "لبان للمضغ للنساء بنكهة الكرز" },
   "w-22": { form: "oral", hook: "عبوة 10 أقراص من إصدار Lovezone 380mg" },
   "w-23": { form: "topical", hook: "مناديل نسائية فردية للاستخدام الخارجي" },
   "d-01": { form: "device", hook: "مضخة رقمية بشاشة LCD وملحقات" },

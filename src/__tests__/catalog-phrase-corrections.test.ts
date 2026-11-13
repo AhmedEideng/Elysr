@@ -20,7 +20,7 @@ describe("phrase-only catalog corrections", () => {
       ),
     );
     expect(createHash("sha256").update(JSON.stringify(fields)).digest("hex")).toBe(
-      "9593c419affc3b82798499429f220da3c12ba071b8fdc796d000e97b589bb57d",
+      "f8e45dcd75e8fbc5491ec49b6c08bad2b6640a26989824914e64ae5e8b541dcf",
     );
   });
   it("corrects discrete ingredient and language errors without removing the original descriptions", () => {
