@@ -550,6 +550,13 @@ const usageForms = {
 // (Round 9) ادعاءات غير قابلة للتحقق + كليشيهات تسويقية + جُمل طويلة:
 // «الأكثر مبيعًا/شهرة»، «أقوى»، «أسطوري»، «ببراعة علمية»… نصوص بتضعف المصداقية
 // وتُخالف سياسة «لا ندّعي ما لا نتحقق منه»، وبتظهر كصفحات متشابهة في SERP.
+const MEDICAL_SAFETY_CLAIM = [
+  "الخيار الطبي",
+  "طبي آمن",
+  "آمن تمام",
+  "مضمون النتيجة",
+  "يفوق التوقعات",
+];
 const UNVERIFIABLE = [
   "الأكثر مبيعاً",
   "الأكثر مبيعا",
@@ -599,6 +606,9 @@ for (const p of products) {
   if (/المكونات:|طريقة الاستخدام:/.test(p.description || ""))
     add("error", "copy-info-box-duplicate", p.id, "الوصف يعيد المكونات/طريقة الاستخدام");
   // ادعاءات غير قابلة للتحقق + كليشيهات + جمل طويلة
+  for (const phrase of MEDICAL_SAFETY_CLAIM)
+    if (String(p.description || "").includes(phrase))
+      add("error", "copy-unverified-claim", p.id, `«${phrase}»`);
   for (const phrase of UNVERIFIABLE)
     if (String(p.description || "").includes(phrase))
       add("error", "copy-unverified-claim", p.id, `«${phrase}»`);
