@@ -547,6 +547,34 @@ const usageForms = {
   sachet: /كيس|مغلف/,
   device: /جهاز|مضخة/,
 };
+// (Round 9) ادعاءات غير قابلة للتحقق + كليشيهات تسويقية + جُمل طويلة:
+// «الأكثر مبيعًا/شهرة»، «أقوى»، «أسطوري»، «ببراعة علمية»… نصوص بتضعف المصداقية
+// وتُخالف سياسة «لا ندّعي ما لا نتحقق منه»، وبتظهر كصفحات متشابهة في SERP.
+const UNVERIFIABLE = [
+  "الأكثر مبيعاً",
+  "الأكثر مبيعا",
+  "الأسرع مبيعاً",
+  "الأكثر شهرة",
+  "الأكثر تطوراً",
+  "الأكثر قوة",
+  "الأكثر اعتماداً",
+  "الأكثر طلباً",
+  "الأرقى",
+  "أقوى",
+  "أسطوري",
+  "الأسطورية",
+  "مذهل",
+  "معجزة",
+  "خارق",
+];
+const CLICHES = [
+  "ببراعة علمية",
+  "بمعايير سلامة",
+  "بعناية فائقة",
+  "تفوق التوقعات",
+  "في قالب آمن",
+  "مثبت علميًا",
+];
 const usageOwners = new Map();
 const ingredientOwners = new Map();
 for (const p of products) {
@@ -570,6 +598,19 @@ for (const p of products) {
   // تكرار صندوق المعلومات داخل الوصف (المكوّنات/الاستخدام تظهران تلقائيًا)
   if (/المكونات:|طريقة الاستخدام:/.test(p.description || ""))
     add("error", "copy-info-box-duplicate", p.id, "الوصف يعيد المكونات/طريقة الاستخدام");
+  // ادعاءات غير قابلة للتحقق + كليشيهات + جمل طويلة
+  for (const phrase of UNVERIFIABLE)
+    if (String(p.description || "").includes(phrase))
+      add("error", "copy-unverified-claim", p.id, `«${phrase}»`);
+  for (const phrase of CLICHES)
+    if (String(p.description || "").includes(phrase))
+      add("warn", "copy-cliche", p.id, `«${phrase}»`);
+  const longSentence = String(p.description || "")
+    .split(/(?<=[.!?])\s+/)
+    .map((sentence) => sentence.trim().split(/\s+/).filter(Boolean).length)
+    .reduce((max, words) => Math.max(max, words), 0);
+  if (longSentence >= 42) add("warn", "copy-long-sentence", p.id, `${longSentence} كلمة`);
+
   // طريقة الاستخدام لازم تطابق الشكل
   const rx = usageForms[type];
   if (rx && p.usage && !rx.test(p.usage))

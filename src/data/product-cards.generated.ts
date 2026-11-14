@@ -135,8 +135,8 @@ export const productCards: ProductCardView[] = [
     featured: true,
     rating: 4.6,
     reviews: 11,
-    badgeLabel: "تأخير",
-    badgeClass: "bg-indigo-700 text-white",
+    badgeLabel: "تحفيز موضعي",
+    badgeClass: "bg-cyan-700 text-white",
   },
   {
     id: "m-11",
@@ -150,8 +150,8 @@ export const productCards: ProductCardView[] = [
     image: "/images/vitamax-doubleshot-energy-honey.webp",
     rating: 4.5,
     reviews: 15,
-    badgeLabel: "طاقة وحيوية",
-    badgeClass: "bg-amber-400 text-amber-950",
+    badgeLabel: "انتصاب + تأخير",
+    badgeClass: "bg-teal-700 text-white",
   },
   {
     id: "m-12",

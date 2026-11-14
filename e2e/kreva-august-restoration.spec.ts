@@ -2,7 +2,9 @@ import { expect, test } from "@playwright/test";
 
 const path = "/products/kreva-gel-for-men";
 const historicalMeta =
-  "جل كريفا الألماني المتطور للرجال (Kreva Gel 50GM) هو تركيبة جل كريمي متخصصة ثنائية المفعول (ساخن وبارد) مصممة بعناية لدعم الأداء الذكوري والتحكم الكامل في…";
+  // (Round 9) النص تحدّث مع إزالة «الألماني المتطور/بعناية/التحكم الكامل» من
+  // وصف المنتج؛ الحارس باقٍ على نفس الغرض: الميتا ثابتة ومطابقة بعد الريفريش.
+  "جل كريفا للرجال (Kreva Gel 50GM) هو تركيبة جل كريمي متخصصة ثنائية المفعول (ساخن وبارد) لدعم الأداء والتحكم في وقت العلاقة. يجمع زيت Cayenne Oil الذي ينشط…";
 
 for (const width of [390, 1280]) {
   test(`Kreva August restoration stays consistent after refresh at ${width}px`, async ({

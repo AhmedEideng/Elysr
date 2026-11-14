@@ -204,10 +204,13 @@ try {
     );
     // Explicit owner exception: Kreva uses its literal 17 August meta, not
     // the later first-benefit/shipping template. Keep an exact regression guard.
+    // (Round 9) النص اتغيّر مع إزالة «الألماني المتطور/بعناية/التحكم الكامل»
+    // من وصف المنتج (ادعاءات أصل وكليشيهات) — السعر والمخزون والغياب عن
+    // التقييمات كما هي، والغرض من الحارس باقٍ: الميتا مش من القالب.
     if (product.id === "m-60") {
       assert.equal(
         description,
-        "جل كريفا الألماني المتطور للرجال (Kreva Gel 50GM) هو تركيبة جل كريمي متخصصة ثنائية المفعول (ساخن وبارد) مصممة بعناية لدعم الأداء الذكوري والتحكم الكامل في…",
+        "جل كريفا للرجال (Kreva Gel 50GM) هو تركيبة جل كريمي متخصصة ثنائية المفعول (ساخن وبارد) لدعم الأداء والتحكم في وقت العلاقة. يجمع زيت Cayenne Oil الذي ينشط…",
       );
       assert.equal(product.price, 300);
       assert.equal(product.stock, 5000);

@@ -374,3 +374,55 @@ describe("سياسة نسخ المنتجات (Round 8)", () => {
     expect(misses).toEqual([]);
   });
 });
+
+/**
+ * (Round 9 · 2026-11-15) جودة الوصف: لا ادعاءات غير قابلة للتحقق، ولا جُمل
+ * مرهقة. «الأكثر مبيعًا» و«أقوى» و«أسطوري» مش بس بتضعف المصداقية — دي ادعاءات
+ * مش عندنا دليل عليها، والوصف الطويل بجملة واحدة بيصعّب القراءة على الموبايل.
+ */
+describe("جودة أوصاف المنتجات (Round 9)", () => {
+  const UNVERIFIABLE = [
+    "الأكثر مبيعاً",
+    "الأكثر مبيعا",
+    "الأسرع مبيعاً",
+    "الأكثر شهرة",
+    "الأكثر تطوراً",
+    "الأكثر قوة",
+    "الأكثر اعتماداً",
+    "الأرقى",
+    "أقوى",
+    "أسطوري",
+    "الأسطورية",
+    "مذهل",
+  ];
+
+  it("لا ادعاءات تفوّق أو شهرة غير قابلة للتحقق داخل الوصف", () => {
+    const hits = products.flatMap((product) =>
+      UNVERIFIABLE.filter((phrase) => product.description.includes(phrase)).map(
+        (phrase) => `${product.id}: ${phrase}`,
+      ),
+    );
+    expect(hits).toEqual([]);
+  });
+
+  it("لا جملة واحدة أطول من 42 كلمة (قراءة الموبايل)", () => {
+    const long = products
+      .map((product) => {
+        const words = product.description
+          .split(/(?<=[.!?])\s+/)
+          .map((sentence) => sentence.trim().split(/\s+/).filter(Boolean).length);
+        return `${product.id}:${Math.max(...words)}`;
+      })
+      .filter((entry) => Number(entry.split(":")[1]) >= 42);
+    expect(long).toEqual([]);
+  });
+
+  it("كل وصف يذكر شكل المنتج داخل أول 120 حرفًا (مطابقة نية البحث)", () => {
+    const SHAPE =
+      /كبسول|كبسولات|قرص|أقراص|كريم|جل|بخاخ|عسل|معجون|علكة|لبان|قطر|منديل|مناديل|شوكولاتة|قهوة|كيس|أكياس|مغلف|جهاز|مضخة|حقيبة|كروت/;
+    const misses = products
+      .filter((p) => !SHAPE.test(p.description.slice(0, 120)))
+      .map((p) => p.id);
+    expect(misses).toEqual([]);
+  });
+});
