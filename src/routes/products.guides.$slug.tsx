@@ -4,6 +4,7 @@ import { ArrowRight, ShieldCheck, Truck, AlertCircle } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 import { ShareButton } from "@/components/ShareButton";
 import { shareGuideText } from "@/lib/share";
+import { fitSerpTitle } from "@/lib/serp-title";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryFAQ } from "@/components/CategoryFAQ";
 import { TopicHub } from "@/components/TopicHub";
@@ -59,7 +60,12 @@ export const Route = createFileRoute("/products/guides/$slug")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: loaderData?.page.metaTitle },
+      // (2026-11-15 · SEO) نفس محوّل الـ prerender: يطابق <head> بعد الـ hydration.
+      {
+        title: loaderData?.page
+          ? fitSerpTitle(loaderData.page.metaTitle || loaderData.page.title)
+          : undefined,
+      },
       {
         // Same helper/limit as the prerendered guide HTML (155 chars) so the
         // initial document and the hydrated head agree.

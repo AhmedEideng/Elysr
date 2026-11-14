@@ -24,6 +24,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRateLimiter } from "./lib/rate-limiter.js";
 import { getClientIp } from "./lib/request-ip.js";
+import { allowedOrigins } from "./lib/request-guards.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PRODUCTS_DB_PATH = join(__dirname, "lib", "products-db.json");
@@ -45,17 +46,9 @@ function knownProducts() {
   return knownProductIds;
 }
 
-const ALLOWED_ORIGINS = new Set(
-  [
-    "https://elysrmedical.store",
-    "https://www.elysrmedical.store",
-    process.env.SITE_URL,
-    process.env.VERCEL_URL && process.env.VERCEL_ENV !== "production"
-      ? `https://${process.env.VERCEL_URL}`
-      : undefined,
-    process.env.NODE_ENV !== "production" ? "http://localhost:8080" : undefined,
-  ].filter(Boolean),
-);
+// (2026-11-14 · M5) الأصول من المصدر المشترك بـ request-guards (كانت منسوخة
+// حرفيًا في 5 ملفات — وأحدها نُسي فرفض بيئات المعاينة).
+const ALLOWED_ORIGINS = allowedOrigins();
 
 const RATE_LIMIT = { windowMs: 60_000, max: 10 };
 const FETCH_TIMEOUT_MS = 6_000;

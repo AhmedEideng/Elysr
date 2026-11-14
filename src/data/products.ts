@@ -3,9 +3,24 @@ import { women } from "./products/women";
 import { devices } from "./products/devices";
 import type { Product, ProductCategory } from "@/data/product-types";
 import { expandSearchTerm } from "@/lib/search-terms";
+import { getBundlePresentation, getBundleProductType, getOralSolidForm } from "@/lib/product-form";
 import { productSearchScore, rankProductSearch } from "@/lib/product-search";
+import {
+  HOMEPAGE_CONCERN_CANDIDATES,
+  HOMEPAGE_EXCLUDED_PRODUCT_IDS,
+  isHomepageProductEligible,
+  pickHomepageFeatured,
+  sortCategoryProducts,
+} from "@/lib/product-selection";
+
+// (2026-11-14 · H5) الثوابت والمنطق انتقلا إلى `@/lib/product-selection` كي
+// تعمل الطبقة الخفيفة (بطاقات المنتجات) بنفس القواعد بلا استيراد هذا الملف.
+export { HOMEPAGE_CONCERN_CANDIDATES, HOMEPAGE_EXCLUDED_PRODUCT_IDS, isHomepageProductEligible };
 
 export { expandSearchTerm };
+// (2026-11-14 · H5) منطق الشكل انتقل إلى `@/lib/product-form` — يُعاد تصديره
+// هنا حتى تبقى كل نقاط الاستيراد القديمة كما هي.
+export { getBundlePresentation, getBundleProductType, getOralSolidForm } from "@/lib/product-form";
 
 // ✅ إزالة نظام التقييمات التلقائي (Dynamic Review Growth).
 // كان يزيد عدد المراجعات تلقائيًا كل بضعة أيام بدون مراجعات حقيقية من
@@ -15,137 +30,13 @@ export { expandSearchTerm };
 
 export const products: Product[] = [...men, ...women, ...devices];
 
-/**
- * ترتيب ثابت لأول المنتجات في كل فئة — الباقي بالشعبية
- * ملاحظات:
- * - أربعة منتجات دوائية ما زالت محذوفة من الكتالوج: m-36,m-43,m-47,w-24.
- * - المنتجات الخمسة التي أعادها المالك (m-34,m-37,m-38,m-45,w-17)
- *   تُرتب وتظهر طبيعيًا مثل بقية الكتالوج.
- */
-const PINNED_MEN_ORDER = [
-  "m-01", // Hammer of Thor - بديل آمن لـ Hard-On
-  "m-11", // Vitamax Doubleshot
-  "m-44", // بخاخ ريمانز دووز 14000
-  "m-14", // الشوكولاتة الملكي للرجال
-  "m-12", // العسل الملكي الذهبي Gold VIP
-  "m-20", // Golden Horse - بديل آمن لـ Viagra
-];
+export const getProductsByCategory = (cat: ProductCategory) =>
+  sortCategoryProducts(
+    products.filter((p) => p.category === cat),
+    cat,
+  );
 
-export const getProductsByCategory = (cat: ProductCategory) => {
-  const filtered = products.filter((p) => p.category === cat);
-  const PINNED_WOMEN_ORDER = [
-    "w-11", // لبان Spanish Fly Forte Gum
-    "w-16", // Argi fem جل
-    "w-12", // الشوكولاتة الملكي Royal Chocolate for Her
-    "w-05", // العسل الملكي للنساء
-    "w-02", // قطرات Lady Era - بديل آمن لـ Viagra Women
-    "w-08", // قهوة CoffeMix CAVIAR نسائي
-    "w-06", // علكة SexLove
-    "w-09", // Lipo 6
-    "w-15", // نقط Connubial
-    "w-04", // Checoo Love - بديل آمن
-  ];
-
-  const PINNED_WOMEN_LAST = [
-    "w-23", // Toro Duro مناديل
-    "w-20", // ماكس فيلر
-  ];
-
-  const pinnedOrder = cat === "men" ? PINNED_MEN_ORDER : cat === "women" ? PINNED_WOMEN_ORDER : [];
-  const pinnedLast = cat === "women" ? PINNED_WOMEN_LAST : [];
-
-  return filtered.sort((a, b) => {
-    // 1. Out of stock → bottom
-    const aStock = a.stock > 0 ? 1 : 0;
-    const bStock = b.stock > 0 ? 1 : 0;
-    if (aStock !== bStock) return bStock - aStock;
-
-    // 2. Pinned last → bottom (before out of stock)
-    const aLast = pinnedLast.indexOf(a.id);
-    const bLast = pinnedLast.indexOf(b.id);
-    if (aLast !== -1 && bLast === -1) return 1;
-    if (bLast !== -1 && aLast === -1) return -1;
-    if (aLast !== -1 && bLast !== -1) return aLast - bLast;
-
-    // 3. Pinned products → top in exact order
-    const aPin = pinnedOrder.indexOf(a.id);
-    const bPin = pinnedOrder.indexOf(b.id);
-    if (aPin !== -1 && bPin !== -1) return aPin - bPin;
-    if (aPin !== -1) return -1;
-    if (bPin !== -1) return 1;
-
-    // 3. Featured/Badged → next
-    const aFeatured = a.featured || a.badge ? 1 : 0;
-    const bFeatured = b.featured || b.badge ? 1 : 0;
-    if (aFeatured !== bFeatured) return bFeatured - aFeatured;
-
-    // 4. Lower price first. Customer ratings are loaded only from the
-    // approved reviews API; they are intentionally not part of the catalog
-    // ranking or product data.
-    return a.price - b.price;
-  });
-};
-
-/** منتجات طلبت الإدارة عدم إظهارها في أي قسم من أقسام الصفحة الرئيسية.
- * استبعاد عرضي من الرئيسية فقط؛ تظل المنتجات متاحة في صفحات أقسامها.
- */
-export const HOMEPAGE_EXCLUDED_PRODUCT_IDS = new Set([
-  "m-02", // Boost Up MAN
-  "m-49", // Power Fully Up Advanced
-  "d-04", // Big Bro: excluded from the homepage by owner request
-]);
-
-export const isHomepageProductEligible = (product: Pick<Product, "id">): boolean =>
-  !HOMEPAGE_EXCLUDED_PRODUCT_IDS.has(product.id);
-
-/**
- * المرشحون لقسم "تسوق حسب الاحتياج" — مصدر واحد مشترك بين:
- * ShopByConcern (العرض)، ProductsTabs (الاستبعاد لمنع التكرار)،
- * وdata-integrity.test.mjs (التحقق). أي تعديل هنا ينتشر لكل المواضع
- * تلقائياً بدل ثلاث نسخ مكررة كانت تبتعد عن بعضها صامتاً.
- */
-export const HOMEPAGE_CONCERN_CANDIDATES = {
-  delay: ["m-31", "m-55", "m-30"],
-  strength: ["m-04", "m-63", "m-03"],
-  devices: ["d-05", "d-07", "d-08", "d-01", "d-02", "d-03", "d-06"],
-  women: ["w-25", "w-10", "w-15"],
-} as const;
-
-const HOME_FEATURED_ORDER = [
-  "m-11", // Vitamax
-  "m-01", // Hammer of Thor
-  "m-44", // Dooz 14000
-  "m-60", // Kreva
-  "w-13", // Golden Gum
-  "m-32", // Titan Gold; Connubial now belongs to the women's concern section
-
-  // Reserve products for the featured selection.
-  "m-02", // Boost Up MAN remains excluded from the homepage
-  "m-52",
-  "w-07",
-  "w-04",
-  "m-29",
-  "m-15",
-  "m-26",
-  "w-08",
-  "m-22",
-  "m-21",
-  "m-25",
-  "m-06",
-  "m-48",
-  "w-01",
-  "m-56",
-] as const;
-
-/**
- * منتجات الصفحة الرئيسية — مختارات مدروسة:
- * - تعرض 6 منتجات فقط تم اختيارها بعناية لزيادة معدل التحويل وتقليل حجم الـ DOM
- */
-export const getFeaturedProducts = (): Product[] =>
-  HOME_FEATURED_ORDER.map((id) => getProductById(id))
-    .filter((p): p is Product => Boolean(p))
-    .filter(isHomepageProductEligible)
-    .slice(0, 6);
+export const getFeaturedProducts = (): Product[] => pickHomepageFeatured(getProductById);
 
 export const getProductById = (id: string) => products.find((p) => p.id === id);
 
@@ -158,78 +49,6 @@ export const getProductById = (id: string) => products.find((p) => p.id === id);
  */
 export const getPublicProductsByCategory = (cat: ProductCategory) => {
   return getProductsByCategory(cat);
-};
-
-/**
- * يحدد الشكل الصلب الفموي من الاسم/الـ slug فقط، بدون اختلاق حقل جديد في بيانات
- * المنتج. الهدف منع ظهور الأقراص والكبسولات داخل نفس باقة المنتج.
- */
-export const getOralSolidForm = (product: Product): "tablet" | "capsule" | null => {
-  const text = `${product.name} ${product.nameEn} ${product.slug}`.toLowerCase();
-  const isCapsule = /كبسول|capsule/.test(text);
-  const isTablet = /أقراص|قرص|حبوب|tablet|pill/.test(text);
-  if (isCapsule && !isTablet) return "capsule";
-  if (isTablet && !isCapsule) return "tablet";
-  return null;
-};
-
-export const getBundlePresentation = (product: Product): "gel" | "cream" | null => {
-  const text = `${product.name} ${product.nameEn} ${product.slug}`.toLowerCase();
-  if (/جل|جيل|\bgel\b/.test(text)) return "gel";
-  if (/كريم|\bcream\b/.test(text)) return "cream";
-  return null;
-};
-
-/**
- * يحدد نوع المنتج الظاهر في الباقة. النوع هنا هو الشكل/الصنف التجاري
- * (عسل، جل، كريم، شوكولاتة، بخاخ...) وليس مجرد اختلاف الاسم.
- */
-export const getBundleProductType = (
-  product: Product,
-):
-  | "tablet"
-  | "capsule"
-  | "gel"
-  | "cream"
-  | "honey"
-  | "chocolate"
-  | "spray"
-  | "drops"
-  | "gum"
-  | "wipes"
-  | "sachet"
-  | "coffee"
-  | "digital-pump"
-  | "vacuum-kit"
-  | "manual-pump"
-  | "breast-kit"
-  | "traction-device"
-  | "electric-pump"
-  | "other" => {
-  const text = `${product.name} ${product.nameEn} ${product.slug}`.toLowerCase();
-  const oralForm = getOralSolidForm(product);
-  if (oralForm) return oralForm;
-  const presentation = getBundlePresentation(product);
-  if (presentation) return presentation;
-  if (/عسل|honey/.test(text)) return "honey";
-  if (/شيكول|شوكول|chocolate/.test(text)) return "chocolate";
-  if (/بخاخ|spray/.test(text)) return "spray";
-  if (/قطر|قطرات|drops/.test(text)) return "drops";
-  if (/علك|لبان|gum/.test(text)) return "gum";
-  if (/مناديل|wipes/.test(text)) return "wipes";
-  if (/أكياس|sachet/.test(text)) return "sachet";
-  if (/قهوة|coffee/.test(text)) return "coffee";
-
-  if (product.category === "devices") {
-    if (/رقمية|digital/.test(text)) return "digital-pump";
-    if (/حقيبة|kit/.test(text) && /صدر|breast/.test(text)) return "breast-kit";
-    if (/حقيبة|kit/.test(text)) return "vacuum-kit";
-    if (/شد|إطالة|traction/.test(text)) return "traction-device";
-    if (/كهرب|electric/.test(text)) return "electric-pump";
-    if (/يدوية|manual/.test(text)) return "manual-pump";
-  }
-
-  return "other";
 };
 
 /**

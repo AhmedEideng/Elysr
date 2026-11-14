@@ -16,6 +16,13 @@ export interface Article {
   image?: string;
   slug: string;
   title: string;
+  /**
+   * (2026-11-15 · SEO) عنوان **لعرض نتائج البحث فقط** — يُستخدم في <title>
+   * وog:title حين يتجاوز العنوان الأصلي 62 حرفًا (Google يقتطع ما بعد ذلك).
+   * H1 والـ JSON-LD headline يبقيان على العنوان الكامل: النص المرئي لم يُمس،
+   * ولا اقتطاع وقت البناء — كل عنوان مكتوب صريح هنا بيد المحرر.
+   */
+  seoTitle?: string;
   excerpt: string;
   category: string;
   readMin: number;
@@ -1514,7 +1521,8 @@ const articleDrafts: Array<
 
   a(
     "masturbation-myths",
-    "خرافات حول العادة السرية",
+    // (2026-11-15 · SEO) 24 حرفًا فقط → عنوان بلا كلمة مفتاحية ثانية في SERP.
+    "خرافات حول العادة السرية: ما الصحيح طبيًا؟",
     "خرافات كثيرة عن العادة السرية تزرع القلق دون دليل. نراجع ما يقوله العلم عن آثارها على الصحة والخصوبة والطاقة، ونفصل الحقيقة عن المبالغة بمصادر موثوقة.",
     "أساسيات",
     7,
@@ -1662,7 +1670,8 @@ const articleDrafts: Array<
 
   a(
     "foods-to-avoid",
-    "أطعمة تضر الأداء الجنسي",
+    // (2026-11-15 · SEO) 23 حرفًا → أُضيف الوعد المعرفي (قائمة عملية).
+    "أطعمة تضر الأداء الجنسي: قائمة يجب الحذر منها",
     "بعض الأطعمة تؤثر سلباً على الدورة الدموية والهرمونات والأداء. نرشدك إلى ما يُفضّل الحد منه لصحة زوجية أفضل، مع السبب العلمي وبدائل عملية أسهل للتطبيق.",
     "تغذية",
     7,
@@ -1863,7 +1872,8 @@ const articleDrafts: Array<
 
   a(
     "when-to-see-doctor",
-    "متى تزور الطبيب؟",
+    // (2026-11-15 · SEO) 16 حرفًا → أقل ما يعرضه Google بلا سياق.
+    "متى تزور الطبيب لمشكلة جنسية؟ علامات لا تتجاهلها",
     "بعض الأعراض الجنسية لا يجوز تجاهلها لأنها قد تعكس مشكلة صحية. نضع بين يديك علامات تستدعي استشارة طبيب مختص، ومتى يكون القلق مبرراً، وكيف تستعد للزيارة",
     "وقاية",
     7,
@@ -2937,7 +2947,7 @@ const articleDrafts: Array<
   a(
     "medications-affecting-libido",
     "أدوية بتأثّر على الرغبة والأداء الجنسي: القائمة الكاملة ومتى تراجع طبيبك",
-    "أدوية ضغط ومزاج شائعة ممكن تخفض الرغبة أو تؤثر على الأداء من غير ما تاخد بالك. القائمة الكاملة، وليه ممنوع توقف دواءك من نفسك، والبدائل اللي تناقشها مع طبيبك.",
+    "أدوية ضغط ومزاج شائعة تخفض الرغبة أو تؤثر على الأداء من غير ما تاخد بالك. القائمة الكاملة، وليه ممنوع توقف دواءك لوحدك، والبدائل اللي تناقشها مع طبيبك.",
     "وقاية",
     9,
     "💊",
@@ -3377,7 +3387,7 @@ const articleDrafts: Array<
   a(
     "how-to-spot-original-vs-fake-products",
     "إزاي تفرّق الأصلي من التقليد؟ دليل عملي لأهم منتجات الصحة الزوجية",
-    "السوق مليان تقليد لمنتجات زي هامر أوف ثور وكريفا وبروكوميل. 8 علامات عملية تتأكد بيها قبل الشراء وبعد ما يوصلك الطلب، وليه السعر الرخيص زيادة هو أول جرس إنذار.",
+    "السوق مليان تقليد لمنتجات زي هامر أوف ثور وكريفا وبروكوميل. 8 علامات عملية تتأكد بيها قبل الشراء وبعد الاستلام، وليه السعر الرخيص زيادة هو أول جرس إنذار.",
     "صحة الرجل",
     6,
     "🔍",
@@ -3411,7 +3421,7 @@ const articleDrafts: Array<
   a(
     "hard-on-sildenafil-dapoxetine-guide",
     "هارد أون (سيلدينافيل + دابوكستين): دليل صريح للانتصاب والتأخير معًا",
-    "أقراص هارد أون بتجمع سيلدينافيل للانتصاب ودابوكستين لسرعة القذف في قرص واحد. إمتى تكون فكرة مناسبة، وإمتى تكون خطيرة، والاحتياطات اللي لازم تعرفها قبل أي تجربة.",
+    "أقراص هارد أون بتجمع سيلدينافيل للانتصاب ودابوكستين لسرعة القذف في قرص واحد. إمتى تناسبك، وإمتى تكون خطيرة، والاحتياطات قبل أي تجربة.",
     "صحة الرجل",
     7,
     "💊",
@@ -3440,7 +3450,24 @@ const articleDrafts: Array<
 
 // The owner confirmed the 64-article weekly history on 2026-11-01.
 // This fixed correction date is not recalculated on builds or presented as a medical review.
-export const articles: Article[] = articleDrafts.map((article) => {
+/**
+ * (2026-11-15 · SEO) عناوين SERP مختصرة للسبعة التي تجاوز عنوانها 62 حرفًا.
+ * المفتاح = الـ slug، والقيمة تُستخدم في <title> فقط (انظر `seoTitle`).
+ */
+const ARTICLE_SERP_TITLES: Record<string, string> = {
+  "delay-sprays-safe-use": "بخاخات التأخير للرجال: طريقة الاستخدام ومدة التأثير",
+  "hard-on-sildenafil-dapoxetine-guide":
+    "هارد أون (سيلدينافيل + دابوكستين): دليل الانتصاب والتأخير",
+  "max-filler-breast-guide": "كريم ماكس فيلر: طريقة الاستخدام والنتائج قبل الشراء",
+  "medications-affecting-libido": "أدوية تؤثر على الرغبة والأداء: القائمة ومتى تراجع طبيبك",
+  "nutrition-mental-health-testosterone-balance":
+    "التغذية والمزاج والتستوستيرون: إرهاق أم نقص هرمون؟",
+  "royal-honey-benefits": "العسل الملكي: الفوائد والاستخدام والفرق عن التقليد",
+  "women-products-complete-guide": "منتجات النساء: القطرات والأقراص والعسل — دليل الاختيار",
+  "how-to-spot-original-vs-fake-products": "إزاي تفرّق بين الأصلي والتقليد؟ دليل عملي",
+};
+
+const resolvedArticles: Article[] = articleDrafts.map((article) => {
   const confirmedDate = articlePublicationDates[article.slug];
   const publishedAt = confirmedDate ?? article.publishedAt;
   if (!publishedAt) throw new Error(`Missing publication date: ${article.slug}`);
@@ -3473,3 +3500,17 @@ export const articles: Article[] = articleDrafts.map((article) => {
   }
   return { ...article, publishedAt, updatedAt };
 });
+
+/**
+ * (2026-11-15 · SEO) العنوان المطبوع في نتائج البحث: `seoTitle` إن وُجد،
+ * وإلا العنوان الكامل. مصدر واحد يستهلكه الـ prerender وواجهة SPA معًا.
+ */
+export const articles: Article[] = resolvedArticles.map((article) =>
+  ARTICLE_SERP_TITLES[article.slug]
+    ? { ...article, seoTitle: ARTICLE_SERP_TITLES[article.slug] }
+    : article,
+);
+
+/** عنوان الـ <title> لمقالة — يمنع تكرار منطق `seoTitle ?? title` في كل مستهلك. */
+export const serpTitleOf = (article: Pick<Article, "title" | "seoTitle">): string =>
+  article.seoTitle ?? article.title;

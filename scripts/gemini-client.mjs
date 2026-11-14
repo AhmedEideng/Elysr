@@ -31,7 +31,7 @@ export async function callGemini(
       // في logs/proxies/traces، والمفتاح في URL يظهر فيها نصياً)
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
-      let transient = false;
+      let transient; // (2026-11-15 · Round 5) يُعيَّن في كل مسار قبل القراءة.
       try {
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,

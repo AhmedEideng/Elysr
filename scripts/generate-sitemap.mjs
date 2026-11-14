@@ -24,16 +24,60 @@ function assetUrl(path) {
   return `${base}?v=${CACHE_VERSION}`;
 }
 
+/**
+ * 🗓️ مصدر تواريخ آخر تعديل — ثلاثة مستويات (2026-11-14):
+ *   1) git log (أدق إشارة، متاح في CI/Vercel).
+ *   2) config/content-dates.json — أثر (artifact) متتبَّع في المستودع،
+ *      يُحدَّث تلقائيًا كل بناء يرى git، ويُقرأ عندما لا يوجد git.
+ *   3) لا شيء → نحذف الوسم (لا نختلق تاريخًا).
+ *
+ * ليه؟ `.dockerignore` يستبعد `.git` (وصورة node:alpine بلا git أصلًا)، فكان
+ * **كل بناء Docker يُنتج sitemap بلا lastmod في 218 رابطًا من 282** — أي أن
+ * النشر الذاتي يفقد إشارة تحديث يعتمد عليها الزحف. القياس: 282 → 64 وسم.
+ */
+const CONTENT_DATES_PATH = resolve(ROOT, "config/content-dates.json");
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** @type {Map<string, string | null>} */
+const gitDates = new Map();
+/** @type {Record<string, string> | null} */
+let artifactDates = null;
+/** @type {boolean | null} */
+let gitUsable = null;
+
+/** @returns {Record<string, string>} */
+function readContentDatesArtifact() {
+  try {
+    const parsed = JSON.parse(readFileSync(CONTENT_DATES_PATH, "utf-8"));
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+/** @returns {Record<string, string>} */
+function artifact() {
+  if (!artifactDates) artifactDates = readContentDatesArtifact();
+  return artifactDates;
+}
+
+/** @param {string} filePath @returns {string | null} */
 function getGitLastmod(filePath) {
+  if (gitDates.has(filePath)) return gitDates.get(filePath);
+  if (gitUsable === false) return null;
   try {
     const out = execSync(`git log -1 --format=%cs -- ${filePath}`, {
       cwd: ROOT,
       stdio: ["ignore", "pipe", "ignore"],
       encoding: "utf-8",
     }).trim();
-    return /^\d{4}-\d{2}-\d{2}$/.test(out) ? out : null;
+    gitUsable = true;
+    const date = DATE_PATTERN.test(out) ? out : null;
+    gitDates.set(filePath, date);
+    return date;
   } catch {
     // A shallow/non-Git deployment must not manufacture a lastmod date.
+    gitUsable = false;
     return null;
   }
 }
@@ -41,8 +85,45 @@ function getGitLastmod(filePath) {
 // 🗓️ لا نضع lastmod إلا عندما نعرف آخر تعديل حقيقي للملف.
 // تاريخ البناء ليس تاريخ تعديل المحتوى؛ ترك الوسم غائباً أفضل من إرسال
 // إشارة زائفة تجعل Google تعيد الزحف بلا داعٍ أو تفقد الثقة في الإشارة.
+/** @param {string} filePath @returns {string | null} */
 function freshLastmod(filePath) {
-  return getGitLastmod(filePath);
+  const fromGit = getGitLastmod(filePath);
+  if (fromGit) return fromGit;
+  const fromArtifact = artifact()[filePath];
+  return fromArtifact && DATE_PATTERN.test(fromArtifact) ? fromArtifact : null;
+}
+
+/**
+ * يحفظ التواريخ المكتشفة من git في الأثر المشترك (دمج مع المعروف سابقًا)،
+ * حتى تستطيع أي بيئة بلا git (Docker) إنتاج sitemap كامل الإشارات.
+ */
+function persistContentDates() {
+  if (gitUsable !== true) {
+    const known = Object.keys(artifact()).length;
+    if (known === 0) {
+      console.warn(
+        "⚠️  git unavailable and config/content-dates.json is empty/missing — " +
+          "sitemap lastmod will be omitted (run a build with git, then commit the artifact).",
+      );
+    } else {
+      console.log(
+        `🗓  lastmod: git unavailable → using ${known} dates from config/content-dates.json`,
+      );
+    }
+    return;
+  }
+  /** @type {Record<string, string>} */
+  const merged = { ...artifact() };
+  let added = 0;
+  for (const [filePath, date] of gitDates) {
+    if (!date || merged[filePath] === date) continue;
+    merged[filePath] = date;
+    added += 1;
+  }
+  if (added === 0 && Object.keys(artifact()).length > 0) return;
+  const sorted = Object.fromEntries(Object.entries(merged).sort(([a], [b]) => a.localeCompare(b)));
+  writeFileSync(CONTENT_DATES_PATH, `${JSON.stringify(sorted, null, 2)}\n`, "utf-8");
+  console.log(`🗓  lastmod: wrote ${Object.keys(sorted).length} dates to config/content-dates.json`);
 }
 
 const esc = (s = "") =>
@@ -75,7 +156,7 @@ async function generateSitemap() {
       "utf-8",
     );
 
-    // 🎁 خريطة الباقات المعتمدة للتحقق الخلفي من خصم الباقة (10%) في الخادم:
+    // 🎁 خريطة الباقات المعتمدة للتحقق الخلفي من خصم الباقة (BUNDLE_DISCOUNT_RATE = 20%) في الخادم:
     // نفس محرك cross-sell المستخدم في الواجهة → لا ازدواجية منطق.
     const { getCrossSellsForProduct } = await vite.ssrLoadModule("/src/data/products.ts");
     const bundlesDb = {};
@@ -118,7 +199,9 @@ async function generateSitemap() {
     try {
       const mod = await vite.ssrLoadModule("/src/data/articles.ts");
       articles = mod.articles || [];
-    } catch {}
+    } catch {
+      /* لا مقالات — التوليد يكمل بلا أقسام المقالات */
+    }
 
     // 🎴 بطاقات مقالات الـ homepage (ArticlesGrid) — module مولّد صغير من نفس
     // المصدر (SSOT): الكروت الأربع التحويلية فقط، بلا حقل content/sources،
@@ -291,7 +374,9 @@ async function generateSitemap() {
     try {
       const mod = await vite.ssrLoadModule("/src/data/landing-pages.ts");
       seoLandingPages = mod.seoLandingPages || [];
-    } catch {}
+    } catch {
+      /* لا صفحات هبوط — التوليد يكمل بلا أقسامها */
+    }
 
     // (2026-09-15) عدد الأدلة SEO للمواقع اللي محتاجة العدد بس — عن الـ
     // about page كان بيستورد landing-pages.ts كله (538KB من المحتوى)
@@ -806,6 +891,8 @@ Sitemap: ${SITE_URL}/sitemap-images.xml
     }
     console.log(`   ✅ ${allPages.length} individual JSON files generated (${landingPagesDir})`);
 
+    // 🗓  حفظ/قراءة تواريخ آخر تعديل (يحل فقدان lastmod داخل Docker).
+    persistContentDates();
     console.log(`✓ sitemaps generated successfully.`);
   } finally {
     await vite.close();

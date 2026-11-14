@@ -56,9 +56,12 @@ export function ArticleContentWithAds({
                       <ProductCard product={ad.product} />
                     </div>
                     <div className="w-full sm:w-2/3 space-y-3 text-center sm:text-right">
-                      <h3 className="text-xl font-black text-primary !mb-0 !mt-0">
+                      {/* (2026-11-15 · SEO) h2 لا h3: البلوك يقع مباشرة بعد h1
+                          داخل متن المقال، وh3 كان يصنع قفزة h1→h3 في HTML
+                          الثابت (15 مقالة). مطابق لـ prerender-seo.mjs. */}
+                      <h2 className="text-xl font-black text-primary !mb-0 !mt-0">
                         {ad.product.name}
-                      </h3>
+                      </h2>
                       <p className="text-sm text-muted-foreground line-clamp-3 !mt-2">
                         {ad.product.description}
                       </p>

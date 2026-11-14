@@ -21,6 +21,7 @@
  */
 
 import { getClientIp } from "./lib/request-ip.js";
+import { allowedOrigins } from "./lib/request-guards.js";
 import { createEndpointRateLimiter } from "./lib/endpoint-rate-limiter.js";
 
 const checkRateLimit = createEndpointRateLimiter({ windowMs: 60_000, max: 30 });
@@ -30,14 +31,21 @@ const MAX_BODY_BYTES = 32_000;
 // القيم كلها من المتصفح — حتى لو "بنية داخلية" بنعتبرها معادية.
 /** @param {unknown} value @param {number} max */
 function cleanStr(value, max) {
-  return String(value ?? "")
-    .replace(/[\u0000-\u001f\u007f]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, max);
+  return (
+    String(value ?? "")
+      // الهدف نفسه: حذف محارف التحكم (\u0000-\u001f) من نصوص المتصفح قبل
+      // تسجيلها/إرجاعها — فالـ regex هو المقصود.
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\u0000-\u001f\u007f]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, max)
+  );
 }
 
-const ALLOWED_ORIGINS = new Set(["https://elysrmedical.store", "https://www.elysrmedical.store"]);
+// (2026-11-14 · M5) نفس مصدر الأصول المشترك — تقارير الأخطاء كانت تُرفض
+// بـ 403 على أي بيئة غير الإنتاج، فتُفقد أعطال المعاينات/staging بلا أثر.
+const ALLOWED_ORIGINS = allowedOrigins();
 
 /**
  * @param {import("express").Request} req

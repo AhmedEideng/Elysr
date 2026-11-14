@@ -14,7 +14,7 @@
  * ============================================================
  */
 import { readdirSync, readFileSync, statSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { resolve, dirname, join, basename, extname } from "node:path";
+import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
@@ -66,7 +66,6 @@ console.log(`🔍 Found ${files.length} images to inspect.\n`);
 
 for (const file of files) {
   const name = file.name;
-  const ext = extname(name).toLowerCase();
 
   if (shouldSkip(name.replace(/\.webp$/i, ""))) {
     if (VERBOSE) console.log(`⏭  Skip: ${name} (matched skip pattern)`);

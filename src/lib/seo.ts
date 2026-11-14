@@ -7,6 +7,7 @@
 import { assetUrl } from "@/lib/cache";
 import { PRODUCT_META_PROFILES } from "@/data/product-meta";
 import {
+  getArchivedReviewSummary,
   getProductReviews,
   reviewDatePublished,
   VISIBLE_REVIEW_COUNT,
@@ -237,7 +238,7 @@ function absoluteProductImage(url?: string): string {
   return absoluteUrl(assetUrl(url));
 }
 
-export interface SeoMeta {
+interface SeoMeta {
   title?: string;
   description?: string;
   image?: string;
@@ -307,22 +308,63 @@ export function applySeo(meta: SeoMeta = {}) {
   setMeta('meta[name="twitter:title"]', "content", title);
   setMeta('meta[name="twitter:description"]', "content", description);
   setMeta('meta[name="twitter:image"]', "content", image);
-  if (typeof Image !== "undefined") {
-    const probe = new Image();
-    probe.onload = () => {
-      const ratio =
-        probe.naturalWidth && probe.naturalHeight ? probe.naturalWidth / probe.naturalHeight : 2;
-      setMeta(
-        'meta[name="twitter:card"]',
-        "content",
-        ratio >= 1.4 ? "summary_large_image" : "summary",
-      );
-    };
-    probe.src = image;
-  }
+  applyTwitterCardFor(image);
 
   // Canonical
   setLink("canonical", url);
+}
+
+/**
+ * نسبة الصور التي قِيست في هذه الجلسة — مفتاحها المسار **نسبياً**.
+ * (2026-11-14) كانت كل عملية تنقّل تُنزّل صورة الـ OG كاملة (28KB) مرة أخرى.
+ * قياس واحد لكل صورة في الجلسة يكفي: النسبة ثابتة لا تتغير.
+ * @type {Map<string, number>}
+ */
+const ogAspectCache = new Map();
+
+/**
+ * اختيار `twitter:card` من نسبة الصورة الفعلية.
+ *
+ * ⚠️ (2026-11-14) إصلاح: كان القياس يُنزّل الصورة من **الرابط المطلق للإنتاج**
+ * (`https://elysrmedical.store/...`). على أي نطاق غير الـ apex (www، دومين
+ * مخصص، Vercel Preview، localhost) يصبح الرابط cross-origin فتحجبه سياسة
+ * `img-src 'self'` — فيظهر CSP violation في الكونسول على **كل صفحة**
+ * (Lighthouse: errors-in-console + inspector-issues = 0) بلا أي فائدة.
+ * الحل: القياس بمسار نسبي (same-origin دائماً) + كاش للنسبة.
+ *
+ * @param {string} absoluteImage الرابط المطلق المستخدم في الميتا (يبقى كما هو).
+ */
+function applyTwitterCardFor(absoluteImage: string) {
+  /** @param {number} ratio */
+  const setCard = (ratio: number) => {
+    setMeta(
+      'meta[name="twitter:card"]',
+      "content",
+      ratio >= 1.4 ? "summary_large_image" : "summary",
+    );
+  };
+
+  const cached = ogAspectCache.get(absoluteImage);
+  if (cached !== undefined) {
+    setCard(cached);
+    return;
+  }
+  if (typeof Image === "undefined") return;
+
+  // مسار نسبي لنفس الأصل — يحافظ على القياس ويمنع حجب CSP.
+  const sameOriginSrc = absoluteImage.startsWith(SITE_URL)
+    ? absoluteImage.slice(SITE_URL.length) || "/"
+    : absoluteImage;
+  if (!sameOriginSrc.startsWith("/")) return; // صورة خارجية: البطاقة تبقى كما هي في الـ prerender
+
+  const probe = new Image();
+  probe.onload = () => {
+    const ratio =
+      probe.naturalWidth && probe.naturalHeight ? probe.naturalWidth / probe.naturalHeight : 2;
+    ogAspectCache.set(absoluteImage, ratio);
+    setCard(ratio);
+  };
+  probe.src = sameOriginSrc;
 }
 
 /**
@@ -427,10 +469,27 @@ export const productSchema = (p: {
   // العدد الذي تعرضه واجهة React (مصدر وحيد VISIBLE_REVIEW_COUNT).
   const reviewCategory: ProductCategory | null =
     p.category === "men" || p.category === "women" || p.category === "devices" ? p.category : null;
+  // (2026-11-14) البوابة لم تعد `approvedReviewSummary` وحدها: بعد أن صار
+  // الأرشيف هو مصدر التقييم الإجمالي، كان ممكنًا أن يخرج `aggregateRating`
+  // بلا أي `Review` في نفس الـ markup لو نسِي المستدعي تمرير الحقل.
+  // القاعدة الآن: وجود أرشيف **أو** ملخص مُمرَّر = هناك مراجعات تُعرض.
+  const archivedSummaryForVisibility = reviewCategory ? getArchivedReviewSummary(p.slug) : null;
+  const hasReviewSource = Boolean(archivedSummaryForVisibility || p.approvedReviewSummary);
   const visibleReviews =
-    reviewCategory && p.approvedReviewSummary
+    reviewCategory && hasReviewSource
       ? getProductReviews(p.slug, reviewCategory, VISIBLE_REVIEW_COUNT).reviews
       : [];
+  // 🎯 (2026-11-14) مصدر واحد للتقييم الإجمالي: أرشيف المنتج نفسه الذي تُعرض
+  // منه المراجعات. قبل ذلك كان `aggregateRating` يأخذ رقمين من بيانات المنتج
+  // (`product.rating` / `product.reviews`) — مصدر ثانٍ مستقل عن الأرشيف، يعطي
+  // `reviewCount` أكبر من عدد المراجعات المعروضة/المُعلَّمة في نفس الصفحة
+  // (11 مقابل 6 مثلاً) وهو ما يخالف سياسة Google بأن الـ markup يعكس المراجعات
+  // الفعلية للعنصر. الآن: الأرشيف هو المصدر، والدالة موجودة أصلاً
+  // (`getArchivedReviewSummary`) وكانت غير مستخدمة.
+  const archivedSummary = archivedSummaryForVisibility;
+  const ratingSummary = archivedSummary
+    ? { ratingValue: archivedSummary.rating, reviewCount: archivedSummary.reviewCount }
+    : p.approvedReviewSummary;
   return {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -452,17 +511,17 @@ export const productSchema = (p: {
     ...(p.mpn?.trim() ? { mpn: p.mpn.trim() } : {}),
     ...(p.gtin?.trim() ? { gtin: p.gtin.trim() } : {}),
     image: absoluteProductImage(p.image),
-    ...(p.approvedReviewSummary &&
-    Number.isFinite(p.approvedReviewSummary.ratingValue) &&
-    p.approvedReviewSummary.ratingValue >= 1 &&
-    p.approvedReviewSummary.ratingValue <= 5 &&
-    Number.isInteger(p.approvedReviewSummary.reviewCount) &&
-    p.approvedReviewSummary.reviewCount >= 1
+    ...(ratingSummary &&
+    Number.isFinite(ratingSummary.ratingValue) &&
+    ratingSummary.ratingValue >= 1 &&
+    ratingSummary.ratingValue <= 5 &&
+    Number.isInteger(ratingSummary.reviewCount) &&
+    ratingSummary.reviewCount >= 1
       ? {
           aggregateRating: {
             "@type": "AggregateRating",
-            ratingValue: p.approvedReviewSummary.ratingValue,
-            reviewCount: p.approvedReviewSummary.reviewCount,
+            ratingValue: ratingSummary.ratingValue,
+            reviewCount: ratingSummary.reviewCount,
             bestRating: 5,
             worstRating: 1,
           },

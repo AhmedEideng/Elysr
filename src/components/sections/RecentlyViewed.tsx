@@ -1,6 +1,7 @@
 import { useRecentlyViewed } from "@/hooks/use-recently-viewed";
 import { formatPrice } from "@/data/product-types";
-import { getProductBySlug } from "@/data/products";
+// (2026-11-14 · H5) بطاقة المنتج كافية لعرض «شوهدت مؤخرًا».
+import { getCardBySlug as getProductBySlug } from "@/data/product-cards";
 import { X } from "lucide-react";
 import { thumbUrl, assetUrl } from "@/lib/cache";
 

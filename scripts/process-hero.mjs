@@ -39,7 +39,6 @@ const SIZES = [
 const QUALITIES = [60, 65, 70, 75, 80];
 
 async function findBestQuality(buffer, width) {
-  const target = width / (await sharp(buffer).metadata()).width;
   const results = [];
 
   for (const q of QUALITIES) {

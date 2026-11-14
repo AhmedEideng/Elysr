@@ -19,18 +19,23 @@
  */
 
 import { products, getCrossSellsForProduct, getProductById } from "@/data/products";
+import { BUNDLE_DISCOUNT_RATE } from "@/lib/site-config";
 
-/** نسبة خصم الباقة (20%) — نفس القيمة في السيرفر واختبارات السلامة. */
-export const BUNDLE_DISCOUNT_RATE = 0.2;
+/**
+ * نسبة خصم الباقة (20%) — المصدر الوحيد الآن `site-config.ts`
+ * (يُعاد تصديرها هنا للتوافق الخلفي مع المستوردين الحاليين ولتوليد
+ * `api/lib/config-db.json` في نفس المسار).
+ */
+export { BUNDLE_DISCOUNT_RATE };
 
-export interface AppliedBundle {
+interface AppliedBundle {
   /** المنتج الرئيسي الذي كُشف من خلال باقته (للعرض في الواجهة). */
   mainId: string;
   /** كل أعضاء الباقة (يشمل المنتج الرئيسي). */
   ids: string[];
 }
 
-export interface BundleCalcResult {
+interface BundleCalcResult {
   /** قيمة الخصم (0 إذا لم تكتمل أي باقة). */
   discount: number;
   /** الباقة المطبقة أو null. */

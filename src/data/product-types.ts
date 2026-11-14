@@ -26,6 +26,12 @@ export interface Product {
   /** Historical customer-review summary imported from the store archive. */
   rating?: number;
   reviews?: number;
+  /**
+   * (2026-11-15 · توجيه المالك) **الكتالوج متوفر دائمًا** — القيمة ليست جردًا
+   * حيًّا بل مؤشر توفّر: أي رقم > 0 يعني «متوفر» في السكيما والفيد والواجهة.
+   * لذلك لا يوجد مسار «نفد المخزون» في المنتج، و`stock = 0` يُعتبر خطأ بيانات
+   * (لا حالة صالحة) — يحرسه اختبار الكتالوج ويظهر كخطأ في product-audit.
+   */
   stock: number;
   featured?: boolean;
   /** مصفوفة بمعرفات المنتجات المقترحة للبيع المتقاطع (Cross-Sell) - اختياري */
@@ -44,5 +50,24 @@ export interface Product {
    */
   titleLatin?: string;
 }
+
+/**
+ * (2026-11-14 · H5) «بطاقة المنتج»: الحقول التي تحتاجها البطاقات والسلة
+ * والترتيب فقط — بلا `description`/`ingredients`/`usage`/`benefits`.
+ *
+ * السبب: الكتالوج الكامل (89 منتجًا بوصفها) كان يدخل المسار الحرج لكل صفحة
+ * عبر `CartProvider` والرئيسية (~47KB مضغوط). البطاقة تُولَّد في
+ * `src/data/product-cards.generated.ts` (~5KB مضغوط) وتكفي للعرض والسلة،
+ * بينما يُحمَّل الكتالوج الكامل عند الحاجة فقط (صفحة المنتج/البحث).
+ */
+export type ProductCardView = Pick<
+  Product,
+  "id" | "slug" | "name" | "nameEn" | "price" | "emoji" | "stock" | "category"
+> &
+  Partial<Pick<Product, "image" | "badge" | "featured" | "rating" | "reviews">> & {
+    /** شارة الاستخدام محسوبة مسبقًا وقت التوليد (تقرأ نص الوصف الكامل). */
+    badgeLabel?: string;
+    badgeClass?: string;
+  };
 
 export const formatPrice = (price?: number) => (price ? `${price} ج.م` : "");

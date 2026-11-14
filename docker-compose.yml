@@ -10,6 +10,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8080
+      # عدد البروكسيات الموثوقة أمام الحاوية (nginx/Caddy = 1).
+      # بدونه يتشارك كل الزوار مفتاح حدّ واحد لطلبات الـ API.
+      - TRUST_PROXY_HOPS=${TRUST_PROXY_HOPS:-0}
     restart: unless-stopped
     healthcheck:
       test: wget -qO- http://localhost:8080/health || exit 1

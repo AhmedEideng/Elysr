@@ -88,7 +88,7 @@
           keepalive: true,
         });
       }
-    } catch (e) {
+    } catch {
       /* measurement fallback must never break the page */
     }
   }

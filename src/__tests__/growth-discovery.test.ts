@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { products, searchAllPublicProducts } from "@/data/products";
 import { suggestProductSearch } from "@/lib/product-search";
-import { filterCatalog } from "@/components/ProductCatalog";
+import { filterCatalog } from "@/lib/product-filter";
 import { trackSiteSearch, trackViewItemList, trackSelectItem } from "@/lib/analytics";
 import { useCheckoutFunnel } from "@/hooks/use-checkout-funnel";
 import { submitToGoogleSheets } from "@/lib/governorates";

@@ -16,11 +16,14 @@ import { Link } from "@tanstack/react-router";
 import { type Topic, topicsForPage } from "@/data/topics";
 import { articlesMeta } from "@/data/articles-meta.generated";
 import { landingPagesMeta } from "@/data/landing-pages-meta.generated";
-import { products } from "@/data/products";
+// (2026-11-14 · H5) محاور المقالات تعرض اسم/رابط المنتج فقط — البيانات الخفيفة
+// تكفي، وكان استيراد الكتالوج الكامل هنا يُدخل أوصاف 89 منتجًا إلى الحزمة
+// الأولى عبر routeTree ← education_.$slug ← TopicHub.
+import { productCards } from "@/data/product-cards.generated";
 
 const ARTICLE_TITLES = new Map(articlesMeta.map((a) => [a.slug, a.title]));
 const GUIDE_TITLES = new Map(landingPagesMeta.map((g) => [g.slug, g.title]));
-const PRODUCT_BY_ID = new Map(products.map((p) => [p.id, p]));
+const PRODUCT_BY_ID = new Map(productCards.map((p) => [p.id, p]));
 
 /** Link typed لأي pillar (article أو guide) */
 function PillarLink({

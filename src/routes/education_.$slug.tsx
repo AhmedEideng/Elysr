@@ -62,7 +62,11 @@ export const Route = createFileRoute("/education_/$slug")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: loaderData?.article.title },
+      // (2026-11-15) نفس منطق الـ prerender: عنوان SERP المختصر إن وُجد،
+      // حتى لا يختلف <head> بعد الـ hydration عن HTML الثابت.
+      // (مكتوب صريحًا هنا لا عبر `serpTitleOf` — استيراد القيمة من
+      // articles.ts كان سيسحب نصوص 64 مقالة إلى حزمة المسار.)
+      { title: loaderData?.article?.seoTitle ?? loaderData?.article?.title },
       {
         // Same helper/limit as the prerendered copy so the initial HTML and the
         // hydrated <head> never declare two different descriptions.

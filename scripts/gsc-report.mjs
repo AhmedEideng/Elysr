@@ -33,7 +33,6 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, "..");
 const GSC_DIR = resolve(__dirname, "gsc");
 
 // ── CLI args ──
@@ -153,7 +152,8 @@ try {
     plugins: [],
     logLevel: "silent",
   });
-  const { TOPICS, topicForArticle, topicForGuide, topicForProduct } =
+  // (2026-11-15 · Round 5) TOPICS كان يُفَكّ من الوحدة ولا يُستخدم.
+  const { topicForArticle, topicForGuide, topicForProduct } =
     await vite.ssrLoadModule("/src/data/topics.ts");
   let products = null;
   try {
@@ -224,13 +224,12 @@ const brandQueries = queries
       .filter((r) => /اليسر|elysr/i.test(r.key))
       .sort((a, b) => b.impressions - a.impressions)
   : [];
-const topQueries = (queries ? queries.rows : []).slice(0, 10);
 
 const pct = (v) => `${(v * 100).toFixed(1)}%`;
 const tag = (key) => topicTagFor(key) || "—";
 
 // ── اقتراح إجراء لكل فرصة (heuristic واضح) ──
-function suggestAction(r, kind) {
+function suggestAction(r) {
   const isNewAsset = /glossary|checklist/.test(r.key);
   if (isNewAsset) return "وزّع (شارك) لجمع أول إشارات ظهور — asset جديد عليه فرص سريعة";
   if (r.ctr < avgCtr * 0.8)
@@ -244,7 +243,7 @@ function suggestAction(r, kind) {
 const actions = [];
 for (const r of pageOpportunities.slice(0, 4)) {
   actions.push(
-    `صفحة ${r.key} (موضع ${r.position.toFixed(1)}, ${r.impressions} ظهور): ${suggestAction(r, "pages")}`,
+    `صفحة ${r.key} (موضع ${r.position.toFixed(1)}, ${r.impressions} ظهور): ${suggestAction(r)}`,
   );
 }
 const brandImp = brandQueries.reduce((s, r) => s + r.impressions, 0);
@@ -287,7 +286,7 @@ pageOpportunities.slice(0, 12).forEach((r, i) => {
   P(
     `   ${r.impressions} ظهور · موضع ${r.position.toFixed(1)} · CTR ${pct(r.ctr)} · عقدة: ${tag(r.key)}`,
   );
-  P(`   → ${suggestAction(r, "pages")}`);
+  P(`   → ${suggestAction(r)}`);
 });
 if (pageOpportunities.length > 12)
   P(`   ... و${pageOpportunities.length - 12} صفحات تانية (في التقرير الكامل)`);
@@ -345,7 +344,7 @@ M("| الصفحة | ظهور | موضع | CTR | عقدة الموضوع | إجر
 M("|---|---|---|---|---|---|");
 pageOpportunities.forEach((r) =>
   M(
-    `| \`${r.key}\` | ${r.impressions} | ${r.position.toFixed(1)} | ${pct(r.ctr)} | ${tag(r.key)} | ${suggestAction(r, "pages")} |`,
+    `| \`${r.key}\` | ${r.impressions} | ${r.position.toFixed(1)} | ${pct(r.ctr)} | ${tag(r.key)} | ${suggestAction(r)} |`,
   ),
 );
 M();

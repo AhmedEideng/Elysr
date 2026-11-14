@@ -39,7 +39,6 @@ const DIST = resolve(ROOT, "dist");
 // يظل السقف محدداً لتجنب تضخيم HTML؛ والـ CSS داخل @layer critical فلا يتقدم
 // على الـ CSS الكامل عند التعارض.
 const CRITICAL_BUDGET = 48 * 1024;
-const BODY_SAMPLE = 9000; // أول 9KB من body لكل صفحة عينة
 
 // ── 1) إيجاد الـ CSS المبنى ──
 const assetsDir = resolve(DIST, "assets");
@@ -48,7 +47,6 @@ if (cssFiles.length !== 1) {
   console.error(`✗ متوقع index-*.css واحد في dist/assets، لقينا: ${cssFiles}`);
   process.exit(1);
 }
-const cssHref = `/assets/${cssFiles[0]}`;
 const css = readFileSync(resolve(assetsDir, cssFiles[0]), "utf-8");
 
 // ── 2) جمع الـ classes من مصادر فوق الـ fold (بتتحديث تلقائيًا مع الكود) ──
@@ -146,11 +144,11 @@ const addClass = (t, w = 1) => {
 };
 for (const f of SOURCES) {
   const src = readFileSync(resolve(ROOT, f), "utf-8");
-  for (const m of src.matchAll(/["'`]([A-Za-z0-9_\-:/\.\[\]%! ]+)["'`]/g)) {
+  for (const m of src.matchAll(/["'`]([A-Za-z0-9_\-:/.[\]%! ]+)["'`]/g)) {
     for (const t of m[1].split(/\s+/)) {
       if (
         t.length < 40 &&
-        /^[A-Za-z][A-Za-z0-9_\-:/]*([:!][A-Za-z0-9_\-:/\[\]%]*|[!.]?[A-Za-z0-9_\-:/\[\]%]*)$/.test(
+        /^[A-Za-z][A-Za-z0-9_\-:/]*([:!][A-Za-z0-9_\-:/[\]%]*|[!.]?[A-Za-z0-9_\-:/[\]%]*)$/.test(
           t,
         ) &&
         !JS_KEYWORDS.has(t)

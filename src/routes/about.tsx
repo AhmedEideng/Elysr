@@ -1,5 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { products } from "@/data/products";
+// (2026-11-14 · H5) الصفحة تحتاج **العدد** فقط، وكان استيراد الكتالوج الكامل
+// هنا يُدخل 89 وصفًا (~47KB مضغوط) في الحزمة الأولى لأن routeTree يستورد
+// about.tsx استيرادًا مباشرًا.
+import { PRODUCT_COUNT as PRODUCT_TOTAL } from "@/data/product-cards";
 import { ARTICLE_COUNT } from "@/data/articles-cards.generated";
 // (2026-09-15) العدد من ملف مولّد صغير بدل استيراد landing-pages.ts كلها
 // (538KB من محتوى مش محتاجينه لـ .length).
@@ -65,7 +68,7 @@ function AboutPage() {
           </p>
           <p>
             اليوم نحدّث كتالوجاً يضم{" "}
-            <strong className="text-foreground">{products.length} منتجاً</strong>، مع توصيل سري إلى{" "}
+            <strong className="text-foreground">{PRODUCT_TOTAL} منتجاً</strong>، مع توصيل سري إلى{" "}
             <strong className="text-foreground">27 محافظة</strong> والدفع عند الاستلام حيثما كان
             متاحاً.
           </p>
@@ -75,7 +78,7 @@ function AboutPage() {
       {/* ─── الأرقام ─── */}
       <section className="mt-8 grid gap-4 grid-cols-2 md:grid-cols-4">
         {[
-          { n: String(products.length), label: "منتج في الكتالوج", icon: Package },
+          { n: String(PRODUCT_TOTAL), label: "منتج في الكتالوج", icon: Package },
           { n: "27", label: "محافظة شحن", icon: MapPin },
           { n: "14", label: "يوم في سياسة الإرجاع", icon: Clock },
         ].map((s) => (

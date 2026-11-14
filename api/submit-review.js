@@ -15,8 +15,8 @@
  */
 
 import { createRateLimiter } from "./lib/rate-limiter.js";
+import { allowedOrigins, isAllowedOrigin, readPayload } from "./lib/request-guards.js";
 import { getClientIp } from "./lib/request-ip.js";
-import { isAllowedOrigin, readPayload } from "./lib/request-guards.js";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -41,17 +41,9 @@ function getProductsDb() {
   }
 }
 
-const ALLOWED_ORIGINS = new Set(
-  [
-    "https://elysrmedical.store",
-    "https://www.elysrmedical.store",
-    process.env.SITE_URL,
-    process.env.VERCEL_URL && process.env.VERCEL_ENV !== "production"
-      ? `https://${process.env.VERCEL_URL}`
-      : undefined,
-    process.env.NODE_ENV !== "production" ? "http://localhost:8080" : undefined,
-  ].filter(Boolean),
-);
+// (2026-11-14 · M5) الأصول من المصدر المشترك بـ request-guards (كانت منسوخة
+// حرفيًا في 5 ملفات — وأحدها نُسي فرفض بيئات المعاينة).
+const ALLOWED_ORIGINS = allowedOrigins();
 
 const MAX_BODY_SIZE_BYTES = 8_000;
 export const GOOGLE_SHEETS_TIMEOUT_MS = 10_000;
@@ -106,17 +98,18 @@ export function validateReviewPayload(payload) {
   if (trimmedText.length < REVIEW.MIN_TEXT) return "Review too short";
   if (trimmedText.length > REVIEW.MAX_TEXT) return "Review too long";
 
-  let name = "";
+  // (2026-11-15 · Round 5) `name`/`phone` كانا يُعيَّنان ثم لا يُقرآن خارج
+  // هذا البلوك (الدالة ترجع undefined فقط) — أي متغيّران ميتان. صارا const
+  // داخل الفرع: نفس الفحوص ونفس الرسائل بلا حالة غير مستخدمة.
   if (payload.reviewerName !== undefined) {
     if (typeof payload.reviewerName !== "string") return "Invalid reviewerName";
-    name = payload.reviewerName.trim();
+    const name = payload.reviewerName.trim();
     if (name.length > REVIEW.MAX_NAME) return "Name too long";
   }
 
-  let phone = "";
   if (payload.reviewerPhone !== undefined) {
     if (typeof payload.reviewerPhone !== "string") return "Invalid reviewerPhone";
-    phone = payload.reviewerPhone.trim();
+    const phone = payload.reviewerPhone.trim();
     if (phone) {
       const isLocalEgypt = /^01[0125][0-9]{8}$/.test(phone);
       const isInternational = /^\+[1-9][0-9]{6,14}$/.test(phone);

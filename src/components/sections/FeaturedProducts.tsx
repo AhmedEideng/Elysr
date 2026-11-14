@@ -1,12 +1,13 @@
 import { ProductCard } from "@/components/ProductCard";
-import { getFeaturedProducts } from "@/data/products";
+// (2026-11-14 · H5) الطبقة الخفيفة: نفس الاختيار بلا وصف كامل في المسار الحرج.
+import { getFeaturedCards } from "@/data/product-cards";
 import { useEffect, useMemo } from "react";
 import { trackViewItemList } from "@/lib/analytics";
 
 export function FeaturedProducts() {
   // البيانات محلية ثابتة — نحسبها مرة واحدة عبر useMemo.
   // لا حاجة لـ lazy loading أو effects هنا، فالحساب فوري ورخيص.
-  const featured = useMemo(() => getFeaturedProducts(), []);
+  const featured = useMemo(() => getFeaturedCards(), []);
 
   useEffect(() => {
     if (featured.length > 0) {

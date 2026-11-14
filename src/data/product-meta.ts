@@ -6,7 +6,7 @@
  */
 type ProductMetaForm = "oral" | "topical" | "device";
 
-export type ProductMetaProfile = {
+type ProductMetaProfile = {
   form: ProductMetaForm;
   hook: string;
 };

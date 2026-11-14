@@ -40,6 +40,35 @@ export default tseslint.config(
     },
   },
   {
+    /**
+     * (2026-11-14) ملفات JS الخادمية والسكربتات كانت **غير مُفحوصة إطلاقًا**:
+     * كتلة TS أعلاه محدودة بامتدادات ts/tsx فقط، فـ api/ وserver/ و
+     * scripts/ وpublic/scripts/ وconfig/ (34 ملفًا — أكثر من ثلث الشيفرة)
+     * كانت تمر بلا ESLint. أخطاء مثل متغير غير معرّف أو await داخل دالة غير
+     * async كانت تصل للإنتاج بلا أي حاجز.
+     */
+    files: ["**/*.{js,mjs,cjs}"],
+    extends: [js.configs.recommended],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: { ...globals.node, ...globals.browser },
+    },
+    rules: {
+      // سكربتات البناء تتعامل مع كائنات من ssrLoadModule/JSON بلا أنواع.
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      /**
+       * no-useless-assignment (قاعدة جديدة في ESLint 10) تعلّم على 7 مواضع
+       * قديمة كلها نمط واحد: `let x = default;` ثم إسناد مشروط داخل try أو
+       * if — والقراءة تحدث في مسار لاحق. القاعدة صحيحة شكليًا لكن إصلاحها
+       * يعني لمس منطق API حسّاس (submit-order/submit-review) مقابل لا شيء
+       * سلوكي. نُبقيها تحذيرًا بدل خطأ حتى لا يُغلق الباب، ونصلحها عند أول
+       * تعديل حقيقي في تلك الملفات.
+       */
+      "no-useless-assignment": "warn",
+    },
+  },
+  {
     // TanStack Router route modules intentionally export the generated `Route`
     // object beside their page components; its Vite plugin owns route HMR.
     files: ["src/routes/**/*.{ts,tsx}"],

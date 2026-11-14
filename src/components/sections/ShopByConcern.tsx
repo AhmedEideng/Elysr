@@ -1,11 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { Zap, Clock, Activity, Heart } from "lucide-react";
+// (2026-11-14 · H5) بطاقات المنتجات بدل الكتالوج الكامل — نفس المرشحين
+// ونفس الترتيب، بلا وصف طويل في المسار الحرج للصفحة الرئيسية.
 import {
-  getProductById,
-  getFeaturedProducts,
+  getCardById as getProductById,
+  getFeaturedCards as getFeaturedProducts,
   HOMEPAGE_CONCERN_CANDIDATES,
   HOMEPAGE_EXCLUDED_PRODUCT_IDS,
-} from "@/data/products";
+} from "@/data/product-cards";
 import { thumbUrl, assetUrl } from "@/lib/cache";
 
 // القوائم المرشحة (الأكثر مبيعاً بكل فئة) — مصدر واحد في src/data/products.ts

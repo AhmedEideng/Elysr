@@ -32,14 +32,14 @@ export function getShippingLabel(governorate: string): string {
   return GOVERNORATE_SHIPPING.find((g) => g.name === normalized)?.region ?? "وجه بحري";
 }
 
-export interface SheetSubmitResult {
+interface SheetSubmitResult {
   success: boolean;
   orderId?: string;
   error?: string;
 }
 
 // Longer than the API's 10-second upstream deadline, so it can report its result.
-export const ORDER_SUBMIT_TIMEOUT_MS = 15_000;
+const ORDER_SUBMIT_TIMEOUT_MS = 15_000;
 
 /** إرسال الطلب للشيت مع إرجاع نتيجة واضحة للطلب المباشر */
 export async function submitToGoogleSheets(

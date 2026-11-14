@@ -136,6 +136,17 @@ jobs:
       - name: Generated artifact health check
         run: npm run health-check
 
+      # 🔍 (2026-11-15 · Round 5) تدقيق SEO على dist/ — عناوين/أوصاف/كانونيكال/
+      # robots مقابل sitemap/JSON-LD/روابط ميتة/عناوين h1-h2/صور بلا alt.
+      # --strict يفشل الوظيفة على أي خطأ (التحذيرات لا تُفشل).
+      - name: SEO audit (dist)
+        run: npm run seo:audit:strict
+
+      # 🧪 (2026-11-15 · Round 6) تدقيق كتالوج المنتجات: السعر/المخزون/الصور/
+      # الـ slug/crossSell/سكيما Product/فيد التجّار/صفحات الأقسام.
+      - name: Product catalog audit
+        run: npm run product:audit:strict
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v6
         with:

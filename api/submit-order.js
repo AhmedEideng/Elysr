@@ -1,7 +1,12 @@
 import { MAX_ORDER_UNITS } from "../config/order-limits.js";
 import { createRateLimiter } from "./lib/rate-limiter.js";
 import { getClientIp } from "./lib/request-ip.js";
-import { getRequestOrigin, isAllowedOrigin, readPayload } from "./lib/request-guards.js";
+import {
+  allowedOrigins,
+  getRequestOrigin,
+  isAllowedOrigin,
+  readPayload,
+} from "./lib/request-guards.js";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -93,17 +98,9 @@ function getConfigDb() {
   }
 }
 
-const ALLOWED_ORIGINS = new Set(
-  [
-    "https://elysrmedical.store",
-    "https://www.elysrmedical.store",
-    process.env.SITE_URL,
-    process.env.VERCEL_URL && process.env.VERCEL_ENV !== "production"
-      ? `https://${process.env.VERCEL_URL}`
-      : undefined,
-    process.env.NODE_ENV !== "production" ? "http://localhost:8080" : undefined,
-  ].filter(Boolean),
-);
+// (2026-11-14 · M5) الأصول من المصدر المشترك بـ request-guards (كانت منسوخة
+// حرفيًا في 5 ملفات — وأحدها نُسي فرفض بيئات المعاينة).
+const ALLOWED_ORIGINS = allowedOrigins();
 
 const MAX_BODY_SIZE_BYTES = 64_000;
 // (2026-09-15) سقف إجمالي وحدات الطلب (مجموع كل الكميات) — حماية من طلبات
@@ -344,8 +341,10 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: "Rate limit exceeded" });
   }
 
+  // (2026-11-15 · Round 5) كان `= null` قيمة ميتة: كل مسار يصل للاستخدام
+  // إمّا يعيّنها في try أو يرجع من catch — لا قراءة للقيمة الابتدائية.
   /** @type {Record<string, any> | null} */
-  let payload = null;
+  let payload;
   try {
     payload = readPayload(req, MAX_BODY_SIZE_BYTES);
   } catch {

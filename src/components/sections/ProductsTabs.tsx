@@ -1,12 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { ProductCard } from "@/components/ProductCard";
+// (2026-11-14 · H5) نفس الترتيب والاستبعاد، لكن من طبقة البطاقات الخفيفة.
 import {
-  getProductsByCategory,
-  getFeaturedProducts,
+  getCardsByCategory as getProductsByCategory,
+  getFeaturedCards as getFeaturedProducts,
   HOMEPAGE_CONCERN_CANDIDATES,
   HOMEPAGE_EXCLUDED_PRODUCT_IDS,
-} from "@/data/products";
+} from "@/data/product-cards";
 import { ArrowLeft } from "lucide-react";
 import { trackViewItemList } from "@/lib/analytics";
 

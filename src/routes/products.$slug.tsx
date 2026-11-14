@@ -47,8 +47,16 @@ import { ShareButton } from "@/components/ShareButton";
 import { TopicHub } from "@/components/TopicHub";
 import { topicForProduct } from "@/data/topics";
 import { shareProductText, waShareUrl } from "@/lib/share";
-import { getProductBySlug, getProductsByCategory, getCrossSellsForProduct } from "@/data/products";
 import { assetUrl } from "@/lib/cache";
+
+// (2026-11-14 · H5) الكتالوج الكامل (89 منتجًا بوصفها ~47KB) لا يدخل الحزمة
+// الأولى: `routeTree.gen.ts` يستورد كل المسارات مسبقًا، فأي استيراد ثابت هنا
+// يسحب الكتالوج إلى المسار الحرج لكل صفحة. الاستيراد الديناميكي يبقيه حزمة
+// منفصلة تُحمَّل عند فتح صفحة منتج فقط.
+const loadCatalog = () => import("@/data/products");
+// (2026-11-15 · Round 7) محرك «منتجات قد تعجبك» — يُحمَّل مع الكتالوج في نفس
+// اللحظة، فلا تكلفة إضافية على أول رسم.
+const loadRelated = () => import("@/lib/internal-links");
 
 interface LinkedArticle {
   slug: string;
@@ -86,16 +94,24 @@ export const Route = createFileRoute("/products/$slug")({
       </Link>
     </div>
   ),
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
+    const [
+      { getProductBySlug, getProductsByCategory, getCrossSellsForProduct },
+      { relatedProductsFor },
+    ] = await Promise.all([loadCatalog(), loadRelated()]);
     const product = getProductBySlug(params.slug);
     if (!product) throw notFound();
 
     const crossSells = getCrossSellsForProduct(product);
 
-    const related = getProductsByCategory(product.category)
-      .filter((p) => p.id !== product.id && !crossSells.find((c) => c.id === p.id))
-      .sort((a, b) => a.id.localeCompare(b.id))
-      .slice(0, 4);
+    // (2026-11-15 · Round 7) كان «منتجات قد تعجبك» = أول 4 منتجات أبجديًا في
+    // القسم: 52 صفحة من 89 تعرض نفس الـ4 (صفحة شوكولاتة توصي بجينسنغ)، و55
+    // منتجًا بلا أي رابط داخل. المحرك يرتّب بالصلة (الشكل → السعر → عائلة
+    // الاسم → ألقاب البحث) ويوازن التوزيع بين كل منتجات القسم.
+    const related = relatedProductsFor(product, getProductsByCategory(product.category), {
+      limit: 4,
+      crossSellsOf: getCrossSellsForProduct,
+    });
 
     return { product, related, crossSells };
   },

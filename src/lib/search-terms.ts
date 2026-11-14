@@ -5,14 +5,26 @@
  *
  * الاتجاه ثنائي: البحث عن "نقط" يطابق منتجات "قطرات" والعكس.
  */
-const SEARCH_SYNONYMS: Record<string, string[]> = {
+export const SEARCH_SYNONYMS: Record<string, string[]> = {
   نقط: ["قطرات"],
   قطرات: ["نقط"],
+  سبراي: ["بخاخ", "spray"],
+  جيل: ["جل", "gel"],
+  چل: ["جل", "gel"],
 };
+
+/**
+ * (2026-11-14) مصدر واحد للمرادفات: كان `product-search.ts` يحمل قاموسًا
+ * موازيًا بخمسة مداخل مقابل مدخلين هنا، فما يقترحه الهيدر (`expandSearchTerm`)
+ * لا يطابق ما تعرضه صفحة النتائج، وأي إضافة يجب تكرارها مرتين. الآن الاثنان
+ * يقرآن من هذا القاموس — والوحدة تبقى خفيفة (بلا بيانات كتالوج) كي يستوردها
+ * SearchBar بلا سحب الحزمة الأولى.
+ */
+export const synonymsFor = (term: string): string[] => SEARCH_SYNONYMS[term] ?? [];
 
 /** يوسّع المصطلح: الأصل + مرادفاته (فارغ لو مفيش مرادفات). */
 export const expandSearchTerm = (q: string): string[] => {
   const term = q.trim();
   if (!term) return [];
-  return [term, ...(SEARCH_SYNONYMS[term] ?? [])];
+  return [term, ...synonymsFor(term)];
 };

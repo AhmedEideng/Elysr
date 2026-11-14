@@ -13,3 +13,9 @@ public/landing-pages/
 api/lib/products-db.json
 api/lib/bundles-db.json
 api/lib/config-db.json
+
+# ⚠️ index.html يحتوي سكربت علم الطلة الأولى مضمّناً، وCSP تسمح به عبر
+# sha256 محسوب من نصه **حرفياً** (config/security-headers.mjs + data-integrity).
+# إعادة تنسيقه (prettier --write .) تغيّر النص فتحجب السياسة السكربت ويظهر
+# وميض النص السادة في كل صفحة. لا تُزل هذا السطر.
+index.html

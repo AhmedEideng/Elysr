@@ -1,7 +1,35 @@
 /**
- * Shared request guards for serverless order/review handlers.
+ * Shared request guards for serverless handlers.
  * Endpoint-specific origin sets and body-size limits are passed by the caller.
  */
+
+/**
+ * (2026-11-14 · M5) مصدر واحد لقائمة الأصول المسموحة.
+ *
+ * كان كل endpoint يبني نسخته: ثلاثة منها (submit-order · submit-review ·
+ * reviews) تضيف SITE_URL وVERCEL_URL وlocalhost، وثلاثة (ga-pageview ·
+ * errors · csp-report) تُثبّت النطاقين فقط. النتيجة أن **أي بيئة غير
+ * الإنتاج** — preview على Vercel، staging، أو تشغيل محلي — كانت تُرجِع 403
+ * من نقاط القياس نفسها، فيضيع الـ fallback الذي بُني أصلًا لالتقاط الزيارات
+ * المفقودة، وتضيع تقارير الأخطاء وCSP بلا أثر مطلق.
+ *
+ * تُقرأ المتغيرات **وقت الاستدعاء** لا وقت التحميل، حتى تعمل الاختبارات
+ * والتحقق اليدوي بتغيير البيئة دون إعادة استيراد الوحدة.
+ */
+export const CANONICAL_ORIGINS = ["https://elysrmedical.store", "https://www.elysrmedical.store"];
+
+/** @param {Record<string, string | undefined>} [env] */
+export function allowedOrigins(env = process.env) {
+  return new Set(
+    [
+      ...CANONICAL_ORIGINS,
+      env.SITE_URL,
+      // معاينات Vercel لها نطاق عشوائي لكل نشرة — مسموح بها خارج الإنتاج فقط.
+      env.VERCEL_URL && env.VERCEL_ENV !== "production" ? `https://${env.VERCEL_URL}` : undefined,
+      env.NODE_ENV !== "production" ? "http://localhost:8080" : undefined,
+    ].filter(Boolean),
+  );
+}
 
 /** @param {import("express").Request} req @returns {string | undefined} */
 export function getRequestOrigin(req) {

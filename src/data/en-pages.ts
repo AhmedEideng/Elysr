@@ -38,6 +38,57 @@ export const enHome = {
   browseLabel: "Browse by category",
   noteLabel: "The full catalog, buying guides and educational articles are available in Arabic.",
   switchLabel: "العربية",
+  /**
+   * (2026-11-15 · SEO) كان مركز /en = 120 كلمة فقط (thin content في تدقيق
+   * dist). أُضيفت هنا ثلاث كتل نصية كل جملة فيها منقولة من صفحات عربية
+   * موجودة فعلاً (الشحن السري/الدفع عند الاستلام/واتساب/التحذيرات) — لا
+   * ادعاء جديد، فقط صياغة إنجليزية لما هو منشور.
+   */
+  howTitle: "How ordering works",
+  steps: [
+    {
+      title: "Choose and read first",
+      text: "Open the product page and read the ingredients, usage instructions and warnings before you order. Each listing states what the product does and what it does not.",
+    },
+    {
+      title: "Order with cash on delivery",
+      text: "Place the order from the site or through WhatsApp on +20 109 808 8206. Payment is cash on delivery where available, and our team confirms every order before it ships.",
+    },
+    {
+      title: "Discreet shipping to all governorates",
+      text: "Orders leave in neutral packaging with nothing on the outside describing the nature of the product, and are delivered to all governorates of Egypt.",
+    },
+  ],
+  assuranceTitle: "Why customers order from Elysr Medical",
+  assurances: [
+    "Original products selected from trusted sources, with the source and packaging stated on each page.",
+    "Prices and delivery fees shown before you confirm the order — no hidden charges at the door.",
+    "A support team on WhatsApp to answer questions about a product, an order or an exchange.",
+    "Educational content that does not promise a cure and does not replace a doctor or pharmacist.",
+  ],
+  faqs: [
+    {
+      question: "Are the products on Elysr Medical original?",
+      answer:
+        "Products are selected from trusted sources, and each product page states the source, the ingredients and the usage instructions. If you receive a product that does not match its description, contact us on WhatsApp and we will arrange an exchange.",
+    },
+    {
+      question: "Is the packaging discreet?",
+      answer:
+        "Yes. Orders ship in neutral, discreet packaging to all governorates, with no indication of the nature of the product on the outer package, to protect your privacy.",
+    },
+    {
+      question: "Do you offer cash on delivery?",
+      answer:
+        "Yes, cash on delivery is available wherever it is supported, and the delivery fee for your governorate is shown before you confirm the order.",
+    },
+    {
+      question: "Is the content on the site medical advice?",
+      answer:
+        "No. The content is educational only and does not replace consulting a doctor or pharmacist. If you have a chronic condition such as heart, blood pressure, diabetes, liver or kidney disease, or you take prescription medication, consult your doctor before using any product.",
+    },
+  ],
+  faqTitle: "Frequently asked questions",
 };
 
 export const enCategories: EnCategoryPage[] = [

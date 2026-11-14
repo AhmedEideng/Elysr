@@ -38,6 +38,7 @@ import {
 } from "@/lib/analytics";
 import { toast } from "sonner";
 import { getNextTier, PROMO_TAGLINE, isPromotionEnabled } from "@/lib/promo";
+import { BUNDLE_DISCOUNT_PERCENT } from "@/lib/site-config";
 import { assetUrl } from "@/lib/cache";
 
 export const Route = createFileRoute("/cart")({
@@ -484,7 +485,7 @@ function CartPage() {
             )}
             {bundleDiscount > 0 && appliedBundle && (
               <div className="text-sm flex justify-between font-bold text-emerald-800 rounded-lg px-3 py-2 bg-emerald-50 border border-emerald-200">
-                <span>🎁 خصم الباقة المكتملة (20%)</span>
+                <span>🎁 خصم الباقة المكتملة ({BUNDLE_DISCOUNT_PERCENT}%)</span>
                 <span>-{formatPrice(bundleDiscount) || "0 ج.م"}</span>
               </div>
             )}

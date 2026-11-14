@@ -39,6 +39,19 @@ dist-ssr
 # PWA service worker (deployed manually, not from src)
 public/sw.js.bak
 
+# 🧾 (2026-11-14 · M2) مخرجات مولَّدة في `prebuild` بواسطة
+# scripts/generate-sitemap.mjs — كانت ملتزمة في git، فتتّسخ الشجرة بعد كل
+# بناء (تعارضات merge + «نسخة حقيقية» بتواريخ قديمة لأي أداة تقرأ الملف من
+# git). البناء يولّدها دائمًا، و`predev` يولّدها قبل تشغيل بيئة التطوير.
+public/sitemap.xml
+public/sitemap-images.xml
+public/sitemap-index.xml
+public/robots.txt
+public/catalog-feed.xml
+public/catalog-feed.csv
+public/catalog-feed.txt
+public/landing-pages/*.json
+
 # Husky
 .husky/_
 

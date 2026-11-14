@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ShoppingCart, Heart, Star } from "lucide-react";
-import type { Product } from "@/data/product-types";
+import type { ProductCardView } from "@/data/product-types";
 import { formatPrice } from "@/data/product-types";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
@@ -20,14 +20,18 @@ export function ProductCard({
   listName,
   priority = false,
 }: {
-  product: Product;
+  // (2026-11-14 · H5) البطاقة تقرأ حقول العرض فقط — فالرئيسية تمرّر
+  // ProductCardView الخفيفة، وصفحات الأقسام تمرّر Product الكامل بلا تغيير.
+  product: ProductCardView;
   listName?: string;
   priority?: boolean;
 }) {
   const { add } = useCart();
   const { has: hasInWishlist, toggle: toggleWishlist } = useWishlist();
   const promoOn = isPromotionEnabled();
-  const useBadge = getUseBadge(product);
+  const useBadge = product.badgeLabel
+    ? { label: product.badgeLabel, className: product.badgeClass ?? "" }
+    : getUseBadge(product);
   const wishlisted = hasInWishlist(product.id);
   const showImage = Boolean(product.image);
   const effectiveListName = listName ?? "general_product_list";

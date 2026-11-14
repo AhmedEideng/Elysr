@@ -203,6 +203,17 @@
   ],
   "redirects": [
     {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.elysrmedical.store"
+        }
+      ],
+      "destination": "https://elysrmedical.store/$1",
+      "permanent": true
+    },
+    {
       "source": "/products/d-08",
       "destination": "/products/digital-electric-vacuum-pump-9-speeds",
       "permanent": true

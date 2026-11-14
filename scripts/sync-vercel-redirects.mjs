@@ -427,11 +427,19 @@ async function syncRedirects() {
       }
     }
 
+    // (2026-11-14) قواعد مستوى المنصة (`has: host`) — مثل www → النطاق
+    // الأساسي — لا تُدار من هذا السكربت (لا هي منتجات ولا aliases مسارات).
+    // نعزلها ونعيد تركيبها في المقدمة كما هي، وإلا رفض السكربت الكتابة أو
+    // فقد القاعدة عند أول sync.
+    const isHostScoped = (r) => Array.isArray(r.has) && r.has.length > 0;
+    const platformRules = (vercel.redirects || []).filter(isHostScoped);
+    const pathRules = (vercel.redirects || []).filter((r) => !isHostScoped(r));
+
     // 🛡️ حماية من الحذف الصامت: أي redirect موجود في vercel.json الحالية
     // ومش في قائمة السكربت = السكربت مش المصدر الكامل → نرفض الكتابة
     // (الـ redirects الجديدة تتضاف للسكربت الأول، مش للـ JSON مباشرة).
     const newBySource = new Map(productRedirects.map((r) => [r.source, r]));
-    const dropped = (vercel.redirects || []).filter(
+    const dropped = pathRules.filter(
       (r) => !newBySource.has(r.source) && !restoredPaths.has(r.source),
     );
     if (dropped.length > 0) {
@@ -445,15 +453,16 @@ async function syncRedirects() {
 
     // نقدر الترتيب الحالي: نحدّث كل entry في مكانه (لو اتغيرت الوجهة)،
     // ونضيف الجديد في الآخر — idempotent (نفس الملف → صفر diff).
-    const merged = (vercel.redirects || [])
+    const merged = pathRules
       .filter((r) => !restoredPaths.has(r.source))
       .map((r) => newBySource.get(r.source) || r);
-    const existingSources = new Set((vercel.redirects || []).map((r) => r.source));
+    const existingSources = new Set(pathRules.map((r) => r.source));
     for (const r of productRedirects) {
       if (!existingSources.has(r.source)) merged.push(r);
     }
 
-    vercel.redirects = merged;
+    // قواعد المنصة أولًا (ترتيب التقييم في Vercel من الأعلى للأسفل).
+    vercel.redirects = [...platformRules, ...merged];
     writeFileSync(vercelPath, `${JSON.stringify(vercel, null, 2)}\n`, "utf-8");
 
     console.log(`✓ vercel.json redirects synced (${productRedirects.length} redirects)`);

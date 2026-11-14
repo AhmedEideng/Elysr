@@ -22,10 +22,17 @@
 
 import { getClientIp } from "./lib/request-ip.js";
 import { createEndpointRateLimiter } from "./lib/endpoint-rate-limiter.js";
+import { allowedOrigins } from "./lib/request-guards.js";
 
 const checkRateLimit = createEndpointRateLimiter({ windowMs: 60_000, max: 30 });
 
-const ALLOWED_ORIGINS = new Set(["https://elysrmedical.store", "https://www.elysrmedical.store"]);
+/**
+ * (2026-11-14 · M5) كانت النطاقات مثبَّتة هنا — فحين يعمل الموقع على معاينة
+ * Vercel أو staging أو نطاق مخصص، تُرجِع النقطة 403 ويضيع الـ fallback الذي
+ * وُجد أصلًا لالتقاط الزيارات التي يفشل فيها gtag. القائمة الآن من المصدر
+ * المشترك مع بقية الـ endpoints.
+ */
+const ALLOWED_ORIGINS = allowedOrigins();
 
 const MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID || "G-V3X7Q3D0RR";
 const SITE_ORIGIN = "https://elysrmedical.store";

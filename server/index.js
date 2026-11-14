@@ -33,6 +33,8 @@ import { fileURLToPath } from "node:url";
 // vercel.json نسخة منه والـ parity check (verify-security-headers.mjs)
 // بتضمن إن الاتنين ما يتفرقوش.
 import { CSP_POLICY, buildReportToHeader } from "../config/security-headers.mjs";
+import { HTML_MAX_AGE, cachePolicyForFile } from "./cache-policy.js";
+import { canonicalHostRedirect } from "./canonical-host.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
@@ -117,9 +119,8 @@ function fileForUrl(url) {
 }
 
 // ── Cache control helpers ──
-const STATIC_MAX_AGE = "public, max-age=31536000, immutable";
-const HTML_MAX_AGE = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400";
-
+// (2026-11-14) سياسات الكاش انتقلت إلى ملف مستقل قابل للاختبار
+// (server/cache-policy.js) — كانت مدفونة هنا فلا يراها أي اختبار.
 /** @param {import("express").Response} res @param {string} policy */
 function setCache(res, policy) {
   res.setHeader("Cache-Control", policy);
@@ -175,7 +176,17 @@ app.use(handleBodyParserError);
 // (nginx/Caddy على VPS، أو Vercel edge بنفسه). لو اتغير الشكل (Cloudflare +
 // LB + Nginx ...) لازم يتضبط الرقم ده يطابق عدد الـ proxies الموثوقة —
 // وإلا الـ rate limiting بيبني على XFF ممكن يتزوير.
-app.set("trust proxy", 1);
+//
+// (2026-11-14) صار الرقم قابلًا للضبط عبر TRUST_PROXY_HOPS — نفس المتغيّر
+// الذي يقرأه api/lib/request-ip.js لبناء مفتاح حد المعدّل. القيمة الافتراضية
+// تبقى 1 (سلوك Express السابق لـ protocol/host)، لكن **مفتاح حد المعدّل**
+// لا يستخدم XFF إلا عند ضبط المتغيّر صراحةً (opt-in) — لأن 30 طلبًا/دقيقة
+// كانت تصبح دلوًا عالميًا واحدًا لكل الزوار خلف البروكسي.
+const TRUST_PROXY_HOPS = (() => {
+  const parsed = Number.parseInt(process.env.TRUST_PROXY_HOPS || "0", 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
+})();
+app.set("trust proxy", TRUST_PROXY_HOPS > 0 ? TRUST_PROXY_HOPS : 1);
 
 // Security headers (unified and synchronized with vercel.json for perfect security parity) - 2026 hardened
 app.use((req, res, next) => {
@@ -228,6 +239,17 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   if (req.method !== "GET" && req.method !== "HEAD") return next();
 
+  // (2026-11-14) www → النطاق الأساسي بتحويل دائم — نفس قاعدة vercel.json
+  // (`has: host`). كان النطاقان يُخدمان بنفس المحتوى، والـ canonical وحده
+  // هو ما يمنع التكرار؛ 301 إشارة أقوى وأوضح.
+  const wwwDestination = canonicalHostRedirect({
+    hostHeader: req.headers.host,
+    siteUrl: process.env.SITE_URL,
+    protocol: process.env.NODE_ENV === "production" ? "https" : req.protocol,
+    originalUrl: req.originalUrl,
+  });
+  if (wwwDestination) return res.redirect(301, wwwDestination);
+
   // Vercel parity (trailingSlash: false): الصيغة القانونية بلا شلطة —
   // /education/ → 301 /education (Vercel يفعلها بـ 308، و301 هنا هو القياسي).
   // بدون هذا كانت express.static تسبق المعالج الرئيسي وتحوّل /education
@@ -273,11 +295,7 @@ app.use(
     immutable: true,
     redirect: false,
     setHeaders(res, filePath) {
-      if (filePath.endsWith(".html")) {
-        res.setHeader("Cache-Control", HTML_MAX_AGE);
-      } else {
-        res.setHeader("Cache-Control", STATIC_MAX_AGE);
-      }
+      res.setHeader("Cache-Control", cachePolicyForFile(filePath));
     },
   }),
 );
@@ -352,7 +370,20 @@ function boot() {
     console.log(`   Port:   ${PORT}`);
     console.log(`   URL:    http://0.0.0.0:${PORT}`);
     console.log(`   SSG:    ${ssgReady ? "✅ ready" : "⚠️  run 'npm run build:ssr' first"}`);
+    console.log(
+      `   Trust proxy: ${TRUST_PROXY_HOPS > 0 ? `${TRUST_PROXY_HOPS} hop(s) — client IP from X-Forwarded-For` : "off — client IP = socket address"}`,
+    );
     console.log("   Rate limit: in-process + Google Apps Script per-phone limit");
+    // (2026-11-14) تحذير إقلاع: بدون TRUST_PROXY_HOPS خلف بروكسي، كل الزوار
+    // يتشاركون مفتاح حدّ واحد (30 طلبًا/دقيقة للموقع كله) — عطل تجاري صامت
+    // لا يظهر في أي اختبار. الأفضل أن يصرخ الخادم عند الإقلاع.
+    if (process.env.NODE_ENV === "production" && TRUST_PROXY_HOPS === 0) {
+      console.warn(
+        "⚠️  TRUST_PROXY_HOPS is not set. If this server runs behind nginx/Caddy/CDN, " +
+          "all visitors share ONE rate-limit bucket (30 req/min). Set TRUST_PROXY_HOPS to the " +
+          "number of trusted proxies (1 for a single nginx/Caddy).",
+      );
+    }
     console.log("");
   });
 

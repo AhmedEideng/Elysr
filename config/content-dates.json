@@ -1,0 +1,23 @@
+{
+  "src/data/landing-pages.ts": "2026-11-08",
+  "src/data/products.ts": "2026-11-13",
+  "src/data/products/devices.ts": "2026-10-15",
+  "src/data/products/men.ts": "2026-10-15",
+  "src/data/products/women.ts": "2026-11-13",
+  "src/routes/about.tsx": "2026-11-08",
+  "src/routes/contact.tsx": "2026-09-29",
+  "src/routes/education.tsx": "2026-09-29",
+  "src/routes/en.index.tsx": "2026-10-11",
+  "src/routes/en.products.devices.tsx": "2026-10-11",
+  "src/routes/en.products.men.tsx": "2026-10-11",
+  "src/routes/en.products.women.tsx": "2026-10-11",
+  "src/routes/index.tsx": "2026-10-31",
+  "src/routes/medical-review-board.tsx": "2026-09-30",
+  "src/routes/privacy.tsx": "2026-09-29",
+  "src/routes/products.devices.tsx": "2026-11-08",
+  "src/routes/products.men.tsx": "2026-11-08",
+  "src/routes/products.women.tsx": "2026-11-08",
+  "src/routes/returns.tsx": "2026-09-29",
+  "src/routes/shipping.tsx": "2026-09-29",
+  "src/routes/terms.tsx": "2026-09-29"
+}

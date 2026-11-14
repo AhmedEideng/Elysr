@@ -71,22 +71,43 @@ function arabicCountNoun(n) {
 const TRUNCATED_META = [];
 
 /**
+ (2026-11-14) التحذير كان يقول «قصّر النص» دون أن يقول **أي صفحة** — فكان
+ من المستحيل تقريبًا العثور على المصدر بين 286 صفحة. الصفحة الحالية تُسجّل
+ هنا (تُضبط في renderHtml) فيذكر البلاغ المسار الكانوني، ويُجمَّع بالمسار
+ حتى لا يتكرر نفس النص عشر مرات.
+ */
+let CURRENT_ROUTE = "";
+
+/**
  (2026-10-10) مصدر واحد: خوارزمية الاقتطاع تعيش في src/lib/seo.ts فقط
  وتُحقن هنا من main عبر ssrLoadModule؛ هذا الغلاف يضيف بلاغ الاقتطاع
  ولا يكرر المنطق (كانت نسختان متوازيتان خطر انزلاق صامت).
  */
 let seoMakeMetaDescription = null;
-function makeMetaDescription(text = "", maxLength = 155) {
+function makeMetaDescription(text = "", maxLength = 155, route = CURRENT_ROUTE) {
   if (!seoMakeMetaDescription) {
     throw new Error("makeMetaDescription called before seo.ts injection in main()");
   }
+  const normalized = String(text).trim().replace(/\s+/g, " ");
   const out = seoMakeMetaDescription(text, maxLength);
-  if (out.endsWith("…")) {
-    TRUNCATED_META.push({
-      length: String(text).trim().replace(/\s+/g, " ").length,
-      maxLength,
-      preview: `${out.slice(-40)}`,
-    });
+  // (2026-11-14) البلاغ صار يخصّ **الاقتطاع الحقيقي** فقط: النص المصدر أطول
+  // من الميزانية. قبل ذلك كانت نصوص تنتهي بـ «…» في أصلها أو نصوص اقتُطعت
+  // مرة وأُعيد تمريرها تُبلَّغ كأنها جديدة — فظهرت إدخالات كاذبة ومكرّرة
+  // وأخفت العشرة الحقيقية.
+  if (normalized.length > maxLength && out.endsWith("…")) {
+    // تجميع بالمسار + النص: الصفحة الواحدة تطلب الوصف أكثر من مرة (meta +
+    // og + twitter) فنرى نفس النص 3 مرات بلا هذه التجميدة.
+    const length = normalized.length;
+    const key = `${route}|${length}`;
+    if (!TRUNCATED_META.some((t) => t.key === key)) {
+      TRUNCATED_META.push({
+        key,
+        route: route || "(unknown route)",
+        length,
+        maxLength,
+        preview: `…${out.slice(-40)}`,
+      });
+    }
   }
   return out;
 }
@@ -228,6 +249,9 @@ function buildHtml(template, opts) {
   const realDims = !imageWidth || !imageHeight ? imageDims(image) : null;
   const ogW = imageWidth || (realDims && realDims.width) || 1200;
   const ogH = imageHeight || (realDims && realDims.height) || 631;
+
+  // (2026-11-14) المسار الحالي لبلاغ الاقتطاع (انظر CURRENT_ROUTE أعلاه).
+  CURRENT_ROUTE = String(canonical || "").replace(SITE_URL, "") || "/";
 
   let html = template;
   // (2026-10-11) صفحات /en تستبدل لغة المستند واتجاهه (القالب عربي افتراضاً).
@@ -499,8 +523,10 @@ async function prerender() {
       HOMEPAGE_CONCERN_CANDIDATES,
       HOMEPAGE_EXCLUDED_PRODUCT_IDS,
     } = await vite.ssrLoadModule("/src/data/products.ts");
-    const { getProductReviews, reviewDatePublished, VISIBLE_REVIEW_COUNT } =
-      await vite.ssrLoadModule("/src/lib/legacy-product-reviews.ts");
+    // (2026-11-15 · Round 5) reviewDatePublished كان يُفَكّ ولا يُستخدم.
+    const { getProductReviews, VISIBLE_REVIEW_COUNT } = await vite.ssrLoadModule(
+      "/src/lib/legacy-product-reviews.ts",
+    );
     const {
       makeProductMetaDescription,
       makeProductMetaTitle,
@@ -516,18 +542,15 @@ async function prerender() {
       getRelatedArticles,
       getArticlesForLandingPage,
       getArticlesForProduct,
+      relatedProductsFor,
     } = await vite.ssrLoadModule("/src/lib/internal-links.ts");
     const { editorialTrustSignals } = await vite.ssrLoadModule(
       "/src/data/editorial-trust-signals.ts",
     );
     const { BUNDLE_DISCOUNT_RATE } = await vite.ssrLoadModule("/src/lib/bundle-discount.ts");
     const { getProductFAQs } = await vite.ssrLoadModule("/src/data/product-faqs.ts");
-    const {
-      GOVERNORATE_SHIPPING,
-      SHIPPING_DELIVERY_TEXT,
-      FREE_SHIPPING_THRESHOLD,
-      getShippingDeliveryWindow,
-    } = await vite.ssrLoadModule("/src/lib/site-config.ts");
+    const { GOVERNORATE_SHIPPING, SHIPPING_DELIVERY_TEXT, FREE_SHIPPING_THRESHOLD } =
+      await vite.ssrLoadModule("/src/lib/site-config.ts");
     // نفس أرقام صفحة /shipping الحقيقية (src/routes/shipping.tsx يحسبها من
     // GOVERNORATE_SHIPPING و FREE_SHIPPING_THRESHOLD) — حتى لا تختلف السياسة
     // المعلنة في النسخة الثابتة عن المعلنة بعد الـ hydration.
@@ -582,6 +605,9 @@ async function prerender() {
     const { alternatesFor, enHome, enCategories } =
       await vite.ssrLoadModule("/src/data/en-pages.ts");
 
+    // (2026-11-15 · SEO) سقف عنوان SERP في مكان واحد (src/lib/serp-title.ts).
+    const { fitSerpTitle } = await vite.ssrLoadModule("/src/lib/serp-title.ts");
+
     // (2026-09-17) Topic Authority: روابط الموضوعات في الـ HTML الثابت
     // (قابل للزحف من غير JS) — نفس محتوى TopicHub في الـ SPA.
     let TOPICS = [];
@@ -592,7 +618,7 @@ async function prerender() {
       t.pillarKind === "article"
         ? `/education/${t.pillarSlug}`
         : `/products/guides/${t.pillarSlug}`;
-    let isPillarPath = (p) => false;
+    let isPillarPath = () => false;
     try {
       const topicsMod = await vite.ssrLoadModule("/src/data/topics.ts");
       TOPICS = topicsMod.TOPICS || [];
@@ -1362,6 +1388,9 @@ ${homeArticlesBody}
 
     for (const product of products) {
       // Same helper + default length as src/routes/products.$slug.tsx head().
+      // (2026-11-15 · SEO) السقف يبقى 70 لصور المنتجات: أسماء الكتالوج
+      // تُنشر كما هي (اختبار seo.test.ts يحرس ذلك)، والحد 62 محفوظ للعناوين
+      // التحريرية التي نكتبها نحن (مقالات/أدلة) حيث القرار بيد المحرر.
       const title = makeProductMetaTitle(product.name, 70, product.titleLatin);
       // 🎯 وصف غني بالبيانات الفريدة (السعر، الشحن، ومعلومات المنتج) لمنع Google من إعادة كتابته بوصف الموقع العام
       const desc = makeProductMetaDescription(product);
@@ -1434,11 +1463,14 @@ ${homeArticlesBody}
       // React removes the two cross-sell members, applies the catalog sorter,
       // then takes four cards. The old prerender used the raw catalog prefix,
       // so 14 product pages showed different related products before hydration.
+      // (2026-11-15 · Round 7) نفس محرك الصلة الذي تستخدمه واجهة React
+      // (`relatedProductsFor`) — كان الاختيار «أول 4 أبجديًا» فتعرض 52 صفحة
+      // نفس المنتجات الأربعة. مصدر واحد = لا اختلاف بين HTML الثابت والمتصفح.
       const crossSells = getCrossSellsForProduct(product);
-      const relatedProducts = getProductsByCategory(product.category)
-        .filter((p) => p.id !== product.id && !crossSells.some((c) => c.id === p.id))
-        .sort((a, b) => a.id.localeCompare(b.id))
-        .slice(0, 4);
+      const relatedProducts = relatedProductsFor(product, getProductsByCategory(product.category), {
+        limit: 4,
+        crossSellsOf: getCrossSellsForProduct,
+      });
       const relatedBody =
         relatedProducts.length > 0
           ? `<h2>منتجات قد تعجبك أيضاً</h2><ul>${relatedProducts
@@ -1527,9 +1559,14 @@ ${homeArticlesBody}
 
       for (const article of articles) {
         // 🎯 العنوان بلا لاحقة brand لتفادي تجاوز 65 حرفاً (الـ brand في schema).
-        const title = article.title;
+        // (2026-11-15 · SEO) `seoTitle` عنوان SERP مختصر: العناوين الطويلة
+        // تظهر مقتطعة في Google، فصار لكل مقالة عنوان عرض منفصل عن H1
+        // (H1 وheadline يبقيان النص الكامل). لا اقتطاع هنا — القيمة بيد المحرر.
+        const title = article.seoTitle ?? article.title;
         // 🎯 meta description مُقتطع (الـ excerpt قد يطُول أحياناً).
-        const desc = makeMetaDescription(article.excerpt);
+        // (2026-11-14) المسار يُمرَّر صريحًا: البلاغ هنا يُبنى قبل buildHtml،
+        // فـ CURRENT_ROUTE كان لا يزال مسار الصفحة السابقة.
+        const desc = makeMetaDescription(article.excerpt, 155, `/education/${article.slug}`);
         // Hydrated articleSchema() uses absoluteUrl() (no ?v= suffix).
         const img = article.image
           ? article.image.startsWith("http")
@@ -1617,8 +1654,11 @@ ${homeArticlesBody}
                 ];
         // (2026-09-28) يطابق ArticleContentWithAds: الشارة نص عادي وh3 باسم
         // المنتج فقط — العنوان القديم «الحل المقترح: X» كان يختلف عمّا يُرسم.
+        // (2026-11-15 · SEO/A11y) كان h3 يجي مباشرة بعد h1 (قفزة h1→h3 في
+        // 15 صفحة مقالة). البلوك هنا قسم مستقل أعلى مستوى داخل المقال، فهو h2
+        // — العناصر h3 داخل الأقسام الأخرى تبقى كما هي.
         const articleAdHtml = (product) =>
-          `<section><p>الحل المقترح</p><h3>${esc(product.name)}</h3><p>${esc(product.description)}</p><p><a href="${SITE_URL}/products/${product.slug}">عرض المنتج والشراء</a></p></section>`;
+          `<section><p>الحل المقترح</p><h2>${esc(product.name)}</h2><p>${esc(product.description)}</p><p><a href="${SITE_URL}/products/${product.slug}">عرض المنتج والشراء</a></p></section>`;
         const paragraphs = contentParagraphs
           .map((paragraph, index) => {
             const ad = adPositions.find((position) => position.index === index);
@@ -1842,7 +1882,8 @@ ${homeArticlesBody}
         `;
 
         const html = buildHtml(template, {
-          title: page.metaTitle,
+          // لاحقة العلامة التجارية تُحذف وحدها حين تتجاوز السقف (12 صفحة دليل).
+          title: fitSerpTitle(page.metaTitle || page.title),
           description: page.metaDescription,
           image: `${SITE_URL}/og-default.webp`,
           canonical,
@@ -1883,13 +1924,39 @@ ${homeArticlesBody}
       locale: "en_US",
       hreflang: alternatesFor("/en"),
       navLinks: enNav,
-      jsonLd: [breadcrumbSchema([{ name: "Home", url: "/en" }])],
+      // (2026-11-15 · SEO) FAQPage على مركز /en — يطابق أسئلة arabic hub
+      // المنشورة (ترجمة) ويُتيح ظهور النتائج الغنية بالإنجليزية.
+      jsonLd: [
+        breadcrumbSchema([{ name: "Home", url: "/en" }]),
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: (enHome.faqs || []).map((f) => ({
+            "@type": "Question",
+            name: f.question,
+            acceptedAnswer: { "@type": "Answer", text: f.answer },
+          })),
+        },
+      ],
       imageAlt: enHome.title,
-      bodyContent: `<h1>${esc(enHome.h1)}</h1><p>${esc(enHome.intro)}</p><h2>${esc(
-        enHome.browseLabel,
-      )}</h2><ul>${enCategories
-        .map((c) => `<li><a href="${SITE_URL}${c.path}">${esc(c.heroTitle)}</a></li>`)
-        .join("")}</ul><p>${esc(enHome.noteLabel)} <a href="${SITE_URL}/">النسخة العربية</a></p>`,
+      bodyContent:
+        `<h1>${esc(enHome.h1)}</h1><p>${esc(enHome.intro)}</p>` +
+        `<h2>${esc(enHome.browseLabel)}</h2><ul>${enCategories
+          .map((c) => `<li><a href="${SITE_URL}${c.path}">${esc(c.heroTitle)}</a></li>`)
+          .join("")}</ul>` +
+        // كُتَل المحتوى الجديدة: خطوات الطلب + الضمانات + الأسئلة الشائعة.
+        `<h2>${esc(enHome.howTitle)}</h2>` +
+        (enHome.steps || [])
+          .map((step) => `<h3>${esc(step.title)}</h3><p>${esc(step.text)}</p>`)
+          .join("") +
+        `<h2>${esc(enHome.assuranceTitle)}</h2><ul>${(enHome.assurances || [])
+          .map((item) => `<li>${esc(item)}</li>`)
+          .join("")}</ul>` +
+        `<h2>${esc(enHome.faqTitle)}</h2>` +
+        (enHome.faqs || [])
+          .map((f) => `<h3>${esc(f.question)}</h3><p>${esc(f.answer)}</p>`)
+          .join("") +
+        `<p>${esc(enHome.noteLabel)} <a href="${SITE_URL}/">النسخة العربية</a></p>`,
     });
     writeFileSync(resolve(enDir, "index.html"), hubHtml);
     enCount++;
@@ -1954,8 +2021,8 @@ ${homeArticlesBody}
       console.warn(
         `\n⚠️  ${TRUNCATED_META.length} meta description اقتُطع بـ «…» أثناء البناء — قصّر النص في المصدر:`,
       );
-      for (const t of TRUNCATED_META.slice(0, 10))
-        console.warn(`    · ${t.length} حرف (الحد ${t.maxLength}) …${t.preview}`);
+      for (const t of TRUNCATED_META.slice(0, 20))
+        console.warn(`    · ${t.route} — ${t.length} حرف (الحد ${t.maxLength}) ${t.preview}`);
     }
   } finally {
     await vite.close();

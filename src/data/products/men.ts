@@ -141,7 +141,10 @@ export const men: Product[] = [
   {
     id: "m-06",
     slug: "treand-gel",
-    name: "جل TREAND للرجال",
+    // (2026-11-15 · تدقيق المنتجات) الاسم كان «جل TREAND للرجال» = 17 حرفًا،
+    // أي عنوان صفحة أقصر من أن يحمل كلمة مفتاحية في SERP. الاسم الجديد يطابق
+    // nameEn والوصف (جل تأخير مائي) دون ادعاء جديد. **الـ slug لم يُمس**.
+    name: "جل تريند للتأخير للرجال (TREAND Delay Gel)",
     nameEn: "TREAND Delay Gel for Men",
     category: "men",
     searchAliases: ["جيل", "تأخير", "جل تريند", "جيل تريند", "TREAND Delay Gel for Men"],

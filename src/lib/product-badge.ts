@@ -1,13 +1,21 @@
 import type { Product } from "@/data/product-types";
 
-export type UseBadge = { label: string; className: string };
+type UseBadge = { label: string; className: string };
 
 /**
  * The small use-case badge shown on every product card.
  * Kept in one module so the prerender shell and hydrated React card never
  * disagree about the visible badge text.
  */
-export function getUseBadge(product: Product): UseBadge {
+/**
+ * (2026-11-14 · H5) تقبل الآن «بطاقة المنتج» أيضًا: الشارة تُحسب من نصوص
+ * الوصف التي لا تحملها البطاقة، لذلك تُحسَب مسبقًا وقت التوليد وتُخزَّن في
+ * `badgeLabel`/`badgeClass` — وهذه الدالة تبقى للنص الكامل (صفحة المنتج).
+ */
+type BadgeSource = Pick<Product, "id" | "name" | "category"> &
+  Partial<Pick<Product, "nameEn" | "slug" | "description" | "ingredients" | "usage" | "benefits">>;
+
+export function getUseBadge(product: BadgeSource): UseBadge {
   const text = [
     product.name,
     product.nameEn,

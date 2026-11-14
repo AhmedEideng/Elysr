@@ -1,5 +1,39 @@
 import { Star, CheckCircle, ThumbsUp, EyeOff } from "lucide-react";
-import { getProductReviews, type ProductCategory } from "@/lib/legacy-product-reviews";
+import {
+  getArchivedReviewSummary,
+  getProductReviews,
+  type ProductCategory,
+} from "@/lib/legacy-product-reviews";
+
+/**
+ * ⭐ نجوم بمعدّل حقيقي (2026-11-14).
+ * قبل ذلك كانت الصفحة ترسم 5 نجوم ذهبية ثابتة لأي تقييم — فمنتج بـ 4.6 يظهر
+ * كأنه 5/5، وهو تضليل بصري + تعارض مع `aggregateRating` في الـ schema.
+ * التنفيذ: طبقة رمادية (خلفية) + طبقة ذهبية مقصوصة بعرض = النسبة المئوية،
+ * فلا حاجة لأيقونات نصف نجمة ولا لمكتبة إضافية.
+ */
+function RatingStars({ value, className = "h-6 w-6" }: { value: number; className?: string }) {
+  const clamped = Math.max(0, Math.min(5, value));
+  const percent = (clamped / 5) * 100;
+  return (
+    <div className="relative inline-flex" role="img" aria-label={`التقييم ${clamped} من 5`}>
+      <div className="flex text-amber-200">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <Star key={i} className={className} />
+        ))}
+      </div>
+      <div
+        className="absolute inset-y-0 start-0 flex overflow-hidden text-amber-500"
+        style={{ width: `${percent}%` }}
+        aria-hidden="true"
+      >
+        {[0, 1, 2, 3, 4].map((i) => (
+          <Star key={i} className={`${className} shrink-0 fill-current`} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function LegacyProductReviews({
   rating,
@@ -20,6 +54,12 @@ export function LegacyProductReviews({
     category,
     Math.min(reviewsCount, Math.max(1, maxVisibleReviews)),
   );
+
+  // (2026-11-14) مصدر واحد للأرقام المعروضة: ملخص الأرشيف نفسه الذي يبني
+  // `aggregateRating` في الـ schema — فالواجهة والـ markup لا يتفرقان أبداً.
+  const archivedSummary = getArchivedReviewSummary(slug);
+  const displayRating = archivedSummary?.rating ?? rating;
+  const displayCount = archivedSummary?.reviewCount ?? reviewsCount;
 
   if (!reviews.length) return null;
 
@@ -45,18 +85,17 @@ export function LegacyProductReviews({
 
         <div className="flex flex-col items-center md:items-end">
           <div className="flex items-center gap-3 text-xl font-black">
-            <div className="flex text-amber-500">
-              <Star className="h-6 w-6 fill-current" />
-              <Star className="h-6 w-6 fill-current" />
-              <Star className="h-6 w-6 fill-current" />
-              <Star className="h-6 w-6 fill-current" />
-              <Star className="h-6 w-6 fill-current" />
-            </div>
-            <span className="text-4xl">{rating}</span>
+            <RatingStars value={displayRating} />
+            <span className="text-4xl">{displayRating}</span>
           </div>
           <p className="text-xs font-bold text-muted-foreground mt-1">
-            بناءً على {reviewsCount} تقييم سابق
+            بناءً على {displayCount} تقييم سابق
           </p>
+          {reviews.length < displayCount ? (
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              (نعرض {reviews.length} من أصل {displayCount} — الأحدث أولاً)
+            </p>
+          ) : null}
         </div>
       </div>
 

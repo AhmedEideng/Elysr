@@ -98,7 +98,7 @@ export const GOVERNORATE_SHIPPING: GovernorateShipping[] = [
   { name: "بورسعيد", shipping: 70, region: "وجه بحري" },
   { name: "شمال سيناء", shipping: 120, region: "سيناء" },
   { name: "جنوب سيناء", shipping: 120, region: "سيناء" },
-  { name: "البحر الأحمر", shipping: 120, region: "وجه بحري" },
+  { name: "البحر الأحمر", shipping: 120, region: "وجه قبلي" },
   { name: "الفيوم", shipping: 90, region: "وجه قبلي" },
   { name: "بني سويف", shipping: 90, region: "وجه قبلي" },
   { name: "المنيا", shipping: 90, region: "وجه قبلي" },
@@ -109,6 +109,19 @@ export const GOVERNORATE_SHIPPING: GovernorateShipping[] = [
   { name: "أسوان", shipping: 90, region: "وجه قبلي" },
   { name: "الوادي الجديد", shipping: 90, region: "وجه قبلي" },
 ];
+
+/**
+ * 🎁 نسبة خصم الباقة (المصدر الوحيد) — 20%.
+ * (2026-11-14) انتقلت هنا من bundle-discount.ts لأن هذا الملف هو SSOT
+ * للإعدادات المشتركة بين الواجهة والسيرفر (والـ build يولّد منه
+ * api/lib/config-db.json). قبل ذلك كانت النسبة مكتوبة نصًا كـ «20%» في
+ * ثلاث واجهات (رسالة واتساب، السلة، بانر الباقة) — أي تعديل للنسبة كان
+ * يترك نصوصًا تكذب على العميل.
+ */
+export const BUNDLE_DISCOUNT_RATE = 0.2;
+
+/** نفس النسبة كنسبة مئوية صحيحة للعرض في النصوص («20%»). */
+export const BUNDLE_DISCOUNT_PERCENT = Math.round(BUNDLE_DISCOUNT_RATE * 100);
 
 /** الحد الأدنى للشحن المجاني (المصدر الوحيد). */
 export const FREE_SHIPPING_THRESHOLD: number = 2000;

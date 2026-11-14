@@ -1,4 +1,5 @@
 import { getPromoTier, isPromotionEnabled, PROMO_ORDER_LABEL } from "@/lib/promo";
+import { BUNDLE_DISCOUNT_PERCENT } from "@/lib/site-config";
 import { MAX_CUSTOMER_PHONE_LENGTH, sanitizeForMsg } from "@/lib/utils";
 
 // رقم الواتساب الرسمي للشركة — المصدر الوحيد؛ كل الأماكن الأخرى تستورده
@@ -72,7 +73,7 @@ export const buildOrderMessage = (
   );
   const tier = isPromotionEnabled() ? getPromoTier(subtotalBefore) : null;
   // 🔀 الخصمان متبادلا الاستبعاد (نفس قاعدة السلة والسيرفر):
-  // عند اكتمال الباقة → خصم الباقة (20%) هو الخصم الوحيد المعروض
+  // عند اكتمال الباقة → خصم الباقة هو الخصم الوحيد المعروض (النسبة من site-config)
   const bundleActive = !!bundleDiscount && bundleDiscount > 0;
   const discount = bundleActive ? 0 : tier ? Math.round(subtotalBefore * tier.discount) : 0;
   const subtotalAfter = subtotalBefore - discount - (bundleDiscount || 0);
@@ -111,7 +112,7 @@ export const buildOrderMessage = (
 
   lines.push("");
   lines.push(`المجموع: ${subtotalBefore} ج.م`);
-  if (bundleActive) lines.push(`خصم الباقة (20%): -${bundleDiscount} ج.م`);
+  if (bundleActive) lines.push(`خصم الباقة (${BUNDLE_DISCOUNT_PERCENT}%): -${bundleDiscount} ج.م`);
   else if (tier && discount > 0) lines.push(`خصم ${tier.label}: -${discount} ج.م`);
   if (freeShipping) lines.push("الشحن: مجاني");
   else if (shipping && shipping > 0) lines.push(`الشحن: ${shipping} ج.م`);

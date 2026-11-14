@@ -2,7 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Heart, ShoppingCart, Trash2, Share2, ChevronLeft, Package } from "lucide-react";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { useCart } from "@/hooks/use-cart";
-import { products as allProducts } from "@/data/products";
+// (2026-11-14 · H5) الصفحة تحتاج بطاقات المنتجات فقط (بحث بالمعرّف + أعداد)،
+// وكان استيراد الكتالوج الكامل هنا — وrouteTree يستورد wishlist.tsx مباشرة —
+// يُدخل وصف 89 منتجًا في الحزمة الأولى.
+import { cardsCountByCategory, getCardById } from "@/data/product-cards";
 import { formatPrice } from "@/data/product-types";
 import { toast } from "sonner";
 import { useState, useMemo } from "react";
@@ -26,6 +29,8 @@ export const Route = createFileRoute("/wishlist")({
 type SortKey = "newest" | "price-asc" | "price-desc";
 
 function WishlistPage() {
+  // أعداد الفئات ثابتة — تُحسب مرة واحدة بلا بيانات نصية.
+  const categoryCounts = useMemo(() => cardsCountByCategory(), []);
   const { items, count, clear } = useWishlist();
   const { add: addToCart } = useCart();
   const [sort, setSort] = useState<SortKey>("newest");
@@ -34,7 +39,7 @@ function WishlistPage() {
   const enriched = useMemo(() => {
     return items
       .map((item) => {
-        const product = allProducts.find((p) => p.id === item.id);
+        const product = getCardById(item.id);
         return { item, product };
       })
       .filter((entry) => entry.product); // drop items no longer in catalog
@@ -184,9 +189,7 @@ function WishlistPage() {
                 💪
               </span>
               <span className="text-sm font-black">منتجات الرجال</span>
-              <span className="text-xs text-muted-foreground">
-                {allProducts.filter((p) => p.category === "men").length} منتج
-              </span>
+              <span className="text-xs text-muted-foreground">{categoryCounts.men} منتج</span>
             </Link>
             <Link
               to="/products/women"
@@ -196,9 +199,7 @@ function WishlistPage() {
                 🌸
               </span>
               <span className="text-sm font-black">منتجات النساء</span>
-              <span className="text-xs text-muted-foreground">
-                {allProducts.filter((p) => p.category === "women").length} منتج
-              </span>
+              <span className="text-xs text-muted-foreground">{categoryCounts.women} منتج</span>
             </Link>
             <Link
               to="/products/devices"
@@ -208,9 +209,7 @@ function WishlistPage() {
                 ⚙️
               </span>
               <span className="text-sm font-black">الأجهزة</span>
-              <span className="text-xs text-muted-foreground">
-                {allProducts.filter((p) => p.category === "devices").length} أجهزة
-              </span>
+              <span className="text-xs text-muted-foreground">{categoryCounts.devices} أجهزة</span>
             </Link>
           </div>
         </div>

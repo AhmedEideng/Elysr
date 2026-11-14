@@ -2,49 +2,14 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { Product } from "@/data/product-types";
-import { getBundleProductType } from "@/data/products";
+// (2026-11-14 · H5) من وحدة النمط الخالصة بدل الكتالوج الكامل — هذا الملف
+// يُستورد من مسارات الأقسام التي تُبنى مباشرة في الحزمة الأولى.
+import { getBundleProductType } from "@/lib/product-form";
 import { ProductCard } from "@/components/ProductCard";
 import { trackViewItemList } from "@/lib/analytics";
 import { injectJsonLd, itemListSchema } from "@/lib/seo";
+import { CATALOG_TYPE_LABELS as labels, filterCatalog } from "@/lib/product-filter";
 
-const labels: Record<string, string> = {
-  tablet: "أقراص",
-  capsule: "كبسولات",
-  gel: "جل",
-  cream: "كريم",
-  honey: "عسل",
-  chocolate: "شوكولاتة",
-  spray: "بخاخ",
-  drops: "قطرات",
-  gum: "لبان",
-  wipes: "مناديل",
-  sachet: "أكياس",
-  coffee: "قهوة",
-  "digital-pump": "مضخات رقمية",
-  "electric-pump": "مضخات كهربائية",
-  "manual-pump": "مضخات يدوية",
-  "vacuum-kit": "حقائب تفريغ",
-  "breast-kit": "أجهزة للصدر",
-  "traction-device": "أجهزة شد",
-  other: "أخرى",
-};
-export function filterCatalog(
-  items: Product[],
-  type: string,
-  min: string,
-  max: string,
-  sort: string,
-) {
-  const filtered = items.filter(
-    (p) =>
-      (type === "all" || getBundleProductType(p) === type) &&
-      (!min || p.price >= Number(min)) &&
-      (!max || p.price <= Number(max)),
-  );
-  if (sort === "price-asc") filtered.sort((a, b) => a.price - b.price);
-  if (sort === "price-desc") filtered.sort((a, b) => b.price - a.price);
-  return filtered;
-}
 /** Local UI state only: no crawlable faceted URLs or new indexable pages. */
 export function ProductCatalog({
   items,

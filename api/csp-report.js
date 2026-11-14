@@ -13,11 +13,14 @@
  */
 
 import { getClientIp } from "./lib/request-ip.js";
+import { allowedOrigins } from "./lib/request-guards.js";
 import { createEndpointRateLimiter } from "./lib/endpoint-rate-limiter.js";
 
 const checkRateLimit = createEndpointRateLimiter({ windowMs: 60_000, max: 50 });
 
-const ALLOWED_ORIGINS = new Set(["https://elysrmedical.store", "https://www.elysrmedical.store"]);
+// (2026-11-14 · M5) نفس مصدر الأصول المشترك — وإلا تُرفض مخالفات CSP على
+// المعاينات/staging بـ 403 فيضيع أهم إنذار أمني في المشروع.
+const ALLOWED_ORIGINS = allowedOrigins();
 
 /**
  * @param {import("express").Request} req

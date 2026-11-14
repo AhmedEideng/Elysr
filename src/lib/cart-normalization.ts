@@ -1,5 +1,5 @@
-import type { Product } from "@/data/product-types";
-import { products } from "@/data/products";
+import type { ProductCardView } from "@/data/product-types";
+import { productCards } from "@/data/product-cards.generated";
 
 export interface CartItem {
   id: string;
@@ -21,9 +21,15 @@ export interface CartItem {
   stock: number;
 }
 
-export type CatalogById = ReadonlyMap<string, Product>;
+/**
+ * (2026-11-14 · H5) الكتالوج الذي تحتاجه السلة = «بطاقات المنتجات» لا الكتالوج
+ * الكامل: `normalizeCartItem` يقرأ id/slug/name/price/emoji/image/stock فقط.
+ * الاعتماد على الكتالوج الكامل كان يُدخل وصف 89 منتجًا (~47KB مضغوط) في كل
+ * صفحة، لأن CartProvider يعيش في __root.
+ */
+export type CatalogById = ReadonlyMap<string, ProductCardView>;
 
-export const CATALOG_BY_ID: CatalogById = new Map(products.map((p) => [p.id, p]));
+export const CATALOG_BY_ID: CatalogById = new Map(productCards.map((p) => [p.id, p]));
 
 // سقف كمية الصنف الواحد في السلة (مستقل عن المخزون — عميل حقيقي ما يطلبش
 // 100 وحدة من صنف واحد، والسيرفر عنده سقف إجمالي 100 وحدة للطلب كله).

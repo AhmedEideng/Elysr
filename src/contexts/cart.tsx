@@ -9,7 +9,7 @@ import {
 } from "react";
 import { trackAddToCart, trackRemoveFromCart } from "@/lib/analytics";
 import { toast } from "sonner";
-import type { Product } from "@/data/product-types";
+import type { ProductCardView } from "@/data/product-types";
 import {
   CATALOG_BY_ID,
   MAX_CART_ITEMS,
@@ -53,11 +53,12 @@ export interface CartCtx {
   bundleDiscount: number;
   /** الباقة المكتملة المطبقة حالياً (null لو لا توجد) */
   appliedBundle: { mainId: string; ids: string[] } | null;
-  add: (p: Product, qty?: number) => void;
+  // (2026-11-14 · H5) السلة تحتاج حقول البطاقة فقط — لا وصف ولا مكونات.
+  add: (p: ProductCardView, qty?: number) => void;
   remove: (id: string) => void;
   setQty: (id: string, qty: number) => void;
   clear: () => void;
-  syncCatalog: (catalog: Product[]) => void;
+  syncCatalog: (catalog: ProductCardView[]) => void;
   isStockLimitReached: (id: string) => boolean;
 }
 
@@ -156,7 +157,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     itemsRef.current = items;
   });
 
-  const add = useCallback((p: Product, qty = 1) => {
+  const add = useCallback((p: ProductCardView, qty = 1) => {
     // (2026-09-15) الـ context API نفسه لازم يكون صح: منتج نافد/مفيش مخزون
     // بياناته ما ينضيفش — Math.max(1, Math.min(qty, 0)) كان بضيف بـ qty=1!
     // (الـ UI كمان بيمنع، بس الـ API مستقل عن الـ UI لازم يكون محكم.)
@@ -243,7 +244,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  const syncCatalog = useCallback((catalog: Product[]) => {
+  const syncCatalog = useCallback((catalog: ProductCardView[]) => {
     // (2026-09-17) Implementation واحدة: بدل إعادة بناء القواعد يدويًا
     // هنا (وكانت نسخة ثانية من منطق normalizeCartItem — نفس فخ
     // "4 implementations" اللي بدأ منه الـ bug الأصلي)، بنمرر

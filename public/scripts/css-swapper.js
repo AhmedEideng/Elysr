@@ -17,7 +17,7 @@
       links[i].rel = "stylesheet";
       links[i].removeAttribute("as");
     }
-  } catch (e) {
+  } catch {
     /* noop — الـ noscript fallback بيغطي الـ crawlers */
   }
 })();

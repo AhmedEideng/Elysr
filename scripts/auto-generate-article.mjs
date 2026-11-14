@@ -176,8 +176,9 @@ async function generateArticle() {
     return !existingTitles.some((title) => title.includes(kw) || kw.includes(title));
   });
 
-  let chosenKeyword = "";
-  let topicInstruction = "";
+  // (2026-11-15 · Round 5) بلا مُهيّئ: كل فرع أدناه يعيّن القيمة قبل قراءتها.
+  let chosenKeyword;
+  let topicInstruction;
 
   if (availableKeywords.length > 0) {
     chosenKeyword = availableKeywords[Math.floor(Math.random() * availableKeywords.length)];
@@ -275,7 +276,7 @@ JSON Schema:
   }
 
   // 🖼️ توليد الصورة المعبرة والفاخرة للمقال تلقائياً وبالمجان 100%!
-  let relativeImagePath = "";
+  let relativeImagePath; // (2026-11-15 · Round 5) كل مسار يعيّنها قبل القراءة.
 
   // دالة تحديد غلاف بديل ذكي ومرتبط تماماً بموضوع المقال لمنع تكرار الصور (Smart Fallback Selector)
   function getFallbackBanner(category, title, content = "") {

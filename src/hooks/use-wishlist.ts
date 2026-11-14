@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Product } from "@/data/product-types";
+import type { ProductCardView } from "@/data/product-types";
 
 /**
  * ============================================================
@@ -16,7 +16,7 @@ import type { Product } from "@/data/product-types";
  * ============================================================
  */
 
-export interface WishlistItem {
+interface WishlistItem {
   id: string;
   slug?: string;
   name: string;
@@ -92,7 +92,7 @@ export function useWishlist() {
 
   const has = useCallback((id: string) => items.some((i) => i.id === id), [items]);
 
-  const add = useCallback((p: Product) => {
+  const add = useCallback((p: ProductCardView) => {
     const current = wishlistStorage.read();
     if (current.some((i) => i.id === p.id)) return;
     const next: WishlistItem[] = [
@@ -115,7 +115,7 @@ export function useWishlist() {
   }, []);
 
   const toggle = useCallback(
-    (p: Product) => {
+    (p: ProductCardView) => {
       if (items.some((i) => i.id === p.id)) remove(p.id);
       else add(p);
     },

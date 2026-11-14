@@ -10,7 +10,7 @@
  * ============================================================
  */
 
-self.addEventListener("install", (event) => {
+self.addEventListener("install", () => {
   self.skipWaiting();
 });
 

@@ -53,6 +53,21 @@ export default defineConfig({
           // تقسيم الكتالوج لكل فئة على حدة بحيث يُحمّل فقط ملف القسم
           // الذي يحتاجه المستخدم (men/women/devices) بدلاً من كل المنتجات
           // معاً في chunk واحد ضخم — يحسّن زمن التحميل (LCP) للأقسام والهوم.
+          // (2026-11-14 · H5) منطق الاختيار/التصنيف وبطاقات العرض في حزمة
+          // صغيرة مستقلة. قبل ذلك كان Rollup يضمّها إلى حزمة `data-catalog`
+          // الضخمة (لأنها مشتركة بينها وبين الطبقة الخفيفة) فتعود الحزمة
+          // الكاملة إلى المسار الحرج من باب الخلفي.
+          if (
+            id.includes("src/lib/product-selection") ||
+            id.includes("src/lib/product-form") ||
+            id.includes("src/lib/product-search") ||
+            id.includes("src/lib/search-terms")
+          ) {
+            return "catalog-logic";
+          }
+          if (id.includes("src/data/product-cards")) {
+            return "catalog-cards";
+          }
           if (id.includes("src/data/products/men")) {
             return "data-catalog-men";
           }

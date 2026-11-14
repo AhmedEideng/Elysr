@@ -19,8 +19,12 @@ describe("phrase-only catalog corrections", () => {
           .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)),
       ),
     );
+    // (2026-11-15 · تدقيق المنتجات) البصمة اتغيّرت **مرة واحدة عن قصد**:
+    // اسم واحد فقط تغيّر — m-06 «جل TREAND للرجال» → «جل تريند للتأخير للرجال
+    // (TREAND Delay Gel)» — لأن عنوان الصفحة كان 16 حرفًا (بلا كلمة مفتاحية
+    // في SERP). لا سعر/شارة/تصنيف/bundle تغيّر في هذه الجولة.
     expect(createHash("sha256").update(JSON.stringify(fields)).digest("hex")).toBe(
-      "f8e45dcd75e8fbc5491ec49b6c08bad2b6640a26989824914e64ae5e8b541dcf",
+      "0a48420cb97b73d3c6316df0de27f53c4a05105ecd5a772f80a8d21308871d72",
     );
   });
   it("corrects discrete ingredient and language errors without removing the original descriptions", () => {

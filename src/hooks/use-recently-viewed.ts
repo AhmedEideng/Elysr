@@ -14,7 +14,7 @@ import type { Product } from "@/data/product-types";
  * ============================================================
  */
 
-export interface RecentlyViewedItem {
+interface RecentlyViewedItem {
   id: string;
   slug: string;
   name: string;

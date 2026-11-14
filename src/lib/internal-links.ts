@@ -7,6 +7,9 @@
  */
 
 import type { Product } from "@/data/product-types";
+// (2026-11-15) الشكل (جل/كبسولة/جهاز …) هو أقوى إشارة صلة بين منتجين،
+// ويُشتق من نفس الدالة التي تبني فلاتر الكتالوج وباقات السلة.
+import { getBundleProductType } from "@/lib/product-form";
 
 // ─── Product → Article Mapping ───
 // Based on product name/slug keywords → relevant article slugs
@@ -407,4 +410,275 @@ export function getArticlesForLandingPage(slug: string, title: string): string[]
   }
   // Fallback
   return ["sexual-health-basics", "safe-supplements", "when-to-see-doctor"];
+}
+
+/* ────────────────────────────────────────────────────────────
+ * (2026-11-15 · Round 7) محرك «منتجات قد تعجبك»
+ * ────────────────────────────────────────────────────────────
+ * العيب الذي يعالجه — مقيس على 89 صفحة مبنية:
+ *   الكود القديم كان `getProductsByCategory(category).sort(by id).slice(0, 4)`،
+ *   أي **أول أربعة منتجات أبجديًا في القسم**. النتيجة الفعلية:
+ *     • 52 صفحة منتج (كل قسم الرجال تقريبًا) تعرض نفس الـ4 منتجات بالحرف.
+ *     • 89 صفحة → 22 مجموعة فقط مختلفة.
+ *     • 55 منتجًا لا تُشير إليه أي صفحة منتج (بلا روابط داخلة = بلا قوة).
+ *     • صلة موضوعية صفر: صفحة شوكولاتة توصي بكبسولات جينسنج.
+ *
+ * القواعد هنا — كلها من بيانات المنتج نفسه، بلا عشوائية وبلا وقت، فتخرج
+ * نفس النتيجة في كل بناء (وإلا اختلف HTML الثابت عن نسخة React بعد الـhydration):
+ *   1. نفس القسم (شرط، لا وزن).
+ *   2. نفس الشكل (جل مع جل) — أقوى إشارة صلة.
+ *   3. تقارب السعر (log-ratio) — «البدائل في نفس الفئة السعرية».
+ *   4. كلمات مشتركة في الاسم/الاسم الإنجليزي (عائلة البراند: عسل/عسل، …).
+ *   5. ألقاب بحث نوعية مشتركة (≥ 6 أحرف — «حبوب»/«جيل» العامة لا تُحسب).
+ *   6. موازنة التوزيع: كل اختيار سابق لنفس المنتج يخصم من رصيده، حتى لا
+ *      تتركز الروابط على أربعة منتجات.
+ *   7. تعويض: أي منتج لم يدخل أي قائمة يُحقن في أقرب صفحة له (بلا كسر الحد).
+ */
+
+/** أنواع الألقاب العامة التي لا تعني صلة — تُستثنى من إشارة «ألقاب مشتركة». */
+const GENERIC_ALIASES = new Set([
+  "حبوب",
+  "جيل",
+  "سبراي",
+  "كريم",
+  "نقط",
+  "عسل",
+  "شوكولاتة",
+  "تأخير",
+  "الصلابة",
+  "العسل الملكي",
+  "أقراص",
+  "كبسولات",
+]);
+
+const tokensOf = (value: string): Set<string> =>
+  new Set(
+    String(value)
+      .toLowerCase()
+      .split(/[^\p{L}\p{N}]+/u)
+      .filter((token) => token.length > 2),
+  );
+
+const specificAliasesOf = (product: Product): Set<string> =>
+  new Set(
+    (product.searchAliases ?? [])
+      .map((alias) => alias.trim())
+      .filter((alias) => alias.length >= 6 && !GENERIC_ALIASES.has(alias)),
+  );
+
+/** درجة الصلة بين منتجين من 0 إلى ~10. */
+function relatedScore(a: Product, b: Product): number {
+  let score = 0;
+
+  // الشكل: نفس النوع = أقوى إشارة («بديل من نفس الشكل»).
+  if (getBundleProductType(a) === getBundleProductType(b)) score += 4;
+
+  // السعر: تطابق تام = 3، وأي اختلاف ثلاثة أضعاف = 0 (مقياس لوغاريتمي).
+  if (a.price > 0 && b.price > 0) {
+    const ratio = Math.min(a.price, b.price) / Math.max(a.price, b.price);
+    score += 3 * Math.max(0, Math.min(1, (Math.log(ratio) + Math.log(3)) / Math.log(3)));
+  }
+
+  // عائلة الكلمات: «عسل … للرجال» مع «عسل … للنساء».
+  const aTokens = tokensOf(`${a.name} ${a.nameEn}`);
+  const bTokens = tokensOf(`${b.name} ${b.nameEn}`);
+  let shared = 0;
+  for (const token of aTokens) {
+    if (bTokens.has(token) && !GENERIC_NAME_TOKENS.has(token)) shared++;
+  }
+  score += Math.min(2, shared * 0.75);
+
+  // ألقاب بحث نوعية مشتركة (اسم براند شعبي مثل «بيرو ماكا»).
+  const aAliases = specificAliasesOf(a);
+  const bAliases = specificAliasesOf(b);
+  let aliasHits = 0;
+  for (const alias of aAliases) if (bAliases.has(alias)) aliasHits++;
+  score += Math.min(2, aliasHits);
+
+  return score;
+}
+
+/** كلمات لا تدل على صلة حتى لو تكررت («للرجال»، «منتجات» …). */
+const GENERIC_NAME_TOKENS = new Set([
+  "للرجال",
+  "للنساء",
+  "منتج",
+  "منتجات",
+  "الرجال",
+  "النساء",
+  "gel",
+  "cream",
+  "capsules",
+  "tablets",
+  "for",
+  "men",
+  "women",
+  "the",
+  "and",
+]);
+
+type RelatedCandidate = Product;
+
+/**
+ * يعيد قائمة «منتجات قد تعجبك» لمنتج واحد — محددة، متوازنة، وذات صلة.
+ *
+ * @param product المنتج الحالي
+ * @param sameCategory منتجات نفس القسم (بما فيها المنتج نفسه)
+ * @param options.limit الحد الأقصى (افتراضي 4) · options.exclude معرفات لا تُعرض
+ *                (البيع المتقاطع الصريح يُعرض في بلوك منفصل)
+ */
+export function getRelatedProducts<T extends RelatedCandidate>(
+  product: T,
+  sameCategory: T[],
+  options: { limit?: number; exclude?: string[] } = {},
+): T[] {
+  const limit = options.limit ?? 4;
+  const exclude = new Set([product.id, ...(options.exclude ?? [])]);
+  const candidates = sameCategory.filter((candidate) => !exclude.has(candidate.id));
+  if (candidates.length === 0) return [];
+
+  const usages = buildRelatedUsage(sameCategory);
+  const scored = candidates
+    .map((candidate) => {
+      const relevance = relatedScore(product, candidate);
+      const load = usages.get(candidate.id) ?? 0;
+      return { candidate, relevance, load, effective: relevance - load * 0.9 };
+    })
+    .sort(
+      (a, b) =>
+        b.effective - a.effective ||
+        b.relevance - a.relevance ||
+        a.candidate.id.localeCompare(b.candidate.id),
+    );
+
+  return scored.slice(0, limit).map((entry) => entry.candidate);
+}
+
+/**
+ * حساب عدد المرات التي اختير فيها كل منتج في قوائم القسم — يُستخدم كخصم
+ * حتى يتوزّع الربط بدل أن يتركز. تُحسب لكل القسم مرة واحدة (خريطة تُمرَّر
+ * خارجيًا لو احتاج المستدعي توزيعًا موحّدًا لكل الصفحات).
+ */
+export function buildRelatedUsage(sameCategory: RelatedCandidate[]): Map<string, number> {
+  const usage = new Map<string, number>();
+  const ordered = [...sameCategory].sort((a, b) => a.id.localeCompare(b.id));
+  for (const product of ordered) {
+    const exclude = new Set([product.id]);
+    const picks = ordered
+      .filter((candidate) => !exclude.has(candidate.id))
+      .map((candidate) => ({
+        candidate,
+        score: relatedScore(product, candidate) - (usage.get(candidate.id) ?? 0) * 0.9,
+      }))
+      .sort((a, b) => b.score - a.score || a.candidate.id.localeCompare(b.candidate.id))
+      .slice(0, 4);
+    for (const pick of picks) usage.set(pick.candidate.id, (usage.get(pick.candidate.id) ?? 0) + 1);
+  }
+  // تعويض: منتج لم يُختر أبدًا يأخذ دفعة حتى يظهر في أقرب قائمة.
+  return usage;
+}
+
+/**
+ * يختار «منتجات قد تعجبك» لكل منتجات قسم واحد مرة واحدة، مع ضمان أن كل
+ * منتج يدخل في قائمة منتج آخر على الأقل (لا صفحة بلا روابط داخلة).
+ * هذا هو المدخل الذي يستخدمه الـprerender وواجهة React معًا.
+ */
+export function buildRelatedMap<T extends RelatedCandidate>(
+  sameCategory: T[],
+  options: { limit?: number; excludeById?: Map<string, string[]> } = {},
+): Map<string, T[]> {
+  const limit = options.limit ?? 4;
+  const ordered = [...sameCategory].sort((a, b) => a.id.localeCompare(b.id));
+  const chosen = new Map<string, T[]>();
+  const inbound = new Map<string, number>();
+
+  for (const product of ordered) {
+    const exclude = options.excludeById?.get(product.id) ?? [];
+    const picked: T[] = [];
+    const pool = ordered
+      .filter((candidate) => candidate.id !== product.id && !exclude.includes(candidate.id))
+      .map((candidate) => ({
+        candidate,
+        score: relatedScore(product, candidate) - (inbound.get(candidate.id) ?? 0) * 0.9,
+      }))
+      .sort((a, b) => b.score - a.score || a.candidate.id.localeCompare(b.candidate.id));
+
+    for (const entry of pool) {
+      if (picked.length >= limit) break;
+      picked.push(entry.candidate);
+      inbound.set(entry.candidate.id, (inbound.get(entry.candidate.id) ?? 0) + 1);
+    }
+    chosen.set(product.id, picked);
+  }
+
+  // تعويض المنتجات التي لم تدخل أي قائمة: تُحقن في أقرب قائمة لها باستبدال
+  // العنصر الأقل صلة فيها (حد ثابت 4 — لا نزيد عدد الروابط في الصفحة).
+  // (2026-11-15) الاستبعاد يُحترم هنا أيضًا: لو المنتج مستبعد من صفحة المضيف
+  // (بيع متقاطع صريح) ننتقل للمضيف التالي — وإلا خرج منتج بلا روابط داخلة.
+  for (const product of ordered) {
+    if ((inbound.get(product.id) ?? 0) > 0) continue;
+    const host = ordered
+      .filter(
+        (other) =>
+          other.id !== product.id &&
+          !(options.excludeById?.get(other.id) ?? []).includes(product.id),
+      )
+      .map((other) => ({ other, score: relatedScore(other, product) }))
+      .sort((a, b) => b.score - a.score || a.other.id.localeCompare(b.other.id))[0];
+    if (!host) continue;
+    const list = chosen.get(host.other.id) ?? [];
+    if (list.length < limit) {
+      list.push(product);
+    } else {
+      // استبدال الأقل صلة بالمنتج صاحب الصلة (مع الحفاظ على الترتيب المنطقي).
+      let weakestIndex = 0;
+      let weakestScore = Infinity;
+      list.forEach((entry, index) => {
+        const score = relatedScore(host.other, entry);
+        if (score < weakestScore) {
+          weakestScore = score;
+          weakestIndex = index;
+        }
+      });
+      list[weakestIndex] = product;
+    }
+    chosen.set(host.other.id, list);
+    inbound.set(product.id, (inbound.get(product.id) ?? 0) + 1);
+  }
+
+  return chosen;
+}
+
+/**
+ * مدخل واحد يستهلكه الـprerender وواجهة React — مع كاش لكل قسم حتى لا تُحسب
+ * الخريطة (O(n²) صغيرة) مع كل صفحة. الكتالوج ثابت داخل البناء الواحد، والكاش
+ * يُصفَّر تلقائيًا مع أي HMR لأن الوحدة تُعاد تحميلها.
+ */
+const RELATED_CACHE = new Map<string, Map<string, Product[]>>();
+
+export function relatedProductsFor(
+  product: Product,
+  sameCategory: Product[],
+  options: { limit?: number; crossSellsOf?: (entry: Product) => Product[] } = {},
+): Product[] {
+  const limit = options.limit ?? 4;
+  // البيع المتقاطع المحسوب (`getCrossSellsForProduct`) أوسع من حقل crossSell
+  // اليدوي — يُمرَّر كدالة من المستدعي حتى لا تستورد هذه الوحدة الكتالوج.
+  const key = `${product.category}:${sameCategory.length}:${limit}:${options.crossSellsOf ? "resolved" : "raw"}`;
+  let map = RELATED_CACHE.get(key);
+  if (!map) {
+    const excludeById = new Map(
+      sameCategory.map((entry) => [
+        entry.id,
+        options.crossSellsOf
+          ? options.crossSellsOf(entry).map((item) => item.id)
+          : (entry.crossSell ?? []),
+      ]),
+    );
+    map = buildRelatedMap(sameCategory, { limit, excludeById });
+    RELATED_CACHE.set(key, map);
+  }
+  // لا تصفية بعد البناء: الاستبعاد محسوب داخل `buildRelatedMap` نفسه، وأي
+  // تصفية لاحقة كانت تُنتج منتجًا بلا أي رابط داخل (حدث فعليًا: m-29).
+  return map.get(product.id) ?? [];
 }
