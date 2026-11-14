@@ -21,7 +21,9 @@ describe("homepage device selection and manual pump price", () => {
   it("keeps the manual pump price consistent in data, copy, FAQ and meta", () => {
     const pump = products.find((p) => p.id === "d-03")!;
     expect(pump.price).toBe(800);
-    expect(pump.description).toContain("٨٠٠ جنيه");
+    // (Round 8) السعر ممنوع داخل نسخ المنتج: بيتغيّر ويبقى قديمًا في SERP،
+    // والمصدر الوحيد للحقيقة هو حقل price (اللي بيُعرض حيًّا في الصفحة).
+    expect(pump.description).not.toMatch(/جنيه|ج\.م|EGP/);
     expect(pump.description).not.toMatch(/700|٧٠٠/);
     expect(getProductFAQs(pump).some((f) => f.answer.includes("800 جنيه"))).toBe(true);
     expect(makeProductMetaDescription(pump)).toContain("800 ج.م");

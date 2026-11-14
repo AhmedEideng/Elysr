@@ -32,7 +32,9 @@ test("manual pump costs 800 on the page, in schema and in the cart", async ({ pa
   await expect(page.locator("script#ldjson-product")).toBeAttached();
   const schema = JSON.parse((await page.locator("script#ldjson-product").textContent())!);
   expect(Number(schema.offers.price)).toBe(800);
-  expect(schema.description).toContain("٨٠٠ جنيه");
+  // (Round 8) السعر ممنوع داخل نسخ المنتج — السعر يظهر من حقل price فقط.
+  expect(schema.description).not.toMatch(/جنيه/);
+  expect(schema.offers.price).toBe(800);
   await expect(page.getByText("800 ج.م", { exact: true }).first()).toBeVisible();
   await page.getByRole("button", { name: "إضافة للسلة", exact: true }).click();
   await page.goto("/cart");

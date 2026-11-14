@@ -294,3 +294,83 @@ describe("سياسة التوفّر الدائم", () => {
     }
   });
 });
+
+/**
+ * (Round 8 · 2026-11-15) سياسة نسخ المنتجات — «بدون إحالة للطبيب/الصيدلي/
+ * العبوة/المصنع/المورد». القاعدة دي اتكسرت 58 مرة قبل الجولة (تحذير «استشر
+ * الطبيب» متكرر حرفيًا على أغلب الكتالوج) وبتنكسر بصمت: الصفحة تُبنى
+ * والاختبارات تعدّي. الحارس هنا يمنع رجوعها مع أي منتج جديد.
+ */
+describe("سياسة نسخ المنتجات (Round 8)", () => {
+  const BANNED =
+    /(^|[^\u0621-\u064A])(الطبيب|طبيب|الصيدلي|صيدلي|النشرة|المصنع|المصنّع|المورد|الموزع|الشركة المنتجة|على العبوة|حسب العبوة)/;
+  const copyOf = (product: (typeof products)[number]) =>
+    [
+      ["description", product.description],
+      ["ingredients", product.ingredients ?? ""],
+      ["usage", product.usage ?? ""],
+      ["benefits", (product.benefits ?? []).join(" ")],
+    ] as const;
+
+  it("لا إحالة إلى الطبيب أو الصيدلي أو النشرة أو المصنع أو المورد", () => {
+    const hits: string[] = [];
+    for (const product of products)
+      for (const [field, text] of copyOf(product))
+        if (BANNED.test(text)) hits.push(`${product.id}.${field}`);
+    expect(hits).toEqual([]);
+  });
+
+  it("لا سعر مكتوب داخل النسخ (بيبقى قديمًا بعد أي تعديل سعري)", () => {
+    const hits = products.flatMap((product) =>
+      copyOf(product)
+        .filter(([, text]) => /جنيه|EGP/.test(text))
+        .map(([field]) => `${product.id}.${field}`),
+    );
+    expect(hits).toEqual([]);
+  });
+
+  it("كل منتج له طريقة استخدام ومكونات/مواصفات غير فارغة", () => {
+    for (const product of products) {
+      expect((product.usage ?? "").trim(), product.id).not.toBe("");
+      expect((product.ingredients ?? "").trim(), product.id).not.toBe("");
+    }
+  });
+
+  it("لا نسخ مكررة حرفيًا بين منتجين (صفحات شبه مكررة في SERP)", () => {
+    const usage = new Map<string, string[]>();
+    const ingredients = new Map<string, string[]>();
+    for (const product of products) {
+      const u = (product.usage ?? "").trim();
+      const i = (product.ingredients ?? "").trim();
+      if (u) usage.set(u, [...(usage.get(u) ?? []), product.id]);
+      if (i) ingredients.set(i, [...(ingredients.get(i) ?? []), product.id]);
+    }
+    expect([...usage.values()].filter((ids) => ids.length > 1)).toEqual([]);
+    expect([...ingredients.values()].filter((ids) => ids.length > 1)).toEqual([]);
+  });
+
+  it("طريقة الاستخدام تطابق شكل المنتج", () => {
+    const verbs: Record<string, RegExp> = {
+      capsule: /كبسول/,
+      tablet: /قرص/,
+      cream: /كريم/,
+      gel: /جل/,
+      spray: /بخاخ|يُرش/,
+      honey: /عسل|كيس/,
+      gum: /علكة|امضغ/,
+      drops: /قطرة|قطرات/,
+      wipes: /منديل/,
+      chocolate: /شوكولاتة|قطعة/,
+      coffee: /قهوة|كيس/,
+      sachet: /كيس|مغلف/,
+      device: /جهاز|مضخة/,
+    };
+    const misses = products
+      .filter((product) => {
+        const verb = verbs[getBundleProductType(product)];
+        return verb && product.usage && !verb.test(product.usage);
+      })
+      .map((product) => product.id);
+    expect(misses).toEqual([]);
+  });
+});

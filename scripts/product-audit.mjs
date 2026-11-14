@@ -501,6 +501,94 @@ if (existsSync(feedPath)) {
   add("warn", "feed-missing", "catalog-feed", "dist/catalog-feed.xml غير موجود — نفّذ build");
 }
 
+/* ───────────── 8.5) سياسة نسخ المنتجات (Round 8) ───────────── */
+// قرار المالك: لا إحالة إلى الطبيب/الصيدلي/النشرة/المصنع/المورد/العبوة داخل
+// نص المنتج. ولا نسخ مكررة حرفيًا بين منتجين (تظهر كصفحات شبه مكررة في SERP)،
+// ولا سعر مكتوب داخل النص (يبقى قديمًا بعد أي تعديل سعري)، ولا عامية مصرية
+// وسط كتالوج فصيح، وطريقة الاستخدام لازم تطابق شكل المنتج.
+const BANNED_REFERENCE = new RegExp(
+  [
+    "(^|[^\\u0621-\\u064A])(الطبيب|طبيب|الطبيبك|الصيدلي|صيدلي|الصيدلية|النشرة الطبية)",
+    "(المصنع|المصنّع|دليل الشركة|الشركة المنتجة)",
+    "(المورد|الموزع|موزعين|موزعي)",
+    "(على العبوة|حسب العبوة|المدونة على العبوة|تذكر العبوة)",
+  ].join("|"),
+);
+const COLLOQUIAL = [
+  " ده ",
+  " دي ",
+  "اللي ",
+  "مش ",
+  "عشان",
+  "كمان",
+  "بتختلف",
+  "بيكملوا",
+  "معمولة",
+  "عندك",
+  "تبص",
+  "دلوقتي",
+  "برضه",
+  " بتاع ",
+  "هتحتاج",
+  "عايز",
+];
+const usageForms = {
+  capsule: /كبسول/,
+  tablet: /قرص/,
+  cream: /كريم/,
+  gel: /جل/,
+  spray: /بخاخ|يُرش|بخّ/,
+  honey: /عسل|كيس/,
+  gum: /علكة|امضغ/,
+  drops: /قطرة|قطرات/,
+  wipes: /منديل/,
+  chocolate: /شوكولاتة|قطعة/,
+  coffee: /مغلف|قهوة/,
+  sachet: /كيس|مغلف/,
+  device: /جهاز|مضخة/,
+};
+const usageOwners = new Map();
+const ingredientOwners = new Map();
+for (const p of products) {
+  const type = getBundleProductType(p);
+  const fields = [
+    ["description", p.description],
+    ["benefits", (p.benefits || []).join(" ")],
+    ["ingredients", p.ingredients],
+    ["usage", p.usage],
+  ];
+  for (const [field, value] of fields) {
+    const text = String(value || "");
+    if (!text) continue;
+    const banned = text.match(BANNED_REFERENCE);
+    if (banned) add("error", "copy-banned-reference", p.id, `${field}: «${banned[1]}»`);
+    if (/جنيه|EGP/.test(text)) add("warn", "copy-price-in-text", p.id, field);
+    if (field !== "benefits")
+      for (const word of COLLOQUIAL)
+        if (text.includes(word)) add("warn", "copy-colloquial", p.id, `${field}: «${word.trim()}»`);
+  }
+  // تكرار صندوق المعلومات داخل الوصف (المكوّنات/الاستخدام تظهران تلقائيًا)
+  if (/المكونات:|طريقة الاستخدام:/.test(p.description || ""))
+    add("error", "copy-info-box-duplicate", p.id, "الوصف يعيد المكونات/طريقة الاستخدام");
+  // طريقة الاستخدام لازم تطابق الشكل
+  const rx = usageForms[type];
+  if (rx && p.usage && !rx.test(p.usage))
+    add("warn", "copy-usage-form-mismatch", p.id, `الشكل ${type} بلا فعل مطابق`);
+  if (!p.ingredients || !String(p.ingredients).trim())
+    add("error", "copy-ingredients-empty", p.id, "لا مكونات ولا مواصفات");
+  // تفرّد النسخ بين المنتجات
+  const usageKey = String(p.usage || "").trim();
+  const ingKey = String(p.ingredients || "").trim();
+  if (usageKey) usageOwners.set(usageKey, [...(usageOwners.get(usageKey) || []), p.id]);
+  if (ingKey) ingredientOwners.set(ingKey, [...(ingredientOwners.get(ingKey) || []), p.id]);
+}
+for (const [, ids] of usageOwners)
+  if (ids.length > 1)
+    add("error", "copy-duplicate-usage", ids.join("="), "طريقة استخدام مكررة حرفيًا");
+for (const [, ids] of ingredientOwners)
+  if (ids.length > 1)
+    add("warn", "copy-duplicate-ingredients", ids.join("="), "مكونات مكررة حرفيًا");
+
 /* ───────────── 9) عدّادات مساعدة ───────────── */
 const summary = {
   products: products.length,
@@ -520,6 +608,8 @@ const summary = {
   ],
   errors: issues.filter((i) => i.level === "error").length,
   warnings: issues.filter((i) => i.level === "warn").length,
+  uniqueUsage: usageOwners.size,
+  uniqueIngredients: ingredientOwners.size,
 };
 
 await vite.close();

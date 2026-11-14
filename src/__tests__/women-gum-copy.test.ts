@@ -21,14 +21,16 @@ describe("women's gum wording and owner-confirmed Marcin form", () => {
       expect(usage, id).toContain("30-60 دقيقة");
       expect(usage, id).not.toMatch(/لا تتجاوزي|قطعتين/);
       expect(usage, id).toMatch(/الحمل|للحامل/);
-      expect(usage, id).toMatch(/استشار|استشيري/);
+      // (Round 8) ممنوع إحالة الطبيب/الصيدلي في نسخ المنتج — التحذير نفسه باقٍ.
+      expect(usage, id).not.toMatch(/استشير|الطبيب|الصيدلي|النشرة/);
     }
     for (const id of ["w-10", "w-11", "w-13"]) {
-      expect(product(id).usage, id).toContain("توقفي");
+      expect(product(id).usage, id).toContain("توقّفي");
       expect(product(id).price, id).toBe(250);
     }
     expect(product("w-11").usage).toContain("أمراض مزمنة");
-    expect(product("w-21").usage).toContain("تتناولين أدوية");
+    // (Round 8) صيغة التحذير وُحّدت: «تناول أدوية» بدل «تتناولين أدوية» — نفس المعنى بلا مخاطبة شخصية.
+    expect(product("w-21").usage).toContain("تناول أدوية");
   });
 
   it("presents and searches Marcin as gum while preserving its URL, price and stock", () => {
@@ -50,7 +52,7 @@ describe("women's gum wording and owner-confirmed Marcin form", () => {
 
   it("updates SexLove wording and preserves every previously approved bundle", () => {
     expect(product("w-06").usage).toBe(
-      "امضغي قطعة واحدة فقط قبل العلاقة بـ 10-20 دقيقة. اشربي الماء بكثرة. لا تستخدمي أثناء الحمل أو الرضاعة دون استشارة. إذا ظهر أي أثر جانبي توقفي. استشيري الطبيب إذا كان لديك حساسية.",
+      "امضغي قطعة واحدة فقط قبل العلاقة بـ 10-20 دقيقة. اشربي الماء بكثرة. لا يُستخدم أثناء الحمل أو الرضاعة. توقّفي عند ظهور أي أثر جانبي. لا يُنصح بالاستخدام في حال وجود حساسية.",
     );
     const bundles = products.map((p) => [p.id, getCrossSellsForProduct(p).map((item) => item.id)]);
     expect(createHash("sha256").update(JSON.stringify(bundles)).digest("hex")).toBe(

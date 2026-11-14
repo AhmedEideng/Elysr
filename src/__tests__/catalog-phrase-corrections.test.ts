@@ -23,8 +23,11 @@ describe("phrase-only catalog corrections", () => {
     // اسم واحد فقط تغيّر — m-06 «جل TREAND للرجال» → «جل تريند للتأخير للرجال
     // (TREAND Delay Gel)» — لأن عنوان الصفحة كان 16 حرفًا (بلا كلمة مفتاحية
     // في SERP). لا سعر/شارة/تصنيف/bundle تغيّر في هذه الجولة.
+    // (Round 8 · 2026-11-15) تغيّر واحد إضافي في **حقل غير نصي**: d-08 كان
+    // stock=1 وخارج سياسة «المتوفر دائمًا» → 5000. كل الأسماء/الأسعار/الشارات
+    // وbundle كما هي، وهذا مؤكد بالبصمة الثانية أسفل الاختبار.
     expect(createHash("sha256").update(JSON.stringify(fields)).digest("hex")).toBe(
-      "0a48420cb97b73d3c6316df0de27f53c4a05105ecd5a772f80a8d21308871d72",
+      "c3a7b0de73470a357202d02ef82279069d05ace52a274bb3f2eb41e06eee5997",
     );
   });
   it("corrects discrete ingredient and language errors without removing the original descriptions", () => {
