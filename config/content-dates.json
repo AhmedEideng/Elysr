@@ -1,11 +1,11 @@
 {
-  "src/data/landing-pages.ts": "2026-11-14",
+  "src/data/landing-pages.ts": "2026-11-15",
   "src/data/products.ts": "2026-11-15",
   "src/data/products/devices.ts": "2026-11-15",
   "src/data/products/men.ts": "2026-11-15",
   "src/data/products/women.ts": "2026-11-15",
   "src/routes/about.tsx": "2026-11-14",
-  "src/routes/contact.tsx": "2026-09-29",
+  "src/routes/contact.tsx": "2026-11-15",
   "src/routes/education.tsx": "2026-09-29",
   "src/routes/en.index.tsx": "2026-10-11",
   "src/routes/en.products.devices.tsx": "2026-10-11",
