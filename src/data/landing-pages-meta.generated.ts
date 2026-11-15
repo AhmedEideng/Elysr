@@ -38,7 +38,7 @@ export const landingPagesMeta: LandingPageMeta[] = [
   { slug: "levitra-guide", title: "دليل ليفيترا" },
   { slug: "sildenafil-dapoxetine-combo", title: "حبوب سيلدينافيل ودابوكستين المركبة" },
   { slug: "erection-delay-combo-products", title: "منتجات انتصاب وتأخير معاً" },
-  { slug: "best-erection-support-products", title: "أفضل منتجات دعم الانتصاب" },
+  { slug: "best-erection-support-products", title: "منتجات دعم الانتصاب" },
   { slug: "weak-erection-young-men", title: "ضعف الانتصاب عند الشباب" },
   { slug: "honey-vs-capsules-men", title: "العسل أم الكبسولات للرجال" },
   { slug: "ginseng-for-men-guide", title: "دليل الجينسنج للرجال" },
