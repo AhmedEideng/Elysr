@@ -1,14 +1,6 @@
-import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Sparkles, Clock, ArrowLeft, ChevronLeft } from "lucide-react";
-import {
-  PROMO_TITLE,
-  PROMO_TAGLINE,
-  PROMO_TIERS,
-  getTimeLeft,
-  isPromotionEnabled,
-} from "@/lib/promo";
-import type { TimeLeft } from "@/lib/promo";
+import { Sparkles, ArrowLeft, ChevronLeft } from "lucide-react";
+import { PROMO_TITLE, PROMO_TAGLINE, PROMO_TIERS, PROMO_PERMANENCE_NOTE } from "@/lib/promo";
 
 /**
  * 💎 شريط "مبادرة الرعاية الماسية" — شريط متميز ومحفز أسفل الـ Hero
@@ -16,37 +8,15 @@ import type { TimeLeft } from "@/lib/promo";
  * التصميم: شريط أفقي مضغوط (compact horizontal bar)
  * - الارتفاع: ~56-72px (يتجاوب مع الموبايل)
  * - الخلفية: gradient طبي وقور وعميق slate-blue→teal→navy
- * - المحتوى: شارة + عنوان + الشرائح + العداد + CTA
+ * - المحتوى: شارة + عنوان + الشرائح + ملاحظة السريان الدائم + CTA
  * - mobile: يتحول لـ stacked layout
  *
- * يستخدم React state بدلاً من refs لتجنب مشاكل
- * SSR + hydration cycle مع DOM manipulation.
+ * (R26) مكوّن ثابت بلا state ولا مؤقّت: لا عدّاد ولا hydration cycle.
  */
 export function AnniversaryPromo() {
-  // 🐛 Fix: useState بـ lazy initializer ثم setInterval
-  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(() =>
-    isPromotionEnabled() ? getTimeLeft() : null,
-  );
-
-  useEffect(() => {
-    if (!isPromotionEnabled()) return;
-
-    const intervalId = window.setInterval(() => {
-      const next = getTimeLeft();
-      setTimeLeft(next);
-      if (next.ended) {
-        window.clearInterval(intervalId);
-      }
-    }, 1000);
-
-    return () => window.clearInterval(intervalId);
-  }, []);
-
-  // إذا انتهى العرض أو غير نشط، لا نعرض شيئاً
-  if (!timeLeft || timeLeft.ended) return null;
-
-  // Helper: تنسيق الرقم بصفرين
-  const pad = (n: number) => String(n).padStart(2, "0");
+  // (2026-11-14 · R26) أُزيل العدّاد الزمني المتجدد كل 3 أيام: كان يوحي
+  // بانتهاء عرض لا ينتهي فعلًا (إلحاح مصطنع) — والشرائح سارية دائمًا.
+  // الشريط الآن ثابت بلا حالة ولا مؤقّت، فيُبنى على السيرفر كاملًا.
   const highestPromoLabel = PROMO_TIERS[0] ? PROMO_TIERS[0].label : "";
 
   return (
@@ -115,16 +85,10 @@ export function AnniversaryPromo() {
           </div>
         </div>
 
-        {/* Mobile countdown (tiny row) — values come from React state */}
+        {/* Mobile: ملاحظة السريان الدائم (بدل العدّاد) */}
         <div className="mt-1.5 flex items-center justify-center gap-1.5 text-[10px] font-bold text-white">
-          <Clock className="h-3 w-3" />
-          <span>تتجدد الدورة خلال:</span>
-          <div className="flex items-center gap-0.5" dir="ltr">
-            <span className="tabular-nums">{pad(timeLeft.days)}</span>:
-            <span className="tabular-nums">{pad(timeLeft.hours)}</span>:
-            <span className="tabular-nums">{pad(timeLeft.minutes)}</span>:
-            <span className="tabular-nums">{pad(timeLeft.seconds)}</span>
-          </div>
+          <Sparkles className="h-3 w-3" aria-hidden />
+          <span>{PROMO_PERMANENCE_NOTE}</span>
         </div>
       </div>
 
@@ -162,31 +126,10 @@ export function AnniversaryPromo() {
         {/* Divider */}
         <div className="h-8 w-px shrink-0 bg-white/30" />
 
-        {/* Middle-right: countdown — values come from React state */}
+        {/* Middle-right: ملاحظة السريان الدائم */}
         <div className="flex items-center gap-1.5 text-white">
-          <Clock className="h-3.5 w-3.5 opacity-90" />
-          <span className="text-[10px] font-bold opacity-90">تتجدد الدورة خلال</span>
-          <div className="flex items-center gap-0.5 text-xs font-black tabular-nums" dir="ltr">
-            <div className="flex flex-col items-center">
-              <span>{pad(timeLeft.days)}</span>
-              <span className="text-[8px] opacity-75">يوم</span>
-            </div>
-            <span className="mx-0.5 opacity-50">:</span>
-            <div className="flex flex-col items-center">
-              <span>{pad(timeLeft.hours)}</span>
-              <span className="text-[8px] opacity-75">ساعة</span>
-            </div>
-            <span className="mx-0.5 opacity-50">:</span>
-            <div className="flex flex-col items-center">
-              <span>{pad(timeLeft.minutes)}</span>
-              <span className="text-[8px] opacity-75">د</span>
-            </div>
-            <span className="mx-0.5 opacity-50">:</span>
-            <div className="flex flex-col items-center">
-              <span>{pad(timeLeft.seconds)}</span>
-              <span className="text-[8px] opacity-75">ث</span>
-            </div>
-          </div>
+          <Sparkles className="h-3.5 w-3.5 opacity-90" aria-hidden />
+          <span className="text-[10px] font-bold opacity-90">{PROMO_PERMANENCE_NOTE}</span>
         </div>
 
         {/* Spacer */}
@@ -197,7 +140,7 @@ export function AnniversaryPromo() {
           to="/products/men"
           className="group inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-black text-teal-900 shadow-lg transition-all hover:scale-[1.03] active:scale-95"
         >
-          تسوّق العرض
+          تسوّق الآن
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
         </Link>
       </div>

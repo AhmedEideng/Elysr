@@ -21,7 +21,10 @@ import {
   PROMO_MIN_THRESHOLD,
   getPromoEndIso,
   PROMO_CYCLE_DURATION_MS,
+  PROMO_PERMANENCE_NOTE,
 } from "@/lib/promo";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 // تاريخ ثابت أثناء فترة العرض
 const ACTIVE_DATE = new Date("2026-06-15T12:00:00Z");
@@ -166,5 +169,35 @@ describe("PROMO_TIERS consistency", () => {
 
   it("PROMO_MIN_THRESHOLD = أقل شريحة", () => {
     expect(PROMO_MIN_THRESHOLD).toBe(PROMO_TIERS[PROMO_TIERS.length - 1].threshold);
+  });
+});
+
+/**
+ * (R26) حارس ضد الإلحاح المصطنع: شريط «مبادرة الرعاية الماسية» يجب أن يبقى
+ * بلا عدّاد زمني. العدّاد القديم كان يتجدد كل 3 أيام بلا نهاية، فيوحي
+ * بانتهاء عرض لا ينتهي — وهو إيحاء مضلل (قانون حماية المستهلك 181/2018).
+ */
+describe("AnniversaryPromo — بلا عدّاد زمني", () => {
+  const SOURCE = readFileSync(
+    resolve(process.cwd(), "src/components/sections/AnniversaryPromo.tsx"),
+    "utf-8",
+  );
+
+  it("لا يستخدم دوال العدّاد ولا مؤقّتًا", () => {
+    expect(SOURCE).not.toContain("getTimeLeft");
+    expect(SOURCE).not.toContain("getPromoEndIso");
+    expect(SOURCE).not.toContain("setInterval");
+    expect(SOURCE).not.toContain("useEffect");
+  });
+
+  it("لا يحتوي أي صيغة توحي بانتهاء قريب", () => {
+    for (const banned of ["تتجدد الدورة", "ينتهي خلال", "باقي على انتهاء", "الوقت المتبقي"]) {
+      expect(SOURCE).not.toContain(banned);
+    }
+  });
+
+  it("يعرض نص السريان الدائم", () => {
+    expect(SOURCE).toContain("PROMO_PERMANENCE_NOTE");
+    expect(PROMO_PERMANENCE_NOTE).toContain("سارية دائمًا");
   });
 });
