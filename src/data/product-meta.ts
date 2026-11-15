@@ -41,7 +41,7 @@ export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "m-24": { form: "oral", hook: "عسل في 10 أكياس بجرعة مركزة" },
   "m-25": { form: "oral", hook: "كروت عشبية للتناول الفموي" },
   "m-26": { form: "oral", hook: "أقراص في عبوة 10 حبات بتركيز 400 مجم" },
-  "m-27": { form: "oral", hook: "أكياس عشبية بتركيبة Extra Super X7" },
+  "m-27": { form: "oral", hook: "عسل طبيعي بأكياس فردية مع التونغكات علي والجينسنج" },
   "m-28": { form: "topical", hook: "جل مائي في 10 عبوات فردية" },
   "m-29": { form: "topical", hook: "مناديل فردية للاستخدام الخارجي بزيت القرنفل" },
   "m-30": { form: "topical", hook: "كريم مع ليدوكايين وبريلوكايين بتركيز 7.5%" },

@@ -26,8 +26,10 @@ describe("phrase-only catalog corrections", () => {
     // (Round 8 · 2026-11-15) تغيّر واحد إضافي في **حقل غير نصي**: d-08 كان
     // stock=1 وخارج سياسة «المتوفر دائمًا» → 5000. كل الأسماء/الأسعار/الشارات
     // وbundle كما هي، وهذا مؤكد بالبصمة الثانية أسفل الاختبار.
+    // (m-27 · 2026-11-15) تغيير مقصود بطلب المالك: «أكياس إكس ستيل» → «عسل
+    // إكس ستيل» (اسم + ألقاب بحث)، فالبصمة اتغيّرت في حقلين غير نصيين فقط.
     expect(createHash("sha256").update(JSON.stringify(fields)).digest("hex")).toBe(
-      "c3a7b0de73470a357202d02ef82279069d05ace52a274bb3f2eb41e06eee5997",
+      "b9442c1bb52c1898a238e016c5e19b07f73ac126a554f2820b579630ebfbfb48",
     );
   });
   it("corrects discrete ingredient and language errors without removing the original descriptions", () => {
