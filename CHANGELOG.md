@@ -5,6 +5,13 @@ All notable changes to **Elysr Medical** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.4] — 2026-11-15
+
+- Refined page headers and reduced excessive spacing across the site.
+- Removed category filters and updated the men and women category titles.
+- Inlined the entry CSS to avoid a partial-style flash; improved CI and browser test setup.
+- Bumped the shared asset cache version to 119.
+
 ## [Unreleased] — 2026-Q4
 
 ### 🩺 Catalog restoration — Vegal Extra 130 + Levitra 100mg (2026-11-15)
@@ -63,6 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Independent static audit of the full ZIP (source + API + Apps Script +
 build/CI + data + assets). Implemented (verified: typecheck · lint ·
 186 unit · data integrity · 19/19 e2e):
+
 - **Cart stock=0 bug fix**: hydration produced qty=1 for out-of-stock
   products (`Math.max(1, min(qty, 0))`) and catalog sync left qty=0
   items behind — both rejected at checkout with a confusing error.
@@ -135,7 +143,7 @@ injection), CI build-time reduction.
   internal-links, and compliance lists. Kept the **301 redirects** to protect SEO.
 - **2026-09-06/07 catalog decisions (owner)**: all blocks lifted on
   m-38/m-43/m-45, then `m-43 Procomil Fort`, `m-38 Power 36`, `m-45
-  Viagra Pfizer` (Viagra for men) and `w-24 Black Widow Drops` deleted
+Viagra Pfizer` (Viagra for men) and `w-24 Black Widow Drops` deleted
   permanently (301 → category, dangling references cleaned, tests updated).
   Current catalog: **78 products** (49 men · 22 women · 7 devices) —
   **zero prescription products**; 9 items permanently deleted in total
@@ -275,7 +283,7 @@ injection), CI build-time reduction.
     fails on drift.
   - **`package.json` / `package-lock.json` drift (5 releases deep:
     2.1.22 vs 2.1.17)**: `release.mjs` now uses `npm version
-    --no-git-tag-version` (updates both files atomically) and commits
+--no-git-tag-version` (updates both files atomically) and commits
     the lock; the one-time drift was synced, and the integrity test
     now fails if the two versions ever diverge again.
   - **Apps Script rate limiter last resort**: the final
@@ -287,7 +295,7 @@ injection), CI build-time reduction.
     submit-review now return a clear 500 configuration error instead
     of every order failing deep in the webhook with an opaque 502.
   - **GA `add_to_cart` accuracy**: the event now reports the quantity
-    *actually added* (capped by stock), not the requested quantity —
+    _actually added_ (capped by stock), not the requested quantity —
     previously adding 3 to a nearly-full cart line reported +3 while
     the cart grew +1 (GA4 units distortion); 0-actual adds send no
     event.
@@ -422,6 +430,7 @@ injection), CI build-time reduction.
   the 18 KiB stylesheet, and the variance band matches normal lab noise.
   Remaining lab nits are cosmetic: 20 KiB unused vendor-React JS and a 4.8 KiB
   non-responsive logo.
+
 ### 🎯 SEO / Indexation
 
 - **Layered noindex protection for prescription products**: the eight blocked medicine

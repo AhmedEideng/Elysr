@@ -19,7 +19,7 @@ _Original marital & sexual-health products for Egypt — discreet shipping to al
 ![TanStack](https://img.shields.io/badge/TanStack_Router-FF4154?logo=reactrouter&logoColor=white)
 ![Node](https://img.shields.io/badge/Node_24-339933?logo=node.js&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000?logo=vercel&logoColor=white)
-![Version](https://img.shields.io/badge/Version-2.3.3-5b8def?style=flat)
+![Version](https://img.shields.io/badge/Version-2.3.4-5b8def?style=flat)
 ![Pages](https://img.shields.io/badge/Pre--rendered_Pages-286-success?style=flat)
 ![Tests](https://img.shields.io/badge/Tests-505_passing-success?style=flat)
 
@@ -415,7 +415,7 @@ workflow, not a generic catalog test; it needs an article target and its service
 
 ## Current release and loading behavior
 
-**Version 2.3.3 · asset cache 106. Documentation reflects the current catalog and homepage-device update.**
+**Version 2.3.4 · asset cache 119. Documentation reflects the current catalog and homepage-device update.**
 
 - Version lives in `package.json` and `package-lock.json`; cache version lives in
   `config/cache-version.json` and is consumed through `CACHE_VERSION`.
