@@ -292,10 +292,14 @@ Elysr/
 ```bash
 npm run build
 npm run ci
-npx playwright install --with-deps chromium
+npm run setup:e2e
 npm run test:e2e -- --workers=1
 npm audit --audit-level=high
 ```
+
+أمر `npm run setup:e2e` يثبت Chromium ومكتبات النظام المطلوبة لـ Playwright؛
+قد يطلب صلاحيات مدير النظام على Linux، ويُشغَّل مرة عند تجهيز البيئة أو تحديث Playwright.
+لا يشغّل `npm run ci` اختبارات المتصفح؛ شغّل `test:e2e` بعد البناء والتجهيز.
 
 `npm run ci` لا يشغّل Playwright أو Lighthouse أو فحص روابط المصادر الخارجية.
 فحص حيوية الروابط منفصل عبر `npm run check-source-links`.

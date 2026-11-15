@@ -1,558 +1,61 @@
 #!/usr/bin/env node
 /**
- * ============================================================
- * ⚡ Critical CSS Injector (post-build)
- * ============================================================
- * الهدف: أول رسمة للصفحة (FCP/LCP) ما تستناش تحميل الـ CSS كامل.
+ * Inline the complete Vite entry stylesheet in each prerendered page.
  *
- * الطريقة:
- *  1) نجمع الـ classes اللي فعلاً معروضة في أول جزء من body لكل
- *     نوع صفحة من الـ HTML المولّد (home/منتج/مقال/تعليم/سلة/landing)
- *     — يعني الـ set بيتحدّث تلقائيًا مع أي تغيير في الماركب.
- *  2) من الـ CSS المبنى بنجيب كل rule تحتوي أي class من الـ set
- *     (بما فيها قواعد الـ responsive داخل @media) + قواعد العناصر
- *     الأساسية + block الـ properties بتاع Tailwind (متغيرات transform).
- *  3) نحط الناتج inline في <style> بكل صفحات dist/*.html، ونحوّل
- *     الـ <link rel="stylesheet"> إلى preload + swapper خارجي
- *     (CSP: script-src-attr 'none' تمنع onload inline) +
- *     <noscript> fallback عشان الـ crawlers ياخدوا الـ CSS كامل.
- *
- * الأمان:
- *  - مفيش تغيير في الـ CSS نفسه — نفس الملف بيتحمّل في الخلفية
- *    وبيتحلل فوق الـ critical (العرض النهائي مطابق 100%).
- *  - cap حجمي عشان الـ HTML ما ينفخش.
+ * A partial critical stylesheet allowed visibly unstyled content on slow
+ * connections. Keeping the exact full stylesheet in the initial HTML ensures
+ * that the first paint does not depend on a separate stylesheet request or on
+ * JavaScript. The trade-off is larger HTML and no cross-page CSS cache reuse.
  */
-import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
-import { transform } from "esbuild";
+import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, "..");
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = resolve(ROOT, "dist");
-
-// سقف الحجم (bytes).
-// رُفع تاريخياً من 30KB إلى 45KB بعد قياس 2026-09-28 لأن السقف القديم كان
-// يُسقط قواعد تخطيط مستخدمة فوق الطية. في بناء 2026-10-15 دخلت كل القواعد
-// المرشحة (394/394) لكن الناتج 42.8KB استهلك 95.2% من السقف؛ رفعه إلى 48KB
-// يضيف هامشاً صغيراً لتغييرات الواجهة من دون تغيير CSS الحالي أو تعطيل التحذير.
-// يظل السقف محدداً لتجنب تضخيم HTML؛ والـ CSS داخل @layer critical فلا يتقدم
-// على الـ CSS الكامل عند التعارض.
-const CRITICAL_BUDGET = 48 * 1024;
-
-// ── 1) إيجاد الـ CSS المبنى ──
-const assetsDir = resolve(DIST, "assets");
-const cssFiles = readdirSync(assetsDir).filter((f) => /^index-.*\.css$/.test(f));
-if (cssFiles.length !== 1) {
-  console.error(`✗ متوقع index-*.css واحد في dist/assets، لقينا: ${cssFiles}`);
-  process.exit(1);
-}
-const css = readFileSync(resolve(assetsDir, cssFiles[0]), "utf-8");
-
-// ── 2) جمع الـ classes من مصادر فوق الـ fold (بتتحديث تلقائيًا مع الكود) ──
-const SOURCES = [
-  // shell مشترك لكل الصفحات
-  "src/components/layout/Header.tsx",
-  "src/components/PageHero.tsx",
-  "src/components/FloatingActions.tsx",
-  // الرئيسية (hero = الـ LCP)
-  "src/components/sections/Hero.tsx",
-  "src/components/sections/AnniversaryPromo.tsx",
-  "src/components/sections/WhyUs.tsx",
-  // صفحات المنتجات
-  "src/components/ProductCard.tsx",
-  "src/features/product/components/ProductCardImage.tsx",
-  "src/features/product/components/ProductImage.tsx",
-];
-const JS_KEYWORDS = new Set([
-  "if",
-  "else",
-  "return",
-  "const",
-  "let",
-  "var",
-  "function",
-  "true",
-  "false",
-  "null",
-  "undefined",
-  "import",
-  "from",
-  "export",
-  "default",
-  "type",
-  "interface",
-  "void",
-  "typeof",
-  "new",
-  "this",
-  "await",
-  "async",
-  "switch",
-  "case",
-  "break",
-  "continue",
-  "in",
-  "of",
-  "do",
-  "try",
-  "catch",
-  "finally",
-  "throw",
-  "extends",
-  "super",
-  "class",
-  "static",
-  "get",
-  "set",
-  "delete",
-  "instanceof",
-  "with",
-  "yield",
-  "enum",
-  "declare",
-  "abstract",
-  "implements",
-  "namespace",
-  "module",
-  "public",
-  "private",
-  "protected",
-  "readonly",
-  "as",
-  "is",
-  "keyof",
-  "infer",
-  "never",
-  "unknown",
-  "any",
-  "string",
-  "number",
-  "boolean",
-  "object",
-  "symbol",
-  "bigint",
-  "react",
-  "children",
-  "className",
-]);
-const classSet = new Set();
-const classFreq = new Map(); // تكرار الكلاس في المصادر = بديل الأولوية (فوق الـ fold بيتكرر أكتر)
-const addClass = (t, w = 1) => {
-  classSet.add(t);
-  classFreq.set(t, (classFreq.get(t) || 0) + w);
-};
-for (const f of SOURCES) {
-  const src = readFileSync(resolve(ROOT, f), "utf-8");
-  for (const m of src.matchAll(/["'`]([A-Za-z0-9_\-:/.[\]%! ]+)["'`]/g)) {
-    for (const t of m[1].split(/\s+/)) {
-      if (
-        t.length < 40 &&
-        /^[A-Za-z][A-Za-z0-9_\-:/]*([:!][A-Za-z0-9_\-:/[\]%]*|[!.]?[A-Za-z0-9_\-:/[\]%]*)$/.test(
-          t,
-        ) &&
-        !JS_KEYWORDS.has(t)
-      ) {
-        addClass(t);
-      }
-    }
-  }
-}
-// utilities أساسية مشتركة في ماركب الـ routes (فوق الـ fold)
-for (const t of [
-  "container",
-  "mx-auto",
-  "px-4",
-  "px-3",
-  "flex",
-  "flex-col",
-  "flex-1",
-  "items-center",
-  "items-start",
-  "items-end",
-  "justify-between",
-  "justify-center",
-  "justify-start",
-  "gap-1",
-  "gap-1.5",
-  "gap-2",
-  "gap-2.5",
-  "gap-3",
-  "gap-4",
-  "gap-5",
-  "grid",
-  "grid-cols-1",
-  "grid-cols-2",
-  "grid-cols-3",
-  "grid-cols-4",
-  "text-center",
-  "text-left",
-  "text-right",
-  "text-xs",
-  "text-sm",
-  "text-base",
-  "text-lg",
-  "text-xl",
-  "text-2xl",
-  "text-3xl",
-  "text-4xl",
-  "font-medium",
-  "font-bold",
-  "font-black",
-  "leading-none",
-  "leading-tight",
-  "leading-snug",
-  "leading-6",
-  "leading-relaxed",
-  "rounded-lg",
-  "rounded-xl",
-  "rounded-2xl",
-  "rounded-full",
-  "bg-white",
-  "bg-card",
-  "bg-background",
-  "bg-muted",
-  "border",
-  "border-b",
-  "border-t",
-  "shadow-sm",
-  "shadow-md",
-  "shadow-elegant",
-  "transition",
-  "transition-all",
-  "transition-smooth",
-  "hover:shadow-sm",
-  "hover:shadow-md",
-  "w-full",
-  "w-fit",
-  "h-full",
-  "h-fit",
-  "min-w-0",
-  "shrink-0",
-  "block",
-  "hidden",
-  "md:block",
-  "sm:block",
-  "md:flex",
-  "md:flex-row",
-  "sm:gap-3",
-  "sm:gap-4",
-  "md:p-6",
-  "md:px-4",
-  "mb-1",
-  "mb-1.5",
-  "mb-2",
-  "mb-2.5",
-  "mb-3",
-  "mb-4",
-  "mb-5",
-  "mb-6",
-  "mt-1",
-  "mt-1.5",
-  "mt-2",
-  "mt-3",
-  "mt-4",
-  "mt-5",
-  "mt-6",
-  "mt-auto",
-  "p-3",
-  "p-4",
-  "p-5",
-  "line-clamp-2",
-  "line-clamp-3",
-  "overflow-hidden",
-  "overflow-x-hidden",
-  "cursor-pointer",
-  "select-none",
-  "aspect-video",
-  "aspect-square",
-  "aspect-auto",
-  "uppercase",
-  "tracking-wide",
-  "truncate",
-  "whitespace-nowrap",
-  "relative",
-  "absolute",
-  "inset-0",
-  "z-10",
-  "z-50",
-  "object-cover",
-  "object-contain",
-  "opacity-80",
-  "pointer-events-none",
-  "aria-hidden",
-])
-  addClass(t, 2); // وزن أعلى: مشروعين في كل الـ above-the-fold
-console.log(`✓ classes من ${SOURCES.length} مصادر + core utils: ${classSet.size}`);
-
-// ── 3) tokenizer بسيط للـ CSS + جمع الـ rules المطابقة ──
-const JS_CLS = (sel) =>
-  [...sel.matchAll(/\.([A-Za-z0-9_\-:/!%[\]()\\]+)(?=[\s,{:.+)>~*]|$)/g)].map((m) =>
-    m[1].replace(/\\/g, ""),
-  );
-const BASE_ELEMENTS = new Set([
-  "html",
-  "body",
-  "h1",
-  "h2",
-  "h3",
-  "h4",
-  "h5",
-  "p",
-  "a",
-  "img",
-  "button",
-  "input",
-  "ul",
-  "li",
-  "ol",
-  "blockquote",
-  "strong",
-  "em",
-  "span",
-  "div",
-  "table",
-  "th",
-  "td",
-  "form",
-  "select",
-  "textarea",
-  "nav",
-  "header",
-  "main",
-  "section",
-  "footer",
-  "svg",
-  "path",
-  "dl",
-  "dt",
-  "dd",
-  "hr",
-  "pre",
-  "code",
-]);
-
-function blockMatchScore(header) {
-  // 0 = مطابق (class من الـ set، أو عنصر أساسي، أو :root، أو universal/pseudo)
-  const h = header.trim();
-  if (/^:root\b/.test(h)) return 0; // متغيرات البراند (primary/card/foreground...)
-  if (JS_CLS(h).some((c) => classSet.has(c))) return 0;
-  if (h.startsWith("*") || h.startsWith(":")) return 0; // universal + pseudo-elements
-  if (
-    h
-      .split(",")
-      .some((p) => BASE_ELEMENTS.has(p.trim().replace(/:before|:after|::before|::after/g, "")))
-  ) {
-    return 0;
-  }
-  return -1;
-}
-
-const kept = []; // {score, size, text}
-
-// walk متكرر للـ CSS text — بيتعامل مع @media/@supports المتداخلة
-// (responsive variants بتاعت Tailwind جواهم)
-function collectRules(text, emitRule) {
-  let k = 0;
-  while (k < text.length) {
-    const bb = text.indexOf("{", k);
-    if (bb === -1) break;
-    const bh = text.slice(k, bb).trim();
-    let d2 = 1;
-    let jj = bb + 1;
-    while (jj < text.length && d2 > 0) {
-      if (text[jj] === "{") d2++;
-      else if (text[jj] === "}") d2--;
-      jj++;
-    }
-    const sub = text.slice(k, jj);
-    k = jj;
-    if (bh.startsWith("@media") || bh.startsWith("@supports")) {
-      // المهم: الـ rules الداخلية لازم ترجع ملفوفة بنفس الـ @media —
-      // .md\:flex من غير (min-width:48rem) هيتطبق على كل الشاشات = كسر mobile
-      const inner = sub.slice(sub.indexOf("{") + 1, sub.lastIndexOf("}"));
-      const innerRules = [];
-      collectRules(inner, (r) => innerRules.push(r));
-      if (innerRules.length) emitRule(bh + "{" + innerRules.join("") + "}");
-      continue;
-    }
-    // rules اللي تعتمد على متغيرات transform من غير fallback (rotate/scale/
-    // translate/shadow/blur/gradient) مالهاش قيمة من غير properties layer →
-    // للـ CSS الكامل. استثناء: var(--tw-leading,...) عنده fallback للـ theme.
-    const body = sub.slice(bb + 1, sub.lastIndexOf("}"));
-    if (
-      sub.includes("var(--tw-") &&
-      /var\(--tw-(?!leading)[a-z-]*\)/.test(body.replace(/var\(--tw-leading[^)]*\)/g, ""))
-    ) {
-      continue;
-    }
-    if (blockMatchScore(bh) >= 0) emitRule(sub);
-  }
-}
-let i = 0;
-while (i < css.length) {
-  const semi = css.indexOf(";", i);
-  const brace = css.indexOf("{", i);
-  if (brace === -1) break;
-  // statements زي "@layer components;" (تسجيل layer من غير body)
-  if (semi !== -1 && semi < brace) {
-    i = semi + 1;
-    continue;
-  }
-  const header = css.slice(i, brace).trim();
-  let depth = 1;
-  let j = brace + 1;
-  while (j < css.length && depth > 0) {
-    if (css[j] === "{") depth++;
-    else if (css[j] === "}") depth--;
-    j++;
-  }
-  const block = css.slice(i, j);
-  i = j;
-
-  const h = header
-    .replace(/^\/\*[\s\S]*?\*\//, "")
-    .trim()
-    .toLowerCase();
-  if (h.startsWith("@keyframes")) continue; // أنيميشن: بيتطبق مع الـ CSS الكامل (بلا تأثير layout)
-  if (h.startsWith("@font-face")) {
-    kept.push({ score: 0, size: block.length, text: block });
-    continue;
-  }
-  if (h.startsWith("@layer")) {
-    // theme/base = متغيرات ألوان/خطوط + resets بنلازمها (الـ utilities بتعتمد عليهم).
-    // بنفككهم بـ collectRules (نفس طريقة الـ utilities) عشان كل حاجة تدخل
-    // جوا @layer critical فيبقى أولويتها أقل من كل طبقات الـ CSS الكامل.
-    // الـ properties (متغيرات transform) بنسبها: بتستهلك 4.5KB من الـ budget.
-    if (!h.includes("utilities") && !h.includes("properties")) {
-      const inner = block.slice(block.indexOf("{") + 1, block.lastIndexOf("}"));
-      collectRules(inner, (sub) => kept.push({ score: 0, size: sub.length, text: sub }));
-      continue;
-    }
-    // @layer utilities: بنخطف الـ rules المطابقة — بما فيها المتجايلة جوا
-    // @media للـ responsive variants (sm:/md:/lg:) — كل rule لوحدها عشان
-    // الـ budget يقدر يختار أفضل subset
-    let matched = 0;
-    const innerText = block.slice(block.indexOf("{") + 1, block.lastIndexOf("}"));
-    collectRules(innerText, (sub) => {
-      // freq من كل الـ classes في النص (شامل rules جوا @media المجمعة)
-      const freq = JS_CLS(sub).reduce((s2, c) => s2 + (classFreq.get(c) || 0), 0);
-      kept.push({ score: 1, freq, size: sub.length, text: sub });
-      matched++;
-    });
-    console.log(`DEBUG utilities matched: ${matched} rules`);
-    continue;
-  }
-  if (h.startsWith("@supports") || h.startsWith("@media")) {
-    const innerText = block.slice(block.indexOf("{") + 1, block.lastIndexOf("}"));
-    let out = "";
-    let k = 0;
-    while (k < innerText.length) {
-      const bb = innerText.indexOf("{", k);
-      if (bb === -1) break;
-      const bh = innerText.slice(k, bb).trim();
-      let d2 = 1;
-      let jj = bb + 1;
-      while (jj < innerText.length && d2 > 0) {
-        if (innerText[jj] === "{") d2++;
-        else if (innerText[jj] === "}") d2--;
-        jj++;
-      }
-      const sub = innerText.slice(k, jj);
-      k = jj;
-      if (blockMatchScore(bh) >= 0) out += sub;
-    }
-    if (out)
-      kept.push({ score: 2, size: header.length + 2 + out.length, text: header + "{" + out + "}" });
-    continue;
-  }
-  if (h.startsWith("@")) continue; // @property/باقي
-
-  const score = blockMatchScore(header);
-  if (score >= 0) kept.push({ score, size: block.length, text: block });
-}
-
-// ── 4) ترتيب بالأولوية + تطبيق الـ budget ──
-kept.sort((a, b) => a.score - b.score || (b.freq || 0) - (a.freq || 0) || a.size - b.size);
-let total = 0;
-const chosen = [];
-for (const k of kept) {
-  if (total + k.size > CRITICAL_BUDGET && chosen.length > 0) continue;
-  chosen.push(k);
-  total += k.size;
-}
-// مهم جدًا: كل القواعد جوا @layer critical — الـ layer بيظهر قبل طبقات الـ CSS
-// الكامل (theme/base/components/utilities) فأولويته أدنى: لو في تعارض،
-// الـ CSS الكامل دايمًا يفوز (critical = أول رسمة بس، مش مصدر الحقيقة).
-const criticalCss = "@layer critical{" + chosen.map((k) => k.text).join("") + "}";
-// The main stylesheet is minified by Vite, but this inline stylesheet bypasses
-// Vite. Minify it here too so PageSpeed does not count whitespace/comments as
-// render-blocking CSS bytes.
-const minifiedCriticalCss = (
-  await transform(criticalCss, { loader: "css", minify: true, target: "es2022" })
-).code.trim();
-const dropped = kept.length - chosen.length;
-const usage = minifiedCriticalCss.length / CRITICAL_BUDGET;
-console.log(
-  `✓ critical CSS: ${(minifiedCriticalCss.length / 1024).toFixed(1)}KB — ${chosen.length} قاعدة محقونة من ${kept.length} مرشحة (budget ${CRITICAL_BUDGET / 1024}KB)`,
+const cssFiles = readdirSync(resolve(DIST, "assets")).filter((name) =>
+  /^index-.*\.css$/.test(name),
 );
-// ⚠️ القواعد المستبعدة لا تكسر الموقع (الـ CSS الكامل يُحمَّل بعدها) لكنها
-// تُرجع أول رسمة بلا تنسيق لتلك الأجزاء. قبل هذا التحذير كان الإسقاط صامتاً
-// تماماً والسقف مستهلكاً بنسبة ~99%، فأي class جديد فوق الطية كان يُحذف
-// دون أن يلاحظ أحد.
-if (dropped > 0) {
-  const droppedRules = kept.filter((k) => !chosen.includes(k));
-  const droppedBytes = droppedRules.reduce((s, k) => s + k.size, 0);
-  const selectorOf = (t) => t.slice(0, t.indexOf("{")).trim().replace(/\s+/g, " ").slice(0, 60);
-  console.warn(
-    `⚠️  critical CSS: ${dropped} قاعدة مستبعدة بسبب السقف (${CRITICAL_BUDGET / 1024}KB) بحجم ${(droppedBytes / 1024).toFixed(1)}KB — أول رسمة قد تظهر بلا تنسيق لهذه الأجزاء حتى يُحمَّل الـ CSS الكامل.`,
-  );
-  console.warn(
-    `    المستبعد (الأدنى أولوية أولاً): ${droppedRules
-      .slice(-12)
-      .reverse()
-      .map((k) => `[s${k.score}] ${selectorOf(k.text)}`)
-      .join(" · ")}`,
-  );
+if (cssFiles.length !== 1) throw new Error(`Expected one entry stylesheet; found: ${cssFiles}`);
+const cssName = cssFiles[0];
+const css = readFileSync(resolve(DIST, "assets", cssName), "utf8");
+// Relative CSS URLs resolve against the CSS file, not the HTML document. Fail
+// safely rather than silently changing their meaning when inlining the file.
+if (/<\/style/i.test(css) || /@import\b/i.test(css)) {
+  throw new Error("Entry CSS contains </style or @import and cannot be safely inlined");
 }
-if (usage > 0.95) {
-  console.warn(
-    `⚠️  critical CSS: السقف مستهلك بنسبة ${(usage * 100).toFixed(1)}% — أي قواعد جديدة فوق الطية ستُستبعد صامتةً ما لم يُرفع CRITICAL_BUDGET.`,
-  );
-}
-
-// ── 5) حقن في كل صفحات dist ──
-const htmlFiles = [];
-(function walk(dir) {
-  for (const e of readdirSync(dir)) {
-    const p = join(dir, e);
-    const st = statSync(p);
-    if (st.isDirectory()) walk(p);
-    else if (e.endsWith(".html")) htmlFiles.push(p);
+for (const match of css.matchAll(/url\(\s*['"]?([^'"\s)]+)/gi)) {
+  if (!/^(?:\/|https?:|data:|blob:|#)/i.test(match[1])) {
+    throw new Error(`Entry CSS has a relative URL that cannot be safely inlined: ${match[1]}`);
   }
-})(DIST);
-
-// defer: بيتحمّل بالتوازي مع الـ HTML (مفيش round-trip مانع) وبيشتغل فور
-// ما الـ parsing يخلص — الـ preload كان بدأ تحميل الـ CSS من الأول
-const swapper = `<script src="/scripts/css-swapper.js" defer></script>`;
+}
+const stylesheet = /<link\s+rel="stylesheet"\s+crossorigin\s+href="([^"]+)"\s*\/?>/g;
 let pages = 0;
-for (const f of htmlFiles) {
-  let html = readFileSync(f, "utf-8");
-  if (!html.includes('rel="stylesheet"')) continue;
-  // 5a) استبدال الـ link بـ preload + noscript + swapper
-  html = html.replace(
-    /<link rel="stylesheet" crossorigin href="([^"]+)">/,
-    `<link rel="preload" href="$1" as="style">\n    <noscript><link rel="stylesheet" href="$1"></noscript>\n    ${swapper}`,
-  );
-  // 5b) إضافة الـ critical style بعد الـ <style> الحالي (أو قبل </head>)
-  const styleClose = html.indexOf("</style>");
-  const insert = `<style id="critical-above-the-fold">${minifiedCriticalCss}</style>`;
-  if (styleClose !== -1) {
-    html = html.slice(0, styleClose + 8) + "\n    " + insert + html.slice(styleClose + 8);
-  } else {
-    html = html.replace("</head>", "  " + insert + "\n</head>");
+function walk(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      walk(path);
+      continue;
+    }
+    if (!entry.name.endsWith(".html")) continue;
+    const html = readFileSync(path, "utf8");
+    let replacements = 0;
+    const result = html.replace(stylesheet, (tag, href) => {
+      if (href !== `/assets/${cssName}`) return tag;
+      replacements++;
+      return `<style id="entry-stylesheet">${css}</style>`;
+    });
+    if (path === resolve(DIST, "404.html") && replacements === 0) continue;
+    if (replacements !== 1) {
+      throw new Error(`Expected exactly one entry stylesheet in ${path}; found ${replacements}`);
+    }
+    writeFileSync(path, result, "utf8");
+    pages++;
   }
-  writeFileSync(f, html, "utf-8");
-  pages++;
 }
-console.log(`✓ حقن الـ critical CSS في ${pages} صفحة`);
+walk(DIST);
+if (pages === 0) throw new Error("No pages received the entry stylesheet");
+console.log(
+  `✓ Full CSS inlined in ${pages} pages (${(Buffer.byteLength(css) / 1024).toFixed(1)} KB per page)`,
+);

@@ -69,11 +69,6 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      # Integrity checks compare generated catalogs against the current TS source.
-      # Generate inside the runner; do not commit or publish Merchant feeds here.
-      - name: Generate catalog artifacts for integrity checks
-        run: node scripts/generate-sitemap.mjs
-
       - name: Data integrity tests
         run: npm test
 
@@ -282,8 +277,8 @@ jobs:
           name: dist
           path: dist
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install Chromium and system dependencies
+        run: npm run setup:e2e
 
       - name: Run browser tests
         run: npm run test:e2e

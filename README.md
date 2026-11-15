@@ -41,18 +41,18 @@ reviews and error reporting. No application database is required.
 Orders flow through a hardened serverless API into Google Sheets; customer reviews
 flow through the same webhook into a moderated reviews sheet.
 
-| Metric             | Value                                                                                                                                                                           |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Metric             | Value                                                                                                                                                                            |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Products           | **91** (58 men · 25 women · 8 devices) — 2 legacy items remain deleted; eight previously removed products restored by owner decision (latest: Vegal Extra + Levitra, 2026-11-15) |
-| Catalog coverage   | **91** in the site catalog · 82 in the Merchant feed (9 prescription-active items excluded from the feed only — owner decision 2026-09-28; their pages stay live and indexable) |
-| Articles           | **64** educational health articles with trusted medical sources (NIH/Mayo/NHS/…)                                                                                                |
-| SEO landing pages  | **113** long-form guide pages (price lists, product comparisons and regional delivery pages; drug-guide pages retain medical safety warnings)                                   |
-| Pre-rendered pages | **288** (16 static + 91 product routes + 64 articles + 113 guides + 4 English pages)                                                                                            |
-| Sitemap URLs       | **284** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)                                                                                     |
-| Catalog feed       | **82** items (Google Shopping RSS/CSV/TXT, price + availability + `product_type` per product)                                                                                   |
-| Redirects          | **175** permanent redirects (HTTP 308 on Vercel) (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                                                         |
-| Images             | 148 source WebP + 269 thumbnails across three sizes                                                                                                                             |
-| Tests              | **505** unit (Vitest) + **52** E2E (Playwright) + data-integrity + schema validation                                                                                            |
+| Catalog coverage   | **91** in the site catalog · 82 in the Merchant feed (9 prescription-active items excluded from the feed only — owner decision 2026-09-28; their pages stay live and indexable)  |
+| Articles           | **64** educational health articles with trusted medical sources (NIH/Mayo/NHS/…)                                                                                                 |
+| SEO landing pages  | **113** long-form guide pages (price lists, product comparisons and regional delivery pages; drug-guide pages retain medical safety warnings)                                    |
+| Pre-rendered pages | **288** (16 static + 91 product routes + 64 articles + 113 guides + 4 English pages)                                                                                             |
+| Sitemap URLs       | **284** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)                                                                                      |
+| Catalog feed       | **82** items (Google Shopping RSS/CSV/TXT, price + availability + `product_type` per product)                                                                                    |
+| Redirects          | **175** permanent redirects (HTTP 308 on Vercel) (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                                                          |
+| Images             | 148 source WebP + 269 thumbnails across three sizes                                                                                                                              |
+| Tests              | **505** unit (Vitest) + **52** E2E (Playwright) + data-integrity + schema validation                                                                                             |
 
 ---
 
@@ -399,10 +399,12 @@ Local release checks (build first to synchronize generated catalog snapshots):
 ```bash
 npm run build
 npm run ci
-npx playwright install --with-deps chromium
+npm run setup:e2e
 npm run test:e2e -- --workers=1
 npm audit --audit-level=high
 ```
+
+`npm run setup:e2e` installs Chromium and its Playwright system dependencies. On Linux it may require administrator privileges; run it when setting up the environment or updating Playwright.
 
 `npm run ci` does not run Playwright, Lighthouse or external source-link checks.
 Run `npm run check-source-links` separately for source URL liveness.

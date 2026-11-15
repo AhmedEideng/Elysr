@@ -17,7 +17,6 @@ test("HILTI women is discoverable, has working responsive images and a 200 EGP o
   expect(html).toContain("ليست كل اللحظات الجميلة بحاجة إلى مناسبة");
   expect(html).toContain("الإبيميديوم (عشبة العنزة)");
   await page.goto("/products/women");
-  await page.getByLabel("نوع المنتج", { exact: true }).selectOption("chocolate");
   const cardLink = page.locator(`[data-catalog-results] a[href="/products/${slug}"]`).first();
   await cardLink.scrollIntoViewIfNeeded();
   await expect(cardLink).toBeVisible();

@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { products, searchAllPublicProducts } from "@/data/products";
 import { suggestProductSearch } from "@/lib/product-search";
-import { filterCatalog } from "@/lib/product-filter";
 import { trackSiteSearch, trackViewItemList, trackSelectItem } from "@/lib/analytics";
 import { useCheckoutFunnel } from "@/hooks/use-checkout-funnel";
 import { submitToGoogleSheets } from "@/lib/governorates";
@@ -33,24 +32,6 @@ describe("ranked Egyptian product search", () => {
     expect(searchAllPublicProducts("كريفو")).toEqual([]);
     expect(suggestProductSearch(products, "كريفو").map((p) => p.id)).toContain("m-60");
     expect(suggestProductSearch(products, "zzzzzzzz")).toEqual([]);
-  });
-});
-
-describe("catalog controls", () => {
-  it("preserves default membership and order without mutating source data", () => {
-    const original = products.map((p) => p.id);
-    expect(filterCatalog(products, "all", "", "", "default").map((p) => p.id)).toEqual(original);
-    filterCatalog(products, "all", "", "", "price-desc");
-    expect(products.map((p) => p.id)).toEqual(original);
-  });
-  it("filters by type and an inclusive price range", () => {
-    const result = filterCatalog(products, "spray", "0", "500", "price-asc");
-    expect(result.length).toBeGreaterThan(0);
-    expect(result.every((p) => p.price <= 500)).toBe(true);
-    expect(result.map((p) => p.price)).toEqual(result.map((p) => p.price).sort((a, b) => a - b));
-  });
-  it("empty ranges do not change prices or invent fallback offers", () => {
-    expect(filterCatalog(products, "all", "1000", "1", "default")).toEqual([]);
   });
 });
 

@@ -474,20 +474,6 @@ function buildHtml(template, opts) {
     `$1<p>${safeTitle}</p>\n        <p>${safeDesc}</p>`,
   );
 
-  // The build emits BOTH <link rel="preload" as="style"> and a render-blocking
-  // <link rel="stylesheet"> for the same bundle; the blocking copy defeats the
-  // critical-CSS + css-swapper design (first paint waits for the full 100KB
-  // bundle). Drop the blocking copy — css-swapper.js promotes the preload to a
-  // stylesheet the moment it lands — and keep a <noscript> stylesheet so no-JS
-  // visitors still get the full design.
-  html = html.replace(
-    /<link rel="stylesheet" href="(\/assets\/index-[^"]+\.css)"\s*\/?>/,
-    (m, href) =>
-      html.includes(`<link rel="preload" href="${href}" as="style">`)
-        ? `<noscript><link rel="stylesheet" href="${href}"></noscript>`
-        : m,
-  );
-
   return html;
 }
 

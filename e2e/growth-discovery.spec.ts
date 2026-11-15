@@ -1,5 +1,4 @@
 import { expect, test, type Page } from "@playwright/test";
-import catalog from "../api/lib/products-db.json" with { type: "json" };
 
 test.beforeEach(async ({ page }) => {
   await page.route("**/gtag/js**", (route) => route.abort());
@@ -48,44 +47,39 @@ test("multiword Egyptian search, spelling suggestions and header search agree", 
 });
 
 for (const category of ["men", "women", "devices"]) {
-  test(`${category} filters preserve canonical URL and default order`, async ({ page }) => {
-    await page.goto(`/products/${category}`);
-    await expect(page.locator("[data-catalog-results]")).toBeVisible();
-    const original = await page
-      .locator('[data-catalog-results] a[href^="/products/"]')
-      .evaluateAll((links) => links.map((a) => a.getAttribute("href")));
-    await page.getByLabel("ترتيب المنتجات", { exact: true }).selectOption("price-asc");
-    await page.getByRole("button", { name: "تحديد السعر", exact: true }).click();
-    await page.getByLabel("السعر إلى", { exact: true }).fill("1000");
-    await expect
-      .poll(async () => {
-        const text = await page.locator("script#ldjson-itemlist").textContent();
-        const list = JSON.parse(text!);
-        const prices = list.itemListElement.map(
-          (x: { url: string }) => catalog.find((p) => x.url.endsWith(`/products/${p.slug}`))!.price,
-        );
-        return (
-          prices.length > 0 &&
-          prices.every(
-            (price: number, i: number) => price <= 1000 && (!i || price >= prices[i - 1]),
-          )
-        );
-      })
-      .toBe(true);
-    await expect(page).toHaveURL(new RegExp(`/products/${category}$`));
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-      "href",
-      `https://elysrmedical.store/products/${category}`,
-    );
-    await page.getByRole("button", { name: "مسح الفلاتر", exact: true }).click();
-    await expect
-      .poll(() =>
-        page
-          .locator('[data-catalog-results] a[href^="/products/"]')
-          .evaluateAll((links) => links.map((a) => a.getAttribute("href"))),
-      )
-      .toEqual(original);
-  });
+  for (const width of [390, 1440]) {
+    test(`${category} catalog displays products without filters at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto(`/products/${category}`);
+      const results = page.locator("[data-catalog-results]");
+      await expect(results).toBeVisible();
+      await expect(results.locator('a[href^="/products/"]').first()).toBeVisible();
+      await expect(page.locator("[data-catalog-toolbar]")).toHaveCount(0);
+      await expect(page.getByLabel("نوع المنتج", { exact: true })).toHaveCount(0);
+      await expect(page.getByLabel("ترتيب المنتجات", { exact: true })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "تحديد السعر", exact: true })).toHaveCount(0);
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        "href",
+        `https://elysrmedical.store/products/${category}`,
+      );
+      const links = await results
+        .locator('a[href^="/products/"]')
+        .evaluateAll((els) => els.map((el) => el.getAttribute("href")));
+      await page.reload();
+      await expect
+        .poll(() =>
+          results
+            .locator('a[href^="/products/"]')
+            .evaluateAll((els) => els.map((el) => el.getAttribute("href"))),
+        )
+        .toEqual(links);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+      ).toBe(true);
+    });
+  }
 }
 
 test("form starts before submit, metrics exclude private fields, and order submission is unchanged", async ({
@@ -124,48 +118,4 @@ test("form starts before submit, metrics exclude private fields, and order submi
   });
   expect(recorded.find((e) => e.event === "purchase")).toMatchObject({ value: 300, shipping: 50 });
   expect(JSON.stringify(recorded)).not.toMatch(/01012345678|عميل اختبار خاص|عنوان اختبار خاص/);
-});
-
-test("mobile filters recover from an empty range without horizontal overflow", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/products/men");
-  await page.getByLabel("نوع المنتج", { exact: true }).selectOption("spray");
-  await page.getByRole("button", { name: "تحديد السعر", exact: true }).click();
-  await page.getByLabel("السعر من", { exact: true }).fill("1000");
-  await page.getByLabel("السعر إلى", { exact: true }).fill("1");
-  await expect(
-    page.getByText("لا توجد منتجات ضمن الفلاتر المختارة.", { exact: false }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "مسح الفلاتر", exact: true }).click();
-  await expect(page.locator("[data-catalog-results]")).toBeVisible();
-  expect(
-    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),
-  ).toBe(true);
-});
-
-test("compact catalog toolbar keeps price controls optional and keyboard accessible", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 360, height: 800 });
-  await page.goto("/products/women");
-  const toolbar = page.locator("[data-catalog-toolbar]");
-  await expect(toolbar).toBeVisible();
-  expect((await toolbar.boundingBox())!.height).toBeLessThan(140);
-  await expect(page.getByLabel("السعر من", { exact: true })).toHaveCount(0);
-  await expect(toolbar).not.toContainText("توصية علاجية");
-  await expect(toolbar.getByRole("link")).toHaveCount(0);
-  const price = page.getByRole("button", { name: "تحديد السعر", exact: true });
-  await price.click();
-  await expect(price).toHaveAttribute("aria-expanded", "true");
-  await page.getByLabel("السعر من", { exact: true }).fill("200");
-  await page.keyboard.press("Escape");
-  await expect(price).toBeFocused();
-  await expect(price).toHaveAttribute("aria-expanded", "false");
-  await price.click();
-  await expect(page.getByLabel("السعر من", { exact: true })).toHaveValue("200");
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.getByRole("heading", { level: 1 }).click();
-  await expect(price).toHaveAttribute("aria-expanded", "false");
-  await page.getByRole("button", { name: "مسح الفلاتر", exact: true }).click();
-  await expect(page.getByRole("button", { name: "مسح الفلاتر", exact: true })).toHaveCount(0);
 });
