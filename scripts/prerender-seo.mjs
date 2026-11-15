@@ -1425,6 +1425,10 @@ ${homeArticlesBody}
             : undefined,
       });
 
+      // (2026-11-15) مصدر واحد للأسئلة: نفس المصفوفة تُطبع نصًا مرئيًا
+      // وتُصدر FAQPage JSON-LD — فلا يمكن أن تختلف السكيما عن الصفحة.
+      const productFaqs = getProductFAQs(product);
+
       const breadcrumb = {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
@@ -1526,7 +1530,7 @@ ${homeArticlesBody}
         <section><h2>كيف يتم الشحن بسرية؟</h2><ul><li>يتم تغليف الطلب في عبوة محايدة بدون ذكر اسم المنتج.</li><li>لا تظهر طبيعة المنتج على الشحنة أو من الخارج.</li><li>يتم التواصل معك لتأكيد التفاصيل قبل الشحن.</li><li>بياناتك تُستخدم لإتمام الطلب والتوصيل فقط.</li></ul></section>
         <p><a href="${categoryUrl}">تصفح كل ${esc(categoryName)}</a></p>
         ${bundleBody}
-        <section><h2>الأسئلة الشائعة</h2>${getProductFAQs(product)
+        <section><h2>الأسئلة الشائعة</h2>${productFaqs
           .map((faq) => `<p><strong>${esc(faq.question)}</strong></p><p>${esc(faq.answer)}</p>`)
           .join("")}</section>
         ${relatedBody}
@@ -1541,7 +1545,7 @@ ${homeArticlesBody}
         canonical,
         type: "product",
         noindex: false,
-        jsonLd: [productJsonLd, breadcrumb],
+        jsonLd: [productJsonLd, breadcrumb, faqSchema(productFaqs)],
         bodyContent: body,
         imageAlt: product.name,
         // (2026-10-11) الأبعاد تُقرأ من ملف الصورة نفسه (imageDims) — لا تثبيت.

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { seoLandingPages } from "@/data/landing-pages";
 import { products } from "@/data/products";
 import {
+  faqSchema,
   makeProductMetaDescription,
   makeProductMetaTitle,
   merchantShippingDetails,
@@ -316,5 +317,27 @@ describe("package-3 education articles", () => {
     expect(bySlug("delay-sprays-safe-use")?.title).toContain("طريقة الاستخدام");
     expect(bySlug("max-filler-breast-guide")?.title).toContain("الأصلي");
     expect(bySlug("medications-affecting-libido")?.title).toContain("القائمة الكاملة");
+  });
+});
+
+// (2026-11-15) FAQPage لكل المنتجات: نفس مصدر النص المرئي بالحرف، بلا أسئلة
+// مكررة أو أجوبة فارغة. المظهر المرئي في جوجل انتهى في 7 مايو 2026، فالحارس
+// هنا على صدق التعليم الآلي ومطابقته للصفحة — لا على الـrich result.
+describe("product FAQPage schema", () => {
+  it("mirrors each product's visible FAQ list exactly", async () => {
+    const { getProductFAQs } = await import("@/data/product-faqs");
+    expect(products).toHaveLength(89);
+    for (const catalogProduct of products) {
+      const faqs = getProductFAQs(catalogProduct);
+      const schema = faqSchema(faqs);
+      expect(schema["@type"]).toBe("FAQPage");
+      expect(schema.mainEntity.map((entry) => entry.name)).toEqual(faqs.map((faq) => faq.question));
+      expect(new Set(schema.mainEntity.map((entry) => entry.name)).size).toBe(faqs.length);
+      for (const entry of schema.mainEntity) {
+        expect(entry["@type"]).toBe("Question");
+        expect(entry.acceptedAnswer["@type"]).toBe("Answer");
+        expect(entry.acceptedAnswer.text.trim().length).toBeGreaterThan(0);
+      }
+    }
   });
 });

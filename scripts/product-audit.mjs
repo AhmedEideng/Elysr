@@ -381,6 +381,42 @@ for (const p of products) {
     if (availability && wantsOut !== /OutOfStock/i.test(availability))
       add("error", "page-schema-availability", p.slug, `${availability} · stock=${p.stock}`);
   }
+
+  // (2026-11-15) FAQPage JSON-LD: لازم توجد على كل صفحة منتج، ولازم تطابق
+  // النص المرئي حرفيًا وبنفس الترتيب (Google أوقفت المظهر المرئي في 7 مايو
+  // 2026، لكن أي سكيما تصف أسئلة غير موجودة على الصفحة = تعليم آلي كاذب).
+  const faqNodes = [];
+  for (const [, raw] of blocks) {
+    try {
+      const parsed = JSON.parse(raw);
+      const nodes = Array.isArray(parsed) ? parsed : parsed["@graph"] ? parsed["@graph"] : [parsed];
+      for (const node of nodes) if (node["@type"] === "FAQPage") faqNodes.push(node);
+    } catch {
+      /* يُبلَّغ عنه أعلاه */
+    }
+  }
+  if (faqs.length > 0) {
+    if (!faqNodes.length) {
+      add("error", "page-faq-schema-missing", p.slug, `${faqs.length} سؤال بلا FAQPage`);
+    } else {
+      const entities = faqNodes.flatMap((node) =>
+        Array.isArray(node.mainEntity) ? node.mainEntity : [],
+      );
+      const names = entities.map((entity) => entity?.name);
+      const expected = faqs.map((faq) => faq.question);
+      if (names.length !== expected.length || names.some((name, i) => name !== expected[i])) {
+        add("error", "page-faq-schema-mismatch", p.slug, `${names.length}/${expected.length}`);
+      }
+      for (const entity of entities) {
+        const answer = entity?.acceptedAnswer?.text;
+        if (!answer) {
+          add("error", "page-faq-schema-no-answer", p.slug, entity?.name ?? "");
+        } else if (!bodyText.includes(String(answer).slice(0, 30))) {
+          add("error", "page-faq-schema-invisible", p.slug, String(entity.name).slice(0, 24));
+        }
+      }
+    }
+  }
 }
 
 /* ───────────── 7.2) صفحات الأقسام: كل منتج قابل للزحف من قسمه ───────────── */
