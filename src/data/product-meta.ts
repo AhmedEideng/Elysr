@@ -14,7 +14,7 @@ type ProductMetaProfile = {
 export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "w-26": { form: "oral", hook: "شوكولاتة هيلتي الداكنة للنساء بعبوة وردية 50 جم" },
   "m-08": { form: "oral", hook: "5 كروت × قرصين، إجمالي 10 أقراص للعلبة" },
-  "m-63": { form: "oral", hook: "30 كبسولة بمستخلصات نباتية وزنك وفيتاميني B6 وB12" },
+  "m-63": { form: "oral", hook: "30 كبسولة بالماكا والجنسنج والتريبولوس والزنك وفيتاميني B6 وB12" },
   "m-64": { form: "oral", hook: "4 أقراص مغلفة، تادالافيل 20 مجم لكل قرص" },
   "w-25": { form: "oral", hook: "قطرات بينك شوت للنساء 30 مل بإل-أرجينين" },
   "m-01": { form: "oral", hook: "30 كبسولة ألمانية مستوردة" },
@@ -34,7 +34,7 @@ export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "m-17": { form: "topical", hook: "كريم موضعي مع ليدوكايين" },
   "m-18": { form: "oral", hook: "عسل ملكي بري بالجينسنج والتونغكات للحيوية" },
   "m-19": { form: "oral", hook: "عسل مانوكا أسترالي +75 MGO فاخر" },
-  "m-20": { form: "oral", hook: "معجون ملكي معزز" },
+  "m-20": { form: "oral", hook: "معجون عسل بغذاء ملكات النحل والتونغكات والجنسنج" },
   "m-21": { form: "oral", hook: "عسل في عبوة 10 أكياس مع الكافيار" },
   "m-22": { form: "oral", hook: "عسل في 12 كيساً × 10 جم" },
   "m-23": { form: "oral", hook: "معجون عسل ملكي تركي في ساشيهات عملية" },
@@ -101,6 +101,6 @@ export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "d-04": { form: "device", hook: "طقم كوبين للشفط مع مضخة يدوية" },
   "d-05": { form: "device", hook: "مضخة يدوية بحلقات سيليكون وصمام تنفيس" },
   "d-06": { form: "device", hook: "جهاز شد وإطالة بأحزمة سيليكون لاستخدام تدريجي منزلي" },
-  "d-07": { form: "device", hook: "مضخة كهربائية تلقائية بشحن USB لشفط متزن وسلس" },
+  "d-07": { form: "device", hook: "مضخة كهربائية تلقائية بشحن USB لشفط تدريجي وهادئ" },
   "d-08": { form: "device", hook: "مضخة كهربائية بشاشة رقمية و٩ سرعات" },
 };

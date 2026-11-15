@@ -150,8 +150,8 @@ export const productCards: ProductCardView[] = [
     image: "/images/vitamax-doubleshot-energy-honey.webp",
     rating: 4.5,
     reviews: 15,
-    badgeLabel: "انتصاب + تأخير",
-    badgeClass: "bg-teal-700 text-white",
+    badgeLabel: "طاقة وحيوية",
+    badgeClass: "bg-amber-400 text-amber-950",
   },
   {
     id: "m-12",
@@ -418,8 +418,8 @@ export const productCards: ProductCardView[] = [
     stock: 5000,
     emoji: "🐯",
     image: "/images/sotara-gel-50gm-v2.webp",
-    badgeLabel: "تأخير",
-    badgeClass: "bg-indigo-700 text-white",
+    badgeLabel: "تحفيز موضعي",
+    badgeClass: "bg-cyan-700 text-white",
   },
   {
     id: "m-32",

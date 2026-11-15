@@ -42,10 +42,15 @@ describe("phrase-only catalog corrections", () => {
     );
   });
   it("corrects discrete ingredient and language errors without removing the original descriptions", () => {
-    expect(byId("m-32").description).toContain("هو الصيغة الذهبية المطورة");
+    // (2026-11-15 · §24) جولة «العبارات المبهمة» شالت «الصيغة الذهبية المطورة»،
+    // والفحص بقى على المضمون: المكونات نفسها باقية في الوصف.
+    expect(byId("m-32").description).toContain("حمض الهيالورونيك");
     expect(byId("m-32").description).not.toContain("0 أعراض");
     expect(byId("m-60").description).toContain("هو تركيبة جل كريمي متخصصة ثنائية المفعول");
-    expect(byId("w-20").description).toContain("هو البديل التجميلي الموضعي");
+    // (2026-11-15 · §24) نفس الجولة: الوصف بقى «كريم تجميلي موضعي» بدل «البديل
+    // التجميلي» — الفحص على كونه موضعيًا بلا تدخل جراحي.
+    expect(byId("w-20").description).toContain("كريم تجميلي موضعي");
+    expect(byId("w-20").description).toContain("دون أي تدخل جراحي");
     expect(byId("w-20").description).not.toContain("5-7.5%");
     expect(byId("w-14").description).not.toContain("البابايا");
     for (const id of ["w-06", "w-10", "w-11", "w-13"]) expect(byId(id).usage).toContain("امضغي");

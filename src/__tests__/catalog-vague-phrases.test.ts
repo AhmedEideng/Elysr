@@ -1,0 +1,106 @@
+import { describe, it, expect } from "vitest";
+import { products } from "../data/products";
+import { PRODUCT_META_PROFILES } from "../data/product-meta";
+import { getProductFAQs } from "../data/product-faqs";
+
+/**
+ * (2026-11-15) حرّاس «العبارات المبهمة» — نتاج المراجعة الشاملة للكتالوج (تقرير §24).
+ *
+ * القاعدة: أي جملة لا تقول شيئًا محددًا (مبالغة، وعد بالفورية، وصف علمي مزعوم،
+ * أو إعلان أن التركيبة غير معلنة) ممنوعة في نصوص المنتجات. الأسماء التجارية
+ * لا تُمس (اسم المنتج قد يحمل كلمة مثل «الفاخرة» لأنه تسمية المالكة)، لذلك
+ * يُفحص الوصف/الفؤائد/المكونات/الاستخدام والأسئلة فقط.
+ */
+
+const BANNED: Array<[pattern: string, why: string]> = [
+  // إعلان عدم الإفصاح بدل ذكر المعلوم
+  ["التركيبة الكاملة", "إعلان أن التركيبة غير معلنة بدل ذكر المعلوم"],
+  ["غير معلنة", "إعلان أن التركيبة غير معلنة بدل ذكر المعلوم"],
+  // مكونات بلا تسمية
+  ["مستخلصات نباتية", "خلاصات نباتية بلا تسمية"],
+  ["خليط نباتي مضاف", "خليط بلا تسمية"],
+  ["خليط مضاف", "خليط بلا تسمية"],
+  ["مكونات إضافية", "مكوّن غير مسمّى"],
+  ["مكونات داعمة", "مكوّن غير مسمّى"],
+  ["عناصر فعالة", "مكوّن غير مسمّى"],
+  // وصف علمي مزعوم / آلية غير مثبتة
+  ["التروية الوعائية", "وصف آلية غير مثبتة للمنتج"],
+  ["الطاقة الحيوية", "وصف علمي مزعوم"],
+  ["الطاقة الخلوية", "وصف علمي مزعوم"],
+  ["تنشيط الخلايا", "وصف علمي مزعوم"],
+  ["بدقة علمية", "ادعاء علمي غير موثق"],
+  ["تقنية الامتصاص", "مصطلح تقني بلا معنى قابل للتحقق"],
+  ["بشكل هادئ وسلس", "وصف إنشائي بلا معنى"],
+  ["فسيولوجي", "مصطلح يُوهم العلمية بلا رقم أو مرجع"],
+  // مبالغة
+  ["الإكسير", "مبالغة تسويقية"],
+  ["الكنز", "مبالغة تسويقية"],
+  ["النخبوي", "مبالغة تسويقية"],
+  ["بوقار", "مبالغة/كلمة بلا معنى في سياق المنتج"],
+  ["مفعم", "مبالغة تسويقية"],
+  ["الثقة الكاملة", "مبالغة تسويقية"],
+  ["الراحة الكاملة", "مبالغة تسويقية"],
+  ["لا مثيل", "تفضيل مطلق غير قابل للإثبات"],
+  ["الخلاصة العشبية الفائقة", "اسم تسويقي يُقدَّم كأنه تركيز مقاس"],
+  // وعد بالفورية
+  ["سريع المفعول", "وعد بزمن مفعول غير موثق"],
+  ["مضاعفة الإحساس", "وعد بقياس غير موثق"],
+  ["يضاعف الإحساس", "وعد بقياس غير موثق"],
+  ["الفوري", "وعد بالفورية"],
+  ["فورياً", "وعد بالفورية"],
+  // مراجع ممنوعة على المالكة
+  ["حسب الطبيب", "إحالة ممنوعة"],
+  ["حسب الصيدلي", "إحالة ممنوعة"],
+  ["حسب العبوة", "إحالة ممنوعة"],
+  ["حسب المصنع", "إحالة ممنوعة"],
+  ["حسب المورد", "إحالة ممنوعة"],
+  // كلام داخلي/ميتا
+  ["اسم الإصدار", "كلام عن الإصدار بدل وصف المنتج"],
+  ["الوحدات غير المفتوحة", "صياغة مبهمة عن التغليف"],
+];
+
+const copyOf = (p: (typeof products)[number]) => ({
+  description: p.description || "",
+  ingredients: p.ingredients || "",
+  usage: p.usage || "",
+  benefits: (p.benefits || []).join(" | "),
+});
+
+const hits: string[] = [];
+for (const product of products) {
+  const fields = copyOf(product);
+  const hook = PRODUCT_META_PROFILES[product.id]?.hook ?? "";
+  const faqs = getProductFAQs(product)
+    .map((faq) => `${faq.question} ${faq.answer}`)
+    .join(" | ");
+  const blobs: Array<[string, string]> = [
+    ["description", fields.description],
+    ["ingredients", fields.ingredients],
+    ["usage", fields.usage],
+    ["benefits", fields.benefits],
+    ["metaHook", String(hook)],
+    ["faqs", faqs],
+  ];
+  for (const [field, text] of blobs) {
+    for (const [pattern] of BANNED) {
+      if (text.includes(pattern)) hits.push(`${product.id} · ${field} · «${pattern}»`);
+    }
+  }
+}
+
+describe("catalog copy has no vague phrasing", () => {
+  it("covers the whole catalog", () => {
+    expect(products.length).toBe(91);
+  });
+
+  it("uses no banned vague pattern in any product copy", () => {
+    expect(hits, hits.join("\n")).toEqual([]);
+  });
+
+  it("keeps every description specific enough to be checkable", () => {
+    const thin = products
+      .filter((p) => (p.description || "").length < 200)
+      .map((p) => `${p.id}:${(p.description || "").length}`);
+    expect(thin, thin.join(", ")).toEqual([]);
+  });
+});
