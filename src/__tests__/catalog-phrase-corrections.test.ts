@@ -28,8 +28,11 @@ describe("phrase-only catalog corrections", () => {
     // وbundle كما هي، وهذا مؤكد بالبصمة الثانية أسفل الاختبار.
     // (m-27 · 2026-11-15) تغيير مقصود بطلب المالك: «أكياس إكس ستيل» → «عسل
     // إكس ستيل» (اسم + ألقاب بحث)، فالبصمة اتغيّرت في حقلين غير نصيين فقط.
+    // (m-60 كريفا · 2026-11-15) تغيير مقصود إضافي: أُضيفت ألقاب بحث لكريفا
+    // (كريڨا/كريڨه/جل كريفا/جل تأخير/Kreva Gel) لتوحيده مع باقي الكتالوج.
+    // لا اسم/سعر/شارة/تصنيف/bundle تغيّر — الحقل الوحيد المختلف هو aliases.
     expect(createHash("sha256").update(JSON.stringify(fields)).digest("hex")).toBe(
-      "b9442c1bb52c1898a238e016c5e19b07f73ac126a554f2820b579630ebfbfb48",
+      "00253fb29c63b20f72a6dec15e74725360330cf65f8179070cc3bd5890740f9e",
     );
   });
   it("corrects discrete ingredient and language errors without removing the original descriptions", () => {

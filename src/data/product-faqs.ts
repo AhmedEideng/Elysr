@@ -62,6 +62,11 @@ const KREVA_AUGUST_17_FAQS: ProductFAQ[] = [
 /** Shared by React and prerender; catalog prices must never be copied by hand. */
 export function getProductFAQs(product: { id: string; price: number }): ProductFAQ[] {
   const specific = PRODUCT_FAQ_BUILDERS[product.id];
+  // (2026-11-14) كريفا حصل على أسئلة خاصة مثل باقي الـ88 منتجًا، لكن الأسئلة
+  // الأربعة التاريخية (نسخة 17 أغسطس) تبقى كما هي بنفس النص والترتيب بعده.
+  if (product.id === "m-60") {
+    return specific ? [...specific(product.price), ...KREVA_AUGUST_17_FAQS] : KREVA_AUGUST_17_FAQS;
+  }
   if (specific) {
     // Do not attach a blanket authenticity claim to the new owner-supplied listing.
     const shared =
@@ -70,10 +75,34 @@ export function getProductFAQs(product: { id: string; price: number }): ProductF
         : productFAQs;
     return [...specific(product.price), ...shared];
   }
-  return product.id === "m-60" ? KREVA_AUGUST_17_FAQS : productFAQs;
+  return productFAQs;
 }
 
 const PRODUCT_FAQ_BUILDERS: Record<string, (price: number) => ProductFAQ[]> = {
+  // (2026-11-14) أسئلة كريفا الخاصة — حقائق موجودة أصلًا في وصف المنتج
+  // واستخدامه وفوائده، بلا أرقام أو ادعاءات جديدة. تُعرض قبل الأسئلة
+  // الأربعة التاريخية وتبقى الأخيرة كما هي حرفيًا.
+  "m-60": (price) => [
+    {
+      question: "ما سعر جل كريفا وحجم العبوة؟",
+      answer: `السعر ${price} جنيه للعبوة 50 جم. السعر للعبوة كاملة، وتُحسب تكلفة الشحن حسب المحافظة عند إتمام الطلب.`,
+    },
+    {
+      question: "كيف أستخدم جل كريفا بشكل صحيح؟",
+      answer:
+        "بعد غسل المنطقة وتجفيفها، ضع طبقة رقيقة من الجل ودلّكها بلطف من دقيقتين إلى خمس دقائق حتى يمتص تمامًا، ثم اتركه من 15 إلى 20 دقيقة، واغسله جيدًا بالماء والصابون قبل العلاقة.",
+    },
+    {
+      question: "هل جل كريفا يخدّر أو يفقد الإحساس؟",
+      answer:
+        "لا. التركيبة ثنائية المفعول (ساخن وبارد): زيت Cayenne Oil ينشط الدورة الدموية موضعيًا، والمينثول يقلل الحساسية المفرطة بلطف — والهدف تأخير أكبر دون تخدير كامل أو فقدان الإحساس.",
+    },
+    {
+      question: "ما التحذيرات قبل استخدام جل كريفا؟",
+      answer:
+        "للاستخدام الخارجي على الجلد السليم فقط: تجنّب ملامسة العينين أو الجروح المفتوحة، وتوقف فورًا إذا ظهر أي تهيج أو احتراق أو احمرار في المنطقة.",
+    },
+  ],
   "w-26": (price) => [
     {
       question: "ما سعر شوكولاتة هيلتي للنساء وحجم العبوة؟",

@@ -207,7 +207,10 @@ describe("Kreva product search context", () => {
     expect(kreva.rating).toBeUndefined();
     expect(kreva.reviews).toBeUndefined();
     expect(kreva.stock).toBe(5000);
-    expect(kreva.searchAliases).toBeUndefined();
+    // (2026-11-14) بطلب المالكة: كريفا بقى بنفس نمط باقي الكتالوج في ألقاب
+    // البحث (كانت غائبة فكان بيظهر متأخر في نتائج مثل «جل تأخير»).
+    // الاسم والوصف والاستخدام والميتا المستعادة في 17 أغسطس لم تُمسّ.
+    expect(kreva.searchAliases).toEqual(["كريڨا", "كريڨه", "جل كريفا", "جل تأخير", "Kreva Gel"]);
     expect(kreva.description).toContain("هو تركيبة جل كريمي متخصصة ثنائية المفعول (ساخن وبارد)");
     expect(makeProductMetaDescription(kreva)).toBe(
       "جل كريفا للرجال (Kreva Gel 50GM) هو تركيبة جل كريمي متخصصة ثنائية المفعول (ساخن وبارد) لدعم الأداء والتحكم في وقت العلاقة. يجمع زيت Cayenne Oil الذي ينشط…",
@@ -221,10 +224,26 @@ describe("Kreva product search context", () => {
     expect(kreva.description).not.toMatch(/راجع.*العبوة|حسب العبوة/);
     const { getProductFAQs } = await import("@/data/product-faqs");
     const faqs = getProductFAQs(kreva);
-    expect(faqs).toHaveLength(4);
-    expect(faqs[1].answer).toBe(
+    // (2026-11-14) أُضيفت 4 أسئلة خاصة بكريفا (سعر/حجم، طريقة، تخدير، تحذيرات)
+    // مثل باقي الـ88 منتجًا. الأسئلة الأربعة التاريخية تبقى كما هي، بنفس النص
+    // والترتيب، بعدها مباشرة — فالاستعادة لم تُلغَ بل امتدّت.
+    expect(faqs).toHaveLength(8);
+    expect(faqs.slice(0, 4).map((faq) => faq.question)).toEqual([
+      "ما سعر جل كريفا وحجم العبوة؟",
+      "كيف أستخدم جل كريفا بشكل صحيح؟",
+      "هل جل كريفا يخدّر أو يفقد الإحساس؟",
+      "ما التحذيرات قبل استخدام جل كريفا؟",
+    ]);
+    expect(faqs[0].answer).toContain("300 جنيه");
+    expect(faqs[5].answer).toBe(
       "يتم التوصيل داخل القاهرة والجيزة خلال 24-48 ساعة عمل. أما باقي محافظات الجمهورية فيستغرق الشحن من 2 إلى 4 أيام عمل كحد أقصى.",
     );
+    expect(faqs.slice(4).map((faq) => faq.question)).toEqual([
+      "هل التغليف سري؟",
+      "كم يستغرق الشحن؟",
+      "كيف يمكنني الدفع؟",
+      "هل المنتجات أصلية؟",
+    ]);
   });
 });
 
