@@ -60,9 +60,11 @@ describe("women's gum wording and owner-confirmed Marcin form", () => {
     // (m-36 + m-47 · 2026-11-15) استرجاع منتجين فمويين جديدين غيّر مرشحي
     // الباقات في فئة الرجال (89 → 91 منتجًا) — البصمة اتحدّثت عن قصد أيضًا،
     // وكل باقة لا تزال 3 منتجات بلا تكرار.
+    // (m-42 · 2026-11-15) تحوّل من «أكياس» إلى «عسل» فخرج من مرشحي الأكياس
+    // ودخل مرشحي العسل — إعادة ترتيب مقصودة، والعدد 3 لكل باقة كما هو.
     const bundles = products.map((p) => [p.id, getCrossSellsForProduct(p).map((item) => item.id)]);
     expect(createHash("sha256").update(JSON.stringify(bundles)).digest("hex")).toBe(
-      "641a98b8c454e46df675f552c06f0ab26e393f06817067d0519bafb2dc429efa",
+      "426a4a9fc7c8c2fa360aa665414eb84bfafd3fe577b35f9a6bf8734f731a01f3",
     );
   });
 });

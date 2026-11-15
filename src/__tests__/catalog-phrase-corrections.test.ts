@@ -33,8 +33,10 @@ describe("phrase-only catalog corrections", () => {
     // (m-36 + m-47 · 2026-11-15) استرجاع بطلب المالكة: عاد Vegal Extra وLevitra
     // بأسعارهما التاريخية (200/250) وبأسمائهما وروابطهما كما كانت — إضافة
     // عنصرين للقائمة، بلا أي تغيير في أسعار/أسماء/شارات/bundles الباقين.
+    // (m-42 · 2026-11-15) بطلب المالكة: «أكياس ريد بول العشبية» → «عسل ريد بول
+    // العشبي» (اسم + ألقاب بحث). السعر 400 والـslug والصور كما هي.
     expect(createHash("sha256").update(JSON.stringify(fields)).digest("hex")).toBe(
-      "07f35b48ab23fbc66f56d0765b54b78435283f0791043e6c8be4223708cbdaad",
+      "67e3739d0bb1c557014775eff5d25d11c0ae4cf4cde5488f5c806688dc39c5d2",
     );
   });
   it("corrects discrete ingredient and language errors without removing the original descriptions", () => {
