@@ -133,7 +133,10 @@ function compactProductName(name: string, maxLength = 46): string {
 
   const cut = candidate.slice(0, maxLength);
   const lastSpace = cut.lastIndexOf(" ");
-  return (lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trimEnd();
+  const trimmed = (lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trimEnd();
+  // (2026-11-15) لو القطع وقع بعد فاصل («— 12 كيس × 16 جم») كانت الميتا تطلع
+  // «(Red Bull) —: …». نشيل أي فاصل معلّق في الآخر قبل لصق النقطتين.
+  return trimmed.replace(/[\s—–\-،,·:]+$/u, "");
 }
 
 /**

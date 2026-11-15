@@ -35,8 +35,10 @@ describe("phrase-only catalog corrections", () => {
     // عنصرين للقائمة، بلا أي تغيير في أسعار/أسماء/شارات/bundles الباقين.
     // (m-42 · 2026-11-15) بطلب المالكة: «أكياس ريد بول العشبية» → «عسل ريد بول
     // العشبي» (اسم + ألقاب بحث). السعر 400 والـslug والصور كما هي.
+    // (m-42 تحديث ثانٍ · 2026-11-15) أُضيف حجم العبوة المؤكد من المالكة إلى
+    // الاسم: «— 12 كيس × 16 جم» + ألقاب بحث للحجم. السعر/الـslug/الصورة ثابتة.
     expect(createHash("sha256").update(JSON.stringify(fields)).digest("hex")).toBe(
-      "67e3739d0bb1c557014775eff5d25d11c0ae4cf4cde5488f5c806688dc39c5d2",
+      "fe3b2c7f93a6683597ffb396979a02cff3c3d4f83e1f11fac51ba7cfcd21652e",
     );
   });
   it("corrects discrete ingredient and language errors without removing the original descriptions", () => {
