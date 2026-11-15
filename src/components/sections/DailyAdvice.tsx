@@ -115,7 +115,7 @@ export function DailyAdvice() {
                   to="/products/men"
                   className="inline-flex items-center gap-2 rounded-full border-2 border-white/80 bg-white/15 px-6 py-3.5 font-black text-white backdrop-blur-sm transition-smooth hover:bg-white/25"
                 >
-                  تسوّق الأكثر مبيعاً <ArrowLeft className="h-5 w-5" />
+                  تسوّق مختاراتنا <ArrowLeft className="h-5 w-5" />
                 </Link>
               </div>
             </div>

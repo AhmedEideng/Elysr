@@ -131,12 +131,14 @@ function makeTitle(text = "") {
 const NAV_CORE = [
   ["/products/men", "منتجات الرجال"],
   ["/products/women", "منتجات النساء"],
-  ["/products/devices", "أجهزة"],
-  ["/education", "مقالات توعوية"],
+  ["/products/devices", "الأجهزة الطبية"],
+  ["/education", "النصائح الطبية"],
   ["/about", "من نحن"],
   ["/medical-review-board", "شفافية المحتوى"],
-  ["/contact", "تواصلي معنا"],
+  ["/contact", "تواصل معنا"],
   ["/terms", "الشروط والأحكام"],
+  // (2026-11-15 · §31) النسخة الإنجليزية كانت بلا أي رابط داخلي من العربية.
+  ["/en", "English"],
 ];
 
 /**

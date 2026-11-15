@@ -659,7 +659,7 @@ function ProductPage() {
                 <button
                   onClick={handleWhatsAppOrder}
                   disabled={isOrdering}
-                  className={`flex-1 inline-flex items-center justify-center gap-2 rounded-full px-6 py-4 text-base font-black text-white shadow-elegant transition-smooth ${isOrdering ? "bg-muted-foreground cursor-wait" : "bg-[#25D366] hover:scale-[1.01] hover:bg-[#1ebd57]"}`}
+                  className={`flex-1 inline-flex items-center justify-center gap-2 rounded-full px-6 py-4 text-base font-black text-white shadow-elegant transition-smooth ${isOrdering ? "bg-muted-foreground cursor-wait" : "bg-[#0b7a45] hover:scale-[1.01] hover:bg-[#096b3c]"}`}
                 >
                   <MessageCircle className="h-5 w-5" />
                   {isOrdering ? "جاري التحويل..." : "اطلب عبر واتساب"}
@@ -875,7 +875,7 @@ function ProductPage() {
             <button
               type="submit"
               disabled={isOrdering}
-              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3.5 text-sm font-black text-white shadow-lg transition-smooth hover:bg-[#1ebd57] disabled:cursor-wait disabled:opacity-70"
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#0b7a45] px-6 py-3.5 text-sm font-black text-white shadow-lg transition-smooth hover:bg-[#096b3c] disabled:cursor-wait disabled:opacity-70"
             >
               <MessageCircle className="h-5 w-5" />
               {isOrdering ? "جاري تسجيل الطلب..." : "تسجيل وفتح واتساب"}

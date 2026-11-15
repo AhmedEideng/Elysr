@@ -400,6 +400,7 @@ function CartPage() {
                     </div>
                     <button
                       onClick={() => remove(it.id)}
+                      aria-label={`حذف ${it.name} من السلة`}
                       className="text-destructive p-2 hover:bg-destructive/10 rounded-full"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -602,7 +603,7 @@ function CartPage() {
             <button
               onClick={checkout}
               disabled={submitting || overOrderLimit}
-              className={`w-full mt-6 rounded-full px-4 sm:px-6 py-3 sm:py-4 font-bold text-white shadow-elegant transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-2 text-sm sm:text-base ${method === "whatsapp" ? "bg-[#25D366] hover:bg-[#1ebd57] shadow-[#25d366]/20" : "bg-gradient-brand shadow-primary/20"}`}
+              className={`w-full mt-6 rounded-full px-4 sm:px-6 py-3 sm:py-4 font-bold text-white shadow-elegant transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-2 text-sm sm:text-base ${method === "whatsapp" ? "bg-[#0b7a45] hover:bg-[#096b3c] shadow-[#25d366]/20" : "bg-gradient-brand shadow-primary/20"}`}
             >
               {submitting ? (
                 <>

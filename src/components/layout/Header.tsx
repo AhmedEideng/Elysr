@@ -54,7 +54,7 @@ const shopLinks: NavItem[] = [
   { to: "/products/men", label: "منتجات الرجال", icon: User, tone: "primary" },
   { to: "/products/women", label: "منتجات النساء", icon: UserRound, tone: "primary" },
   { to: "/products/devices", label: "الأجهزة الطبية", icon: Stethoscope, tone: "primary" },
-  { href: "/#featured-products", label: "الأكثر مبيعًا", icon: Star, tone: "best" },
+  { href: "/#featured-products", label: "مختارات المتجر", icon: Star, tone: "best" },
   { to: "/wishlist", label: "المفضلة", icon: Heart, tone: "promo" },
   { to: "/education", label: "النصائح الطبية", icon: BookOpen, tone: "secondary" },
 ];
@@ -216,12 +216,15 @@ export function Header() {
             <Link
               to="/wishlist"
               className="relative inline-flex h-10 w-10 items-center justify-center text-rose-500 transition-smooth hover:text-rose-600"
-              aria-label={`المفضلة${wishlistCount > 0 ? ` (${wishlistCount})` : ""}`}
+              aria-label={wishlistCount > 0 ? `المفضلة، ${wishlistCount} منتجات` : "المفضلة"}
               title="المفضلة"
             >
               <Heart className="h-6 w-6" />
               {wishlistCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                <span
+                  aria-hidden="true"
+                  className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white"
+                >
                   {wishlistCount}
                 </span>
               )}
@@ -230,11 +233,14 @@ export function Header() {
             <Link
               to="/cart"
               className="relative inline-flex h-10 w-10 items-center justify-center text-primary transition-smooth hover:text-primary/80"
-              aria-label={`السلة${count > 0 ? ` (${count})` : ""}`}
+              aria-label={count > 0 ? `السلة، ${count} منتجات` : "السلة"}
             >
               <ShoppingCart className="h-6 w-6" />
               {count > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                <span
+                  aria-hidden="true"
+                  className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground"
+                >
                   {count}
                 </span>
               )}
@@ -366,7 +372,7 @@ export function Header() {
                 href={waLink("مرحباً، أريد استشارة مجانية من اليسر ميديكال")}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3 text-sm font-black text-white shadow-elegant transition-smooth hover:shadow-glow"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0b7a45] py-3 text-sm font-black text-white shadow-elegant transition-smooth hover:shadow-glow"
               >
                 <MessageCircle className="h-4 w-4" />
                 💬 استشارة مجانية عبر واتساب

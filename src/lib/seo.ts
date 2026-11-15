@@ -511,6 +511,9 @@ export const productSchema = (p: {
       : {}),
     description: p.description,
     sku: p.id,
+    // (2026-11-15 · مراجعة نهائية) url المطلق للمنتج + itemCondition: حقلان
+    // مطلوبان لبطاقة المنتج الغنية، وكانا غائبين عن كل المنتجات الـ91.
+    url: `${SITE_URL}/products/${p.slug}`,
     ...(p.mpn?.trim() ? { mpn: p.mpn.trim() } : {}),
     ...(p.gtin?.trim() ? { gtin: p.gtin.trim() } : {}),
     image: absoluteProductImage(p.image),
@@ -551,6 +554,7 @@ export const productSchema = (p: {
       price: p.price,
       priceCurrency: "EGP",
       availability: p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
       url: `${SITE_URL}/products/${p.slug}`,
       priceValidUntil: oneYearFromToday(),
       validFrom: "2026-01-01",

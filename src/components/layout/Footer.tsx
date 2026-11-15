@@ -19,6 +19,11 @@ const supportLinks = [
   { to: "/privacy", label: "سياسة الخصوصية" },
   { to: "/terms", label: "الشروط والأحكام" },
   { to: "/contact", label: "تواصل معنا" },
+  // (2026-11-15 · §31) صفحات /en كانت معزولة تمامًا: موجودة في الـsitemap
+  // وبها hreflang، لكن لا رابط واحد من النسخة العربية — أي زائر إنجليزي أو
+  // زاحف لا يصلها إلا من الـsitemap. الرابط هنا يعكس مبدّل «العربية» الموجود
+  // في الصفحات الإنجليزية.
+  { to: "/en", label: "English" },
 ] as const;
 
 export function Footer() {

@@ -33,7 +33,7 @@ function ContactPage() {
           rel="noreferrer"
           className="group flex w-full max-w-md flex-col items-center rounded-[2rem] border bg-card p-8 text-center shadow-card transition-smooth hover:-translate-y-1 hover:shadow-elegant"
         >
-          <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#25D366] text-white transition-smooth group-hover:scale-110">
+          <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#0b7a45] text-white transition-smooth group-hover:scale-110">
             <MessageCircle className="h-8 w-8" />
           </span>
           <span className="mt-4 text-xl font-bold">تواصل عبر واتساب</span>
