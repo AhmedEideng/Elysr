@@ -63,7 +63,9 @@ describe("phrase-only catalog corrections", () => {
     for (const id of ["m-34", "m-38", "m-64", "w-17"])
       expect(byId(id).usage).toMatch(/النترات|النيترات/);
     for (const id of ["w-25", "w-26"]) expect(byId(id).usage).toMatch(/موافقة/);
-    expect(byId("m-64").usage).toContain("4 ساعات");
+    // (2026-11-15 · §25) بطلب المالكة: جُملة «ألم الصدر / انتصاب أكثر من 4 ساعات»
+    // اتشالت من كل المنتجات والأسئلة — الحارس انعكس ليمنع رجوعها.
+    expect(byId("m-64").usage).not.toContain("4 ساعات");
     expect(byId("w-22").usage).toContain("نصف قرص");
     expect(byId("m-63").usage).toContain("بعد الوجبة الرئيسية");
   });
