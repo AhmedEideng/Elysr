@@ -108,7 +108,7 @@ export const landingPagesMeta: LandingPageMeta[] = [
   { slug: "buying-guide-marital-products", title: "دليل شراء المنتجات الزوجية — من الألف للياء" },
   { slug: "newlyweds-wedding-night-products", title: "منتجات ليلة الزفاف والمتزوجين الجدد" },
   { slug: "products-over-40-men", title: "أفضل المنتجات للرجال فوق الأربعين" },
-  { slug: "how-to-order-from-elysr", title: "ازاي تطلب من اليسر ميديكال — خطوة بخطوة" },
+  { slug: "how-to-order-from-elysr", title: "كيف تطلب من اليسر ميديكال — خطوة بخطوة" },
   { slug: "best-delay-products-beginners", title: "أفضل منتجات التأخير للمبتدئين — دليل أول مرة" },
   { slug: "best-energy-honey-for-men", title: "أفضل عسل طاقة للرجال — مقارنة وتجارب" },
   { slug: "women-intimacy-guide-beginners", title: "دليل المنتجات النسائية للمتزوجات — أول مرة" },
@@ -119,7 +119,7 @@ export const landingPagesMeta: LandingPageMeta[] = [
     title: "مقارنة بين أنواع المنتجات الزوجية — كبسولات vs عسل vs جل vs بخاخ",
   },
   { slug: "return-policy-and-guarantees", title: "سياسة الاستبدال والضمان في اليسر ميديكال" },
-  { slug: "why-buy-from-elysr-medical", title: "ليه تشتري من اليسر ميديكال؟" },
+  { slug: "why-buy-from-elysr-medical", title: "لماذا تشتري من اليسر ميديكال؟" },
   { slug: "safe-use-guide-all-products", title: "دليل الاستخدام الآمن لكل أنواع المنتجات" },
   { slug: "supplement-storage-egypt-heat", title: "تخزين المكملات والعسل في حر مصر: دليل عملي" },
   {
