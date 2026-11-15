@@ -77,7 +77,7 @@ export const Route = createFileRoute("/products/guides/$slug")({
   }),
   component: SeoLandingPageComponent,
   notFoundComponent: () => (
-    <div className="container mx-auto px-4 py-20 text-center">
+    <div className="container mx-auto px-4 py-10 text-center">
       <h1 className="text-3xl font-bold">الدليل غير موجود</h1>
       <Link to="/" className="mt-4 inline-block text-primary">
         العودة للرئيسية
@@ -145,7 +145,7 @@ function SeoLandingPageComponent() {
   }, [page, selectedProducts]);
 
   return (
-    <div className="container mx-auto px-4 py-10 md:py-12">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       <Link to="/" className="mb-5 inline-flex items-center gap-1 text-sm font-bold text-primary">
         <ArrowRight className="h-4 w-4" /> الرئيسية
       </Link>

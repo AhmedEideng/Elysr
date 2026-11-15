@@ -20,7 +20,7 @@ export function PageHero({
   return (
     <section
       data-page-hero
-      className="relative mb-8 overflow-hidden rounded-[1.75rem] border border-primary/10 bg-gradient-to-br from-[#eef8fc] via-white to-[#e9f6fa] shadow-[0_12px_36px_-24px_rgba(0,74,112,0.28)] md:mb-10 md:rounded-[2rem]"
+      className="relative mb-5 overflow-hidden rounded-[1.75rem] border border-primary/10 bg-gradient-to-br from-[#eef8fc] via-white to-[#e9f6fa] shadow-[0_12px_36px_-24px_rgba(0,74,112,0.28)] md:mb-6 md:rounded-[2rem]"
     >
       <div
         aria-hidden="true"
@@ -31,10 +31,10 @@ export function PageHero({
         className="pointer-events-none absolute -bottom-36 -start-28 h-64 w-64 rounded-full border border-primary/10 md:-start-16 md:h-80 md:w-80"
       />
       <div
-        className={`relative z-10 px-6 py-8 sm:px-10 md:px-12 md:py-12 ${centered ? "text-center" : "text-right"}`}
+        className={`relative z-10 px-6 py-6 sm:px-10 md:px-12 md:py-8 ${centered ? "text-center" : "text-right"}`}
       >
         {eyebrow && (
-          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-white/80 px-3.5 py-1.5 text-xs font-bold text-primary shadow-sm">
+          <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-white/80 px-3.5 py-1.5 text-xs font-bold text-primary shadow-sm">
             <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
             {eyebrow}
           </span>
@@ -48,18 +48,18 @@ export function PageHero({
 
         <span
           aria-hidden="true"
-          className={`mt-4 block h-1 w-12 rounded-full bg-gradient-brand ${centered ? "mx-auto" : ""}`}
+          className={`mt-3 block h-1 w-12 rounded-full bg-gradient-brand ${centered ? "mx-auto" : ""}`}
         />
 
         {description && (
           <p
-            className={`mt-4 text-sm leading-7 text-muted-foreground sm:text-base sm:leading-8 ${centered ? "mx-auto max-w-2xl" : "max-w-2xl"}`}
+            className={`mt-3 text-sm leading-7 text-muted-foreground sm:text-base sm:leading-8 ${centered ? "mx-auto max-w-2xl" : "max-w-2xl"}`}
           >
             {description}
           </p>
         )}
 
-        {children && <div className={`mt-5 ${centered ? "mx-auto" : ""}`}>{children}</div>}
+        {children && <div className={`mt-4 ${centered ? "mx-auto" : ""}`}>{children}</div>}
       </div>
     </section>
   );

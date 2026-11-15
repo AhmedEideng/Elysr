@@ -313,7 +313,7 @@ function CartPage() {
 
   if (items.length === 0)
     return (
-      <div className="container mx-auto px-4 py-20 text-center">
+      <div className="container mx-auto px-4 py-10 text-center">
         <div className="inline-flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full bg-accent text-primary mb-4 mx-auto">
           <ShoppingBag className="h-10 w-10 sm:h-12 sm:w-12" />
         </div>
@@ -328,7 +328,7 @@ function CartPage() {
     );
 
   return (
-    <div className="container mx-auto px-4 py-6 md:py-10 overflow-x-hidden max-w-full">
+    <div className="container mx-auto px-4 py-6 md:py-8 overflow-x-hidden max-w-full">
       <h1 className="text-2xl sm:text-3xl font-black mb-6 md:mb-8 text-gradient">سلة التسوق</h1>
       <p className="mb-4 text-sm text-muted-foreground">
         الحد الأقصى للطلب {MAX_ORDER_UNITS} وحدة من جميع المنتجات.

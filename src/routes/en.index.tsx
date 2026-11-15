@@ -36,7 +36,7 @@ function EnHubPage() {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-10 md:py-12">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       <PageHero eyebrow="Elysr Medical" title={enHome.h1} description={enHome.intro} />
       <p className="mb-6 text-sm font-bold">
         <Link to="/" className="text-primary hover:underline">

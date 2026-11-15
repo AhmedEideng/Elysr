@@ -74,7 +74,7 @@ function SearchResultsPage() {
   }, [query, items]);
 
   return (
-    <div className="container mx-auto px-4 py-10 md:py-12">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       <header className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">
           {query ? `نتائج البحث عن: «${query}»` : "البحث في المنتجات"}
@@ -87,7 +87,7 @@ function SearchResultsPage() {
       </header>
 
       {query && items.length === 0 ? (
-        <div className="py-16 text-center">
+        <div className="py-10 text-center">
           <SearchX className="mx-auto h-12 w-12 text-muted-foreground" />
           <p className="mt-4 text-lg font-bold">لا توجد منتجات مطابقة لبحثك «{query}»</p>
           <p className="mt-2 text-sm text-muted-foreground">

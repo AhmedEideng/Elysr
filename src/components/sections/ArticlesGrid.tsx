@@ -14,7 +14,7 @@ export function ArticlesGrid() {
   return (
     <section className="py-8 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-10">
+        <div className="text-center mb-6">
           <span className="inline-block rounded-full bg-accent px-4 py-1 text-xs font-bold text-primary mb-3">
             🩺 توعية صحية موثوقة
           </span>
@@ -74,7 +74,7 @@ export function ArticlesGrid() {
           ))}
         </div>
 
-        <div className="mt-10 text-center">
+        <div className="mt-6 text-center">
           <Link
             to="/education"
             className="inline-flex items-center gap-2 rounded-full border border-primary px-8 py-3 text-sm font-bold text-primary transition hover:bg-primary hover:text-primary-foreground"

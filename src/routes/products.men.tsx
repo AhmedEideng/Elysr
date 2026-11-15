@@ -12,7 +12,7 @@ import {
   faqSchema,
 } from "@/lib/seo";
 
-const PAGE_TITLE = "منتجات الصحة الزوجية للرجال";
+const PAGE_TITLE = "منتجات الصحة والسعادة الزوجية للرجال";
 
 const MEN_CATEGORY_FAQS: CategoryFAQItem[] = [
   {
@@ -114,7 +114,7 @@ function CategoryPage() {
   }, [items, query]);
 
   return (
-    <div className="container mx-auto px-4 py-10 md:py-12">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       <PageHero
         eyebrow="صحة الرجل"
         title={PAGE_TITLE}
@@ -133,7 +133,7 @@ function CategoryPage() {
       ) : null}
 
       {query && items.length === 0 ? (
-        <div className="py-16 text-center">
+        <div className="py-10 text-center">
           <p className="text-lg font-bold">لا توجد منتجات مطابقة لبحثك «{query}»</p>
           <p className="mt-2 text-sm text-muted-foreground">جرّب كلمة أخرى أو تصفح كل المنتجات</p>
           <Link

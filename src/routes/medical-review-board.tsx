@@ -34,7 +34,7 @@ export const Route = createFileRoute("/medical-review-board")({
 
 function MedicalReviewBoardPage() {
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-10 md:py-14">
+    <div className="container mx-auto max-w-5xl px-4 py-6 md:py-8">
       <PageHero
         eyebrow="شفافية المحتوى"
         title="من يكتب المحتوى وكيف نتحقق منه"

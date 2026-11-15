@@ -102,7 +102,7 @@ function WishlistPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       {/* ── Header ───────────────────────────────────────────── */}
       <div className="mb-8">
         <nav aria-label="مسار التنقل" className="mb-4">
@@ -170,7 +170,7 @@ function WishlistPage() {
 
       {/* ── Empty state ───────────────────────────────────────── */}
       {count === 0 && (
-        <div className="rounded-[2rem] border-2 border-dashed border-rose-200 bg-gradient-to-br from-rose-50/50 via-white to-amber-50/30 px-6 py-20 text-center">
+        <div className="rounded-[2rem] border-2 border-dashed border-rose-200 bg-gradient-to-br from-rose-50/50 via-white to-amber-50/30 px-6 py-10 text-center">
           <div className="mx-auto mb-6 inline-flex h-24 w-24 items-center justify-center rounded-full bg-rose-100 text-rose-500 shadow-inner">
             <Heart className="h-12 w-12" />
           </div>

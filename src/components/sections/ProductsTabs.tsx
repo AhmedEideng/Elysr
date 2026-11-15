@@ -63,7 +63,7 @@ export function ProductsTabs() {
   return (
     <section className="py-8 bg-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h2 className="text-3xl font-black md:text-4xl">تسوق حسب الفئة</h2>
           <p className="mt-2 text-muted-foreground">
             قارن المكونات وأشكال الاستخدام لاختيار ما يناسب احتياجك
@@ -71,7 +71,7 @@ export function ProductsTabs() {
         </div>
 
         {/* Tabs Header */}
-        <div className="flex justify-center gap-2 mb-8">
+        <div className="flex justify-center gap-2 mb-6">
           <button
             onClick={() => setActiveTab("men")}
             className={`px-6 py-2.5 rounded-full font-bold transition-all ${
@@ -112,7 +112,7 @@ export function ProductsTabs() {
         </div>
 
         {/* View All Button */}
-        <div className="mt-10 text-center">
+        <div className="mt-6 text-center">
           <Link
             to={`/products/${activeTab}`}
             className={`inline-flex items-center gap-2 rounded-full px-8 py-3.5 font-black text-white transition-all hover:scale-105 hover:shadow-lg ${

@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 
 const pages = [
-  ["/products/men", "منتجات الصحة الزوجية للرجال"],
-  ["/products/women", "منتجات الصحة الزوجية للنساء"],
+  ["/products/men", "منتجات الصحة والسعادة الزوجية للرجال"],
+  ["/products/women", "منتجات الصحة والسعادة الزوجية للنساء"],
   ["/products/devices", "الأجهزة والمستلزمات الطبية"],
   ["/education", "مكتبة التوعية الجنسية"],
   ["/products/guides/men-products-prices-egypt", ""],
@@ -25,6 +25,21 @@ for (const width of [390, 1440]) {
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
         path,
       ).toBe(true);
+    }
+  });
+}
+
+for (const width of [390, 1440]) {
+  test(`category spacing is compact at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    for (const category of ["men", "women", "devices"]) {
+      await page.goto(`/products/${category}`);
+      const header = await page.locator("header").first().boundingBox();
+      const hero = await page.locator("[data-page-hero]").boundingBox();
+      const products = await page.locator("[data-catalog-results]").boundingBox();
+      expect(header && hero && products).toBeTruthy();
+      expect(hero!.y - (header!.y + header!.height)).toBeLessThanOrEqual(width < 768 ? 25 : 33);
+      expect(products!.y - (hero!.y + hero!.height)).toBeLessThanOrEqual(width < 768 ? 21 : 25);
     }
   });
 }

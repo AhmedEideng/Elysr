@@ -92,7 +92,7 @@ export const Route = createFileRoute("/education_/$slug")({
   }),
   component: ArticlePage,
   notFoundComponent: () => (
-    <div className="container mx-auto px-4 py-20 text-center">
+    <div className="container mx-auto px-4 py-10 text-center">
       <h1 className="text-3xl font-bold">المقال غير موجود</h1>
       <Link to="/education" className="mt-4 inline-block text-primary">
         العودة للمقالات
@@ -188,7 +188,7 @@ function ArticlePage() {
   }, [article]);
 
   return (
-    <article className="container mx-auto px-4 py-10 md:py-12 max-w-4xl">
+    <article className="container mx-auto px-4 py-6 md:py-8 max-w-4xl">
       <Link to="/education" className="inline-flex items-center gap-1 text-sm text-primary mb-5">
         <ArrowRight className="h-4 w-4" /> كل المقالات
       </Link>
@@ -351,7 +351,7 @@ function ArticlePage() {
 
       {/* منتجات مقترحة في نهاية المقال */}
       {linkedProducts && linkedProducts.length > 0 && (
-        <section className="mt-16 rounded-[2rem] border border-primary/10 bg-gradient-soft p-5 md:p-8">
+        <section className="mt-10 rounded-[2rem] border border-primary/10 bg-gradient-soft p-5 md:p-8">
           <h2 className="text-2xl font-bold mb-2">🛍️ منتجات تساعد في حل المشكلة</h2>
           <p className="text-muted-foreground mb-6">
             مجموعة مختارة من أفضل المنتجات ذات الصلة بموضوع المقال لتعزيز صحتك وراحتك.
@@ -364,7 +364,7 @@ function ArticlePage() {
         </section>
       )}
 
-      <section className="mt-16">
+      <section className="mt-10">
         <h2 className="text-2xl font-bold mb-6">مقالات ذات صلة</h2>
         <div className="grid gap-5 md:grid-cols-3">
           {related.map((a) => (

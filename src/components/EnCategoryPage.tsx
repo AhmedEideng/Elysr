@@ -53,7 +53,7 @@ export function EnCategoryPage({ page, items }: { page: EnCategoryCopy; items: P
   }, [items, page]);
 
   return (
-    <div className="container mx-auto px-4 py-10 md:py-12">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       <PageHero eyebrow={page.eyebrow} title={page.heroTitle} description={page.heroDescription} />
       <p className="mb-6 text-sm font-bold">
         <Link to={page.arPath} className="text-primary hover:underline">

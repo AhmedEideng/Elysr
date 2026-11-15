@@ -92,7 +92,7 @@ function CategoryPage() {
   }, [items]);
 
   return (
-    <div className="container mx-auto px-4 py-10 md:py-12">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       <PageHero
         eyebrow="الأجهزة الطبية"
         title="الأجهزة والمستلزمات الطبية"

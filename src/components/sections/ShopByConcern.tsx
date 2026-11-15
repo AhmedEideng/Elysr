@@ -74,7 +74,7 @@ export function ShopByConcern() {
   return (
     <section className="py-8 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-10">
+        <div className="text-center mb-6">
           <h2 className="text-3xl md:text-4xl font-black">أبرز فئات العناية والاهتمام</h2>
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
             اختر الفئة التي تود التركيز عليها لتكتشف الحلول والمكملات المخصصة لدعم حيويتك الزوجية

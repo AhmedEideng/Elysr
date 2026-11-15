@@ -12,7 +12,7 @@ import {
   faqSchema,
 } from "@/lib/seo";
 
-const PAGE_TITLE = "منتجات الصحة الزوجية للنساء";
+const PAGE_TITLE = "منتجات الصحة والسعادة الزوجية للنساء";
 
 const WOMEN_CATEGORY_FAQS: CategoryFAQItem[] = [
   {
@@ -94,7 +94,7 @@ function CategoryPage() {
   }, [items]);
 
   return (
-    <div className="container mx-auto px-4 py-10 md:py-12">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       <PageHero
         eyebrow="صحة المرأة"
         title={PAGE_TITLE}

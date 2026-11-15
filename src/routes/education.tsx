@@ -69,7 +69,7 @@ function ArticleCard({ a, priority = false }: { a: ArticleMeta; priority?: boole
 function EducationIndex() {
   const { articles } = Route.useLoaderData();
   return (
-    <div className="container mx-auto px-4 py-10 md:py-12">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       <PageHero
         eyebrow="تعليم • توعية • علم"
         title="مكتبة التوعية الجنسية"

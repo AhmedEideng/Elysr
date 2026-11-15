@@ -87,7 +87,7 @@ import {
 export const Route = createFileRoute("/products/$slug")({
   component: ProductPage,
   notFoundComponent: () => (
-    <div className="container mx-auto px-4 py-20 text-center">
+    <div className="container mx-auto px-4 py-10 text-center">
       <h1 className="text-3xl font-bold">المنتج غير موجود</h1>
       <Link to="/" className="mt-4 inline-block text-primary">
         العودة للرئيسية
@@ -440,7 +440,7 @@ function ProductPage() {
   const topBenefits = product.benefits?.slice(0, 4) ?? [];
 
   return (
-    <div className="container mx-auto px-4 py-8 pb-16 md:py-10 md:pb-10">
+    <div className="container mx-auto px-4 py-6 pb-16 md:py-8 md:pb-8">
       <nav aria-label="مسار التنقل" className="mb-5">
         <ol className="flex w-fit max-w-full items-center gap-1.5 rounded-2xl border border-primary/10 bg-card/80 px-3 py-2 text-xs shadow-sm sm:text-sm">
           <li className="shrink-0">

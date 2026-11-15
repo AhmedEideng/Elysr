@@ -46,7 +46,7 @@ export const Route = createFileRoute("/about")({
 
 function AboutPage() {
   return (
-    <div className="container mx-auto px-4 py-10 md:py-14 max-w-5xl">
+    <div className="container mx-auto px-4 py-6 md:py-8 max-w-5xl">
       <PageHero
         eyebrow="من نحن"
         title="اليسر ميديكال — شركة متخصصة"
