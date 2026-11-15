@@ -779,8 +779,8 @@ export const productCards: ProductCardView[] = [
     featured: true,
     rating: 4.7,
     reviews: 12,
-    badgeLabel: "تأخير",
-    badgeClass: "bg-indigo-700 text-white",
+    badgeLabel: "طاقة وحيوية",
+    badgeClass: "bg-amber-400 text-amber-950",
   },
   {
     id: "m-63",
