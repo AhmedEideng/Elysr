@@ -57,9 +57,12 @@ describe("women's gum wording and owner-confirmed Marcin form", () => {
     // (m-27 · 2026-11-15) بعد تحويل إكس ستيل من «أكياس» إلى «عسل» تغيّر شكل
     // المنتج، فمحرّك الاقتراحات (الذي يفضّل نفس الشكل) أعاد ترتيب بعض القوائم —
     // البصمة اتحدّثت عن قصد، والعدد/البنية لم يتغيّرا.
+    // (m-36 + m-47 · 2026-11-15) استرجاع منتجين فمويين جديدين غيّر مرشحي
+    // الباقات في فئة الرجال (89 → 91 منتجًا) — البصمة اتحدّثت عن قصد أيضًا،
+    // وكل باقة لا تزال 3 منتجات بلا تكرار.
     const bundles = products.map((p) => [p.id, getCrossSellsForProduct(p).map((item) => item.id)]);
     expect(createHash("sha256").update(JSON.stringify(bundles)).digest("hex")).toBe(
-      "bd3b14257fa2a39355e0af7ee66c906f729744a8e978e9b3ee63e2c2103c83f4",
+      "641a98b8c454e46df675f552c06f0ab26e393f06817067d0519bafb2dc429efa",
     );
   });
 });

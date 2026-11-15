@@ -42,10 +42,11 @@ export const getProductById = (id: string) => products.find((p) => p.id === id);
 
 /**
  * منتجات ظاهرة للعامة في صفحات الفئات.
- * المنتجات المحذوفة حاليًا: m-36 (Vegal)، m-43 (Procomil Fort)،
- * m-47 (Levitra)، وw-24 (Black Widow Drops).
- * مفيش أي حظر: كل المنتجات الحالية (84) ظاهرة في الفئات عادي ومن غير
- * noindex ولا استبعاد من feed/sitemap.
+ * (2026-11-15) استُعيد m-36 (Vegal) وm-47 (Levitra) بطلب المالكة، فلم يبق
+ * محذوفًا سوى m-43 (Procomil Fort) وw-24 (Black Widow Drops).
+ * مفيش أي حظر: كل المنتجات الحالية (91) ظاهرة في الفئات عادي ومن غير
+ * noindex ولا استبعاد من feed/sitemap — استثناء واحد فقط: أدوية الوصفة
+ * تُستثنى من Merchant feed (قرار 2026-09-28) وصفحاتها منشورة ومفهرسة.
  */
 export const getPublicProductsByCategory = (cat: ProductCategory) => {
   return getProductsByCategory(cat);

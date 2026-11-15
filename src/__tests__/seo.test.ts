@@ -156,7 +156,7 @@ describe("product metadata templates", () => {
   });
 
   it("includes a raw first-benefit excerpt except for the approved Kreva historical meta", () => {
-    expect(products).toHaveLength(89);
+    expect(products).toHaveLength(91);
 
     for (const catalogProduct of products.filter((p) => p.id !== "m-60")) {
       const rawBenefit = catalogProduct.benefits?.[0]?.trim().replace(/\s+/g, " ");
@@ -326,7 +326,7 @@ describe("package-3 education articles", () => {
 describe("product FAQPage schema", () => {
   it("mirrors each product's visible FAQ list exactly", async () => {
     const { getProductFAQs } = await import("@/data/product-faqs");
-    expect(products).toHaveLength(89);
+    expect(products).toHaveLength(91);
     for (const catalogProduct of products) {
       const faqs = getProductFAQs(catalogProduct);
       const schema = faqSchema(faqs);

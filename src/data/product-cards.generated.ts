@@ -3,7 +3,7 @@
  * المولِّد: scripts/generate-product-cards.mjs (يعمل تلقائيًا قبل كل بناء).
  * المصدر: src/data/products/*.ts عبر src/lib/product-selection.ts.
  *
- * (2026-11-14 · H5) بطاقات المنتجات (89) — حقول العرض والسلة فقط،
+ * (2026-11-14 · H5) بطاقات المنتجات (91) — حقول العرض والسلة فقط،
  * كي لا يدخل الكتالوج الكامل بوصفه الطويل إلى المسار الحرج لكل صفحة.
  */
 import type { ProductCardView } from "@/data/product-types";
@@ -476,6 +476,19 @@ export const productCards: ProductCardView[] = [
     badgeClass: "bg-indigo-700 text-white",
   },
   {
+    id: "m-36",
+    slug: "vegal-extra-sildenafil-130mg-cobra",
+    name: "أقراص فيغال إكسترا المركزة للرجال (Vegal Extra 130)",
+    nameEn: "Vegal Extra – Sildenafil 130mg Cobra",
+    category: "men",
+    price: 200,
+    stock: 5000,
+    emoji: "🐍",
+    image: "/images/vegal-extra-sildenafil-130mg-cobra.webp",
+    badgeLabel: "انتصاب",
+    badgeClass: "bg-emerald-700 text-white",
+  },
+  {
     id: "m-37",
     slug: "cialis-tadalafil-20mg-30-tablets",
     name: "أقراص سياليس الأصلية للرجال (Cialis Tadalafil 20mg)",
@@ -597,6 +610,19 @@ export const productCards: ProductCardView[] = [
     image: "/images/big-penis-usa-capsules.webp",
     badgeLabel: "تكبير",
     badgeClass: "bg-violet-700 text-white",
+  },
+  {
+    id: "m-47",
+    slug: "levitra-100mg",
+    name: "أقراص ليفيترا الألمانية للرجال (Levitra 100mg)",
+    nameEn: "Levitra 100mg Vardenafil for Men",
+    category: "men",
+    price: 250,
+    stock: 5000,
+    emoji: "💊",
+    image: "/images/levitra-100mg.webp",
+    badgeLabel: "انتصاب",
+    badgeClass: "bg-emerald-700 text-white",
   },
   {
     id: "m-48",

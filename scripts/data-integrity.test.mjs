@@ -257,8 +257,6 @@ try {
   // slugs دوائية للمنتجات المحذوفة فقط لازم يفضل عندها 301 قائم دائماً
   // (نفس قائمة DELETED_PHARMA_FILES في scripts/validate-schemas.mjs).
   const deletedPharmaSlugs = [
-    "vegal-extra-sildenafil-130mg-cobra", // m-36
-    "levitra-100mg", // m-47
     "procomil-fort-tablet", // m-43 (حذف نهائي 2026-09-07)
     "black-widow-drops", // w-24 (حذف نهائي 2026-09-07)
   ];
@@ -285,7 +283,11 @@ try {
     }
   }
 
-  assert.equal(products.length, 89, "Expected 89 products including HILTI women (w-26)");
+  assert.equal(
+    products.length,
+    91,
+    "Expected 91 products (89 + restored m-36 Vegal & m-47 Levitra)",
+  );
   assert.ok(articles.length >= 51, "Expected at least 51 articles");
   const cialisFour = products.find((p) => p.id === "m-64");
   assert.equal(cialisFour?.slug, "cialis-tadalafil-20mg-4-tablets");
@@ -534,8 +536,8 @@ try {
   }, {});
   assert.deepEqual(
     categories,
-    { men: 56, women: 25, devices: 8 },
-    "Unexpected category split (89 = 56 men / 25 women / 8 devices)",
+    { men: 58, women: 25, devices: 8 },
+    "Unexpected category split (91 = 58 men / 25 women / 8 devices)",
   );
 
   // (2026-09-15) JSON-LD OfferCatalog في index.html لازم يطابق كتالوج

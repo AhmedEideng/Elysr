@@ -371,20 +371,22 @@ async function syncRedirects() {
         destination: "/products/hard-on-sildenafil-130mg-dapoxetine-60mg",
         permanent: true,
       },
-      { source: "/products/m-36", destination: "/products/men", permanent: true },
+      {
+        source: "/products/m-36",
+        destination: "/products/vegal-extra-sildenafil-130mg-cobra",
+        permanent: true,
+      },
       {
         source: "/products/m-37",
         destination: "/products/cialis-tadalafil-20mg-30-tablets",
         permanent: true,
       },
-      { source: "/products/m-47", destination: "/products/men", permanent: true },
-      { source: "/products/w-17", destination: "/products/viagra-20-tablets", permanent: true },
       {
-        source: "/products/vegal-extra-sildenafil-130mg-cobra",
-        destination: "/products/men",
+        source: "/products/m-47",
+        destination: "/products/levitra-100mg",
         permanent: true,
       },
-      { source: "/products/levitra-100mg", destination: "/products/men", permanent: true },
+      { source: "/products/w-17", destination: "/products/viagra-20-tablets", permanent: true },
       // ── aliases قديمة لمنتجات اتغيرت أسماؤها → المنتج الحالي/فئته ──
       {
         source: "/products/viga-1-million-delay-spray",

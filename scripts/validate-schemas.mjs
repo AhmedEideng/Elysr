@@ -33,8 +33,6 @@ const SITE_URL = "https://elysrmedical.store";
 // slugs دوائية تاريخية لمنتجات محذوفة نهائياً (301 لفئاتها).
 // مهمتها: أي schema/ItemList في أي صفحة يرجع يذكّرهم تاني → error فوري.
 const DELETED_PHARMA_FILES = new Set([
-  "products/vegal-extra-sildenafil-130mg-cobra.html", // m-36
-  "products/levitra-100mg.html", // m-47
   "products/procomil-fort-tablet.html", // m-43 Procomil Fort (حذف نهائي 2026-09-07)
   "products/black-widow-drops.html", // w-24 Black Widow Drops (حذف نهائي 2026-09-07)
 ]);

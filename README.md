@@ -21,7 +21,7 @@ _Original marital & sexual-health products for Egypt — discreet shipping to al
 ![Vercel](https://img.shields.io/badge/Vercel-000?logo=vercel&logoColor=white)
 ![Version](https://img.shields.io/badge/Version-2.3.3-5b8def?style=flat)
 ![Pages](https://img.shields.io/badge/Pre--rendered_Pages-286-success?style=flat)
-![Tests](https://img.shields.io/badge/Tests-391_passing-success?style=flat)
+![Tests](https://img.shields.io/badge/Tests-505_passing-success?style=flat)
 
 </div>
 
@@ -43,16 +43,16 @@ flow through the same webhook into a moderated reviews sheet.
 
 | Metric             | Value                                                                                                                                                                           |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Products           | **89** (56 men · 25 women · 8 devices) — 4 legacy items remain deleted; six previously removed products restored by owner decision                                              |
-| Catalog coverage   | **89** in the site catalog · 82 in the Merchant feed (7 prescription-active items excluded from the feed only — owner decision 2026-09-28; their pages stay live and indexable) |
+| Products           | **91** (58 men · 25 women · 8 devices) — 2 legacy items remain deleted; eight previously removed products restored by owner decision (latest: Vegal Extra + Levitra, 2026-11-15) |
+| Catalog coverage   | **91** in the site catalog · 82 in the Merchant feed (9 prescription-active items excluded from the feed only — owner decision 2026-09-28; their pages stay live and indexable) |
 | Articles           | **64** educational health articles with trusted medical sources (NIH/Mayo/NHS/…)                                                                                                |
 | SEO landing pages  | **113** long-form guide pages (price lists, product comparisons and regional delivery pages; drug-guide pages retain medical safety warnings)                                   |
-| Pre-rendered pages | **286** (16 static + 89 product routes + 64 articles + 113 guides + 4 English pages)                                                                                            |
-| Sitemap URLs       | **282** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)                                                                                     |
+| Pre-rendered pages | **288** (16 static + 91 product routes + 64 articles + 113 guides + 4 English pages)                                                                                            |
+| Sitemap URLs       | **284** (site-wide search is covered by the `SearchAction` JSON-LD, not a sitemap template)                                                                                     |
 | Catalog feed       | **82** items (Google Shopping RSS/CSV/TXT, price + availability + `product_type` per product)                                                                                   |
 | Redirects          | **175** permanent redirects (HTTP 308 on Vercel) (legacy IDs, deleted products, renamed slugs, typo variants, GSC 404s)                                                         |
 | Images             | 148 source WebP + 269 thumbnails across three sizes                                                                                                                             |
-| Tests              | **391** unit (Vitest) + **52** E2E (Playwright) + data-integrity + schema validation                                                                                            |
+| Tests              | **505** unit (Vitest) + **52** E2E (Playwright) + data-integrity + schema validation                                                                                            |
 
 ---
 
@@ -117,7 +117,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 | Routing   | TanStack Router (file-based, 25 route modules)                                                                              |
 | Styling   | Tailwind CSS 4 (Oklch colors, full RTL)                                                                                     |
 | Search    | Fuse.js (fuzzy, lazy-loaded) + Egyptian dialect synonyms (نقط ⇄ قطرات)                                                      |
-| Tests     | Vitest (391 unit) + Playwright (52 E2E) + data-integrity + JSON-LD schema validator                                         |
+| Tests     | Vitest (505 unit) + Playwright (52 E2E) + data-integrity + JSON-LD schema validator                                         |
 | Hosting   | Vercel Edge CDN (primary) · self-hosted Express + Docker (supported)                                                        |
 | Orders    | Google Apps Script → Google Sheets (ScriptLock, full duplicate scan, intl phones)                                           |
 | SEO       | 286 pre-rendered pages · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                 |
@@ -141,7 +141,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 │   │   ├── components/         # CustomerReviews (approved live reviews), ProductImage, …
 │   │   └── hooks/use-product-image-state.ts # Shared loading/error state for product images
 │   ├── data/
-│   │   ├── products.ts         # 89 products (56 men · 25 women · 8 devices) + search helpers
+│   │   ├── products.ts         # 91 products (58 men · 25 women · 8 devices) + search helpers
 │   │   ├── products/           # men.ts · women.ts · devices.ts (catalog source of truth)
 │   │   ├── articles.ts         # 64 articles with trusted sources
 │   │   ├── landing-pages.ts    # 113 SEO guide pages (build-time source; served as per-slug JSON at runtime)
@@ -176,7 +176,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 │       └── request-ip.js              # Trusted platform IP extraction
 ├── scripts/
 │   ├── prerender-seo.mjs       # 286 static HTML pages + Product/ItemList/FAQ/Breadcrumb JSON-LD
-│   ├── generate-sitemap.mjs    # sitemap.xml (282) + sitemap-images.xml +
+│   ├── generate-sitemap.mjs    # sitemap.xml (284) + sitemap-images.xml +
 │   │                           # robots.txt + security.txt
 │   ├── check-source-links.mjs  # Corpus-wide source liveness (3-attempt backoff, flaky-authority class)
 │   ├── validate-schemas.mjs    # JSON-LD validator (every schema in every pre-rendered page)
@@ -202,7 +202,7 @@ the same API handlers — identical behavior, no Vercel dependency.
 ├── public/
 │   ├── images/                 # 148 source WebP + 269 thumbnails in thumbs/, thumbs-180/, and thumbs-120/
 │   ├── landing-pages/          # 113 per-slug JSON (runtime data source for guide pages)
-│   ├── sitemap.xml             # 282 URLs
+│   ├── sitemap.xml             # 284 URLs
 │   ├── sitemap-images.xml      # 153 image URLs
 │   ├── sitemap-index.xml       # Sitemap index
 │   ├── sw.js                   # PWA migration kill-switch (self-unregistering, network-only)
@@ -252,10 +252,12 @@ the same API handlers — identical behavior, no Vercel dependency.
 
 ### 🛡️ Product & content compliance
 
-- **Catalog visibility** — 89 products are maintained in the site catalog; four
-  legacy items remain deleted and the six owner-restored products are visible
-  normally. Prescription-active items are excluded from the Merchant
-  feed only (owner decision 2026-09-28) — never from the catalog or sitemap.
+- **Catalog visibility** — 91 products are maintained in the site catalog; two
+  legacy items remain deleted (m-43 Procomil Fort, w-24 Black Widow Drops) and
+  the eight owner-restored products are visible normally — the latest being
+  Vegal Extra 130 (m-36) and Levitra 100mg (m-47) on 2026-11-15.
+  Prescription-active items are excluded from the Merchant feed only
+  (owner decision 2026-09-28) — never from the catalog or sitemap.
 - **Medical copy policy** — wording needs editorial/source review. Targeted
   copy-regression tests are not medical certification; validation for new articles remains
   available through `npm run test:sources`.
@@ -301,7 +303,7 @@ writing an order.
 | `npm run build:ssr`            | Build + prerender for the self-hosted Express server     |
 | `npm start` / `start:dev`      | Run the self-hosted server (production / watch)          |
 | `npm run test`                 | Data-integrity guard (catalog, metadata, redirect graph) |
-| `npm run test:unit`            | Vitest unit + API security tests (391)                   |
+| `npm run test:unit`            | Vitest unit + API security tests (505)                   |
 | `npm run test:e2e`             | Playwright E2E suite (52)                                |
 | `npm run test:schemas`         | JSON-LD validator over every pre-rendered page           |
 | `npm run test:sources`         | New-article claim→source support check                   |
@@ -385,7 +387,7 @@ Seven jobs on every push (plus a weekly Saturday source-liveness cron):
 | Job                                         | Gate                                                                                       |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | 🔗 Corpus Source Liveness                   | All unique article source URLs checked (bot-blocked authorities are classified separately) |
-| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc --noEmit` · 391 unit/API tests · catalog+metadata+redirect-graph guard       |
+| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc --noEmit` · 505 unit/API tests · catalog+metadata+redirect-graph guard       |
 | 🛡 Security Audit                            | `npm audit --audit-level=high` on the locked tree                                          |
 | 🏗 Build • Prerender • Sitemaps              | Vite build + 286-page prerender + sitemap artifacts                                        |
 | 🚦 Lighthouse Performance Budget            | LHCI performance budgets on the built site                                                 |
@@ -466,7 +468,7 @@ workflow, not a generic catalog test; it needs an article target and its service
 
 Automatic CI/CD on every push to `main`. The build pipeline:
 
-1. `prebuild` runs `generate-sitemap.mjs` → sitemaps (282 URLs), feeds,
+1. `prebuild` runs `generate-sitemap.mjs` → sitemaps (284 URLs), feeds,
    API catalog snapshots, robots.txt, security.txt and per-slug landing JSON.
 2. `vite build` → optimized, code-split `dist/`.
 3. `prerender-seo.mjs` → 286 pre-rendered pages with full SEO meta + JSON-LD;

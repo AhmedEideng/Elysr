@@ -390,7 +390,7 @@
     },
     {
       "source": "/products/m-36",
-      "destination": "/products/men",
+      "destination": "/products/vegal-extra-sildenafil-130mg-cobra",
       "permanent": true
     },
     {
@@ -445,7 +445,7 @@
     },
     {
       "source": "/products/m-47",
-      "destination": "/products/men",
+      "destination": "/products/levitra-100mg",
       "permanent": true
     },
     {
@@ -916,16 +916,6 @@
     {
       "source": "/products/guides/payment-methods-cod-guide",
       "destination": "/products/guides/how-to-order-from-elysr",
-      "permanent": true
-    },
-    {
-      "source": "/products/vegal-extra-sildenafil-130mg-cobra",
-      "destination": "/products/men",
-      "permanent": true
-    },
-    {
-      "source": "/products/levitra-100mg",
-      "destination": "/products/men",
       "permanent": true
     },
     {

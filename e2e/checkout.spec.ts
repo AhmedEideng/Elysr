@@ -87,14 +87,10 @@ test("restored products have live pages and legacy IDs 301 to those pages", asyn
 });
 
 test("deleted product legacy URLs 301 to their category section", async ({ baseURL }) => {
-  // The four products still deleted permanently must keep their category 301s.
+  // (2026-11-15) m-36 وm-47 رجعوا بطلب المالكة، فالمحذوف نهائيًا الآن اثنان فقط.
   const cases: Array<[string, string]> = [
-    ["/products/m-36", "/products/men"],
-    ["/products/vegal-extra-sildenafil-130mg-cobra", "/products/men"],
     ["/products/m-43", "/products/men"],
     ["/products/procomil-fort-tablet", "/products/men"],
-    ["/products/m-47", "/products/men"],
-    ["/products/levitra-100mg", "/products/men"],
     ["/products/w-24", "/products/women"],
     ["/products/black-widow-drops", "/products/women"],
   ];
@@ -102,6 +98,23 @@ test("deleted product legacy URLs 301 to their category section", async ({ baseU
     const resp = await fetch(`${baseURL}${path}`, { redirect: "manual" });
     expect(resp.status, path).toBe(301);
     expect(resp.headers.get("location"), path).toBe(expected);
+  }
+});
+
+test("restored Vegal Extra and Levitra ids point to their live product pages", async ({
+  baseURL,
+}) => {
+  const cases: Array<[string, string]> = [
+    ["/products/m-36", "/products/vegal-extra-sildenafil-130mg-cobra"],
+    ["/products/m-47", "/products/levitra-100mg"],
+  ];
+  for (const [path, live] of cases) {
+    const resp = await fetch(`${baseURL}${path}`, { redirect: "manual" });
+    expect(resp.status, path).toBe(301);
+    expect(resp.headers.get("location"), path).toBe(live);
+    const page = await fetch(`${baseURL}${live}`, { redirect: "manual" });
+    expect(page.status, live).toBe(200);
+    expect(await page.text(), live).toContain("application/ld+json");
   }
 });
 

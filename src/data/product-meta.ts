@@ -50,6 +50,8 @@ export const PRODUCT_META_PROFILES: Record<string, ProductMetaProfile> = {
   "m-33": { form: "topical", hook: "كريم موضعي مع الجينسنج والجنكو" },
   "m-34": { form: "oral", hook: "أقراص هارد أون 190 مجم (سيلدينافيل 130 + دابوكستين 60)" },
   "m-35": { form: "topical", hook: "كريم موضعي بزيوت القرنفل والحلبة" },
+  "m-36": { form: "oral", hook: "قرص واحد بتركيز 130 مجم سيلدينافيل" },
+  "m-47": { form: "oral", hook: "قرص واحد بتركيز 100 مجم فاردينافيل" },
   "m-37": { form: "oral", hook: "أقراص بتادالافيل 20 مجم في عبوة 30 قرصاً" },
   "m-38": { form: "oral", hook: "أقراص تجمع سيلدينافيل ودابوكستين" },
   "m-39": { form: "topical", hook: "كريم موضعي بزيوت نباتية" },

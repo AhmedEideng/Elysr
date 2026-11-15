@@ -5,7 +5,7 @@ import { getProductFAQs } from "@/data/product-faqs";
 const byId = (id: string) => products.find((p) => p.id === id)!;
 describe("phrase-only catalog corrections", () => {
   it("preserves every non-copy catalog field, including names, prices, badges and bundles", () => {
-    expect(products).toHaveLength(89);
+    expect(products).toHaveLength(91);
     // Owner-approved follow-up: Power 36 and Big Penis are each 250 EGP.
     for (const id of ["m-38", "m-46"]) {
       expect(byId(id).price).toBe(250);
@@ -30,9 +30,11 @@ describe("phrase-only catalog corrections", () => {
     // إكس ستيل» (اسم + ألقاب بحث)، فالبصمة اتغيّرت في حقلين غير نصيين فقط.
     // (m-60 كريفا · 2026-11-15) تغيير مقصود إضافي: أُضيفت ألقاب بحث لكريفا
     // (كريڨا/كريڨه/جل كريفا/جل تأخير/Kreva Gel) لتوحيده مع باقي الكتالوج.
-    // لا اسم/سعر/شارة/تصنيف/bundle تغيّر — الحقل الوحيد المختلف هو aliases.
+    // (m-36 + m-47 · 2026-11-15) استرجاع بطلب المالكة: عاد Vegal Extra وLevitra
+    // بأسعارهما التاريخية (200/250) وبأسمائهما وروابطهما كما كانت — إضافة
+    // عنصرين للقائمة، بلا أي تغيير في أسعار/أسماء/شارات/bundles الباقين.
     expect(createHash("sha256").update(JSON.stringify(fields)).digest("hex")).toBe(
-      "00253fb29c63b20f72a6dec15e74725360330cf65f8179070cc3bd5890740f9e",
+      "07f35b48ab23fbc66f56d0765b54b78435283f0791043e6c8be4223708cbdaad",
     );
   });
   it("corrects discrete ingredient and language errors without removing the original descriptions", () => {

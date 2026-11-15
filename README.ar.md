@@ -40,16 +40,16 @@
 
 | المقياس             | القيمة                                                                                                                                                           |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 📦 المنتجات         | **89** (56 رجال · 25 نساء · 8 أجهزة) — 4 عناصر تاريخية ما زالت محذوفة؛ تمت إعادة 6 منتجات بقرار المالك                                                           |
-| 🛒 تغطية الكتالوج   | **89** في كتالوج الموقع · **82** في Merchant feed (7 منتجات بمواد دوائية موصوفة مستثناة من الـ feed فقط — قرار المالك 2026-09-28؛ صفحاتها منشورة وقابلة للفهرسة) |
+| 📦 المنتجات         | **91** (58 رجال · 25 نساء · 8 أجهزة) — عنصران تاريخيان ما زالا محذوفين؛ تمت إعادة 8 منتجات بقرار المالك (آخرها فيغال إكسترا وليفيترا 2026-11-15)                 |
+| 🛒 تغطية الكتالوج   | **91** في كتالوج الموقع · **82** في Merchant feed (9 منتجات بمواد دوائية موصوفة مستثناة من الـ feed فقط — قرار المالك 2026-09-28؛ صفحاتها منشورة وقابلة للفهرسة) |
 | 📚 المقالات         | **64** مقالًا توعويًا بمصادر طبية موثوقة (NIH/Mayo/NHS/…)                                                                                                        |
 | 🎯 صفحات الدليل     | **113** صفحة دليل (قوائم أسعار ومقارنات منتجات وصفحات توصيل للمناطق؛ مع تحذيرات طبية للأدلة الدوائية)                                                            |
-| 📄 الصفحات المولّدة | **286** (16 ثابتة + 89 صفحة منتج + 64 مقالًا + 113 دليلًا + 4 صفحات إنجليزية)                                                                                    |
-| 🗺️ روابط sitemap    | **282** (البحث الشامل مشمول عبر `SearchAction` في JSON-LD، مش قالب sitemap)                                                                                      |
+| 📄 الصفحات المولّدة | **288** (16 ثابتة + 91 صفحة منتج + 64 مقالًا + 113 دليلًا + 4 صفحات إنجليزية)                                                                                    |
+| 🗺️ روابط sitemap    | **284** (البحث الشامل مشمول عبر `SearchAction` في JSON-LD، مش قالب sitemap)                                                                                      |
 | 🛍️ كتالوج التجار    | **82** منتجًا (RSS + CSV + TXT) مع `product_type` لكل منتج                                                                                                       |
 | ↪️ Redirects        | **175** تحويلًا دائمًا (HTTP 308 على Vercel) (معرّفات قديمة + منتجات محذوفة + slugs معاد تسميتها + 404s اللي طلعت من GSC)                                        |
 | 🖼️ الصور            | 148 صورة WebP أساسية + 269 مصغّرة عبر 3 مقاسات                                                                                                                   |
-| 🧪 الاختبارات       | **391** وحدة (Vitest) + **52** E2E (Playwright) + data-integrity + schema validation                                                                             |
+| 🧪 الاختبارات       | **505** وحدة (Vitest) + **52** E2E (Playwright) + data-integrity + schema validation                                                                             |
 
 ---
 
@@ -99,7 +99,7 @@
 | Routing    | TanStack Router (file-based، 25 ملف مسار)                                                                                              |
 | Styling    | Tailwind CSS 4 (ألوان Oklch، RTL كامل)                                                                                                 |
 | البحث      | Fuse.js (fuzzy، تحميل كسول) + مرادفات اللهجة المصرية (نقط ⇄ قطرات)                                                                     |
-| الاختبارات | Vitest (391) + Playwright (52 E2E) + data-integrity + JSON-LD validator                                                                |
+| الاختبارات | Vitest (505) + Playwright (52 E2E) + data-integrity + JSON-LD validator                                                                |
 | الاستضافة  | Vercel Edge CDN (أساسي) · Express + Docker (نشر ذاتي مدعوم)                                                                            |
 | الطلبات    | Google Apps Script → Google Sheets (ScriptLock + فحص تكرار كامل + هواتف دولية)                                                         |
 | SEO        | 286 صفحة مولّدة · JSON-LD (Product/FAQ/Article/Breadcrumb/SearchAction) · 3 sitemaps                                                   |
@@ -143,7 +143,7 @@ npm run dev              # → http://localhost:8080
 | `npm run build:ssr`            | بناء + prerender لـ Express الخادم الذاتي              |
 | `npm start` / `start:dev`      | تشغيل الخادم الذاتي (إنتاج / watch)                    |
 | `npm run test`                 | حارس data-integrity (كتالوج، metadata، شبكة redirects) |
-| `npm run test:unit`            | اختبارات Vitest + أمان الـ API (391)                   |
+| `npm run test:unit`            | اختبارات Vitest + أمان الـ API (505)                   |
 | `npm run test:e2e`             | باقة Playwright E2E (52)                               |
 | `npm run test:schemas`         | مجرّب JSON-LD لكل صفحة مولّدة                          |
 | `npm run test:sources`         | فحص متطلبات المصادر للمقالات الجديدة                   |
@@ -182,9 +182,10 @@ npm run dev              # → http://localhost:8080
 
 ### 🛡️ امتثال المنتجات والمحتوى
 
-- **ظهور الكتالوج** — 89 منتجًا منشورًا؛ ستة منتجات أُعيدت بقرار المالك،
-  وأربعة منتجات تاريخية تظل محذوفة. تُستثنى سبعة منتجات بمواد دوائية موصوفة
-  من Merchant feed فقط، دون حذف صفحاتها أو روابطها من sitemap.
+- **ظهور الكتالوج** — 91 منتجًا منشورًا؛ ثمانية منتجات أُعيدت بقرار المالك،
+  واثنان تاريخيان يظلان محذوفين (m-43 بروكوميل فورت، w-24 بلاك ويدو).
+  تُستثنى تسعة منتجات بمواد دوائية موصوفة من Merchant feed فقط، دون حذف
+  صفحاتها أو روابطها من sitemap.
 - **فحوص CI** — تتحقق من تكامل البيانات والميتا والتحويلات والسكيما وأهلية الخلاصة؛
   توجد اختبارات محددة لأخطاء النصوص، ولا تُغني عن المراجعة التحريرية والطبية المستقلة.
 - **المصادر** — تُراجع متطلبات مصادر المقالات وحيوية الروابط بأدوات مخصصة؛
@@ -206,7 +207,7 @@ Elysr/
 │   │   └── Accessibility.tsx # Skip-to-content + Live regions + focus trap
 │   ├── features/product/     # CustomerReviews + مكونات المنتج + hooks/use-product-image-state
 │   ├── data/
-│   │   ├── products.ts       # 89 منتجًا + محددات البحث والمرادفات
+│   │   ├── products.ts       # 91 منتجًا + محددات البحث والمرادفات
 │   │   ├── products/         # men.ts · women.ts · devices.ts (مصدر الكتالوج)
 │   │   ├── articles.ts       # 64 مقالًا بمصادر موثوقة
 │   │   ├── landing-pages.ts  # 113 صفحة دليل (مصدر build؛ تُقدّم JSON لكل slug وقت التشغيل)
@@ -239,7 +240,7 @@ Elysr/
 │       └── request-ip.js             # استخراج IP موثوق من المنصة
 ├── scripts/
 │   ├── prerender-seo.mjs           # 286 صفحة HTML + JSON-LD (Product/ItemList/FAQ/Breadcrumb)
-│   ├── generate-sitemap.mjs        # sitemaps (282) + feed (82) + robots + security.txt
+│   ├── generate-sitemap.mjs        # sitemaps (284) + feed (82) + robots + security.txt
 │   ├── check-source-links.mjs      # حيوية المصادر الكاملة (3 محاولات + تصنيف السلطات)
 │   ├── validate-schemas.mjs        # مجرّب JSON-LD لكل مخططات كل الصفحات
 │   ├── validate-article-sources.mjs # فحص متطلبات المصادر (مقالات جديدة)
@@ -256,7 +257,7 @@ Elysr/
 ├── public/
 │   ├── images/               # 148 WebP أساسية + 269 مصغّرة في thumbs/ وthumbs-180/ وthumbs-120/
 │   ├── landing-pages/        # 113 JSON لكل slug (مصدر بيانات وقت التشغيل)
-│   ├── sitemap.xml           # 282 رابط
+│   ├── sitemap.xml           # 284 رابط
 │   ├── sitemap-images.xml    # 153 رابط صورة
 │   ├── sitemap-index.xml
 │   ├── sw.js                 # kill-switch هجرة PWA (يلغي نفسه، network-only)
@@ -279,7 +280,7 @@ Elysr/
 | الوظيفة                                     | البوابة                                                                      |
 | ------------------------------------------- | ---------------------------------------------------------------------------- |
 | 🔗 Corpus Source Liveness                   | روابط مصادر المقالات الفريدة (3 محاولات بتراجع + تصنيف السلطات غير المستقرة) |
-| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 391 اختبار وحدة/API · حارس الكتالوج+البيانات+شبكة redirects |
+| 🔍 Lint • Typecheck • Unit • Data Integrity | ESLint · `tsc` · 505 اختبار وحدة/API · حارس الكتالوج+البيانات+شبكة redirects |
 | 🛡 Security Audit                            | `npm audit --audit-level=high` على الشجرة المقفلة                            |
 | 🏗 Build • Prerender • Sitemaps              | Vite + 286 صفحة مولّدة + sitemaps                                            |
 | 🚦 Lighthouse Performance Budget            | موازِن أداء LHCI على الموقع المبنى                                           |
@@ -344,8 +345,8 @@ npm audit --audit-level=high
 
 ## خلاصة Merchant Center
 
-الخلاصة `public/catalog-feed.xml` ونسختا CSV/TXT تضم **82 منتجًا من 89**.
-بينك شوت مشمول بموافقة المالك؛ سبعة منتجات دوائية مستثناة من الخلاصة فقط.
+الخلاصة `public/catalog-feed.xml` ونسختا CSV/TXT تضم **82 منتجًا من 91**.
+بينك شوت مشمول بموافقة المالك؛ تسعة منتجات دوائية مستثناة من الخلاصة فقط.
 تحتوي البيانات على السعر والتوفر و`product_type` وروابط الصور بإصدار الكاش.
 لا نختلق GTIN أو MPN؛ يُستخدم `identifier_exists=no` عند غياب المعرفات المطلوبة.
 
@@ -361,7 +362,7 @@ npm audit --audit-level=high
 
 CI/CD تلقائي على كل push إلى `main`، وترتيب `npm run build` هو:
 
-1. `prebuild` يشغّل `generate-sitemap.mjs`: خرائط الموقع (282 رابطًا)، والخلاصات، وكتالوج API، وملفات robots/security وlanding JSON.
+1. `prebuild` يشغّل `generate-sitemap.mjs`: خرائط الموقع (284 رابطًا)، والخلاصات، وكتالوج API، وملفات robots/security وlanding JSON.
 2. `vite build` يبني `dist/` ويقسّم الحزم.
 3. `prerender-seo.mjs` يولّد 286 صفحة، ثم `inject-critical-css.mjs` يحقن CSS الحرج.
 4. Vercel يقدّم `dist/` مع 12 مجموعة headers و174 تحويلًا دائمًا.

@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] — 2026-Q4
 
+### 🩺 Catalog restoration — Vegal Extra 130 + Levitra 100mg (2026-11-15)
+
+- **Two products restored by owner request** after their 2026-08-25 removal:
+  `m-36` أقراص فيغال إكسترا المركزة (Vegal Extra 130, 200 EGP) and
+  `m-47` أقراص ليفيترا (Levitra 100mg, 250 EGP). Names, slugs and prices are
+  identical to the archived versions; images restored (full + 120/180/320 px).
+- **Copy rewritten, not copied**: the archived text carried
+  «حسب العبوة / الطبيب / الصيدلي» attributions and unverified ratings
+  (4.7–4.8). Restored entries follow the Round-8/9 rules (no attributions, no
+  invented ratings, Arabic-first + Latin actives), keep every safety warning
+  (nitrates, riociguat, cardiac/renal, 18+, priapism), and are added under the
+  `erectile-dysfunction` topic with catalogue-style search aliases, meta hooks
+  and product-specific FAQs.
+- **Routing**: the `/products/<slug>` 301s were removed (pages are live again);
+  `/products/m-36` and `/products/m-47` now 301 to the live product instead of
+  the category. `vercel.json` regenerated from the single source.
+- **Counts refreshed everywhere**: 89 → **91** products (58 men · 25 women ·
+  8 devices), 286 → **288** pre-rendered pages, Merchant feed stays **82**
+  (9 prescription-active items excluded from the feed only, per the
+  2026-09-28 owner decision), `index.html` OfferCatalog, sitemaps, API DB,
+  product cards, README.md and README.ar.md, and the cache version
+  (**106 → 107**).
+- **Guards updated**: `DELETED_PHARMA_FILES` and the data-integrity
+  deleted-slug list now hold only `m-43` and `w-24`; the non-copy catalogue
+  fingerprint and the bundle fingerprint were re-baselined with dated
+  comments (no price, name, badge or bundle composition changed).
+
 ### 🚀 SEO growth packages (2026-10-31)
 
 - **Package 1–3 (GSC-driven)**: query-aligned meta/FAQs for 15 high-impression
