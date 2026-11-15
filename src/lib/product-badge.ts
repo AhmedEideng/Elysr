@@ -48,6 +48,16 @@ export function getUseBadge(product: BadgeSource): UseBadge {
 
   if (product.id === "m-01") return { label: "انتصاب وتضخيم", className: "bg-teal-700 text-white" };
 
+  /**
+   * (2026-11-15 · توجيه المالكة) «كل منتجات العسل انتصاب مش طاقة وحيوية» —
+   * شارة كل عسل/معجون رجالي تصبح «انتصاب» بدل السقوط على «طاقة وحيوية».
+   */
+  if (/(عسل|honey|macun|معجون)/.test(`${product.name} ${product.slug}`.toLowerCase()))
+    return { label: "انتصاب", className: "bg-emerald-700 text-white" };
+
+  /** (2026-11-15 · توجيه المالكة) جل هاليبينو شارة «تأخير» لا تحفيز موضعي. */
+  if (product.id === "m-62") return { label: "تأخير", className: "bg-indigo-700 text-white" };
+
   if (
     /(dapoxetine|130\/60|170\/60|hard-on|ferrari 130\/60|porsche 130\/60|love extra|double shot|مفعول مزدوج)/.test(
       text,
